@@ -1,0 +1,1 @@
+../ChouTi/scripts/lint.sh
