@@ -1,0 +1,1 @@
+../../ChouTi/scripts/download-bin/download-bins.sh

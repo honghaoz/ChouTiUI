@@ -1,0 +1,1 @@
+../../ChouTi/scripts/git/install-git-hooks.sh
