@@ -7,9 +7,27 @@ MAKEFILE_DIR = $(shell cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd
 bootstrap: # Bootstrap the environment.
 	@scripts/bootstrap.sh
 
-# .PHONY: build
-# build: # Build the package.
-# 	swift build -c release
+.PHONY: build
+build: # Build with debug configuration.
+	swift build
+
+.PHONY: build-release
+build-release: # Build the package.
+	swift build -c release
+
+.PHONY: test
+test: # Run tests.
+	swift test
+
+.PHONY: test-codecov
+test-codecov: # Run tests with code coverage.
+	swift test -Xswiftc -DTEST --enable-code-coverage | $(REPO_ROOT)/bin/xcbeautify
+	xcrun llvm-cov export -format="lcov" .build/debug/ChouTiUIPackageTests.xctest/Contents/MacOS/ChouTiUIPackageTests -instr-profile .build/debug/codecov/default.profdata > .build/debug/codecov/coverage.lcov
+	$(REPO_ROOT)/scripts/filter-lcov.sh .build/debug/codecov/coverage.lcov --keep-pattern '.+Sources/.+'
+
+.PHONY: clean
+clean: # Clean build data.
+	swift package clean
 
 .PHONY: format
 format: # Format the code.
