@@ -12,7 +12,7 @@ let package = Package(
     .library(name: "ChouTiUI", targets: ["ChouTiUI"]),
   ],
   dependencies: [
-    .package(path: "../ChouTi"),
+    .package(path: "./ChouTi"),
   ],
   targets: [
     .target(
