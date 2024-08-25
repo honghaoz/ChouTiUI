@@ -1,0 +1,46 @@
+name: format
+on:
+  workflow_dispatch: # manual trigger to run workflow
+  schedule:
+    # ┌───────────── minute (0 - 59)
+    # │ ┌───────────── hour (0 - 23)
+    # │ │ ┌───────────── day of the month (1 - 31)
+    # │ │ │ ┌───────────── month (1 - 12 or JAN-DEC)
+    # │ │ │ │ ┌───────────── day of the week (0 - 6 or SUN-SAT)
+    # │ │ │ │ │
+    # * * * * *
+    - cron: "0 1 * * *" # every day at 1:00 UTC (17:00 PST, 18:00 PDT)
+
+env:
+  TERM: xterm-256color
+  DEVELOPER_DIR: /Applications/Xcode_${{ vars.XCODE_VERSION }}.app/Contents/Developer
+
+jobs:
+  format:
+    name: Format
+    strategy:
+      fail-fast: false
+    timeout-minutes: 15
+    runs-on: ${{ vars.MACOS }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Bootstrap
+        run: make bootstrap
+      - name: Format
+        run: make format
+      - name: Lint
+        run: make lint
+      - name: Create Pull Request
+        if: success() || failure()
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          commit-message: "[format] format code"
+          committer: "Honghao Zhang <3926785+honghaoz@users.noreply.github.com>"
+          author: "Honghao Zhang <3926785+honghaoz@users.noreply.github.com>"
+          title: "[format] format code"
+          body: "This PR was automatically created by the [format](https://github.com/honghaoz/ChouTiUI/actions/workflows/format.yml) workflow."
+          branch: "github-actions/format"
+          draft: false
+          delete-branch: true

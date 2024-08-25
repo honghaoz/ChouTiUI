@@ -1,0 +1,27 @@
+name: lint
+on:
+  push:
+    branches-ignore:
+      - "github-actions/**" # ignore github-actions branches
+      - "dependabot/**" # ignore dependabot branches
+  pull_request: # any pull request against any branch
+  workflow_dispatch: # manual trigger to run workflow
+
+env:
+  TERM: xterm-256color
+  DEVELOPER_DIR: /Applications/Xcode_${{ vars.XCODE_VERSION }}.app/Contents/Developer
+
+jobs:
+  lint:
+    name: Lint
+    strategy:
+      fail-fast: false
+    timeout-minutes: 15
+    runs-on: ${{ vars.MACOS }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Bootstrap
+        run: make bootstrap
+      - name: Lint
+        run: make lint
