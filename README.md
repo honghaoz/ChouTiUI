@@ -21,7 +21,7 @@ If you're curious about how apps built with ChouTiUI look like, check out the [A
   <tr>
     <td align="center" width="160">
       <a href="https://apps.apple.com/app/maze-maps-switcher/id6504451783">
-        <img src="https://i.imgur.com/rhWvDG7.png" width="110" height="110" alt="Maze · Maps Switcher">
+        <img src="https://i.imgur.com/rhWvDG7.png" width="104" alt="Maze · Maps Switcher">
         <br>
         Maze · Maps Switcher
       </a>
@@ -30,28 +30,28 @@ If you're curious about how apps built with ChouTiUI look like, check out the [A
   <tr>
     <td align="center" width="160">
       <a href="https://apps.apple.com/app/say-no-to-notch/id1639306886">
-        <img src="https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/ce/37/2e/ce372e9e-534f-82c1-f308-15ef75e7afc9/AppIcon-0-0-85-220-0-0-4-0-2x.png/512x0w.webp" width="128" height="128" alt="Say No to Notch">
+        <img src="https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/ce/37/2e/ce372e9e-534f-82c1-f308-15ef75e7afc9/AppIcon-0-0-85-220-0-0-4-0-2x.png/512x0w.webp" width="128" alt="Say No to Notch">
         <br>
         Say No to Notch
       </a>
     </td>
     <td align="center" width="160">
       <a href="https://apps.apple.com/app/lickable-menu-bar/id6444217677">
-        <img src="https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/f4/35/64/f435648c-b8b1-e233-db80-ea7285df85d4/AppIcon-0-0-85-220-0-4-0-2x.png/512x0w.webp" width="128" height="128" alt="Lickable Menu Bar">
+        <img src="https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/f4/35/64/f435648c-b8b1-e233-db80-ea7285df85d4/AppIcon-0-0-85-220-0-4-0-2x.png/512x0w.webp" width="128" alt="Lickable Menu Bar">
         <br>
         Lickable Menu Bar
       </a>
     </td>
     <td align="center" width="160">
       <a href="https://apps.apple.com/app/git-streaks-for-github/id1525795950">
-        <img src="https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/e2/c4/b8/e2c4b880-abe0-4c2c-79f1-d53ebca56aaa/AppIcon-0-0-85-220-0-0-4-0-2x.png/512x0w.webp" width="128" height="128" alt="Git Streaks for GitHub">
+        <img src="https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/e2/c4/b8/e2c4b880-abe0-4c2c-79f1-d53ebca56aaa/AppIcon-0-0-85-220-0-0-4-0-2x.png/512x0w.webp" width="128" alt="Git Streaks for GitHub">
         <br>
         Git Streaks
       </a>
     </td>
     <td align="center" width="160">
       <a href="https://apps.apple.com/app/menubar-ip/id6532621020">
-        <img src="https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/4c/41/1d/4c411d91-b305-e759-e860-b0d4acee335a/AppIcon-0-0-85-220-0-0-4-0-2x.png/512x0w.webp" width="128" height="128" alt="MenuBar IP">
+        <img src="https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/4c/41/1d/4c411d91-b305-e759-e860-b0d4acee335a/AppIcon-0-0-85-220-0-0-4-0-2x.png/512x0w.webp" width="128" alt="MenuBar IP">
         <br>
         MenuBar IP
       </a>
