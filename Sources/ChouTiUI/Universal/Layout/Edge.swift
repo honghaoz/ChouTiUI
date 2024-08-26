@@ -12,7 +12,7 @@ import AppKit
 #endif
 
 /// A type indicates one edge of a rectangle.
-public enum Edge {
+public enum Edge: Sendable {
 
   case top
   case left

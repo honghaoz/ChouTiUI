@@ -8,7 +8,7 @@
 import Foundation
 
 /// The horizontal alignment of a subcomponent relative to its parent.
-public enum LayoutHorizontalAlignment: Hashable {
+public enum LayoutHorizontalAlignment: Hashable, Sendable {
   case center
   case left
   case right
