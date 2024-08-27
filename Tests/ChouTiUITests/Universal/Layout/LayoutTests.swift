@@ -313,22 +313,22 @@ class LayoutTests: XCTestCase {
 
     // when anchor is customized
     do {
-      let frame = Layout.anchor(rect: childSize, relativeTo: CGRect(origin: .zero, size: containerSize), edge: .top, anchorPoint: .init(x: 0.1, y: 0.2), gap: 13)
+      let frame = Layout.anchor(rect: childSize, relativeTo: CGRect(origin: .zero, size: containerSize), edge: .top, anchorPoint: UnitPoint(x: 0.1, y: 0.2), gap: 13)
       expect(frame) == CGRect(x: -20, y: -213, width: 100, height: 200)
     }
 
     do {
-      let frame = Layout.anchor(rect: childSize, relativeTo: CGRect(origin: .zero, size: containerSize), edge: .left, anchorPoint: .init(x: 0.1, y: 0.2), gap: 13)
+      let frame = Layout.anchor(rect: childSize, relativeTo: CGRect(origin: .zero, size: containerSize), edge: .left, anchorPoint: UnitPoint(x: 0.1, y: 0.2), gap: 13)
       expect(frame) == CGRect(x: -113, y: 0, width: 100, height: 200)
     }
 
     do {
-      let frame = Layout.anchor(rect: childSize, relativeTo: CGRect(origin: .zero, size: containerSize), edge: .bottom, anchorPoint: .init(x: 0.1, y: 0.2), gap: 13)
+      let frame = Layout.anchor(rect: childSize, relativeTo: CGRect(origin: .zero, size: containerSize), edge: .bottom, anchorPoint: UnitPoint(x: 0.1, y: 0.2), gap: 13)
       expect(frame) == CGRect(x: -20, y: 513, width: 100, height: 200)
     }
 
     do {
-      let frame = Layout.anchor(rect: childSize, relativeTo: CGRect(origin: .zero, size: containerSize), edge: .right, anchorPoint: .init(x: 0.1, y: 0.2), gap: 13)
+      let frame = Layout.anchor(rect: childSize, relativeTo: CGRect(origin: .zero, size: containerSize), edge: .right, anchorPoint: UnitPoint(x: 0.1, y: 0.2), gap: 13)
       expect(frame) == CGRect(x: 313, y: 0, width: 100, height: 200)
     }
   }

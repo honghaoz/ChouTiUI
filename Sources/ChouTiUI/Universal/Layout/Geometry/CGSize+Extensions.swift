@@ -340,14 +340,6 @@ public extension CGSize {
   func roundedUp() -> CGSize {
     CGSize(ceil(width), ceil(height))
   }
-
-  // TODO: Remove this.
-  @available(*, deprecated, message: "Use `roundedUp(scaleFactor:)` instead.")
-  @inlinable
-  @inline(__always)
-  var integral: CGSize {
-    CGRect(origin: .zero, size: self).integral.size
-  }
 }
 
 public extension CGSize {
