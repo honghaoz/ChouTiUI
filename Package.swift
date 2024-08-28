@@ -12,7 +12,8 @@ let package = Package(
     .library(name: "ChouTiUI", targets: ["ChouTiUI"]),
   ],
   dependencies: [
-    .package(path: "./ChouTi"),
+    // TODO: once ChouTi is stable, use release instead of develop branch.
+    .package(url: "https://github.com/honghaoz/ChouTi", branch: "develop"),
   ],
   targets: [
     .target(
