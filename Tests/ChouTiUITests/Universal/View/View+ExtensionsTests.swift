@@ -23,9 +23,9 @@ class View_ExtensionsTests: XCTestCase {
     // when has superview
     do {
       let frame = CGRect(x: 0, y: 0, width: 100, height: 100)
-      let containerView = NSView(frame: frame)
+      let containerView = View(frame: frame)
 
-      let view = NSView(frame: CGRect(x: 0, y: 0, width: 10, height: 20))
+      let view = View(frame: CGRect(x: 0, y: 0, width: 10, height: 20))
       containerView.addSubview(view)
 
       view.makeFullSizeInSuperView()
@@ -40,7 +40,7 @@ class View_ExtensionsTests: XCTestCase {
     // when there's no superview
     do {
       let frame = CGRect(x: 0, y: 0, width: 100, height: 100)
-      let view = NSView(frame: frame)
+      let view = View(frame: frame)
 
       Assert.setTestAssertionFailureHandler { message, metadata, file, line, column in
         expect(message) == "missing superview"
@@ -58,9 +58,9 @@ class View_ExtensionsTests: XCTestCase {
     // when has superview
     do {
       let frame = CGRect(x: 0, y: 0, width: 100, height: 100)
-      let containerView = NSView(frame: frame)
+      let containerView = View(frame: frame)
 
-      let view = NSView(frame: CGRect(x: 0, y: 0, width: 10, height: 20))
+      let view = View(frame: CGRect(x: 0, y: 0, width: 10, height: 20))
       containerView.addSubview(view)
 
       view.makeFullWidthAndPinToTopInSuperView(fixedHeight: 30)
@@ -76,7 +76,7 @@ class View_ExtensionsTests: XCTestCase {
     // when there's no superview
     do {
       let frame = CGRect(x: 0, y: 0, width: 100, height: 100)
-      let view = NSView(frame: frame)
+      let view = View(frame: frame)
 
       Assert.setTestAssertionFailureHandler { message, metadata, file, line, column in
         expect(message) == "missing superview"
@@ -88,21 +88,5 @@ class View_ExtensionsTests: XCTestCase {
 
       Assert.resetTestAssertionFailureHandler()
     }
-  }
-
-  func testIgnoreHitTest() {
-    let view = NSTextField(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
-
-    // verify hit test
-    expect(view.ignoreHitTest) == false
-    let point = CGPoint(x: 5, y: 5)
-    let hitView = view.hitTest(point)
-    expect(hitView) === view
-
-    // verify ignore hit test
-    view.ignoreHitTest = true
-    expect(view.ignoreHitTest) == true
-    let hitView2 = view.hitTest(point)
-    expect(hitView2) == nil
   }
 }
