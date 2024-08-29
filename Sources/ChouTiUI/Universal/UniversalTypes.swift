@@ -19,7 +19,7 @@ public typealias View = UIView
 public typealias Control = UIControl
 public typealias ScrollView = UIScrollView
 public typealias ImageView = UIImageView
-// public typealias Label = UILabel
+public typealias Label = UILabel
 public typealias TextField = UITextField
 public typealias TextView = UITextView
 
@@ -59,7 +59,7 @@ public typealias View = NSView
 public typealias Control = NSControl
 public typealias ScrollView = NSScrollView
 public typealias ImageView = NSImageView
-// public typealias Label = NSLabel
+public typealias Label = NSLabel
 public typealias TextField = NSTextField
 public typealias TextView = NSTextView
 

@@ -14,6 +14,15 @@ import ChouTi
 
 class NSView_ExtensionsTests: XCTestCase {
 
+  func testUpdateCommonSettings() {
+    let view = NSView()
+    view.updateCommonSettings()
+    expect(view.wantsLayer) == true
+    expect(view.layer()?.cornerCurve) == .continuous
+    expect(view.layer()?.contentsScale) == Screen.mainScreenScale
+    expect(view.layer()?.masksToBounds) == false
+  }
+
   func testIgnoreHitTest() {
     let view = NSTextField(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
 

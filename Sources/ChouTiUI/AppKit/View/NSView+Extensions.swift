@@ -12,6 +12,27 @@ import ChouTi
 
 public extension NSView {
 
+  /// Some NSView common settings in ChouTi projects.
+  func updateCommonSettings() {
+    // seems like using auto layout can avoid certain ambiguous layout issues
+    //
+    // don't use auto layout
+    // translatesAutoresizingMaskIntoConstraints = false
+
+    wantsLayer = true
+    layer()?.cornerCurve = .continuous
+    layer()?.contentsScale = Screen.mainScreenScale
+
+    // turns off clipping
+    // https://stackoverflow.com/a/53176282/3164091
+    layer()?.masksToBounds = false
+  }
+}
+
+// MARK: - Ignore Hit Test
+
+public extension NSView {
+
   private static let _key = Obfuscation.deobfuscate(#"}{y\}hy"#, key: 20) // "ignoreHitTest"
 
   var ignoreHitTest: Bool {

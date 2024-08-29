@@ -18,6 +18,9 @@ import ChouTi
 public extension Screen {
 
   /// The main screen's scale factor.
+  ///
+  /// - on macOS and iOS, this uses `Screens.mainScreen`'s scale. You can set `Screens.mainScreen` explicitly to change this value.
+  /// - on visionOS, this uses a constant: `Sizing.visionOS.scaleFactor`.
   static var mainScreenScale: CGFloat {
     #if os(visionOS)
     return Sizing.visionOS.scaleFactor
