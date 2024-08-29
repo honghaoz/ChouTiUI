@@ -32,7 +32,7 @@ class SizingTests: XCTestCase {
   }
 
   func test_navigationBarButtonEdgeInsets() {
-    expect(Sizing.iOS.navigationBarButtonEdgeInset) == Sizing.iOS.navigationBarButtonEdgeInset
+    expect(Sizing.iOS.navigationBarButtonEdgeInsets) == Sizing.iOS.navigationBarButtonEdgeInsets
   }
 
   func test_navigationBarButtonCornerRadius() {

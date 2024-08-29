@@ -222,10 +222,8 @@ public enum Sizing {
       #endif
     }()
 
-    // TODO: rename to navigationBarButtonEdgeInsets
-
     /// The edge spacing from the navigation bar button to the screen edge.
-    public static let navigationBarButtonEdgeInset: CGFloat = {
+    public static let navigationBarButtonEdgeInsets: CGFloat = {
       #if os(iOS)
       if DeviceKit.Device.current.hasRoundedDisplayCorners {
         return 8
