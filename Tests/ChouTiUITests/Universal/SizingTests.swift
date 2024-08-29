@@ -5,7 +5,13 @@
 //  Copyright © 2024 ChouTi. All rights reserved.
 //
 
+#if canImport(AppKit)
+import AppKit
+#endif
+
 #if canImport(UIKit)
+import UIKit
+#endif
 
 import ChouTiTest
 @testable import ChouTiUI
@@ -213,6 +219,4 @@ class Iphone_Screen_SizeCategoryTests: XCTestCase {
     expect(Sizing.iPhone.Screen.SizeCategory.sizeCategory(for: 900)) == .iPhoneProMax
   }
 }
-#endif
-
 #endif
