@@ -16,7 +16,6 @@ import UIKit
 #endif
 
 import ChouTi
-import DeviceKit
 
 public enum Sizing {
 
@@ -199,7 +198,7 @@ public enum Sizing {
     /// The navigation bar height.
     public static let navigationBarHeight: CGFloat = {
       #if os(iOS)
-      if DeviceKit.Device.current.hasRoundedDisplayCorners {
+      if Device.hasRoundedDisplayCorners {
         return 50
       } else {
         return 44
@@ -212,7 +211,7 @@ public enum Sizing {
     /// The navigation bar button height.
     public static let navigationBarButtonHeight: CGFloat = {
       #if os(iOS)
-      if DeviceKit.Device.current.hasRoundedDisplayCorners {
+      if Device.hasRoundedDisplayCorners {
         return 34
       } else {
         return 30
@@ -225,7 +224,7 @@ public enum Sizing {
     /// The edge spacing from the navigation bar button to the screen edge.
     public static let navigationBarButtonEdgeInsets: CGFloat = {
       #if os(iOS)
-      if DeviceKit.Device.current.hasRoundedDisplayCorners {
+      if Device.hasRoundedDisplayCorners {
         return 8
       } else {
         return 6
@@ -244,7 +243,7 @@ public enum Sizing {
     /// The corner radius of the navigation bar button.
     public static let navigationBarButtonCornerRadius: CGFloat = {
       #if os(iOS)
-      if DeviceKit.Device.current.hasRoundedDisplayCorners {
+      if Device.hasRoundedDisplayCorners {
         return 5
       } else {
         return 4

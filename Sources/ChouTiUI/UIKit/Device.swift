@@ -28,6 +28,11 @@ public enum Device {
 
     // Ref: http://stackoverflow.com/a/30284266/3164091
   }()
+
+  /// Whether the current device has rounded display corners. Like iPhone X and later.
+  public static var hasRoundedDisplayCorners: Bool {
+    UIScreen.main.displayCornerRadius > 0
+  }
 }
 
 #endif

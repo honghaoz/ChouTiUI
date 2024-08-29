@@ -19,6 +19,10 @@ class DeviceTests: XCTestCase {
   func test_isSimulator() {
     expect(Device.isSimulator) == true
   }
+
+  func test_hasRoundedDisplayCorners() {
+    expect(Device.hasRoundedDisplayCorners) == true
+  }
 }
 
 #endif

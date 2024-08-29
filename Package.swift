@@ -14,15 +14,12 @@ let package = Package(
   dependencies: [
     // TODO: once ChouTi is stable, use release instead of develop branch.
     .package(url: "https://github.com/honghaoz/ChouTi", branch: "develop"),
-    // utilities
-    .package(url: "https://github.com/devicekit/DeviceKit", from: "5.4.0"),
   ],
   targets: [
     .target(
       name: "ChouTiUI",
       dependencies: [
         "ChouTi",
-        .product(name: "DeviceKit", package: "DeviceKit", condition: .when(platforms: [.iOS, .macOS, .visionOS])),
       ]
     ),
     .testTarget(
