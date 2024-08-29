@@ -9,15 +9,15 @@ bootstrap: # Bootstrap the environment.
 
 .PHONY: build
 build: # Build with debug configuration.
-	swift build
+	@$(REPO_ROOT)/scripts/swift-package/build-workspace.sh --workspace-path "Project.xcworkspace" --scheme "ChouTiUI" --configuration "Debug"
 
 .PHONY: build-release
 build-release: # Build the package.
-	swift build -c release
+	@$(REPO_ROOT)/scripts/swift-package/build-workspace.sh --workspace-path "Project.xcworkspace" --scheme "ChouTiUI" --configuration "Release"
 
 .PHONY: test
 test: # Run tests.
-	swift test
+	@$(REPO_ROOT)/scripts/swift-package/test-workspace.sh --workspace-path "Project.xcworkspace" --scheme "ChouTiUI"
 
 .PHONY: test-codecov
 test-codecov: # Run tests with code coverage.

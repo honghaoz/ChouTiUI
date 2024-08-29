@@ -17,22 +17,23 @@ import ChouTi
 
 public extension Screen {
 
+  /// The main screen's scale factor.
+  static var mainScreenScale: CGFloat {
+    #if os(visionOS)
+    return Sizing.visionOS.scaleFactor
+    #else
+    Screens.mainScreen.assert("missing main screen")?.scale ?? 2.0
+    #endif
+  }
+
   #if !os(visionOS)
   /// The main screen.
   static func mainScreen() -> Screen? {
     #if os(macOS)
     return NSScreen.main
-    #elseif os(visionOS)
-    ChouTi.assertFailure("visionOS is not supported")
-    return UIScreen.main
     #else
     return UIScreen.main
     #endif
-  }
-
-  /// The main screen's scale factor.
-  static var mainScreenScale: CGFloat {
-    Screens.mainScreen.assert("missing main screen")?.scale ?? 2.0
   }
 
   /// The size of 1 pixel for the screen.

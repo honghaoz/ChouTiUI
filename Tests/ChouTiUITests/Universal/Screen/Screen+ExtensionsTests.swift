@@ -18,16 +18,6 @@ import ChouTiUI
 
 class Screen_ExtensionsTests: XCTestCase {
 
-  func testMainScreen() {
-    #if os(macOS)
-    expect(Screen.mainScreen()) == NSScreen.main
-    #elseif os(visionOS)
-    expect(Screen.mainScreen()) == UIScreen.main
-    #else
-    expect(Screen.mainScreen()) == UIScreen.main
-    #endif
-  }
-
   func testMainScreenScale() {
     #if os(macOS)
     expect(Screen.mainScreenScale) == NSScreen.main?.backingScaleFactor ?? 2
@@ -35,6 +25,16 @@ class Screen_ExtensionsTests: XCTestCase {
     expect(Screen.mainScreenScale) == Sizing.visionOS.scaleFactor
     #else
     expect(Screen.mainScreenScale) == UIScreen.main.scale
+    #endif
+  }
+
+  #if !os(visionOS)
+
+  func testMainScreen() {
+    #if os(macOS)
+    expect(Screen.mainScreen()) == NSScreen.main
+    #else
+    expect(Screen.mainScreen()) == UIScreen.main
     #endif
   }
 
@@ -68,4 +68,6 @@ class Screen_ExtensionsTests: XCTestCase {
       expect(mainScreen.minimumRefreshInterval).to(beApproximatelyEqual(to: 1 / Double(mainScreen.maximumFramesPerSecond), within: 1e-9))
     }
   }
+
+  #endif
 }

@@ -53,7 +53,7 @@ playground.xcworkspace
 # *.xcodeproj
 
 # swiftpm
-.swiftpm/**/*
+# .swiftpm/**/*
 # **/.swiftpm/**/*.xcworkspacedata
 # !**/.swiftpm/**/xcshareddata/**/*.xcscheme
 .build/

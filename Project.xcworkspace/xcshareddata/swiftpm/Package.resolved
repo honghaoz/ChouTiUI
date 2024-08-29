@@ -1,0 +1,23 @@
+{
+  "pins" : [
+    {
+      "identity" : "chouti",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/honghaoz/ChouTi",
+      "state" : {
+        "branch" : "develop",
+        "revision" : "553e45ea4054f8e91e1b85e7aa60803287d89c4e"
+      }
+    },
+    {
+      "identity" : "devicekit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/devicekit/DeviceKit",
+      "state" : {
+        "revision" : "5757447e9f92c476ee2ca41ead7eb6db07936430",
+        "version" : "5.4.0"
+      }
+    }
+  ],
+  "version" : 2
+}

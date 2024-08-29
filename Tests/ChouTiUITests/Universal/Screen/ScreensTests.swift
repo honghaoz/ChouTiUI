@@ -5,7 +5,7 @@
 //  Copyright © 2024 ChouTi. All rights reserved.
 //
 
-import Foundation
+#if !os(visionOS)
 
 import ChouTiTest
 import ChouTiUI
@@ -19,3 +19,5 @@ class ScreensTests: XCTestCase {
     expect(Screens.mainScreen) == Screen.mainScreen()
   }
 }
+
+#endif

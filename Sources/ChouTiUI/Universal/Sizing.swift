@@ -312,7 +312,7 @@ public enum Sizing {
 
     /// The default window corner radius.
     public static let windowCornerRadius: CGFloat = {
-      ChouTi.assertFailure("TODO: verify")
+      ChouTi.assertFailure("TODO: windowCornerRadius is not implemented for visionOS yet")
       return 10
     }()
   }

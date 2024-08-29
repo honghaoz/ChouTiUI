@@ -5,10 +5,11 @@
 //  Copyright © 2024 ChouTi. All rights reserved.
 //
 
-#if os(iOS)
+#if canImport(UIKit)
 
 import ChouTiTest
 @testable import ChouTiUI
+import ChouTi
 
 class SizingTests: XCTestCase {
 
@@ -31,6 +32,18 @@ class SizingTests: XCTestCase {
   func test_navigationBarButtonCornerRadius() {
     expect(Sizing.iOS.navigationBarButtonCornerRadius) == Sizing.iOS.navigationBarButtonCornerRadius
   }
+
+  #if os(visionOS)
+  func testWindowCornerRadius() {
+    Assert.setTestAssertionFailureHandler { message, metadata, file, line, column in
+      expect(message) == "TODO: windowCornerRadius is not implemented for visionOS yet"
+    }
+
+    expect(Sizing.visionOS.windowCornerRadius) == 10
+
+    Assert.resetTestAssertionFailureHandler()
+  }
+  #endif
 }
 
 #if os(iOS)
