@@ -16,7 +16,7 @@ jobs:
     name: Lint
     strategy:
       fail-fast: false
-    timeout-minutes: 15
+    timeout-minutes: 5
     runs-on: ${{ vars.MACOS }}
     steps:
       - name: Check out repository

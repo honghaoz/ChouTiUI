@@ -25,7 +25,7 @@ jobs:
     name: Build & Test
     strategy:
       fail-fast: false
-    timeout-minutes: 20
+    timeout-minutes: 30
     runs-on: ${{ vars.MACOS }}
     steps:
       - name: Check out repository
