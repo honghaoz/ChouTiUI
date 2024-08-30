@@ -1,0 +1,6 @@
+parent_config: .swiftlint.yml
+
+disabled_rules:
+  - weak_delegate
+  - unneeded_override
+  - duplicate_imports

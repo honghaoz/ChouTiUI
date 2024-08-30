@@ -1,0 +1,117 @@
+# file options
+excluded:
+  - .build
+  - .swiftpm
+  - Carthage
+  - fastlane
+  - git
+  - Pods
+  - "${PWD}/**/*/*.xcodeproj"
+  - "${PWD}/**/*/*.playground"
+  - "${PWD}/**/*/.swiftpm"
+  - "${PWD}/**/*/.build"
+  - "**/_Deprecated"
+  - "**/_ChouTiDeprecated"
+  - ChouTi
+
+# rules
+opt_in_rules:
+  - array_init
+  - closure_end_indentation
+  - contains_over_first_not_nil
+  - discouraged_direct_init
+  - explicit_init
+  - fatal_error_message
+  - first_where
+  - force_unwrapping
+  - multiline_parameters
+  - nslocalizedstring_key
+  - return_value_from_void_function
+  - sorted_first_last
+  - toggle_bool
+  - vertical_parameter_alignment_on_call
+  # already tried
+  # - multiline_arguments
+  # - switch_case_on_newline
+
+disabled_rules:
+  - accessibility_label_for_image
+  - closure_parameter_position # occasionally needs to have multiline capture variables
+  - cyclomatic_complexity
+  - discarded_notification_center_observer
+  - empty_count
+  - explicit_enum_raw_value
+  - fallthrough
+  - file_length
+  - for_where
+  - function_body_length
+  - function_parameter_count
+  - identifier_name
+  - inclusive_language
+  - large_tuple
+  - line_length
+  - mark
+  - multiple_closures_with_trailing_closure
+  - nesting
+  - opening_brace
+  - operator_whitespace
+  - orphaned_doc_comment
+  - prefer_self_in_static_references # needs to have explicit class name to ease searching
+  - redundant_string_enum_value
+  - todo
+  - trailing_comma
+  - trailing_whitespace
+  - type_body_length
+  - type_name
+  - unused_closure_parameter
+  - unused_optional_binding
+  - valid_ibinspectable
+
+analyzer_rules: # Rules run by `swiftlint analyze`
+  - capture_variable
+  - typesafe_array_init
+  - unused_import
+
+dynamic_inline:
+  severity: warning
+explicit_init:
+  include_bare_init: true
+fatal_error_message:
+  severity: warning
+force_cast:
+  severity: warning
+force_try:
+  severity: warning
+shorthand_operator:
+  severity: warning
+superfluous_disable_command:
+  severity: warning
+
+custom_rules:
+  fatal_error:
+    name: "Fatal Error"
+    message: "The fatalError can cause crashes. Avoid using it if possible."
+    included: ".*.swift"
+    regex: "\bfatalError\b"
+    match_kinds:
+      - identifier
+    severity: error
+
+  unowned_variable:
+    name: "Unowned Variable"
+    message: "The `unowned` keyword can cause crashes if not used properly. Use `weak` if possible."
+    included: ".*.swift"
+    regex: "unowned "
+    match_kinds:
+      - identifier
+      - attribute.builtin
+    severity: warning
+
+  assert_in_tests:
+    name: "No Assertions in Tests"
+    message: "assert and assertionFailure can cause crashes in tests. Use XCTAssert instead."
+    included: ".*Tests.swift"
+    regex: ' assert\(|assertionFailure\('
+    match_kinds:
+      - identifier
+    severity: error
