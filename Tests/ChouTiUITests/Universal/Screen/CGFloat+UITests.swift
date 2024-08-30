@@ -60,11 +60,11 @@ class CGFloatUITests: XCTestCase {
     #else
     if let mainScreen = Screen.mainScreen() {
       if mainScreen.is3x {
-        expect(mainScreen.halfPoint) == mainScreen.pixelSize * 2
+        expect(CGFloat.halfPoint) == mainScreen.pixelSize * 2
       } else if mainScreen.is2x {
-        expect(mainScreen.halfPoint) == mainScreen.pixelSize
+        expect(CGFloat.halfPoint) == mainScreen.pixelSize
       } else {
-        expect(mainScreen.halfPoint) == mainScreen.pixelSize
+        expect(CGFloat.halfPoint) == mainScreen.pixelSize
       }
     }
     #endif
