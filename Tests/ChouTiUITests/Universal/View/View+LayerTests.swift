@@ -37,8 +37,9 @@ import UIKit
 #endif
 
 import ChouTiTest
-import ChouTiUI
+
 import ChouTi
+import ChouTiUI
 
 class View_LayerTests: XCTestCase {
 

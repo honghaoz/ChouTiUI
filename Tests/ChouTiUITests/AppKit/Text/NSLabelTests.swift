@@ -33,8 +33,9 @@
 import AppKit
 
 import ChouTiTest
-import ChouTiUI
+
 import ChouTi
+import ChouTiUI
 
 class NSLabelTests: XCTestCase {
 

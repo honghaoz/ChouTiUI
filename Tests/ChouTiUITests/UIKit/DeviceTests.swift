@@ -31,6 +31,7 @@
 #if canImport(UIKit) && !os(visionOS)
 
 import ChouTiTest
+
 import ChouTiUI
 
 class DeviceTests: XCTestCase {

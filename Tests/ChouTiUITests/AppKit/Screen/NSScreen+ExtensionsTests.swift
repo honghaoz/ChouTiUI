@@ -31,7 +31,9 @@
 #if canImport(AppKit)
 
 import AppKit
+
 import ChouTiTest
+
 import ChouTiUI
 
 class NSScreen_ExtensionsTests: XCTestCase {

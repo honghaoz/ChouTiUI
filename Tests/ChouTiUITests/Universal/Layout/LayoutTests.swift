@@ -29,8 +29,10 @@
 //
 
 import CoreGraphics
-import ChouTiUI
+
 import ChouTiTest
+
+import ChouTiUI
 
 class LayoutTests: XCTestCase {
 

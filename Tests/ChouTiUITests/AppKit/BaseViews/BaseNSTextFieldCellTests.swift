@@ -31,9 +31,11 @@
 #if canImport(AppKit)
 
 import AppKit
+
+import ChouTiTest
+
 import ChouTi
 @testable import ChouTiUI
-import ChouTiTest
 
 class BaseNSTextFieldCellTests: XCTestCase {
 

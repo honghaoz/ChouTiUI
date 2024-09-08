@@ -30,8 +30,12 @@
 
 #if canImport(AppKit)
 
-import ChouTiUI
+import AppKit
+
 import ChouTiTest
+
+import ChouTiUI
+
 
 class NSRectCornerTests: XCTestCase {
 

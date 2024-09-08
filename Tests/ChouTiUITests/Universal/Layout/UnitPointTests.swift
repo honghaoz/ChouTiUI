@@ -28,8 +28,9 @@
 //  IN THE SOFTWARE.
 //
 
-import ChouTiUI
 import ChouTiTest
+
+import ChouTiUI
 
 class UnitPointTests: XCTestCase {
 

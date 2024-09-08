@@ -36,8 +36,9 @@ import AppKit
 import UIKit
 #endif
 
-import ChouTiUI
 import ChouTiTest
+
+import ChouTiUI
 
 class TextTruncationModeTests: XCTestCase {
 

@@ -37,6 +37,7 @@ import UIKit
 #endif
 
 import ChouTiTest
+
 import ChouTiUI
 
 class Screen_ExtensionsTests: XCTestCase {

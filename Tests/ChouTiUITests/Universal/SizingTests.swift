@@ -37,8 +37,9 @@ import UIKit
 #endif
 
 import ChouTiTest
-@testable import ChouTiUI
+
 import ChouTi
+@testable import ChouTiUI
 
 class SizingTests: XCTestCase {
 

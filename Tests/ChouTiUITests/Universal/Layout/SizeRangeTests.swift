@@ -29,6 +29,7 @@
 //
 
 import ChouTiTest
+
 import ChouTiUI
 
 class SizeRangeTests: XCTestCase {

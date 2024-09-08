@@ -33,6 +33,7 @@
 import UIKit
 
 import ChouTiTest
+
 import ChouTiUI
 
 class UIApplication_ExtensionsTests: XCTestCase {

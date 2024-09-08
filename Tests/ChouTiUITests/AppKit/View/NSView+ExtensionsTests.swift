@@ -32,8 +32,9 @@
 import AppKit
 
 import ChouTiTest
-import ChouTiUI
+
 import ChouTi
+import ChouTiUI
 
 class NSView_ExtensionsTests: XCTestCase {
 
