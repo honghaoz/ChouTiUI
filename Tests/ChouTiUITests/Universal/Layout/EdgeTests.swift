@@ -31,7 +31,7 @@
 import ChouTiUI
 import ChouTiTest
 
-#if os(macOS)
+#if canImport(AppKit)
 import AppKit
 #endif
 

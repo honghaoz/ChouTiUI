@@ -55,7 +55,7 @@ public extension Screen {
   #if !os(visionOS)
   /// The main screen.
   static func mainScreen() -> Screen? {
-    #if os(macOS)
+    #if canImport(AppKit)
     return NSScreen.main
     #else
     return UIScreen.main

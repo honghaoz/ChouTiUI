@@ -44,10 +44,10 @@ public extension View {
   ///
   /// - Warning: On macOS, the view should be layer-backed (set `wantsLayer = true`). Accessing `layer` without setting `wantsLayer = true` will trigger an assertion.
   func layer() -> CALayer? {
-    #if !os(macOS)
+    #if canImport(AppKit)
+    ChouTi.assert(layer != nil, "NSView should set `wantsLayer == true`.")
     return layer
     #else
-    ChouTi.assert(layer != nil, "NSView should set `wantsLayer == true`.")
     return layer
     #endif
   }
@@ -56,11 +56,11 @@ public extension View {
   ///
   /// - Warning: On macOS, the view should be layer-backed (set `wantsLayer = true`). Accessing `unsafeLayer` without setting `wantsLayer = true` will crash.
   var unsafeLayer: CALayer {
-    #if !os(macOS)
-    return layer
-    #else
+    #if canImport(AppKit)
     ChouTi.assert(layer != nil, "NSView should set `wantsLayer == true`.")
     return layer.unsafelyUnwrapped
+    #else
+    return layer
     #endif
   }
 }

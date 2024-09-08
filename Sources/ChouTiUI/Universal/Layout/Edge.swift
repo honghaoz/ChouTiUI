@@ -30,7 +30,7 @@
 
 import Foundation
 
-#if os(macOS)
+#if canImport(AppKit)
 import AppKit
 #endif
 
@@ -58,7 +58,7 @@ public enum Edge: Sendable {
     }
   }
 
-  #if os(macOS)
+  #if canImport(AppKit)
   /// Converts the edge to `NSRectEdge`.
   ///
   /// Used in `NSPopover`.
