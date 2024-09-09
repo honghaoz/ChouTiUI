@@ -36,7 +36,6 @@ import ChouTiTest
 
 import ChouTiUI
 
-
 class NSRectCornerTests: XCTestCase {
 
   func testInit() {
