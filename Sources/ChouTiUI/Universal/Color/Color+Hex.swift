@@ -67,9 +67,6 @@ public extension Color {
     /// https://www.hackingwithswift.com/example-code/uicolor/how-to-convert-a-hex-color-to-a-uicolor
 
     let hex = hex.removingCharacters(in: Color.colorHexCharacterSet.inverted)
-    guard hex.count == 6 || hex.count == 8 else {
-      return nil
-    }
 
     var hexValue: UInt64 = 0
     guard Scanner(string: hex).scanHexInt64(&hexValue) else {
@@ -89,7 +86,8 @@ public extension Color {
       b = (hexValue & 0x0000FF00) >> 8
       a = hexValue & 0x000000FF
     default:
-      return nil // impossible, the above guard will return nil if hex.count is not 6 or 8
+      debugPrint("Bad hex string (\(hex)), hex string should be in format of #FF0000 (RGB) or #FF000088 (RGBA)")
+      return nil
     }
 
     switch colorSpace {
