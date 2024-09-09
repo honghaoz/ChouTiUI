@@ -28,13 +28,13 @@
 //  IN THE SOFTWARE.
 //
 
-import ChouTiTest
-
-import ChouTiUI
-
 #if canImport(AppKit)
 import AppKit
 #endif
+
+import ChouTiTest
+
+import ChouTiUI
 
 class EdgeTests: XCTestCase {
 
