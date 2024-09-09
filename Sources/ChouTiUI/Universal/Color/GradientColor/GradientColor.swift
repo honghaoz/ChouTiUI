@@ -34,7 +34,7 @@ import QuartzCore
 /// A gradient color.
 public enum GradientColor: GradientColorType, Equatable, Hashable {
 
-  public static let clear: GradientColor = .linearGradient(.clear)
+  public static let clearGradientColor: GradientColor = .linearGradient(.clearGradientColor)
 
   case linearGradient(LinearGradientColor)
   case radialGradient(RadialGradientColor)

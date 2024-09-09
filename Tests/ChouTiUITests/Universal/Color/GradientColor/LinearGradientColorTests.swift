@@ -48,7 +48,7 @@ import ChouTiUI
 class LinearGradientColorTests: XCTestCase {
 
   func test_clear() {
-    let gradient = LinearGradientColor.clear
+    let gradient = LinearGradientColor.clearGradientColor
     expect(gradient.colors) == [Color.clear, Color.clear]
     expect(gradient.locations) == nil
     expect(gradient.startPoint) == UnitPoint.top

@@ -45,7 +45,7 @@ import ChouTi
 /// Angular gradient color.
 public struct AngularGradientColor: GradientColorType, Equatable, Hashable {
 
-  public static let clear = AngularGradientColor(colors: [.clear, .clear], centerPoint: .center, aimingPoint: .top)
+  public static let clearGradientColor = AngularGradientColor(colors: [.clear, .clear], centerPoint: .center, aimingPoint: .top)
 
   public var centerPoint: UnitPoint { startPoint }
   public var aimingPoint: UnitPoint { endPoint }

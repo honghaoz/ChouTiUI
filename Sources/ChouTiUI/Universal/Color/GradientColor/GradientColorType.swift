@@ -46,7 +46,7 @@ import ChouTi
 public protocol GradientColorType {
 
   /// The clear gradient color. Required.
-  static var clear: Self { get }
+  static var clearGradientColor: Self { get }
 
   /// The colors of the gradient. Required.
   var colors: [Color] { get }

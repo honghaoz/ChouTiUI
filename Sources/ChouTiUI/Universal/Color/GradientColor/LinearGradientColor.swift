@@ -45,7 +45,7 @@ import ChouTi
 /// Linear gradient color.
 public struct LinearGradientColor: GradientColorType, Equatable, Hashable {
 
-  public static let clear = LinearGradientColor([.clear, .clear])
+  public static let clearGradientColor = LinearGradientColor([.clear, .clear])
 
   public let colors: [Color]
   public let locations: [CGFloat]?

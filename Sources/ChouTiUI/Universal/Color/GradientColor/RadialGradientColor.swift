@@ -45,7 +45,7 @@ import ChouTi
 /// Radial gradient color.
 public struct RadialGradientColor: GradientColorType, Equatable, Hashable {
 
-  public static let clear = RadialGradientColor(colors: [.clear, .clear], centerPoint: .center, endPoint: .top)
+  public static let clearGradientColor = RadialGradientColor(colors: [.clear, .clear], centerPoint: .center, endPoint: .top)
 
   public var centerPoint: UnitPoint { startPoint }
 

@@ -48,7 +48,7 @@ import ChouTiUI
 class AngularGradientColorTests: XCTestCase {
 
   func test_clear() {
-    let gradient = AngularGradientColor.clear
+    let gradient = AngularGradientColor.clearGradientColor
     expect(gradient.colors) == [Color.clear, Color.clear]
     expect(gradient.locations) == nil
     expect(gradient.startPoint) == UnitPoint.center

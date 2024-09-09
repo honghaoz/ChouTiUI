@@ -48,7 +48,7 @@ import ChouTiUI
 class RadialGradientColorTests: XCTestCase {
 
   func test_clear() {
-    let gradient = RadialGradientColor.clear
+    let gradient = RadialGradientColor.clearGradientColor
     expect(gradient.colors) == [Color.clear, Color.clear]
     expect(gradient.locations) == nil
     expect(gradient.centerPoint) == UnitPoint.center
