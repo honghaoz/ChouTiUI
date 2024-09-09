@@ -43,40 +43,73 @@ import ChouTiUI
 
 class Color_PerceivedBrightnessTests: XCTestCase {
 
-  func test_perceivedBrightness() {
-    let white = Color.white
-    let black = Color.black
-    let red = Color.red
-    let green = Color.green
-    let blue = Color.blue
+  func test_perceivedBrightness() throws {
+    // rgb
+    do {
+      expect(Color.red.perceivedBrightness()).to(beApproximatelyEqual(to: 0.299, within: 0.01))
+      expect(Color.green.perceivedBrightness()).to(beApproximatelyEqual(to: 0.587, within: 0.01))
+      expect(Color.blue.perceivedBrightness()).to(beApproximatelyEqual(to: 0.114, within: 0.01))
+    }
 
-    expect(white.perceivedBrightness()).to(beApproximatelyEqual(to: 1, within: 0.01))
-    expect(black.perceivedBrightness()).to(beApproximatelyEqual(to: 0, within: 0.01))
-    expect(red.perceivedBrightness()).to(beApproximatelyEqual(to: 0.299, within: 0.01))
-    expect(green.perceivedBrightness()).to(beApproximatelyEqual(to: 0.587, within: 0.01))
-    expect(blue.perceivedBrightness()).to(beApproximatelyEqual(to: 0.114, within: 0.01))
+    // monochrome color
+    do {
+      expect(Color.white.perceivedBrightness()).to(beApproximatelyEqual(to: 1, within: 0.01))
+      expect(Color.black.perceivedBrightness()).to(beApproximatelyEqual(to: 0, within: 0.01))
+      try expect(CGColor(gray: 1, alpha: 1).asColor().unwrap().perceivedBrightness()).to(beApproximatelyEqual(to: 1, within: 1e-6))
+      try expect(CGColor(gray: 0, alpha: 1).asColor().unwrap().perceivedBrightness()) == 0
+    }
+
+    // cmyk
+    // https://www.w3schools.com/colors/colors_cmyk.asp
+    do {
+      let cmykWhite = try CGColor(colorSpace: CGColorSpaceCreateDeviceCMYK(), components: [0, 0, 0, 0, 1]).unwrap()
+      try expect(cmykWhite.asColor().unwrap().perceivedBrightness()) == 0.99878945094347
+
+      let cmykBlack = try CGColor(colorSpace: CGColorSpaceCreateDeviceCMYK(), components: [0, 0, 0, 1, 1]).unwrap()
+      try expect(cmykBlack.asColor().unwrap().perceivedBrightness()) == 0.10031022909283638
+
+      // light green, cmyk(57%, 0%, 59%, 21%)
+      let cmykLightGreen = try CGColor(colorSpace: CGColorSpaceCreateDeviceCMYK(), components: [0.57, 0, 0.59, 0.21, 1]).unwrap()
+      try expect(cmykLightGreen.asColor().unwrap().perceivedBrightness()) == 0.5049150318205357
+
+      // dark green, cmyk(89%, 0%, 51%, 47%)
+      let cmykDarkGreen = try CGColor(colorSpace: CGColorSpaceCreateDeviceCMYK(), components: [0.89, 0, 0.51, 0.47, 1]).unwrap()
+      try expect(cmykDarkGreen.asColor().unwrap().perceivedBrightness()) == 0.2632510296702385
+    }
   }
 
   func test_perceivedBrightness_invalidColor() {
     // invalid rgb color
     do {
       let invalidColor = Color(red: .nan, green: .nan, blue: .nan, alpha: 1)
-      expect(invalidColor.perceivedBrightness().isNaN) == true
+
+      ChouTi.Assert.setTestAssertionFailureHandler { message, metadata, file, line, column in
+        expect(message) == "color components contains NaN"
+        expect(metadata["color"]) == "\(invalidColor)"
+      }
+
+      expect(invalidColor.perceivedBrightness()) == 0
+
+      ChouTi.Assert.resetTestAssertionFailureHandler()
     }
 
-    // not rgb color
+    // patterned color
     do {
       ChouTi.Assert.setTestAssertionFailureHandler { message, metadata, file, line, column in
-        expect(message) == "pattern color space is not supported"
+        expect(message) == "unsupported color space model"
         #if canImport(AppKit)
         expect(metadata["color"]?.hasPrefix("Pattern color: "), metadata["color"]) == true
         #else
         expect(metadata["color"]?.hasPrefix("<UIDynamicPatternColor"), metadata["color"]) == true
         #endif
+        // "<CGColorSpace 0x6000014264c0> (kCGColorSpacePattern)"
+        expect(metadata["colorSpace"]?.hasPrefix("<CGColorSpace ")) == true
+        expect(metadata["colorSpace"]?.hasSuffix(" (kCGColorSpacePattern)")) == true
+        expect(metadata["colorSpaceModel"]) == "CGColorSpaceModel(rawValue: 6)"
       }
 
-      let invalidColor = Color(patternImage: Image.imageWithColor(.red))
-      expect(invalidColor.perceivedBrightness()) == 0
+      let patternedColor = Color(patternImage: Image.imageWithColor(.red))
+      expect(patternedColor.perceivedBrightness()) == 0
 
       ChouTi.Assert.resetTestAssertionFailureHandler()
     }
@@ -104,5 +137,12 @@ class Color_PerceivedBrightnessTests: XCTestCase {
     expect(black.isDark()) == true
     expect(darkGray.isDark()) == true
     expect(lightGray.isDark()) == false
+  }
+}
+
+private extension CGColor {
+
+  func asColor() -> Color? {
+    return Color(cgColor: self)
   }
 }

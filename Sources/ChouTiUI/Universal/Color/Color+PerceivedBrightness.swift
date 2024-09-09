@@ -48,33 +48,43 @@ public extension Color {
     /// https://gist.github.com/delputnam/2d80e7b4bd9363fd221d131e4cfdbd8f
     /// https://www.w3.org/WAI/ER/WD-AERT/#color-contrast
 
-    guard !isPatterned else {
-      ChouTi.assertFailure("pattern color space is not supported", metadata: [
-        "color": "\(self)",
-      ])
-      return 0
-    }
-
     guard let colorSpace = cgColor.colorSpace else {
-      ChouTi.assertFailure("failed to get color space", metadata: [
-        "color": "\(self)",
-      ])
+      ChouTi.assertFailure("failed to get color space", metadata: ["color": "\(self)"])
       return 0
     }
 
-    if colorSpace.model == .rgb {
-      guard let components = cgColor.components, components.count > 2 else {
-        ChouTi.assertFailure("components is < 3", metadata: [
+    let calculateRGBColorBrightness: (CGColor) -> CGFloat = { cgColor in
+      guard let components = cgColor.components, components.count >= 3 else {
+        ChouTi.assertFailure("color components is less than 3", metadata: ["color": "\(self)"])
+        return 0
+      }
+      if components.contains(where: \.isNaN) {
+        ChouTi.assertFailure("color components contains NaN", metadata: [
           "color": "\(self)",
         ])
         return 0
       }
-      let brightness = ((components[0] * 299) + (components[1] * 587) + (components[2] * 114)) / 1000
-      return brightness
-    } else {
+      return ((components[0] * 299) + (components[1] * 587) + (components[2] * 114)) / 1000
+    }
+
+    switch colorSpace.model {
+    case .rgb:
+      return calculateRGBColorBrightness(cgColor)
+    case .monochrome:
       var white: CGFloat = 0.0
       getWhite(&white, alpha: nil)
       return white
+    default:
+      if let rgbColor = cgColor.usingColorSpace(CGColorSpaceCreateDeviceRGB()) {
+        return calculateRGBColorBrightness(rgbColor)
+      } else {
+        ChouTi.assertFailure("unsupported color space model", metadata: [
+          "color": "\(self)",
+          "colorSpace": "\(colorSpace)",
+          "colorSpaceModel": "\(colorSpace.model)",
+        ])
+        return 0
+      }
     }
   }
 
