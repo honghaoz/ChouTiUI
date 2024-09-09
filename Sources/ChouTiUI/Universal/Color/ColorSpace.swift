@@ -1,8 +1,8 @@
 //
-//  NSRectCornerTests.swift
+//  ColorSpace.swift
 //  ChouTiUI
 //
-//  Created by Honghao Zhang on 3/27/22.
+//  Created by Honghao Zhang on 7/5/23.
 //  Copyright © 2020 Honghao Zhang.
 //
 //  MIT License
@@ -28,23 +28,14 @@
 //  IN THE SOFTWARE.
 //
 
-#if canImport(AppKit)
+import Foundation
 
-import AppKit
+/// A practical color space.
+public enum ColorSpace {
 
-import ChouTiTest
+  /// The standard Red Green Blue (sRGB) color space.
+  case sRGB
 
-import ChouTiUI
-
-class NSRectCornerTests: XCTestCase {
-
-  func testInit() {
-    expect(NSRectCorner.topLeft.rawValue) == 1
-    expect(NSRectCorner.topRight.rawValue) == 2
-    expect(NSRectCorner.bottomLeft.rawValue) == 4
-    expect(NSRectCorner.bottomRight.rawValue) == 8
-    expect(NSRectCorner.allCorners.rawValue) == 15
-  }
+  /// The Display P3 color space, created by Apple.
+  case displayP3
 }
-
-#endif

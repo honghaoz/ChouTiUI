@@ -1,8 +1,8 @@
 //
-//  NSRectCornerTests.swift
+//  NSColor+Extensions.swift
 //  ChouTiUI
 //
-//  Created by Honghao Zhang on 3/27/22.
+//  Created by Honghao Zhang on 12/23/22.
 //  Copyright © 2020 Honghao Zhang.
 //
 //  MIT License
@@ -29,21 +29,53 @@
 //
 
 #if canImport(AppKit)
-
 import AppKit
 
-import ChouTiTest
+public extension NSColor {
 
-import ChouTiUI
+  /// Check if the color space is RGB (red-green-blue) color-space model.
+  @inlinable
+  @inline(__always)
+  var isRGB: Bool {
+    /// ⚠️ accessing `colorSpace` for other types like `catalog` and `pattern` will raise exception
+    guard type == .componentBased else {
+      return false
+    }
+    return colorSpace.colorSpaceModel == .rgb
+  }
 
-class NSRectCornerTests: XCTestCase {
+  /// Check if the color space is grayscale (black-white) color-space model.
+  @inlinable
+  @inline(__always)
+  var isGray: Bool {
+    guard type == .componentBased else {
+      return false
+    }
+    return colorSpace.colorSpaceModel == .gray
+  }
+}
 
-  func testInit() {
-    expect(NSRectCorner.topLeft.rawValue) == 1
-    expect(NSRectCorner.topRight.rawValue) == 2
-    expect(NSRectCorner.bottomLeft.rawValue) == 4
-    expect(NSRectCorner.bottomRight.rawValue) == 8
-    expect(NSRectCorner.allCorners.rawValue) == 15
+public extension NSColorSpace.Model {
+
+  /// Check if the color space model is RGB (red-green-blue) color-space model.
+  @inlinable
+  @inline(__always)
+  var isRGB: Bool {
+    self == .rgb
+  }
+
+  /// Check if the color space model is grayscale (black-white) color-space model.
+  @inlinable
+  @inline(__always)
+  var isGray: Bool {
+    self == .gray
+  }
+
+  /// Check if the color space model is a pattern color space, which is a repeated image that creates a tiled pattern.
+  @inlinable
+  @inline(__always)
+  var isPatterned: Bool {
+    self == .patterned
   }
 }
 

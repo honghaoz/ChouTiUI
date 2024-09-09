@@ -1,8 +1,8 @@
 //
-//  NSRectCornerTests.swift
+//  CGColorSpace+Extensions.swift
 //  ChouTiUI
 //
-//  Created by Honghao Zhang on 3/27/22.
+//  Created by Honghao Zhang on 7/5/23.
 //  Copyright © 2020 Honghao Zhang.
 //
 //  MIT License
@@ -28,23 +28,25 @@
 //  IN THE SOFTWARE.
 //
 
-#if canImport(AppKit)
+import CoreGraphics
 
-import AppKit
+public extension CGColorSpace {
 
-import ChouTiTest
+  /// Make a standard Red Green Blue (sRGB) color space.
+  static func sRGB() -> CGColorSpace {
+    // swiftlint:disable:next force_unwrapping
+    CGColorSpace(name: CGColorSpace.sRGB)!
+  }
 
-import ChouTiUI
+  /// Make an extended sRGB color space.
+  static func extendedSRGB() -> CGColorSpace {
+    // swiftlint:disable:next force_unwrapping
+    CGColorSpace(name: CGColorSpace.extendedSRGB)!
+  }
 
-class NSRectCornerTests: XCTestCase {
-
-  func testInit() {
-    expect(NSRectCorner.topLeft.rawValue) == 1
-    expect(NSRectCorner.topRight.rawValue) == 2
-    expect(NSRectCorner.bottomLeft.rawValue) == 4
-    expect(NSRectCorner.bottomRight.rawValue) == 8
-    expect(NSRectCorner.allCorners.rawValue) == 15
+  /// Make a Display P3 color space.
+  static func displayP3() -> CGColorSpace {
+    // swiftlint:disable:next force_unwrapping
+    CGColorSpace(name: CGColorSpace.displayP3)!
   }
 }
-
-#endif

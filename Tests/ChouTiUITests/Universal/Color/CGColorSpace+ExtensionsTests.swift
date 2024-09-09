@@ -1,8 +1,8 @@
 //
-//  NSRectCornerTests.swift
+//  CGColorSpace+ExtensionsTests.swift
 //  ChouTiUI
 //
-//  Created by Honghao Zhang on 3/27/22.
+//  Created by Honghao Zhang on 9/8/24.
 //  Copyright © 2020 Honghao Zhang.
 //
 //  MIT License
@@ -28,23 +28,26 @@
 //  IN THE SOFTWARE.
 //
 
-#if canImport(AppKit)
-
-import AppKit
+import CoreGraphics
 
 import ChouTiTest
 
 import ChouTiUI
 
-class NSRectCornerTests: XCTestCase {
+class CGColorSpace_ExtensionsTests: XCTestCase {
 
-  func testInit() {
-    expect(NSRectCorner.topLeft.rawValue) == 1
-    expect(NSRectCorner.topRight.rawValue) == 2
-    expect(NSRectCorner.bottomLeft.rawValue) == 4
-    expect(NSRectCorner.bottomRight.rawValue) == 8
-    expect(NSRectCorner.allCorners.rawValue) == 15
+  func test_sRGB() {
+    let colorSpace = CGColorSpace.sRGB()
+    expect(colorSpace) == CGColorSpace(name: CGColorSpace.sRGB)
+  }
+
+  func test_extendedSRGB() {
+    let colorSpace = CGColorSpace.extendedSRGB()
+    expect(colorSpace) == CGColorSpace(name: CGColorSpace.extendedSRGB)
+  }
+
+  func test_displayP3() {
+    let colorSpace = CGColorSpace.displayP3()
+    expect(colorSpace) == CGColorSpace(name: CGColorSpace.displayP3)
   }
 }
-
-#endif

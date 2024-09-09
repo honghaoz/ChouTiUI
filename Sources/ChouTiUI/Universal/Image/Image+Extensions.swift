@@ -1,8 +1,8 @@
 //
-//  NSRectCornerTests.swift
+//  Image+Extensions.swift
 //  ChouTiUI
 //
-//  Created by Honghao Zhang on 3/27/22.
+//  Created by Honghao Zhang on 10/18/20.
 //  Copyright © 2020 Honghao Zhang.
 //
 //  MIT License
@@ -29,22 +29,45 @@
 //
 
 #if canImport(AppKit)
-
 import AppKit
+#endif
 
-import ChouTiTest
+#if canImport(UIKit)
+import UIKit
+#endif
 
-import ChouTiUI
+public extension Image {
 
-class NSRectCornerTests: XCTestCase {
+  /// Create a rectangle image filled with the color specified.
+  ///
+  /// - Parameters:
+  ///   - fillColor: The fill color.
+  ///   - size: The image size. Default value is 1x1.
+  /// - Returns: A new image.
+  static func imageWithColor(_ fillColor: Color, size: CGSize = CGSize(width: 1.0, height: 1.0)) -> Image {
+    // TODO: considering unifying this method with the initializer above.
 
-  func testInit() {
-    expect(NSRectCorner.topLeft.rawValue) == 1
-    expect(NSRectCorner.topRight.rawValue) == 2
-    expect(NSRectCorner.bottomLeft.rawValue) == 4
-    expect(NSRectCorner.bottomRight.rawValue) == 8
-    expect(NSRectCorner.allCorners.rawValue) == 15
+    #if canImport(AppKit)
+    NSGraphicsContext.renderImage(size: size) { context in
+      let rect = CGRect(origin: CGPoint.zero, size: size)
+
+      context.setFillColor(fillColor.cgColor)
+      context.fill(rect)
+    }
+    #else
+    UIGraphicsBeginImageContextWithOptions(size, false, 0)
+    // swiftlint:disable:next force_unwrapping
+    let context = UIGraphicsGetCurrentContext()!
+    let rect = CGRect(origin: CGPoint.zero, size: size)
+
+    context.setFillColor(fillColor.cgColor)
+    context.fill(rect)
+
+    let image = UIGraphicsGetImageFromCurrentImageContext()
+    UIGraphicsEndImageContext()
+
+    // swiftlint:disable:next force_unwrapping
+    return image!
+    #endif
   }
 }
-
-#endif

@@ -1,8 +1,8 @@
 //
-//  NSRectCornerTests.swift
+//  CGColor+ExtensionsTests.swift
 //  ChouTiUI
 //
-//  Created by Honghao Zhang on 3/27/22.
+//  Created by Honghao Zhang on 2/26/22.
 //  Copyright © 2020 Honghao Zhang.
 //
 //  MIT License
@@ -29,22 +29,41 @@
 //
 
 #if canImport(AppKit)
-
 import AppKit
+#endif
+
+#if canImport(UIKit)
+import UIKit
+#endif
+
+import CoreGraphics
 
 import ChouTiTest
 
 import ChouTiUI
 
-class NSRectCornerTests: XCTestCase {
+class CGColor_ExtensionsTests: XCTestCase {
 
-  func testInit() {
-    expect(NSRectCorner.topLeft.rawValue) == 1
-    expect(NSRectCorner.topRight.rawValue) == 2
-    expect(NSRectCorner.bottomLeft.rawValue) == 4
-    expect(NSRectCorner.bottomRight.rawValue) == 8
-    expect(NSRectCorner.allCorners.rawValue) == 15
+  func test_color() throws {
+    #if canImport(AppKit)
+    let color = try CGColor.rgba(red: 1, green: 0, blue: 0, alpha: 1, colorSpace: .sRGB()).unwrap().color
+    expect(color) == NSColor.red
+    #endif
+
+    #if canImport(UIKit)
+    let color = try CGColor.rgba(red: 1, green: 0, blue: 0, alpha: 1, colorSpace: .extendedSRGB()).unwrap().color
+    expect(color) == UIColor.red
+    #endif
+  }
+
+  func test_rgba() throws {
+    let color = try CGColor.rgba(red: 1, green: 0, blue: 0, alpha: 1, colorSpace: .extendedSRGB()).unwrap()
+    expect(color) == CGColor(colorSpace: .extendedSRGB(), components: [1, 0, 0, 1])
+  }
+
+  func test_usingColorSpace() throws {
+    let color = try CGColor.rgba(red: 1, green: 0, blue: 0, alpha: 1, colorSpace: .extendedSRGB()).unwrap()
+    let convertedColor = color.usingColorSpace(.sRGB())
+    expect(convertedColor) == CGColor(colorSpace: .sRGB(), components: [1, 0, 0, 1])
   }
 }
-
-#endif

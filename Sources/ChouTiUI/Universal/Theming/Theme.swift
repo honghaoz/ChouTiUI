@@ -1,8 +1,8 @@
 //
-//  NSRectCornerTests.swift
+//  Theme.swift
 //  ChouTiUI
 //
-//  Created by Honghao Zhang on 3/27/22.
+//  Created by Honghao Zhang on 8/29/21.
 //  Copyright © 2020 Honghao Zhang.
 //
 //  MIT License
@@ -28,23 +28,29 @@
 //  IN THE SOFTWARE.
 //
 
-#if canImport(AppKit)
+import Foundation
 
-import AppKit
+/// A type that represents a theme.
+public enum Theme: Hashable {
 
-import ChouTiTest
+  /// The light theme.
+  case light
 
-import ChouTiUI
+  /// The dark theme.
+  case dark
 
-class NSRectCornerTests: XCTestCase {
-
-  func testInit() {
-    expect(NSRectCorner.topLeft.rawValue) == 1
-    expect(NSRectCorner.topRight.rawValue) == 2
-    expect(NSRectCorner.bottomLeft.rawValue) == 4
-    expect(NSRectCorner.bottomRight.rawValue) == 8
-    expect(NSRectCorner.allCorners.rawValue) == 15
+  /// Whether the theme is light.
+  public var isLight: Bool {
+    switch self {
+    case .light:
+      return true
+    case .dark:
+      return false
+    }
   }
-}
 
-#endif
+  /// Whether the theme is dark.
+  @inlinable
+  @inline(__always)
+  public var isDark: Bool { !isLight }
+}

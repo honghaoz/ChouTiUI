@@ -1,8 +1,8 @@
 //
-//  NSRectCornerTests.swift
+//  ThemeTests.swift
 //  ChouTiUI
 //
-//  Created by Honghao Zhang on 3/27/22.
+//  Created by Honghao Zhang on 8/29/21.
 //  Copyright © 2020 Honghao Zhang.
 //
 //  MIT License
@@ -28,23 +28,33 @@
 //  IN THE SOFTWARE.
 //
 
-#if canImport(AppKit)
-
-import AppKit
-
 import ChouTiTest
 
 import ChouTiUI
 
-class NSRectCornerTests: XCTestCase {
+final class ThemeTests: XCTestCase {
 
-  func testInit() {
-    expect(NSRectCorner.topLeft.rawValue) == 1
-    expect(NSRectCorner.topRight.rawValue) == 2
-    expect(NSRectCorner.bottomLeft.rawValue) == 4
-    expect(NSRectCorner.bottomRight.rawValue) == 8
-    expect(NSRectCorner.allCorners.rawValue) == 15
+  func test_isLight() {
+    do {
+      let theme = Theme.light
+      expect(theme.isLight) == true
+    }
+
+    do {
+      let theme = Theme.dark
+      expect(theme.isLight) == false
+    }
+  }
+
+  func test_isDark() {
+    do {
+      let theme = Theme.light
+      expect(theme.isDark) == false
+    }
+
+    do {
+      let theme = Theme.dark
+      expect(theme.isDark) == true
+    }
   }
 }
-
-#endif

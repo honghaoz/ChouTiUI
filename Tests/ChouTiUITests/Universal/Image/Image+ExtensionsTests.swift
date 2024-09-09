@@ -1,8 +1,8 @@
 //
-//  NSRectCornerTests.swift
+//  Image+ExtensionsTests.swift
 //  ChouTiUI
 //
-//  Created by Honghao Zhang on 3/27/22.
+//  Created by Honghao Zhang on 10/18/20.
 //  Copyright © 2020 Honghao Zhang.
 //
 //  MIT License
@@ -29,22 +29,32 @@
 //
 
 #if canImport(AppKit)
-
 import AppKit
+#endif
+
+#if canImport(UIKit)
+import UIKit
+#endif
 
 import ChouTiTest
 
 import ChouTiUI
 
-class NSRectCornerTests: XCTestCase {
+class ImageExtensionsTests: XCTestCase {
 
-  func testInit() {
-    expect(NSRectCorner.topLeft.rawValue) == 1
-    expect(NSRectCorner.topRight.rawValue) == 2
-    expect(NSRectCorner.bottomLeft.rawValue) == 4
-    expect(NSRectCorner.bottomRight.rawValue) == 8
-    expect(NSRectCorner.allCorners.rawValue) == 15
+  func testImageWithColor() {
+    // default size
+    do {
+      let image = Image.imageWithColor(.red)
+      expect(image.size) == CGSize(width: 1, height: 1)
+    }
+
+    // custom size
+    do {
+      let image = Image.imageWithColor(.red, size: CGSize(width: 100, height: 100))
+      expect(image.size) == CGSize(width: 100, height: 100)
+    }
+
+    // TODO: test color of the image when Image.colorAt is added
   }
 }
-
-#endif

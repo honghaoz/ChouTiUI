@@ -1,8 +1,8 @@
 //
-//  NSRectCornerTests.swift
+//  RGBATests.swift
 //  ChouTiUI
 //
-//  Created by Honghao Zhang on 3/27/22.
+//  Created by Honghao Zhang on 9/7/24.
 //  Copyright © 2020 Honghao Zhang.
 //
 //  MIT License
@@ -28,23 +28,52 @@
 //  IN THE SOFTWARE.
 //
 
-#if canImport(AppKit)
-
-import AppKit
-
 import ChouTiTest
 
+import ChouTi
 import ChouTiUI
 
-class NSRectCornerTests: XCTestCase {
+class RGBATests: XCTestCase {
 
-  func testInit() {
-    expect(NSRectCorner.topLeft.rawValue) == 1
-    expect(NSRectCorner.topRight.rawValue) == 2
-    expect(NSRectCorner.bottomLeft.rawValue) == 4
-    expect(NSRectCorner.bottomRight.rawValue) == 8
-    expect(NSRectCorner.allCorners.rawValue) == 15
+  func test_init() {
+    do {
+      let rgba = RGBA(red: 1, green: 1, blue: 1, alpha: 1)
+      expect(rgba.red) == 1
+      expect(rgba.green) == 1
+      expect(rgba.blue) == 1
+      expect(rgba.alpha) == 1
+    }
+
+    do {
+      let rgba = RGBA(1, 1, 1, 1)
+      expect(rgba.red) == 1
+      expect(rgba.green) == 1
+      expect(rgba.blue) == 1
+      expect(rgba.alpha) == 1
+    }
+  }
+
+  func test_init_with_invalid_alpha() {
+    Assert.setTestAssertionFailureHandler { message, metadata, file, line, column in
+      expect(message) == "alpha must be between 0 and 1"
+      expect(metadata["alpha"]) == "2.0"
+    }
+
+    let rgba = RGBA(red: 1, green: 1, blue: 1, alpha: 2)
+    expect(rgba.red) == 1
+    expect(rgba.green) == 1
+    expect(rgba.blue) == 1
+    expect(rgba.alpha) == 1
+
+    Assert.resetTestAssertionFailureHandler()
+  }
+
+  func test_unwrap() {
+    let rgba = RGBA(red: 1, green: 1, blue: 1, alpha: 1)
+    let (r, g, b, a) = rgba.unwrap()
+    expect(r) == 1
+    expect(g) == 1
+    expect(b) == 1
+    expect(a) == 1
   }
 }
-
-#endif
