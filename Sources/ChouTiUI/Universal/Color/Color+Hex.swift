@@ -68,23 +68,22 @@ public extension Color {
 
     let hex = hex.removingCharacters(in: Color.colorHexCharacterSet.inverted)
 
-    var hexValue: UInt64 = 0
-    guard Scanner(string: hex).scanHexInt64(&hexValue) else {
+    guard let hexValue = UInt32(hex, radix: 16) else {
       return nil
     }
 
-    let r, g, b, a: UInt64
+    let r, g, b, a: UInt32
     switch hex.count {
     case 6:
-      r = (hexValue & 0xFF0000) >> 16
-      g = (hexValue & 0x00FF00) >> 8
-      b = (hexValue & 0x0000FF)
-      a = 255
+      r = (hexValue >> 16) & 0xFF
+      g = (hexValue >> 8) & 0xFF
+      b = hexValue & 0xFF
+      a = 0xFF
     case 8:
-      r = (hexValue & 0xFF000000) >> 24
-      g = (hexValue & 0x00FF0000) >> 16
-      b = (hexValue & 0x0000FF00) >> 8
-      a = hexValue & 0x000000FF
+      r = (hexValue >> 24) & 0xFF
+      g = (hexValue >> 16) & 0xFF
+      b = (hexValue >> 8) & 0xFF
+      a = hexValue & 0xFF
     default:
       debugPrint("Bad hex string (\(hex)), hex string should be in format of #FF0000 (RGB) or #FF000088 (RGBA)")
       return nil
