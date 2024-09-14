@@ -38,14 +38,14 @@ class CGPath_TransformTests: XCTestCase {
 
   // MARK: - Resizing
 
-  func test_resizing_scaleToFill() {
+  func test_resizing_fill() {
     let rect = CGRect(x: 10, y: 20, width: 100, height: 50)
     let path = CGPath(rect: rect, transform: nil)
 
     let newSize = CGSize(width: 200, height: 150)
 
     // resize
-    let resizedPath = path.resizing(to: newSize, mode: .scaleToFill)
+    let resizedPath = path.resizing(to: newSize, mode: .fill)
 
     let newBounds = resizedPath.boundingBox
     expect(
@@ -148,7 +148,7 @@ class CGPath_TransformTests: XCTestCase {
 
   // MARK: - Resized
 
-  func test_resized_scaleToFill() {
+  func test_resized_fill() {
     // +------------------------+
     // |                        |
     // | +-------------+        |
@@ -186,7 +186,7 @@ class CGPath_TransformTests: XCTestCase {
     // old: |--20--|--50--|--130--|
     // new: |--10--|--25--|--65--|
 
-    let resizedPath = path.resized(from: oldSize, to: newSize, mode: .scaleToFill)
+    let resizedPath = path.resized(from: oldSize, to: newSize, mode: .fill)
 
     let newBounds = resizedPath.boundingBox
     expect(
@@ -263,7 +263,7 @@ class CGPath_TransformTests: XCTestCase {
 
     expect(path.resized(from: oldSize, to: newSize, mode: .aspectFit)) == path
     expect(path.resized(from: oldSize, to: newSize, mode: .aspectFill)) == path
-    expect(path.resized(from: oldSize, to: newSize, mode: .scaleToFill)) == path
+    expect(path.resized(from: oldSize, to: newSize, mode: .fill)) == path
 
     Assert.resetTestAssertionFailureHandler()
   }

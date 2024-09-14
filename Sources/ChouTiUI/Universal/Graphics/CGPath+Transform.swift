@@ -44,8 +44,8 @@ public extension CGPath {
     /// Fill the new size with the path, preserving aspect ratio and potentially cropping the path.
     case aspectFill
 
-    /// Scales the path to fill the new size, potentially altering its aspect ratio.
-    case scaleToFill
+    /// Stretch the path to fill the new size, potentially altering its aspect ratio.
+    case fill
   }
 
   /// Resize the path to a new canvas size.
@@ -75,7 +75,7 @@ public extension CGPath {
       return resizedAspect(from: fromCanvasSize, to: toCanvasSize, isFit: true)
     case .aspectFill:
       return resizedAspect(from: fromCanvasSize, to: toCanvasSize, isFit: false)
-    case .scaleToFill:
+    case .fill:
       return resizedScaleToFill(from: fromCanvasSize, to: toCanvasSize)
     }
   }
