@@ -184,3 +184,6 @@ public extension CGPath {
     return translatedPath
   }
 }
+
+// Cubic Bezier Path:
+// https://cubic-bezier.com/#.25,.1,.25,1

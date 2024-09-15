@@ -138,6 +138,152 @@ final class CGPath_ExtensionsTests: XCTestCase {
     }
   }
 
+  // MARK: - Subpaths
+
+  func test_subpaths_empty() {
+    // empty path
+    do {
+      let path = CGMutablePath()
+      expect(path.subpaths()) == []
+    }
+  }
+
+  func test_subpaths_single() {
+    // move to point
+    do {
+      let path = CGMutablePath()
+      path.move(to: CGPoint(0, 0))
+      let subpaths = path.subpaths()
+      expect(subpaths.count) == 1
+      expect(subpaths) == [path]
+    }
+
+    // add line to point
+    do {
+      let path = CGMutablePath()
+      path.addLine(to: CGPoint(100, 0))
+      let subpaths = path.subpaths()
+      expect(subpaths.count) == 0
+    }
+
+    // add quad curve to point
+    do {
+      let path = CGMutablePath()
+      path.addQuadCurve(to: CGPoint(100, 0), control: CGPoint(50, 0))
+      let subpaths = path.subpaths()
+      expect(subpaths.count) == 0
+    }
+
+    // add curve to point
+    do {
+      let path = CGMutablePath()
+      path.addCurve(to: CGPoint(100, 0), control1: CGPoint(50, 0), control2: CGPoint(75, 0))
+      let subpaths = path.subpaths()
+      expect(subpaths.count) == 0
+    }
+
+    // close subpath
+    do {
+      let path = CGMutablePath()
+      path.closeSubpath()
+      let subpaths = path.subpaths()
+      expect(subpaths.count) == 0
+    }
+
+    // move to point, add line
+    do {
+      let path = CGMutablePath()
+      path.move(to: CGPoint(0, 0))
+      path.addLine(to: CGPoint(100, 0))
+
+      let subpaths = path.subpaths()
+      expect(subpaths.count) == 1
+      expect(subpaths) == [path]
+    }
+
+    // move to point, add line, add quad curve
+    do {
+      let path = CGMutablePath()
+      path.move(to: CGPoint(0, 0))
+      path.addLine(to: CGPoint(100, 0))
+      path.addQuadCurve(to: CGPoint(100, 100), control: CGPoint(50, 0))
+
+      let subpaths = path.subpaths()
+      expect(subpaths.count) == 1
+      expect(subpaths) == [path]
+    }
+
+    // move to point, add line, add quad curve, add curve, close subpath
+    do {
+      let path = CGMutablePath()
+      path.move(to: CGPoint(0, 0))
+      path.addLine(to: CGPoint(100, 0))
+      path.addQuadCurve(to: CGPoint(100, 100), control: CGPoint(50, 0))
+      path.addCurve(to: CGPoint(100, 100), control1: CGPoint(50, 0), control2: CGPoint(75, 0))
+      path.closeSubpath()
+
+      let subpaths = path.subpaths()
+      expect(subpaths.count) == 1
+      expect(subpaths) == [path]
+    }
+  }
+
+  func test_subpaths_two() throws {
+    // move to point, add line, add quad curve, move to point, add line
+    do {
+      let path = CGMutablePath()
+      path.move(to: CGPoint(0, 0))
+      path.addLine(to: CGPoint(100, 0))
+      path.addQuadCurve(to: CGPoint(100, 100), control: CGPoint(50, 0))
+
+      path.move(to: CGPoint(0, 0))
+      path.addLine(to: CGPoint(100, 0))
+
+      let subpaths = path.subpaths()
+      expect(subpaths.count) == 2
+      let firstSubpath = try subpaths[safe: 0].unwrap()
+      expect(firstSubpath.pathElements()) == [
+        .moveToPoint(CGPoint(0, 0)),
+        .addLineToPoint(CGPoint(100, 0)),
+        .addQuadCurveToPoint(CGPoint(50, 0), CGPoint(100, 100)),
+      ]
+      let secondSubpath = try subpaths[safe: 1].unwrap()
+      expect(secondSubpath.pathElements()) == [
+        .moveToPoint(CGPoint(0, 0)),
+        .addLineToPoint(CGPoint(100, 0)),
+      ]
+    }
+
+    // move to point, add line, add quad curve, close subpath, move to point, add line, close subpath
+    do {
+      let path = CGMutablePath()
+      path.move(to: CGPoint(0, 0))
+      path.addLine(to: CGPoint(100, 0))
+      path.addQuadCurve(to: CGPoint(100, 100), control: CGPoint(50, 0))
+      path.closeSubpath()
+
+      path.move(to: CGPoint(0, 0))
+      path.addLine(to: CGPoint(100, 0))
+      path.closeSubpath()
+
+      let subpaths = path.subpaths()
+      expect(subpaths.count) == 2
+      let firstSubpath = try subpaths[safe: 0].unwrap()
+      expect(firstSubpath.pathElements()) == [
+        .moveToPoint(CGPoint(0, 0)),
+        .addLineToPoint(CGPoint(100, 0)),
+        .addQuadCurveToPoint(CGPoint(50, 0), CGPoint(100, 100)),
+        .closeSubpath,
+      ]
+      let secondSubpath = try subpaths[safe: 1].unwrap()
+      expect(secondSubpath.pathElements()) == [
+        .moveToPoint(CGPoint(0, 0)),
+        .addLineToPoint(CGPoint(100, 0)),
+        .closeSubpath,
+      ]
+    }
+  }
+
   // MARK: - Miscellaneous
 
   func test_asBezierPath() {

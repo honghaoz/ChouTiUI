@@ -101,6 +101,58 @@ public extension CGPath {
     return elements
   }
 
+  /// Get the subpaths of the path.
+  ///
+  /// The subpaths are the individual disconnected paths that make up the original path.
+  ///
+  /// - Returns: The subpaths.
+  func subpaths() -> [CGPath] {
+    guard isEmpty == false else {
+      return []
+    }
+
+    var subpaths: [CGPath] = []
+    var currentPath: CGMutablePath?
+
+    applyWithBlock { elementPointer in
+      let element = elementPointer.pointee
+
+      switch element.type {
+      case .moveToPoint:
+        if let currentPath {
+          subpaths.append(currentPath)
+        }
+        currentPath = CGMutablePath()
+        currentPath?.move(to: element.points[0])
+
+      case .addLineToPoint:
+        currentPath?.addLine(to: element.points[0])
+
+      case .addQuadCurveToPoint:
+        currentPath?.addQuadCurve(to: element.points[1], control: element.points[0])
+
+      case .addCurveToPoint:
+        currentPath?.addCurve(to: element.points[2], control1: element.points[0], control2: element.points[1])
+
+      case .closeSubpath:
+        currentPath?.closeSubpath()
+        if let currentPath {
+          subpaths.append(currentPath)
+        }
+        currentPath = nil
+
+      @unknown default:
+        fatalError("Unknown path element type encountered.") // swiftlint:disable:this fatal_error
+      }
+    }
+
+    if let currentPath {
+      subpaths.append(currentPath)
+    }
+
+    return subpaths
+  }
+
   // MARK: - Miscellaneous
 
   /// Create a `BezierPath` from the `CGPath`.
