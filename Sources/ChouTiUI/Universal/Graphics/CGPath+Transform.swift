@@ -172,6 +172,15 @@ public extension CGPath {
     return transformedPath
   }
 
+  /// Creates an new immutable copy of the path transformed by a transformation matrix.
+  ///
+  /// - Parameters:
+  ///   - affineTransformBuilder: A builder that constructs an affine transform. The transforms will be concatenated in the order they are provided.
+  /// - Returns: A new, immutable transformed path.
+  func transform(@CGAffineTransformBuilder affineTransformBuilder: () -> [CGAffineTransform]) -> CGPath {
+    transform(affineTransformBuilder().concatenated())
+  }
+
   // MARK: - Translate
 
   /// Creates an new immutable copy of the path translated by a certain offset.

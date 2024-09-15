@@ -289,6 +289,19 @@ class CGPath_TransformTests: XCTestCase {
     expect(transformedPath) == CGPath(ellipseIn: CGRect(x: 20, y: 40, width: 200, height: 100), transform: nil)
   }
 
+  func test_transform_builder() {
+    let rect = CGRect(x: 10, y: 20, width: 100, height: 50)
+    let path = CGPath(rect: rect, transform: nil)
+
+    let transformedPath = path.transform {
+      CGAffineTransform.translation(-10, -20)
+      CGAffineTransform.scale(2, 2)
+      CGAffineTransform.translation(20, 40)
+      CGAffineTransform.scale(2, 2)
+    }
+    expect(transformedPath) == CGPath(rect: CGRect(x: 40, y: 80, width: 400, height: 200), transform: nil)
+  }
+
   // MARK: - Translate
 
   func test_translate_point() {
