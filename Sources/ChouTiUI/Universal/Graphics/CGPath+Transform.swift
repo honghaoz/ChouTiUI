@@ -156,32 +156,43 @@ public extension CGPath {
     return resizedPath
   }
 
+  // MARK: - Transform
+
+  /// Creates an new immutable copy of the path transformed by a transformation matrix.
+  ///
+  /// - Parameters:
+  ///   - transform: The transform to apply to the path.
+  /// - Returns: A new, immutable transformed path.
+  func transform(_ transform: CGAffineTransform) -> CGPath {
+    var transform = transform
+    guard let transformedPath = copy(using: &transform) else {
+      ChouTi.assertFailure("Failed to transform the path", metadata: ["path": "\(self)", "transform": "\(transform)"])
+      return self
+    }
+    return transformedPath
+  }
+
   // MARK: - Translate
 
-  /// Translate the path.
+  /// Creates an new immutable copy of the path translated by a certain offset.
   ///
   /// - Parameters:
   ///   - point: The point represents the offset to translate the path by.
-  /// - Returns: A translated path.
+  /// - Returns: A new, immutable translated path.
   @inlinable
   @inline(__always)
   func translate(_ point: CGPoint) -> CGPath {
     translate(dx: point.x, dy: point.y)
   }
 
-  /// Translate the path by a certain offset.
+  /// Creates an new immutable copy of the path translated by a certain offset.
   ///
   /// - Parameters:
   ///   - dx: The x-coordinate offset.
   ///   - dy: The y-coordinate offset.
-  /// - Returns: A translated path.
+  /// - Returns: A new, immutable translated path.
   func translate(dx: CGFloat = 0, dy: CGFloat = 0) -> CGPath {
-    var transform = CGAffineTransform.translation(x: dx, y: dy)
-    guard let translatedPath = copy(using: &transform) else {
-      ChouTi.assertFailure("Fail to translate the path", metadata: ["path": "\(self)", "dx": "\(dx)", "dy": "\(dy)"])
-      return self
-    }
-    return translatedPath
+    transform(CGAffineTransform.translation(x: dx, y: dy))
   }
 }
 

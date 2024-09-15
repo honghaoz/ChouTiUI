@@ -268,6 +268,27 @@ class CGPath_TransformTests: XCTestCase {
     Assert.resetTestAssertionFailureHandler()
   }
 
+  // MARK: - Transform
+
+  func test_transform_identity() {
+    let rect = CGRect(x: 10, y: 20, width: 100, height: 50)
+    let path = CGPath(rect: rect, transform: nil)
+
+    let transformedPath = path.transform(CGAffineTransform.identity)
+    expect(transformedPath) == path
+  }
+
+  func test_transform_scale() {
+    let rect = CGRect(x: 10, y: 20, width: 100, height: 50)
+    let path = CGPath(ellipseIn: rect, transform: nil)
+
+    var scale = CGAffineTransform.scale(2, 2)
+    let transformedPath = path.transform(scale)
+    expect(transformedPath) == CGPath(ellipseIn: rect, transform: &scale)
+    print(transformedPath.boundingBoxOfPath)
+    expect(transformedPath) == CGPath(ellipseIn: CGRect(x: 20, y: 40, width: 200, height: 100), transform: nil)
+  }
+
   // MARK: - Translate
 
   func test_translate_point() {
@@ -318,8 +339,8 @@ class CGPath_TransformTests: XCTestCase {
     let dy: CGFloat = .nan
 
     Assert.setTestAssertionFailureHandler { message, metadata, file, line, column in
-      expect(message) == "Fail to translate the path"
-      expect(metadata) == ["path": "\(path)", "dx": "\(dx)", "dy": "\(dy)"]
+      expect(message) == "Failed to transform the path"
+      expect(metadata) == ["path": "\(path)", "transform": "\(CGAffineTransform.translation(dx, dy))"]
     }
 
     let translatedPath = path.translate(dx: dx, dy: dy)
