@@ -1,5 +1,5 @@
 //
-//  CGFloat+UI.swift
+//  BinaryFloatingPoint+UI.swift
 //  ChouTiUI
 //
 //  Created by Honghao Zhang on 10/18/21.
@@ -40,9 +40,11 @@ import CoreGraphics
 
 import ChouTi
 
-public extension CGFloat {
+public extension BinaryFloatingPoint {
 
   /// The pixel size based on the main screen scale.
+  @inlinable
+  @inline(__always)
   static var pixel: CGFloat {
     1 / Screen.mainScreenScale
   }
@@ -53,12 +55,16 @@ public extension CGFloat {
   /// ```
   /// frame.isApproximatelyEqual(to: hostView.frame, absoluteTolerance: .pixelTolerance)
   /// ```
+  @inlinable
+  @inline(__always)
   static var pixelTolerance: CGFloat {
     pixel + 1e-12
   }
 
   /// The point size.
-  static let point: CGFloat = 1
+  @inlinable
+  @inline(__always)
+  static var point: CGFloat { 1 }
 
   /// The half point size based on the main screen scale.
   static var halfPoint: CGFloat {
