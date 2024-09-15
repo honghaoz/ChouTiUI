@@ -90,16 +90,16 @@ superfluous_disable_command:
 custom_rules:
   fatal_error:
     name: "Fatal Error"
-    message: "The fatalError can cause crashes. Avoid using it if possible."
+    message: "fatalError can cause crashes. Avoid using it if possible."
     included: ".*.swift"
-    regex: "\bfatalError\b"
+    regex: "fatalError"
     match_kinds:
       - identifier
     severity: error
 
   unowned_variable:
     name: "Unowned Variable"
-    message: "The `unowned` keyword can cause crashes if not used properly. Use `weak` if possible."
+    message: "unowned variables can cause crashes if not used properly. Use `weak` if possible."
     included: ".*.swift"
     regex: "unowned "
     match_kinds:
@@ -108,7 +108,7 @@ custom_rules:
     severity: warning
 
   assert_in_tests:
-    name: "No Assertions in Tests"
+    name: "Assertion in Tests"
     message: "assert and assertionFailure can cause crashes in tests. Use XCTAssert instead."
     included: ".*Tests.swift"
     regex: ' assert\(|assertionFailure\('
