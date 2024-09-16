@@ -211,7 +211,7 @@ class NSBezierPath_RoundedRectTests: XCTestCase {
     #endif
 
     #if canImport(UIKit)
-    expect(path.cgPath.pathElements()) == [
+    expectPathElementsEqual(path.cgPath.pathElements(), [
       .moveToPoint(CGPoint(x: 64.20393, y: 0.0)),
       .addLineToPoint(CGPoint(x: 95.79607, y: 0.0)),
       .addCurveToPoint(CGPoint(x: 106.51285961907355, y: 0.0), CGPoint(x: 117.51716029684988, y: 0.0), CGPoint(x: 129.3628178584504, y: 3.745569392350802)),
@@ -234,7 +234,7 @@ class NSBezierPath_RoundedRectTests: XCTestCase {
       .addCurveToPoint(CGPoint(x: -2.220446049250313e-16, y: 27.925203343417664), CGPoint(x: 12.242890169974531, y: 10.440544150405907), CGPoint(x: 30.637182141549633, y: 3.745569392350797)),
       .addCurveToPoint(CGPoint(x: 42.48283970315011, y: 0.0), CGPoint(x: 53.48714038092645, y: 0.0), CGPoint(x: 75.49574173647913, y: 0.0)),
       .addLineToPoint(CGPoint(x: 64.20393, y: 0.0)),
-    ]
+    ])
     #endif
   }
 
@@ -277,7 +277,7 @@ class NSBezierPath_RoundedRectTests: XCTestCase {
     #endif
 
     #if canImport(UIKit)
-    expect(path.cgPath.pathElements()) == [
+    expectPathElementsEqual(path.cgPath.pathElements(), [
       .moveToPoint(CGPoint(x: 80.0, y: 0.0)),
       .addLineToPoint(CGPoint(x: 80.0, y: 0.0)),
       .addCurveToPoint(CGPoint(x: 110.0, y: 0.0), CGPoint(x: 110.0, y: 0.0), CGPoint(x: 110.0, y: 0.0)),
@@ -300,7 +300,7 @@ class NSBezierPath_RoundedRectTests: XCTestCase {
       .addCurveToPoint(CGPoint(x: -3.3817687553023337e-15, y: 22.38576251000001), CGPoint(x: 22.385762509999996, y: 3.3817687553023337e-15), CGPoint(x: 49.99999999999999, y: 0.0)),
       .addCurveToPoint(CGPoint(x: 50.0, y: 0.0), CGPoint(x: 50.0, y: 0.0), CGPoint(x: 50.0, y: 0.0)),
       .addLineToPoint(CGPoint(x: 80.0, y: 0.0)),
-    ]
+    ])
     #endif
   }
 
@@ -415,7 +415,7 @@ class NSBezierPath_RoundedRectTests: XCTestCase {
     #endif
 
     #if canImport(UIKit)
-    expect(path.cgPath.pathElements()) == [
+    expectPathElementsEqual(path.cgPath.pathElements(), [
       .moveToPoint(CGPoint(x: 30.0, y: 0.0)),
       .addLineToPoint(CGPoint(x: 30.0, y: 0.0)),
       .addCurveToPoint(CGPoint(x: 30.0, y: 0.0), CGPoint(x: 30.0, y: 0.0), CGPoint(x: 30.0, y: 0.0)),
@@ -438,7 +438,7 @@ class NSBezierPath_RoundedRectTests: XCTestCase {
       .addCurveToPoint(CGPoint(x: 6.264326490243543, y: 7.34573410198472), CGPoint(x: 16.75512200605059, y: 1.2212453270876722e-15), CGPoint(x: 28.499999999999996, y: -8.881784197001252e-16)),
       .addCurveToPoint(CGPoint(x: 30.0, y: 0.0), CGPoint(x: 30.0, y: 0.0), CGPoint(x: 30.0, y: 0.0)),
       .addLineToPoint(CGPoint(x: 30.0, y: 0.0)),
-    ]
+    ])
     #endif
   }
 
@@ -481,7 +481,7 @@ class NSBezierPath_RoundedRectTests: XCTestCase {
     #endif
 
     #if canImport(UIKit)
-    expect(path.cgPath.pathElements()) == [
+    expectPathElementsEqual(path.cgPath.pathElements(), [
       .moveToPoint(CGPoint(x: 30.0, y: 0.0)),
       .addLineToPoint(CGPoint(x: 30.0, y: 0.0)),
       .addCurveToPoint(CGPoint(x: 30.0, y: 0.0), CGPoint(x: 30.0, y: 0.0), CGPoint(x: 30.0, y: 0.0)),
@@ -504,7 +504,7 @@ class NSBezierPath_RoundedRectTests: XCTestCase {
       .addCurveToPoint(CGPoint(x: -2.0290612531814004e-15, y: 13.431457506000005), CGPoint(x: 13.431457505999997, y: 2.0290612531814004e-15), CGPoint(x: 29.999999999999996, y: 0.0)),
       .addCurveToPoint(CGPoint(x: 30.0, y: 0.0), CGPoint(x: 30.0, y: 0.0), CGPoint(x: 30.0, y: 0.0)),
       .addLineToPoint(CGPoint(x: 30.0, y: 0.0)),
-    ]
+    ])
     #endif
   }
 
