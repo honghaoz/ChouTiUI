@@ -52,6 +52,12 @@ public extension NSBezierPath {
 
   /// Creates and returns a new Bézier path object with a rounded rectangular path.
   ///
+  /// The BezierPath can generate different shapes depending on the `cornerRadius` value relative to the width and height of the rect.
+  /// It's recommended to ensure the `cornerRadius` is smaller than the width and height divided by `BezierPath.shapeBreakRatio`. For other cases,
+  /// use `SuperEllipse` or `Capsule` shape instead.
+  ///
+  /// See `BezierPath.shapeBreakRatio` for more details.
+  ///
   /// - Parameters:
   ///   - rect: The rectangle that defines the basic shape of the path.
   ///   - cornerRadius: The radius of each corner oval. A value of 0 results in a rectangle without rounded corners.
@@ -142,6 +148,12 @@ public extension NSBezierPath {
   /// Creates and returns a new Bézier path object with a rectangular path rounded at the specified corners.
   ///
   /// - Note: `cornerRadii` only supports equal width and height. i.e. the corner should be a circle.
+  ///
+  /// The BezierPath can generate different shapes depending on the `cornerRadius` value relative to the width and height of the rect.
+  /// It's recommended to ensure the `cornerRadius` is smaller than the width and height divided by `BezierPath.shapeBreakRatio`. For other cases,
+  /// use `SuperEllipse` or `Capsule` shape instead.
+  ///
+  /// See `BezierPath.shapeBreakRatio` for more details.
   ///
   /// - Parameters:
   ///   - rect: The rectangle that defines the basic shape of the path.
