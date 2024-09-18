@@ -29,6 +29,7 @@
 //
 
 import CoreGraphics
+
 import ChouTi
 
 /// A type represent the color's hue, saturation, brightness, alpha component values.

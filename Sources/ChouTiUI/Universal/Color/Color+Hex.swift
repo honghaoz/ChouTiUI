@@ -36,9 +36,10 @@ import AppKit
 import UIKit
 #endif
 
-import ChouTi
 import CoreGraphics
 import CoreImage
+
+import ChouTi
 
 public extension Color {
 

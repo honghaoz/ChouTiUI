@@ -31,6 +31,7 @@
 #if canImport(AppKit)
 
 import AppKit
+
 import ChouTi
 
 // TODO: make this class internal once `BaseNSTextField` is moved to ChouTiUI.

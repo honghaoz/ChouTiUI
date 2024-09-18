@@ -28,9 +28,6 @@
 //  IN THE SOFTWARE.
 //
 
-import ChouTi
-import CoreGraphics
-
 #if canImport(AppKit)
 import AppKit
 #endif
@@ -38,6 +35,10 @@ import AppKit
 #if canImport(UIKit)
 import UIKit
 #endif
+
+import CoreGraphics
+
+import ChouTi
 
 public extension Color {
 

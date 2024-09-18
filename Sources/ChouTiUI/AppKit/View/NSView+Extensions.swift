@@ -31,6 +31,7 @@
 #if canImport(AppKit)
 
 import AppKit
+
 import ChouTi
 
 public extension NSView {

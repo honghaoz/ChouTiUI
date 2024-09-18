@@ -28,8 +28,9 @@
 //  IN THE SOFTWARE.
 //
 
-import ChouTi
 import Foundation
+
+import ChouTi
 
 /// A type that represents a color that changes based on the theme.
 public struct ThemedColor: Hashable {

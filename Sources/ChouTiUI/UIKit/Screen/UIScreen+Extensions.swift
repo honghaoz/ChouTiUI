@@ -30,8 +30,9 @@
 
 #if canImport(UIKit) && !os(visionOS)
 
-import ChouTi
 import UIKit
+
+import ChouTi
 
 // MARK: - Display Corner Radius
 
