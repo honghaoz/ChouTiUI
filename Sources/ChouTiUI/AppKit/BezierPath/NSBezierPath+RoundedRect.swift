@@ -278,63 +278,39 @@ public extension NSBezierPath {
       "roundingCorners": "\(roundingCorners)",
     ])
 
-    // ChouTi.assertFailure("using shape 2 is not recommended, rounding corner is not supported")
-    // CGFloat limitedCornerRadius = MIN(cornerRadius, MIN(rect.size.width, rect.size.height) / 2 / 1.52866483);
     let limit: CGFloat = min(rect.width, rect.height) / 2 / 1.52866483
-    let radius: CGFloat = min(cornerRadius, limit)
+    let limitedRadius: CGFloat = min(cornerRadius, limit)
 
-    //    [self moveToPoint: TOP_LEFT(2.00593972, 0.00000000)];
-    move(to: topLeft(rect, 2.00593972, 0, radius))
-    //    [self addLineToPoint: CGPointMake(rect.origin.x + rect.size.width - 1.52866483 * cornerRadius, rect.origin.y + 0 * cornerRadius)];
+    move(to: topLeft(rect, 2.00593972, 0, limitedRadius))
+
     addLine(to: topRight(rect, 1.52866483, 0, cornerRadius))
+    addCurve(to: topRight(rect, 0.99544263, 0.10012127, limitedRadius), controlPoint1: topRight(rect, 1.63527834, 0, limitedRadius), controlPoint2: topRight(rect, 1.29884040, 0, limitedRadius))
+    addLine(to: topRight(rect, 0.93667978, 0.11451437, limitedRadius))
+    addCurve(to: topRight(rect, 0.00000051, 1.45223188, limitedRadius), controlPoint1: topRight(rect, 0.37430558, 0.31920183, limitedRadius), controlPoint2: topRight(rect, 0.00000051, 0.85376567, limitedRadius))
 
-    //    [self addCurveToPoint: TOP_RIGHT(0.99544263, 0.10012127) controlPoint1: TOP_RIGHT(1.63527834, 0.00000000) controlPoint2: TOP_RIGHT(1.29884040, 0.00000000)];
-    addCurve(to: topRight(rect, 0.99544263, 0.10012127, radius), controlPoint1: topRight(rect, 1.63527834, 0, radius), controlPoint2: topRight(rect, 1.29884040, 0, radius))
-    //    [self addLineToPoint: TOP_RIGHT(0.93667978, 0.11451437)];
-    addLine(to: topRight(rect, 0.93667978, 0.11451437, radius))
-    //    [self addCurveToPoint: TOP_RIGHT(0.00000051, 1.45223188) controlPoint1: TOP_RIGHT(0.37430558, 0.31920183) controlPoint2: TOP_RIGHT(0.00000051, 0.85376567)];
-    addCurve(to: topRight(rect, 0.00000051, 1.45223188, radius), controlPoint1: topRight(rect, 0.37430558, 0.31920183, radius), controlPoint2: topRight(rect, 0.00000051, 0.85376567, radius))
-    //    [self addCurveToPoint: RIGHT(0.00000000) controlPoint1: RIGHT(0.00000000) controlPoint2: RIGHT(0.00000000)];
     addCurve(to: rect.rightCenter, controlPoint1: rect.rightCenter, controlPoint2: rect.rightCenter)
-    //    [self addLineToPoint: RIGHT(0.00000000)];
     addLine(to: rect.rightCenter)
-    //    [self addCurveToPoint: RIGHT(0.00000000) controlPoint1: RIGHT(0.00000000) controlPoint2: RIGHT(0.00000000)];
     addCurve(to: rect.rightCenter, controlPoint1: rect.rightCenter, controlPoint2: rect.rightCenter)
 
-    //    [self addLineToPoint: BOTTOM_RIGHT(0.00000000, 1.45223165)];
-    addLine(to: bottomRight(rect, 0, 1.45223165, radius))
-    //    [self addCurveToPoint: BOTTOM_RIGHT(0.93667978, 0.11451438) controlPoint1: BOTTOM_RIGHT(0.00000000, 0.85376561) controlPoint2: BOTTOM_RIGHT(0.37430558, 0.31920174)];
-    addCurve(to: bottomRight(rect, 0.93667978, 0.11451438, radius), controlPoint1: bottomRight(rect, 0, 0.85376561, radius), controlPoint2: bottomRight(rect, 0.37430558, 0.31920174, radius))
-    //    [self addCurveToPoint: BOTTOM_RIGHT(2.30815363, 0.00000000) controlPoint1: BOTTOM_RIGHT(1.29884040, 0.00000000) controlPoint2: BOTTOM_RIGHT(1.63527834, 0.00000000)];
-    addCurve(to: bottomRight(rect, 2.30815363, 0, radius), controlPoint1: bottomRight(rect, 1.29884040, 0, radius), controlPoint2: bottomRight(rect, 1.63527834, 0, radius))
+    addLine(to: bottomRight(rect, 0, 1.45223165, limitedRadius))
+    addCurve(to: bottomRight(rect, 0.93667978, 0.11451438, limitedRadius), controlPoint1: bottomRight(rect, 0, 0.85376561, limitedRadius), controlPoint2: bottomRight(rect, 0.37430558, 0.31920174, limitedRadius))
+    addCurve(to: bottomRight(rect, 2.30815363, 0, limitedRadius), controlPoint1: bottomRight(rect, 1.29884040, 0, limitedRadius), controlPoint2: bottomRight(rect, 1.63527834, 0, limitedRadius))
 
-    //    [self addLineToPoint: CGPointMake(rect.origin.x + 1.52866483 * cornerRadius, rect.origin.y + rect.size.height - 0 * limitedCornerRadius)];
     addLine(to: bottomLeft(rect, 1.52866483, 0, cornerRadius))
+    addCurve(to: bottomLeft(rect, 0.99544257, 0.10012124, limitedRadius), controlPoint1: bottomLeft(rect, 1.63527822, 0, limitedRadius), controlPoint2: bottomLeft(rect, 1.29884040, 0, limitedRadius))
+    addLine(to: bottomLeft(rect, 0.93667972, 0.11451438, limitedRadius))
+    addCurve(to: bottomLeft(rect, -0.00000001, 1.45223176, limitedRadius), controlPoint1: bottomLeft(rect, 0.37430549, 0.31920174, limitedRadius), controlPoint2: bottomLeft(rect, -0.00000007, 0.85376561, limitedRadius))
 
-    //    [self addCurveToPoint: BOTTOM_LEFT(0.99544257, 0.10012124) controlPoint1: BOTTOM_LEFT(1.63527822, 0.00000000) controlPoint2: BOTTOM_LEFT(1.29884040, 0.00000000)];
-    addCurve(to: bottomLeft(rect, 0.99544257, 0.10012124, radius), controlPoint1: bottomLeft(rect, 1.63527822, 0, radius), controlPoint2: bottomLeft(rect, 1.29884040, 0, radius))
-    //    [self addLineToPoint: BOTTOM_LEFT(0.93667972, 0.11451438)];
-    addLine(to: bottomLeft(rect, 0.93667972, 0.11451438, radius))
-    //    [self addCurveToPoint: BOTTOM_LEFT(-0.00000001, 1.45223176) controlPoint1: BOTTOM_LEFT(0.37430549, 0.31920174) controlPoint2: BOTTOM_LEFT(-0.00000007, 0.85376561)];
-    addCurve(to: bottomLeft(rect, -0.00000001, 1.45223176, radius), controlPoint1: bottomLeft(rect, 0.37430549, 0.31920174, radius), controlPoint2: bottomLeft(rect, -0.00000007, 0.85376561, radius))
-    //    [self addCurveToPoint: LEFT(0.00000000) controlPoint1: LEFT(0.00000000) controlPoint2: LEFT(0.00000000)];
     addCurve(to: rect.leftCenter, controlPoint1: rect.leftCenter, controlPoint2: rect.leftCenter)
-    //    [self addLineToPoint: LEFT(0.00000000)];
     addLine(to: rect.leftCenter)
-    //    [self addCurveToPoint: LEFT(0.00000000) controlPoint1: LEFT(0.00000000) controlPoint2: LEFT(0.00000000)];
     addCurve(to: rect.leftCenter, controlPoint1: rect.leftCenter, controlPoint2: rect.leftCenter)
 
-    //    [self addLineToPoint: TOP_LEFT(-0.00000001, 1.45223153)];
-    addLine(to: topLeft(rect, -0.00000001, 1.45223153, radius))
-    //    [self addCurveToPoint: TOP_LEFT(0.93667978, 0.11451436) controlPoint1: TOP_LEFT(0.00000004, 0.85376537) controlPoint2: TOP_LEFT(0.37430561, 0.31920177)];
-    addCurve(to: topLeft(rect, 0.93667978, 0.11451436, radius), controlPoint1: topLeft(rect, 0.00000004, 0.85376537, radius), controlPoint2: topLeft(rect, 0.37430561, 0.31920177, radius))
-    //    [self addCurveToPoint: TOP_LEFT(2.30815363, 0.00000000) controlPoint1: TOP_LEFT(1.29884040, 0.00000000) controlPoint2: TOP_LEFT(1.63527822, 0.00000000)];
-    addCurve(to: topLeft(rect, 2.30815363, 0, radius), controlPoint1: topLeft(rect, 1.29884040, 0, radius), controlPoint2: topLeft(rect, 1.63527822, 0, radius))
-    //    [self addLineToPoint: CGPointMake(rect.origin.x + 1.52866483 * cornerRadius, rect.origin.y + 0 * cornerRadius)];
+    addLine(to: topLeft(rect, -0.00000001, 1.45223153, limitedRadius))
+    addCurve(to: topLeft(rect, 0.93667978, 0.11451436, limitedRadius), controlPoint1: topLeft(rect, 0.00000004, 0.85376537, limitedRadius), controlPoint2: topLeft(rect, 0.37430561, 0.31920177, limitedRadius))
+    addCurve(to: topLeft(rect, 2.30815363, 0, limitedRadius), controlPoint1: topLeft(rect, 1.29884040, 0, limitedRadius), controlPoint2: topLeft(rect, 1.63527822, 0, limitedRadius))
     addLine(to: topLeft(rect, 1.52866483, 0, cornerRadius))
-    //    [self addLineToPoint: TOP_LEFT(2.00593972, 0.00000000)];
-    addLine(to: topLeft(rect, 2.00593972, 0, radius))
-    //    [self closePath];
+    addLine(to: topLeft(rect, 2.00593972, 0, limitedRadius))
+
     close()
   }
 
