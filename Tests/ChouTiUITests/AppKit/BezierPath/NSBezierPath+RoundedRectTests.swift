@@ -125,26 +125,14 @@ class NSBezierPath_RoundedRectTests: XCTestCase {
 
     // printPathElements(path.cgPath.pathElements())
 
-    var expectedElements: [CGPathElement.Element] = [
+    let expectedElements: [CGPathElement.Element] = [
       .moveToPoint(CGPoint(0, 0)),
       .addLineToPoint(CGPoint(160, 0)),
       .addLineToPoint(CGPoint(160, 100)),
       .addLineToPoint(CGPoint(0, 100)),
-    ]
-
-    #if canImport(AppKit)
-    expectedElements += [
-      .closeSubpath,
-    ]
-    #endif
-
-    #if canImport(UIKit)
-    expectedElements += [
       .addLineToPoint(CGPoint(0, 0)),
       .addLineToPoint(CGPoint(0, 0)),
     ]
-    #endif
-
     expect(path.cgPath.pathElements()) == expectedElements
   }
 

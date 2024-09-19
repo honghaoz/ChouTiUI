@@ -138,11 +138,7 @@ public extension NSBezierPath {
      moveto (12.2293, 0)
      ```
      */
-    if cornerRadius == 0 {
-      self.init(rect: rect)
-    } else {
-      self.init(roundedRect: rect, byRoundingCorners: .all, cornerRadii: CGSize(cornerRadius, cornerRadius))
-    }
+    self.init(roundedRect: rect, byRoundingCorners: .all, cornerRadii: CGSize(cornerRadius, cornerRadius))
   }
 
   /// Creates and returns a new Bézier path object with a rectangular path rounded at the specified corners.
@@ -213,14 +209,14 @@ public extension NSBezierPath {
     let limitedRadius: CGFloat = min(cornerRadius, limit)
 
     // top left
-    if roundingCorners.contains(.topLeft) {
+    if roundingCorners.contains(.topLeft), limitedRadius != 0 {
       move(to: topLeft(rect, 1.528665, 0, limitedRadius))
     } else {
       move(to: rect.topLeft)
     }
 
     // top right
-    if roundingCorners.contains(.topRight) {
+    if roundingCorners.contains(.topRight), limitedRadius != 0 {
       addLine(to: topRight(rect, 1.5286649999999995, 0, limitedRadius))
       addCurve(to: topRight(rect, 0.6314937928309916, 0.07491138784701601, limitedRadius), controlPoint1: topRight(rect, 1.0884929576185285, 0, limitedRadius), controlPoint2: topRight(rect, 0.8684069440630026, 0, limitedRadius))
       addLine(to: topRight(rect, 0.6314937928309916, 0.07491138784701601, limitedRadius))
@@ -231,7 +227,7 @@ public extension NSBezierPath {
     }
 
     // bottom right
-    if roundingCorners.contains(.bottomRight) {
+    if roundingCorners.contains(.bottomRight), limitedRadius != 0 {
       addLine(to: bottomRight(rect, 0, 1.5286649999999995, limitedRadius))
       addCurve(to: bottomRight(rect, 0.07491138784701548, 0.631493792830993, limitedRadius), controlPoint1: bottomRight(rect, 0, 1.0884929576185285, limitedRadius), controlPoint2: bottomRight(rect, 0, 0.8684069440630026, limitedRadius))
       addLine(to: bottomRight(rect, 0.07491138784701548, 0.631493792830993, limitedRadius))
@@ -242,7 +238,7 @@ public extension NSBezierPath {
     }
 
     // bottom left
-    if roundingCorners.contains(.bottomLeft) {
+    if roundingCorners.contains(.bottomLeft), limitedRadius != 0 {
       addLine(to: bottomLeft(rect, 1.528665, 0, limitedRadius))
       addCurve(to: bottomLeft(rect, 0.6314937928309925, 0.07491138784701548, limitedRadius), controlPoint1: bottomLeft(rect, 1.088492957618529, 0, limitedRadius), controlPoint2: bottomLeft(rect, 0.8684069440630022, 0, limitedRadius))
       addLine(to: bottomLeft(rect, 0.6314937928309925, 0.07491138784701548, limitedRadius))
@@ -253,7 +249,7 @@ public extension NSBezierPath {
     }
 
     // top left
-    if roundingCorners.contains(.topLeft) {
+    if roundingCorners.contains(.topLeft), limitedRadius != 0 {
       addLine(to: topLeft(rect, 0, 1.528665, limitedRadius))
       addCurve(to: topLeft(rect, 0.07491138784701583, 0.6314937928309925, limitedRadius), controlPoint1: topLeft(rect, 0, 1.088492957618529, limitedRadius), controlPoint2: topLeft(rect, 0, 0.8684069440630022, limitedRadius))
       addLine(to: topLeft(rect, 0.07491138784701583, 0.6314937928309925, limitedRadius))
@@ -261,6 +257,7 @@ public extension NSBezierPath {
       addCurve(to: topLeft(rect, 1.5286649847295823, 0, limitedRadius), controlPoint1: topLeft(rect, 0.8684069440630022, 0, limitedRadius), controlPoint2: topLeft(rect, 1.088492957618529, 0, limitedRadius))
       addLine(to: topLeft(rect, 1.528665, 0, limitedRadius))
     } else {
+      addLine(to: rect.topLeft)
       addLine(to: rect.topLeft)
     }
   }
