@@ -148,6 +148,7 @@ public extension NSBezierPath {
   /// Creates and returns a new Bézier path object with a rectangular path rounded at the specified corners.
   ///
   /// - Note: `cornerRadii` only supports equal width and height. i.e. the corner should be a circle.
+  /// - Note: Rounding corners only works when the radius is smaller than the width and height divided by `BezierPath.shapeBreakRatio`.
   ///
   /// The BezierPath can generate different shapes depending on the `cornerRadius` value relative to the width and height of the rect.
   /// It's recommended to ensure the `cornerRadius` is smaller than the width and height divided by `BezierPath.shapeBreakRatio`. For other cases,
@@ -216,6 +217,7 @@ public extension NSBezierPath {
     // ChouTi.assert(cornerRadius <= limit, "caller should make sure radius is within shape 1 limit")
     let limitedRadius: CGFloat = min(cornerRadius, limit)
 
+    // top left
     if roundingCorners.contains(.topLeft) {
       move(to: topLeft(rect, 1.528665, 0, limitedRadius))
     } else {
@@ -271,6 +273,12 @@ public extension NSBezierPath {
   }
 
   private func addRoundedRect2a(_ rect: CGRect, cornerRadius: CGFloat, roundingCorners: RectCorner) {
+    ChouTi.assert(roundingCorners == .all, "shape 2a only supports all rounding corners", metadata: [
+      "rect": "\(rect)",
+      "cornerRadius": "\(cornerRadius)",
+      "roundingCorners": "\(roundingCorners)",
+    ])
+
     // ChouTi.assertFailure("using shape 2 is not recommended, rounding corner is not supported")
     // CGFloat limitedCornerRadius = MIN(cornerRadius, MIN(rect.size.width, rect.size.height) / 2 / 1.52866483);
     let limit: CGFloat = min(rect.width, rect.height) / 2 / 1.52866483
@@ -332,7 +340,12 @@ public extension NSBezierPath {
   }
 
   private func addRoundedRect2b(_ rect: CGRect, cornerRadius: CGFloat, roundingCorners: RectCorner) {
-    // CGFloat limitedCornerRadius = MIN(cornerRadius, MIN(rect.size.width, rect.size.height) / 2 / 1.52866483);
+    ChouTi.assert(roundingCorners == .all, "shape 2b only supports all rounding corners", metadata: [
+      "rect": "\(rect)",
+      "cornerRadius": "\(cornerRadius)",
+      "roundingCorners": "\(roundingCorners)",
+    ])
+
     let limit: CGFloat = min(rect.width, rect.height) / 2 / 1.52866483
     let radius: CGFloat = min(cornerRadius, limit)
 
@@ -377,6 +390,12 @@ public extension NSBezierPath {
   }
 
   private func addRoundedRect3a(_ rect: CGRect, cornerRadius: CGFloat, roundingCorners: RectCorner) {
+    ChouTi.assert(roundingCorners == .all || roundingCorners == [], "shape 3a only supports all or none rounding corners", metadata: [
+      "rect": "\(rect)",
+      "cornerRadius": "\(cornerRadius)",
+      "roundingCorners": "\(roundingCorners)",
+    ])
+
     // ChouTi.assertFailure("using shape 3 is not recommended, consider using Capsule shape")
     // CGFloat limitedCornerRadius = MIN(cornerRadius, MIN(rect.size.width, rect.size.height) / 2 / 1.52866483);
     let limit: CGFloat = min(rect.width, rect.height) / 2 / 1.52866483
@@ -466,6 +485,12 @@ public extension NSBezierPath {
   }
 
   private func addRoundedRect3b(_ rect: CGRect, cornerRadius: CGFloat, roundingCorners: RectCorner) {
+    ChouTi.assert(roundingCorners == .all || roundingCorners == [], "shape 3b only supports all or none rounding corners", metadata: [
+      "rect": "\(rect)",
+      "cornerRadius": "\(cornerRadius)",
+      "roundingCorners": "\(roundingCorners)",
+    ])
+
     // ChouTi.assertFailure("using shape 3 is not recommended, consider using Capsule shape")
     // CGFloat limitedCornerRadius = MIN(cornerRadius, MIN(rect.size.width, rect.size.height) / 2 / 1.52866483);
     let limit: CGFloat = min(rect.width, rect.height) / 2 / 1.52866483

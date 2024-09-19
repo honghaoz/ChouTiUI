@@ -53,7 +53,7 @@ class NSBezierPath_RoundedRectTests: XCTestCase {
   }
   #endif
 
-  func test_horizontalRect_shape1_cornerRadius0() {
+  func test_horizontalRect_shape1_zeroCornerRadius() {
     let rect = CGRect(x: 0, y: 0, width: 160, height: 100)
     let path = BezierPath(roundedRect: rect, cornerRadius: 0)
 
@@ -77,6 +77,47 @@ class NSBezierPath_RoundedRectTests: XCTestCase {
       .addLineToPoint(CGPoint(0, 0)),
     ]
     #endif
+  }
+
+  func test_horizontalRect_shape1_negativeCornerRadius() {
+    let rect = CGRect(x: 0, y: 0, width: 160, height: 100)
+    let path = BezierPath(roundedRect: rect, cornerRadius: -10)
+
+    printPathElements(path.cgPath.pathElements())
+
+    var expectedElements: [CGPathElement.Element] = [
+      .moveToPoint(CGPoint(x: -15.28665, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 175.28665, y: 0.0)),
+      .addCurveToPoint(CGPoint(x: 170.8849295761853, y: 0.0), CGPoint(x: 168.68406944063003, y: 0.0), CGPoint(x: 166.31493792830992, y: -0.7491138784701601)),
+      .addLineToPoint(CGPoint(x: 166.31493792830992, y: -0.7491138784701601)),
+      .addCurveToPoint(CGPoint(x: 163.72823826625745, y: -1.6905955604436995), CGPoint(x: 161.69059556044368, y: -3.7282382662574722), CGPoint(x: 160.74911387847015, y: -6.314937928309927)),
+      .addCurveToPoint(CGPoint(x: 160.0, y: -8.684069440630022), CGPoint(x: 160.0, y: -10.88492957618529), CGPoint(x: 160.0, y: -15.286649847295823)),
+      .addLineToPoint(CGPoint(x: 160.0, y: 115.28665)),
+      .addCurveToPoint(CGPoint(x: 160.0, y: 110.88492957618529), CGPoint(x: 160.0, y: 108.68406944063003), CGPoint(x: 160.74911387847015, y: 106.31493792830993)),
+      .addLineToPoint(CGPoint(x: 160.74911387847015, y: 106.31493792830993)),
+      .addCurveToPoint(CGPoint(x: 161.69059556044368, y: 103.72823826625748), CGPoint(x: 163.72823826625748, y: 101.6905955604437), CGPoint(x: 166.31493792830992, y: 100.74911387847015)),
+      .addCurveToPoint(CGPoint(x: 168.68406944063003, y: 100.0), CGPoint(x: 170.8849295761853, y: 100.0), CGPoint(x: 175.28664984729582, y: 100.0)),
+      .addLineToPoint(CGPoint(x: -15.28665, y: 100.0)),
+      .addCurveToPoint(CGPoint(x: -10.88492957618529, y: 100.0), CGPoint(x: -8.684069440630022, y: 100.0), CGPoint(x: -6.314937928309925, y: 100.74911387847015)),
+      .addLineToPoint(CGPoint(x: -6.314937928309925, y: 100.74911387847015)),
+      .addCurveToPoint(CGPoint(x: -3.7282382662574705, y: 101.6905955604437), CGPoint(x: -1.690595560443699, y: 103.72823826625746), CGPoint(x: -0.7491138784701601, y: 106.31493792830992)),
+      .addCurveToPoint(CGPoint(x: 0.0, y: 108.68406944063003), CGPoint(x: 0.0, y: 110.88492957618529), CGPoint(x: 0.0, y: 115.28664984729582)),
+      .addLineToPoint(CGPoint(x: 0.0, y: -15.28665)),
+      .addCurveToPoint(CGPoint(x: 0.0, y: -10.88492957618529), CGPoint(x: 0.0, y: -8.684069440630022), CGPoint(x: -0.7491138784701583, y: -6.314937928309925)),
+      .addLineToPoint(CGPoint(x: -0.7491138784701583, y: -6.314937928309925)),
+      .addCurveToPoint(CGPoint(x: -1.6905955604436975, y: -3.728238266257468), CGPoint(x: -3.7282382662574696, y: -1.690595560443697), CGPoint(x: -6.314937928309927, y: -0.7491138784701583)),
+      .addCurveToPoint(CGPoint(x: -8.684069440630022, y: 0.0), CGPoint(x: -10.88492957618529, y: 0.0), CGPoint(x: -15.286649847295823, y: 0.0)),
+      .addLineToPoint(CGPoint(x: -15.28665, y: 0.0)),
+    ]
+
+    #if canImport(AppKit)
+    expectedElements += [
+      .closeSubpath,
+      .moveToPoint(CGPoint(x: -15.28665, y: 0.0)),
+    ]
+    #endif
+
+    expectPathElementsEqual(path.cgPath.pathElements(), expectedElements)
   }
 
   func test_horizontalRect_shape1() {
@@ -298,26 +339,34 @@ class NSBezierPath_RoundedRectTests: XCTestCase {
     // printPathElements(path.cgPath.pathElements())
 
     var expectedElements: [CGPathElement.Element] = [
-      .moveToPoint(CGPoint(x: 30.0, y: 0.0)),
-      .addLineToPoint(CGPoint(x: 30.0, y: 0.0)),
-      .addCurveToPoint(CGPoint(x: 30.0, y: 0.0), CGPoint(x: 30.0, y: 0.0), CGPoint(x: 30.0, y: 0.0)),
-      .addLineToPoint(CGPoint(x: 31.499999999999996, y: -8.881784197001252e-16)),
-      .addCurveToPoint(CGPoint(x: 43.2448779939494, y: -2.9976021664879227e-15), CGPoint(x: 53.73567350975645, y: 7.345734101984717), CGPoint(x: 57.75265836458952, y: 18.38230928492978)),
-      .addCurveToPoint(CGPoint(x: 60.0, y: 25.48970382189007), CGPoint(x: 60.0, y: 32.09228422855587), CGPoint(x: 60.0, y: 45.29744504188747)),
-      .addLineToPoint(CGPoint(x: 60.0, y: 111.08272)),
-      .addCurveToPoint(CGPoint(x: 60.0, y: 127.90771577144413), CGPoint(x: 60.0, y: 134.5102961781099), CGPoint(x: 57.75265836458952, y: 141.6176907150702)),
-      .addLineToPoint(CGPoint(x: 57.75265836458952, y: 141.6176907150702)),
-      .addCurveToPoint(CGPoint(x: 53.73567350975645, y: 152.65426589801527), CGPoint(x: 43.2448779939494, y: 160.0), CGPoint(x: 31.5, y: 160.0)),
+      .moveToPoint(CGPoint(x: 30.0, y: 0.0)), // top center
+      .addLineToPoint(CGPoint(x: 30.0, y: 0.0)), // top center
+      .addCurveToPoint(CGPoint(x: 30.0, y: 0.0), CGPoint(x: 30.0, y: 0.0), CGPoint(x: 30.0, y: 0.0)), // top center
+      .addLineToPoint(CGPoint(x: 31.499999999999996, y: -8.881784197001252e-16)), // top center, slightly right
+
+      .addCurveToPoint(CGPoint(x: 43.2448779939494, y: -2.9976021664879227e-15), CGPoint(x: 53.73567350975645, y: 7.345734101984717), CGPoint(x: 57.75265836458952, y: 18.38230928492978)), // top right, slightly left, down
+      .addCurveToPoint(CGPoint(x: 60.0, y: 25.48970382189007), CGPoint(x: 60.0, y: 32.09228422855587), CGPoint(x: 60.0, y: 45.29744504188747)), // top right, down
+
+      .addLineToPoint(CGPoint(x: 60.0, y: 111.08272)), // bottom right, slight up
+      .addCurveToPoint(CGPoint(x: 60.0, y: 127.90771577144413), CGPoint(x: 60.0, y: 134.5102961781099), CGPoint(x: 57.75265836458952, y: 141.6176907150702)), // bottom right, up
+      .addLineToPoint(CGPoint(x: 57.75265836458952, y: 141.6176907150702)), // bottom right, up
+
+      .addCurveToPoint(CGPoint(x: 53.73567350975645, y: 152.65426589801527), CGPoint(x: 43.2448779939494, y: 160.0), CGPoint(x: 31.5, y: 160.0)), // bottom center
+
       .addCurveToPoint(CGPoint(x: 30.0, y: 160.0), CGPoint(x: 30.0, y: 160.0), CGPoint(x: 30.0, y: 160.0)),
       .addLineToPoint(CGPoint(x: 30.0, y: 160.0)),
       .addCurveToPoint(CGPoint(x: 30.0, y: 160.0), CGPoint(x: 30.0, y: 160.0), CGPoint(x: 30.0, y: 160.0)),
-      .addLineToPoint(CGPoint(x: 28.5, y: 160.0)),
-      .addCurveToPoint(CGPoint(x: 16.7551220060506, y: 160.0), CGPoint(x: 6.2643264902435485, y: 152.65426589801527), CGPoint(x: 2.2473416354104794, y: 141.6176907150702)),
-      .addCurveToPoint(CGPoint(x: 0.0, y: 134.5102961781099), CGPoint(x: 0.0, y: 127.90771577144413), CGPoint(x: 0.0, y: 114.70255495811253)),
-      .addLineToPoint(CGPoint(x: 0.0, y: 48.91728)),
-      .addCurveToPoint(CGPoint(x: 0.0, y: 32.09228422855587), CGPoint(x: 0.0, y: 25.48970382189007), CGPoint(x: 2.247341635410475, y: 18.38230928492978)),
+
+      .addLineToPoint(CGPoint(x: 28.5, y: 160.0)), // bottom center, slightly left
+
+      .addCurveToPoint(CGPoint(x: 16.7551220060506, y: 160.0), CGPoint(x: 6.2643264902435485, y: 152.65426589801527), CGPoint(x: 2.2473416354104794, y: 141.6176907150702)), // bottom left
+      .addCurveToPoint(CGPoint(x: 0.0, y: 134.5102961781099), CGPoint(x: 0.0, y: 127.90771577144413), CGPoint(x: 0.0, y: 114.70255495811253)), // bottom left
+
+      .addLineToPoint(CGPoint(x: 0.0, y: 48.91728)), // left, 1/3
+      .addCurveToPoint(CGPoint(x: 0.0, y: 32.09228422855587), CGPoint(x: 0.0, y: 25.48970382189007), CGPoint(x: 2.247341635410475, y: 18.38230928492978)), // top left
       .addLineToPoint(CGPoint(x: 2.2473416354104763, y: 18.38230928492978)),
-      .addCurveToPoint(CGPoint(x: 6.264326490243543, y: 7.34573410198472), CGPoint(x: 16.75512200605059, y: 1.2212453270876722e-15), CGPoint(x: 28.499999999999996, y: -8.881784197001252e-16)),
+      .addCurveToPoint(CGPoint(x: 6.264326490243543, y: 7.34573410198472), CGPoint(x: 16.75512200605059, y: 1.2212453270876722e-15), CGPoint(x: 28.499999999999996, y: -8.881784197001252e-16)), // top left
+
       .addCurveToPoint(CGPoint(x: 30.0, y: 0.0), CGPoint(x: 30.0, y: 0.0), CGPoint(x: 30.0, y: 0.0)),
       .addLineToPoint(CGPoint(x: 30.0, y: 0.0)),
     ]
@@ -461,9 +510,9 @@ class NSBezierPath_RoundedRectTests: XCTestCase {
   }
   #endif
 
-  // MARK: - Oval Corner Radius
+  // MARK: - Rounding Corners
 
-  func test_horizontalRect_shape1_noRoundingCorners() {
+  func test_horizontalRect_shape1_roundingCorners_none() {
     let rect = CGRect(x: 0, y: 0, width: 160, height: 100)
     let path = BezierPath(roundedRect: rect, byRoundingCorners: [], cornerRadii: CGSize(width: 20, height: 20))
 
@@ -493,37 +542,75 @@ class NSBezierPath_RoundedRectTests: XCTestCase {
     expectPathElementsEqual(path.cgPath.pathElements(), expectedElements)
   }
 
-  // func test_horizontalRect_shape2a_byRoundingCorners() {
-  //   let rect = CGRect(x: 0, y: 0, width: 160, height: 100)
-  //   let path = BezierPath(roundedRect: rect, byRoundingCorners: [], cornerRadii: CGSize(width: 42, height: 42))
-  //
-  //   // printPathElements(path.cgPath.pathElements())
-  //
-  //   var expectedElements: [CGPathElement.Element] = [
-  //     .moveToPoint(CGPoint(x: 0.0, y: 0.0)),
-  //     .addLineToPoint(CGPoint(x: 160.0, y: 0.0)),
-  //     .addLineToPoint(CGPoint(x: 160.0, y: 100.0)),
-  //     .addLineToPoint(CGPoint(x: 0.0, y: 100.0)),
-  //     .addLineToPoint(CGPoint(x: 0.0, y: 0.0)),
-  //   ]
-  //
-  //   #if canImport(AppKit)
-  //   expectedElements += [
-  //     .closeSubpath,
-  //     .moveToPoint(CGPoint(x: 0.0, y: 0.0)),
-  //   ]
-  //   #endif
-  //
-  //   #if canImport(UIKit)
-  //   expectedElements += [
-  //     .addLineToPoint(CGPoint(x: 0.0, y: 0.0)),
-  //   ]
-  //   #endif
-  //
-  //   expectPathElementsEqual(path.cgPath.pathElements(), expectedElements)
-  // }
+  func test_horizontalRect_shape1_roundingCorners_topRight() {
+    let rect = CGRect(x: 0, y: 0, width: 160, height: 100)
+    let path = BezierPath(roundedRect: rect, byRoundingCorners: [.topRight], cornerRadii: CGSize(width: 20, height: 20))
 
-  func test_horizontalRect_shape3b_noRoundingCorners() {
+    printPathElements(path.cgPath.pathElements())
+
+    var expectedElements: [CGPathElement.Element] = [
+      .moveToPoint(CGPoint(x: 0.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 129.4267, y: 0.0)),
+      .addCurveToPoint(CGPoint(x: 138.23014084762943, y: 0.0), CGPoint(x: 142.63186111873995, y: 0.0), CGPoint(x: 147.37012414338017, y: 1.4982277569403202)),
+      .addLineToPoint(CGPoint(x: 147.37012414338017, y: 1.4982277569403195)),
+      .addCurveToPoint(CGPoint(x: 152.54352346748507, y: 3.3811911208874), CGPoint(x: 156.6188088791126, y: 7.4564765325149365), CGPoint(x: 158.5017722430597, y: 12.629875856619853)),
+      .addCurveToPoint(CGPoint(x: 160.0, y: 17.368138881260045), CGPoint(x: 160.0, y: 21.76985915237058), CGPoint(x: 160.0, y: 30.573299694591647)),
+      .addLineToPoint(CGPoint(x: 160.0, y: 100.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 100.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 0.0)),
+    ]
+
+    #if canImport(AppKit)
+    expectedElements += [
+      .closeSubpath,
+      .moveToPoint(CGPoint(x: 0.0, y: 0.0)),
+    ]
+    #endif
+
+    #if canImport(UIKit)
+    expectedElements += [
+      .addLineToPoint(CGPoint(x: 0.0, y: 0.0)),
+    ]
+    #endif
+
+    expectPathElementsEqual(path.cgPath.pathElements(), expectedElements)
+  }
+
+  func test_horizontalRect_shape2a_roundingCorners_none() {
+    let rect = CGRect(x: 0, y: 0, width: 160, height: 100)
+    let roundingCorners: RectCorner = []
+    let cornerRadii = CGSize(width: 42, height: 42)
+
+    Assert.setTestAssertionFailureHandler { message, metadata, file, line, column in
+      expect(message) == "shape 2a only supports all rounding corners"
+      expect(metadata["rect"]) == "\(rect)"
+      expect(metadata["cornerRadius"]) == "\(cornerRadii.width)"
+      expect(metadata["roundingCorners"]) == "\(roundingCorners)"
+    }
+
+    _ = BezierPath(roundedRect: rect, byRoundingCorners: roundingCorners, cornerRadii: cornerRadii)
+
+    Assert.resetTestAssertionFailureHandler()
+  }
+
+  func test_horizontalRect_shape2a_roundingCorners_topRight() {
+    let rect = CGRect(x: 0, y: 0, width: 160, height: 100)
+    let roundingCorners: RectCorner = [.topRight]
+    let cornerRadii = CGSize(width: 42, height: 42)
+
+    Assert.setTestAssertionFailureHandler { message, metadata, file, line, column in
+      expect(message) == "shape 2a only supports all rounding corners"
+      expect(metadata["rect"]) == "\(rect)"
+      expect(metadata["cornerRadius"]) == "\(cornerRadii.width)"
+      expect(metadata["roundingCorners"]) == "\(roundingCorners)"
+    }
+
+    _ = BezierPath(roundedRect: rect, byRoundingCorners: roundingCorners, cornerRadii: cornerRadii)
+
+    Assert.resetTestAssertionFailureHandler()
+  }
+
+  func test_horizontalRect_shape3b_roundingCorners_none() {
     let rect = CGRect(x: 0, y: 0, width: 160, height: 100)
     let path = BezierPath(roundedRect: rect, byRoundingCorners: [], cornerRadii: CGSize(width: 64, height: 64))
 
@@ -553,7 +640,374 @@ class NSBezierPath_RoundedRectTests: XCTestCase {
     expectPathElementsEqual(path.cgPath.pathElements(), expectedElements)
   }
 
-  func test_verticalRect_shape3a_noRoundingCorners() {
+  func test_horizontalRect_shape3b_roundingCorners_topRight() {
+    let rect = CGRect(x: 0, y: 0, width: 160, height: 100)
+    let roundingCorners: RectCorner = [.topRight]
+    let cornerRadii = CGSize(width: 64, height: 64)
+
+    Assert.setTestAssertionFailureHandler { message, metadata, file, line, column in
+      expect(message) == "shape 3b only supports all or none rounding corners"
+      expect(metadata["rect"]) == "\(rect)"
+      expect(metadata["cornerRadius"]) == "\(cornerRadii.width)"
+      expect(metadata["roundingCorners"]) == "\(roundingCorners)"
+    }
+
+    _ = BezierPath(roundedRect: rect, byRoundingCorners: roundingCorners, cornerRadii: cornerRadii)
+
+    Assert.resetTestAssertionFailureHandler()
+  }
+
+  func test_verticalRect_shape2b_roundingCorners_none() {
+    // let rect = CGRect(x: 0, y: 0, width: 60, height: 160)
+    // let path = BezierPath(roundedRect: rect, byRoundingCorners: [.topLeft, .topRight, .bottomRight], cornerRadii: CGSize(width: 40, height: 40))
+
+    // printPathElements(path.cgPath.pathElements())
+
+    // RoundingCorners: []
+    // [
+    //   .moveToPoint(CGPoint(x: 0.0, y: 0.0)),
+    //   .addLineToPoint(CGPoint(x: 60.0, y: 0.0)),
+    //   .addLineToPoint(CGPoint(x: 60.0, y: 160.0)),
+    //   .addLineToPoint(CGPoint(x: 0.0, y: 160.0)),
+    //   .addLineToPoint(CGPoint(x: 0.0, y: 0.0)),
+    //   .addLineToPoint(CGPoint(x: 0.0, y: 0.0)),
+    // ]
+
+    // RoundingCorners: [.topRight]
+    // [
+    //   .moveToPoint(CGPoint(x: 30.0, y: 0.0)),
+    //   .addLineToPoint(CGPoint(x: 30.0, y: 0.0)),
+    //   .addCurveToPoint(CGPoint(x: 30.0, y: 0.0), CGPoint(x: 30.0, y: 0.0), CGPoint(x: 30.0, y: 0.0)),
+    //   .addLineToPoint(CGPoint(x: 31.499999999999996, y: -8.881784197001252e-16)),
+    //   .addCurveToPoint(CGPoint(x: 43.2448779939494, y: -2.9976021664879227e-15), CGPoint(x: 53.73567350975645, y: 7.345734101984717), CGPoint(x: 57.75265836458952, y: 18.38230928492978)),
+    //   .addCurveToPoint(CGPoint(x: 60.0, y: 25.48970382189007), CGPoint(x: 60.0, y: 32.09228422855587), CGPoint(x: 60.0, y: 45.29744504188747)),
+    //   .addLineToPoint(CGPoint(x: 60.0, y: 160.0)),
+    //   .addLineToPoint(CGPoint(x: 0.0, y: 160.0)),
+    //   .addLineToPoint(CGPoint(x: 0.0, y: 0.0)),
+    //   .addCurveToPoint(CGPoint(x: 0.0, y: 0.0), CGPoint(x: 0.0, y: 0.0), CGPoint(x: 0.0, y: 0.0)),
+    //   .addLineToPoint(CGPoint(x: 0.0, y: 0.0)),
+    //   .addCurveToPoint(CGPoint(x: 0.0, y: 0.0), CGPoint(x: 0.0, y: 0.0), CGPoint(x: 0.0, y: 0.0)),
+    //   .addCurveToPoint(CGPoint(x: 0.0, y: 0.0), CGPoint(x: 0.0, y: 0.0), CGPoint(x: 0.0, y: 0.0)),
+    //   .addLineToPoint(CGPoint(x: 30.0, y: 0.0)),
+    // ]
+
+    // RoundingCorners: [.bottomRight]
+    // [
+    //   .moveToPoint(CGPoint(x: 0.0, y: 0.0)),
+    //   .addLineToPoint(CGPoint(x: 60.0, y: 0.0)),
+    //   .addLineToPoint(CGPoint(x: 60.0, y: 98.8534)),
+    //   .addCurveToPoint(CGPoint(x: 60.0, y: 127.90771577144413), CGPoint(x: 60.0, y: 134.5102961781099), CGPoint(x: 57.75265836458952, y: 141.6176907150702)),
+    //   .addLineToPoint(CGPoint(x: 57.75265836458952, y: 141.6176907150702)),
+    //   .addCurveToPoint(CGPoint(x: 53.73567350975645, y: 152.65426589801527), CGPoint(x: 43.2448779939494, y: 160.0), CGPoint(x: 31.5, y: 160.0)),
+    //   .addCurveToPoint(CGPoint(x: 30.0, y: 160.0), CGPoint(x: 30.0, y: 160.0), CGPoint(x: 30.0, y: 160.0)),
+    //   .addLineToPoint(CGPoint(x: 30.0, y: 160.0)),
+    //   .addCurveToPoint(CGPoint(x: 0.0, y: 160.0), CGPoint(x: 0.0, y: 160.0), CGPoint(x: 0.0, y: 160.0)),
+    //   .addLineToPoint(CGPoint(x: 0.0, y: 160.0)),
+    //   .addCurveToPoint(CGPoint(x: 0.0, y: 160.0), CGPoint(x: 0.0, y: 160.0), CGPoint(x: 0.0, y: 160.0)),
+    //   .addCurveToPoint(CGPoint(x: 0.0, y: 160.0), CGPoint(x: 0.0, y: 160.0), CGPoint(x: 0.0, y: 160.0)),
+    //   .addLineToPoint(CGPoint(x: 0.0, y: 0.0)),
+    //   .addLineToPoint(CGPoint(x: 0.0, y: 0.0)),
+    // ]
+
+    // RoundingCorners: [.bottomLeft]
+    // [
+    //   .moveToPoint(CGPoint(x: 0.0, y: 0.0)),
+    //   .addLineToPoint(CGPoint(x: 60.0, y: 0.0)),
+    //   .addLineToPoint(CGPoint(x: 60.0, y: 160.0)),
+    //   .addCurveToPoint(CGPoint(x: 60.0, y: 160.0), CGPoint(x: 60.0, y: 160.0), CGPoint(x: 60.0, y: 160.0)),
+    //   .addLineToPoint(CGPoint(x: 60.0, y: 160.0)),
+    //   .addCurveToPoint(CGPoint(x: 60.0, y: 160.0), CGPoint(x: 60.0, y: 160.0), CGPoint(x: 60.0, y: 160.0)),
+    //   .addCurveToPoint(CGPoint(x: 60.0, y: 160.0), CGPoint(x: 60.0, y: 160.0), CGPoint(x: 60.0, y: 160.0)),
+    //   .addLineToPoint(CGPoint(x: 30.0, y: 160.0)),
+    //   .addCurveToPoint(CGPoint(x: 30.0, y: 160.0), CGPoint(x: 30.0, y: 160.0), CGPoint(x: 30.0, y: 160.0)),
+    //   .addLineToPoint(CGPoint(x: 28.5, y: 160.0)),
+    //   .addCurveToPoint(CGPoint(x: 16.7551220060506, y: 160.0), CGPoint(x: 6.2643264902435485, y: 152.65426589801527), CGPoint(x: 2.2473416354104794, y: 141.6176907150702)),
+    //   .addCurveToPoint(CGPoint(x: 0.0, y: 134.5102961781099), CGPoint(x: 0.0, y: 127.90771577144413), CGPoint(x: 0.0, y: 114.70255495811253)),
+    //   .addLineToPoint(CGPoint(x: 0.0, y: 0.0)),
+    //   .addLineToPoint(CGPoint(x: 0.0, y: 0.0)),
+    // ]
+
+    // RoundingCorners: [.topLeft]
+    // [
+    //   .moveToPoint(CGPoint(x: 30.0, y: 0.0)),
+    //   .addLineToPoint(CGPoint(x: 30.0, y: 0.0)),
+    //   .addCurveToPoint(CGPoint(x: 60.0, y: 0.0), CGPoint(x: 60.0, y: 0.0), CGPoint(x: 60.0, y: 0.0)),
+    //   .addLineToPoint(CGPoint(x: 60.0, y: 0.0)),
+    //   .addCurveToPoint(CGPoint(x: 60.0, y: 0.0), CGPoint(x: 60.0, y: 0.0), CGPoint(x: 60.0, y: 0.0)),
+    //   .addCurveToPoint(CGPoint(x: 60.0, y: 0.0), CGPoint(x: 60.0, y: 0.0), CGPoint(x: 60.0, y: 0.0)),
+    //   .addLineToPoint(CGPoint(x: 60.0, y: 160.0)),
+    //   .addLineToPoint(CGPoint(x: 0.0, y: 160.0)),
+    //   .addLineToPoint(CGPoint(x: 0.0, y: 61.1466)),
+    //   .addCurveToPoint(CGPoint(x: 0.0, y: 32.09228422855587), CGPoint(x: 0.0, y: 25.48970382189007), CGPoint(x: 2.247341635410475, y: 18.38230928492978)),
+    //   .addLineToPoint(CGPoint(x: 2.2473416354104763, y: 18.38230928492978)),
+    //   .addCurveToPoint(CGPoint(x: 6.264326490243543, y: 7.34573410198472), CGPoint(x: 16.75512200605059, y: 1.2212453270876722e-15), CGPoint(x: 28.499999999999996, y: -8.881784197001252e-16)),
+    //   .addCurveToPoint(CGPoint(x: 30.0, y: 0.0), CGPoint(x: 30.0, y: 0.0), CGPoint(x: 30.0, y: 0.0)),
+    //   .addLineToPoint(CGPoint(x: 30.0, y: 0.0)),
+    // ]
+
+    // RoundingCorners: [.topLeft, .topRight]
+    // [
+    //   .moveToPoint(CGPoint(x: 30.0, y: 0.0)),
+    //   .addLineToPoint(CGPoint(x: 30.0, y: 0.0)),
+    //   .addCurveToPoint(CGPoint(x: 30.0, y: 0.0), CGPoint(x: 30.0, y: 0.0), CGPoint(x: 30.0, y: 0.0)),
+    //   .addLineToPoint(CGPoint(x: 31.499999999999996, y: -8.881784197001252e-16)),
+    //   .addCurveToPoint(CGPoint(x: 43.2448779939494, y: -2.9976021664879227e-15), CGPoint(x: 53.73567350975645, y: 7.345734101984717), CGPoint(x: 57.75265836458952, y: 18.38230928492978)),
+    //   .addCurveToPoint(CGPoint(x: 60.0, y: 25.48970382189007), CGPoint(x: 60.0, y: 32.09228422855587), CGPoint(x: 60.0, y: 45.29744504188747)),
+    //   .addLineToPoint(CGPoint(x: 60.0, y: 160.0)),
+    //   .addLineToPoint(CGPoint(x: 0.0, y: 160.0)),
+    //   .addLineToPoint(CGPoint(x: 0.0, y: 61.1466)),
+    //   .addCurveToPoint(CGPoint(x: 0.0, y: 32.09228422855587), CGPoint(x: 0.0, y: 25.48970382189007), CGPoint(x: 2.247341635410475, y: 18.38230928492978)),
+    //   .addLineToPoint(CGPoint(x: 2.2473416354104763, y: 18.38230928492978)),
+    //   .addCurveToPoint(CGPoint(x: 6.264326490243543, y: 7.34573410198472), CGPoint(x: 16.75512200605059, y: 1.2212453270876722e-15), CGPoint(x: 28.499999999999996, y: -8.881784197001252e-16)),
+    //   .addCurveToPoint(CGPoint(x: 30.0, y: 0.0), CGPoint(x: 30.0, y: 0.0), CGPoint(x: 30.0, y: 0.0)),
+    //   .addLineToPoint(CGPoint(x: 30.0, y: 0.0)),
+    // ]
+
+    // RoundingCorners: [.topLeft, .bottomRight]
+    // [
+    //   .moveToPoint(CGPoint(x: 30.0, y: 0.0)),
+    //   .addLineToPoint(CGPoint(x: 30.0, y: 0.0)),
+    //   .addCurveToPoint(CGPoint(x: 60.0, y: 0.0), CGPoint(x: 60.0, y: 0.0), CGPoint(x: 60.0, y: 0.0)),
+    //   .addLineToPoint(CGPoint(x: 60.0, y: 0.0)),
+    //   .addCurveToPoint(CGPoint(x: 60.0, y: 0.0), CGPoint(x: 60.0, y: 0.0), CGPoint(x: 60.0, y: 0.0)),
+    //   .addCurveToPoint(CGPoint(x: 60.0, y: 0.0), CGPoint(x: 60.0, y: 0.0), CGPoint(x: 60.0, y: 0.0)),
+    //   .addLineToPoint(CGPoint(x: 60.0, y: 98.8534)),
+    //   .addCurveToPoint(CGPoint(x: 60.0, y: 127.90771577144413), CGPoint(x: 60.0, y: 134.5102961781099), CGPoint(x: 57.75265836458952, y: 141.6176907150702)),
+    //   .addLineToPoint(CGPoint(x: 57.75265836458952, y: 141.6176907150702)),
+    //   .addCurveToPoint(CGPoint(x: 53.73567350975645, y: 152.65426589801527), CGPoint(x: 43.2448779939494, y: 160.0), CGPoint(x: 31.5, y: 160.0)),
+    //   .addCurveToPoint(CGPoint(x: 30.0, y: 160.0), CGPoint(x: 30.0, y: 160.0), CGPoint(x: 30.0, y: 160.0)),
+    //   .addLineToPoint(CGPoint(x: 30.0, y: 160.0)),
+    //   .addCurveToPoint(CGPoint(x: 0.0, y: 160.0), CGPoint(x: 0.0, y: 160.0), CGPoint(x: 0.0, y: 160.0)),
+    //   .addLineToPoint(CGPoint(x: 0.0, y: 160.0)),
+    //   .addCurveToPoint(CGPoint(x: 0.0, y: 160.0), CGPoint(x: 0.0, y: 160.0), CGPoint(x: 0.0, y: 160.0)),
+    //   .addCurveToPoint(CGPoint(x: 0.0, y: 160.0), CGPoint(x: 0.0, y: 160.0), CGPoint(x: 0.0, y: 160.0)),
+    //   .addLineToPoint(CGPoint(x: 0.0, y: 61.1466)),
+    //   .addCurveToPoint(CGPoint(x: 0.0, y: 32.09228422855587), CGPoint(x: 0.0, y: 25.48970382189007), CGPoint(x: 2.247341635410475, y: 18.38230928492978)),
+    //   .addLineToPoint(CGPoint(x: 2.2473416354104763, y: 18.38230928492978)),
+    //   .addCurveToPoint(CGPoint(x: 6.264326490243543, y: 7.34573410198472), CGPoint(x: 16.75512200605059, y: 1.2212453270876722e-15), CGPoint(x: 28.499999999999996, y: -8.881784197001252e-16)),
+    //   .addCurveToPoint(CGPoint(x: 30.0, y: 0.0), CGPoint(x: 30.0, y: 0.0), CGPoint(x: 30.0, y: 0.0)),
+    //   .addLineToPoint(CGPoint(x: 30.0, y: 0.0)),
+    // ]
+
+    // RoundingCorners: [.topLeft, .bottomLeft]
+    // [
+    //   .moveToPoint(CGPoint(x: 30.0, y: 0.0)),
+    //   .addLineToPoint(CGPoint(x: 30.0, y: 0.0)),
+    //   .addCurveToPoint(CGPoint(x: 60.0, y: 0.0), CGPoint(x: 60.0, y: 0.0), CGPoint(x: 60.0, y: 0.0)),
+    //   .addLineToPoint(CGPoint(x: 60.0, y: 0.0)),
+    //   .addCurveToPoint(CGPoint(x: 60.0, y: 0.0), CGPoint(x: 60.0, y: 0.0), CGPoint(x: 60.0, y: 0.0)),
+    //   .addCurveToPoint(CGPoint(x: 60.0, y: 0.0), CGPoint(x: 60.0, y: 0.0), CGPoint(x: 60.0, y: 0.0)),
+    //   .addLineToPoint(CGPoint(x: 60.0, y: 160.0)),
+    //   .addCurveToPoint(CGPoint(x: 60.0, y: 160.0), CGPoint(x: 60.0, y: 160.0), CGPoint(x: 60.0, y: 160.0)),
+    //   .addLineToPoint(CGPoint(x: 60.0, y: 160.0)),
+    //   .addCurveToPoint(CGPoint(x: 60.0, y: 160.0), CGPoint(x: 60.0, y: 160.0), CGPoint(x: 60.0, y: 160.0)),
+    //   .addCurveToPoint(CGPoint(x: 60.0, y: 160.0), CGPoint(x: 60.0, y: 160.0), CGPoint(x: 60.0, y: 160.0)),
+    //   .addLineToPoint(CGPoint(x: 30.0, y: 160.0)),
+    //   .addCurveToPoint(CGPoint(x: 30.0, y: 160.0), CGPoint(x: 30.0, y: 160.0), CGPoint(x: 30.0, y: 160.0)),
+    //   .addLineToPoint(CGPoint(x: 28.5, y: 160.0)),
+    //   .addCurveToPoint(CGPoint(x: 16.7551220060506, y: 160.0), CGPoint(x: 6.2643264902435485, y: 152.65426589801527), CGPoint(x: 2.2473416354104794, y: 141.6176907150702)),
+    //   .addCurveToPoint(CGPoint(x: 0.0, y: 134.5102961781099), CGPoint(x: 0.0, y: 127.90771577144413), CGPoint(x: 0.0, y: 114.70255495811253)),
+    //   .addLineToPoint(CGPoint(x: 0.0, y: 61.1466)),
+    //   .addCurveToPoint(CGPoint(x: 0.0, y: 32.09228422855587), CGPoint(x: 0.0, y: 25.48970382189007), CGPoint(x: 2.247341635410475, y: 18.38230928492978)),
+    //   .addLineToPoint(CGPoint(x: 2.2473416354104763, y: 18.38230928492978)),
+    //   .addCurveToPoint(CGPoint(x: 6.264326490243543, y: 7.34573410198472), CGPoint(x: 16.75512200605059, y: 1.2212453270876722e-15), CGPoint(x: 28.499999999999996, y: -8.881784197001252e-16)),
+    //   .addCurveToPoint(CGPoint(x: 30.0, y: 0.0), CGPoint(x: 30.0, y: 0.0), CGPoint(x: 30.0, y: 0.0)),
+    //   .addLineToPoint(CGPoint(x: 30.0, y: 0.0)),
+    // ]
+
+    // RoundingCorners: [.topRight, .bottomRight]
+    // [
+    //   .moveToPoint(CGPoint(x: 30.0, y: 0.0)),
+    //   .addLineToPoint(CGPoint(x: 30.0, y: 0.0)),
+    //   .addCurveToPoint(CGPoint(x: 30.0, y: 0.0), CGPoint(x: 30.0, y: 0.0), CGPoint(x: 30.0, y: 0.0)),
+    //   .addLineToPoint(CGPoint(x: 31.499999999999996, y: -8.881784197001252e-16)),
+    //   .addCurveToPoint(CGPoint(x: 43.2448779939494, y: -2.9976021664879227e-15), CGPoint(x: 53.73567350975645, y: 7.345734101984717), CGPoint(x: 57.75265836458952, y: 18.38230928492978)),
+    //   .addCurveToPoint(CGPoint(x: 60.0, y: 25.48970382189007), CGPoint(x: 60.0, y: 32.09228422855587), CGPoint(x: 60.0, y: 45.29744504188747)),
+    //   .addLineToPoint(CGPoint(x: 60.0, y: 98.8534)),
+    //   .addCurveToPoint(CGPoint(x: 60.0, y: 127.90771577144413), CGPoint(x: 60.0, y: 134.5102961781099), CGPoint(x: 57.75265836458952, y: 141.6176907150702)),
+    //   .addLineToPoint(CGPoint(x: 57.75265836458952, y: 141.6176907150702)),
+    //   .addCurveToPoint(CGPoint(x: 53.73567350975645, y: 152.65426589801527), CGPoint(x: 43.2448779939494, y: 160.0), CGPoint(x: 31.5, y: 160.0)),
+    //   .addCurveToPoint(CGPoint(x: 30.0, y: 160.0), CGPoint(x: 30.0, y: 160.0), CGPoint(x: 30.0, y: 160.0)),
+    //   .addLineToPoint(CGPoint(x: 30.0, y: 160.0)),
+    //   .addCurveToPoint(CGPoint(x: 0.0, y: 160.0), CGPoint(x: 0.0, y: 160.0), CGPoint(x: 0.0, y: 160.0)),
+    //   .addLineToPoint(CGPoint(x: 0.0, y: 160.0)),
+    //   .addCurveToPoint(CGPoint(x: 0.0, y: 160.0), CGPoint(x: 0.0, y: 160.0), CGPoint(x: 0.0, y: 160.0)),
+    //   .addCurveToPoint(CGPoint(x: 0.0, y: 160.0), CGPoint(x: 0.0, y: 160.0), CGPoint(x: 0.0, y: 160.0)),
+    //   .addLineToPoint(CGPoint(x: 0.0, y: 0.0)),
+    //   .addCurveToPoint(CGPoint(x: 0.0, y: 0.0), CGPoint(x: 0.0, y: 0.0), CGPoint(x: 0.0, y: 0.0)),
+    //   .addLineToPoint(CGPoint(x: 0.0, y: 0.0)),
+    //   .addCurveToPoint(CGPoint(x: 0.0, y: 0.0), CGPoint(x: 0.0, y: 0.0), CGPoint(x: 0.0, y: 0.0)),
+    //   .addCurveToPoint(CGPoint(x: 0.0, y: 0.0), CGPoint(x: 0.0, y: 0.0), CGPoint(x: 0.0, y: 0.0)),
+    //   .addLineToPoint(CGPoint(x: 30.0, y: 0.0)),
+    // ]
+
+    // RoundingCorners: [.topRight, .bottomLeft]
+    // [
+    //   .moveToPoint(CGPoint(x: 30.0, y: 0.0)),
+    //   .addLineToPoint(CGPoint(x: 30.0, y: 0.0)),
+    //   .addCurveToPoint(CGPoint(x: 30.0, y: 0.0), CGPoint(x: 30.0, y: 0.0), CGPoint(x: 30.0, y: 0.0)),
+    //   .addLineToPoint(CGPoint(x: 31.499999999999996, y: -8.881784197001252e-16)),
+    //   .addCurveToPoint(CGPoint(x: 43.2448779939494, y: -2.9976021664879227e-15), CGPoint(x: 53.73567350975645, y: 7.345734101984717), CGPoint(x: 57.75265836458952, y: 18.38230928492978)),
+    //   .addCurveToPoint(CGPoint(x: 60.0, y: 25.48970382189007), CGPoint(x: 60.0, y: 32.09228422855587), CGPoint(x: 60.0, y: 45.29744504188747)),
+    //   .addLineToPoint(CGPoint(x: 60.0, y: 160.0)),
+    //   .addCurveToPoint(CGPoint(x: 60.0, y: 160.0), CGPoint(x: 60.0, y: 160.0), CGPoint(x: 60.0, y: 160.0)),
+    //   .addLineToPoint(CGPoint(x: 60.0, y: 160.0)),
+    //   .addCurveToPoint(CGPoint(x: 60.0, y: 160.0), CGPoint(x: 60.0, y: 160.0), CGPoint(x: 60.0, y: 160.0)),
+    //   .addCurveToPoint(CGPoint(x: 60.0, y: 160.0), CGPoint(x: 60.0, y: 160.0), CGPoint(x: 60.0, y: 160.0)),
+    //   .addLineToPoint(CGPoint(x: 30.0, y: 160.0)),
+    //   .addCurveToPoint(CGPoint(x: 30.0, y: 160.0), CGPoint(x: 30.0, y: 160.0), CGPoint(x: 30.0, y: 160.0)),
+    //   .addLineToPoint(CGPoint(x: 28.5, y: 160.0)),
+    //   .addCurveToPoint(CGPoint(x: 16.7551220060506, y: 160.0), CGPoint(x: 6.2643264902435485, y: 152.65426589801527), CGPoint(x: 2.2473416354104794, y: 141.6176907150702)),
+    //   .addCurveToPoint(CGPoint(x: 0.0, y: 134.5102961781099), CGPoint(x: 0.0, y: 127.90771577144413), CGPoint(x: 0.0, y: 114.70255495811253)),
+    //   .addLineToPoint(CGPoint(x: 0.0, y: 0.0)),
+    //   .addCurveToPoint(CGPoint(x: 0.0, y: 0.0), CGPoint(x: 0.0, y: 0.0), CGPoint(x: 0.0, y: 0.0)),
+    //   .addLineToPoint(CGPoint(x: 0.0, y: 0.0)),
+    //   .addCurveToPoint(CGPoint(x: 0.0, y: 0.0), CGPoint(x: 0.0, y: 0.0), CGPoint(x: 0.0, y: 0.0)),
+    //   .addCurveToPoint(CGPoint(x: 0.0, y: 0.0), CGPoint(x: 0.0, y: 0.0), CGPoint(x: 0.0, y: 0.0)),
+    //   .addLineToPoint(CGPoint(x: 30.0, y: 0.0)),
+    // ]
+
+    // RoundingCorners: [.bottomRight, .bottomLeft]
+    // [
+    //   .moveToPoint(CGPoint(x: 0.0, y: 0.0)),
+    //   .addLineToPoint(CGPoint(x: 60.0, y: 0.0)),
+    //   .addLineToPoint(CGPoint(x: 60.0, y: 98.8534)),
+    //   .addCurveToPoint(CGPoint(x: 60.0, y: 127.90771577144413), CGPoint(x: 60.0, y: 134.5102961781099), CGPoint(x: 57.75265836458952, y: 141.6176907150702)),
+    //   .addLineToPoint(CGPoint(x: 57.75265836458952, y: 141.6176907150702)),
+    //   .addCurveToPoint(CGPoint(x: 53.73567350975645, y: 152.65426589801527), CGPoint(x: 43.2448779939494, y: 160.0), CGPoint(x: 31.5, y: 160.0)),
+    //   .addCurveToPoint(CGPoint(x: 30.0, y: 160.0), CGPoint(x: 30.0, y: 160.0), CGPoint(x: 30.0, y: 160.0)),
+    //   .addLineToPoint(CGPoint(x: 30.0, y: 160.0)),
+    //   .addCurveToPoint(CGPoint(x: 30.0, y: 160.0), CGPoint(x: 30.0, y: 160.0), CGPoint(x: 30.0, y: 160.0)),
+    //   .addLineToPoint(CGPoint(x: 28.5, y: 160.0)),
+    //   .addCurveToPoint(CGPoint(x: 16.7551220060506, y: 160.0), CGPoint(x: 6.2643264902435485, y: 152.65426589801527), CGPoint(x: 2.2473416354104794, y: 141.6176907150702)),
+    //   .addCurveToPoint(CGPoint(x: 0.0, y: 134.5102961781099), CGPoint(x: 0.0, y: 127.90771577144413), CGPoint(x: 0.0, y: 114.70255495811253)),
+    //   .addLineToPoint(CGPoint(x: 0.0, y: 0.0)),
+    //   .addLineToPoint(CGPoint(x: 0.0, y: 0.0)),
+    // ]
+
+    // RoundingCorners: [.topRight, .bottomRight, .bottomLeft]
+    // [
+    //   .moveToPoint(CGPoint(x: 30.0, y: 0.0)),
+    //   .addLineToPoint(CGPoint(x: 30.0, y: 0.0)),
+    //   .addCurveToPoint(CGPoint(x: 30.0, y: 0.0), CGPoint(x: 30.0, y: 0.0), CGPoint(x: 30.0, y: 0.0)),
+    //   .addLineToPoint(CGPoint(x: 31.499999999999996, y: -8.881784197001252e-16)),
+    //   .addCurveToPoint(CGPoint(x: 43.2448779939494, y: -2.9976021664879227e-15), CGPoint(x: 53.73567350975645, y: 7.345734101984717), CGPoint(x: 57.75265836458952, y: 18.38230928492978)),
+    //   .addCurveToPoint(CGPoint(x: 60.0, y: 25.48970382189007), CGPoint(x: 60.0, y: 32.09228422855587), CGPoint(x: 60.0, y: 45.29744504188747)),
+    //   .addLineToPoint(CGPoint(x: 60.0, y: 98.8534)),
+    //   .addCurveToPoint(CGPoint(x: 60.0, y: 127.90771577144413), CGPoint(x: 60.0, y: 134.5102961781099), CGPoint(x: 57.75265836458952, y: 141.6176907150702)),
+    //   .addLineToPoint(CGPoint(x: 57.75265836458952, y: 141.6176907150702)),
+    //   .addCurveToPoint(CGPoint(x: 53.73567350975645, y: 152.65426589801527), CGPoint(x: 43.2448779939494, y: 160.0), CGPoint(x: 31.5, y: 160.0)),
+    //   .addCurveToPoint(CGPoint(x: 30.0, y: 160.0), CGPoint(x: 30.0, y: 160.0), CGPoint(x: 30.0, y: 160.0)),
+    //   .addLineToPoint(CGPoint(x: 30.0, y: 160.0)),
+    //   .addCurveToPoint(CGPoint(x: 30.0, y: 160.0), CGPoint(x: 30.0, y: 160.0), CGPoint(x: 30.0, y: 160.0)),
+    //   .addLineToPoint(CGPoint(x: 28.5, y: 160.0)),
+    //   .addCurveToPoint(CGPoint(x: 16.7551220060506, y: 160.0), CGPoint(x: 6.2643264902435485, y: 152.65426589801527), CGPoint(x: 2.2473416354104794, y: 141.6176907150702)),
+    //   .addCurveToPoint(CGPoint(x: 0.0, y: 134.5102961781099), CGPoint(x: 0.0, y: 127.90771577144413), CGPoint(x: 0.0, y: 114.70255495811253)),
+    //   .addLineToPoint(CGPoint(x: 0.0, y: 0.0)),
+    //   .addCurveToPoint(CGPoint(x: 0.0, y: 0.0), CGPoint(x: 0.0, y: 0.0), CGPoint(x: 0.0, y: 0.0)),
+    //   .addLineToPoint(CGPoint(x: 0.0, y: 0.0)),
+    //   .addCurveToPoint(CGPoint(x: 0.0, y: 0.0), CGPoint(x: 0.0, y: 0.0), CGPoint(x: 0.0, y: 0.0)),
+    //   .addCurveToPoint(CGPoint(x: 0.0, y: 0.0), CGPoint(x: 0.0, y: 0.0), CGPoint(x: 0.0, y: 0.0)),
+    //   .addLineToPoint(CGPoint(x: 30.0, y: 0.0)),
+    // ]
+
+    // RoundingCorners: [.topLeft, .bottomRight, .bottomLeft]
+    // [
+    //   .moveToPoint(CGPoint(x: 30.0, y: 0.0)),
+    //   .addLineToPoint(CGPoint(x: 30.0, y: 0.0)),
+    //   .addCurveToPoint(CGPoint(x: 60.0, y: 0.0), CGPoint(x: 60.0, y: 0.0), CGPoint(x: 60.0, y: 0.0)),
+    //   .addLineToPoint(CGPoint(x: 60.0, y: 0.0)),
+    //   .addCurveToPoint(CGPoint(x: 60.0, y: 0.0), CGPoint(x: 60.0, y: 0.0), CGPoint(x: 60.0, y: 0.0)),
+    //   .addCurveToPoint(CGPoint(x: 60.0, y: 0.0), CGPoint(x: 60.0, y: 0.0), CGPoint(x: 60.0, y: 0.0)),
+    //   .addLineToPoint(CGPoint(x: 60.0, y: 98.8534)),
+    //   .addCurveToPoint(CGPoint(x: 60.0, y: 127.90771577144413), CGPoint(x: 60.0, y: 134.5102961781099), CGPoint(x: 57.75265836458952, y: 141.6176907150702)),
+    //   .addLineToPoint(CGPoint(x: 57.75265836458952, y: 141.6176907150702)),
+    //   .addCurveToPoint(CGPoint(x: 53.73567350975645, y: 152.65426589801527), CGPoint(x: 43.2448779939494, y: 160.0), CGPoint(x: 31.5, y: 160.0)),
+    //   .addCurveToPoint(CGPoint(x: 30.0, y: 160.0), CGPoint(x: 30.0, y: 160.0), CGPoint(x: 30.0, y: 160.0)),
+    //   .addLineToPoint(CGPoint(x: 30.0, y: 160.0)),
+    //   .addCurveToPoint(CGPoint(x: 30.0, y: 160.0), CGPoint(x: 30.0, y: 160.0), CGPoint(x: 30.0, y: 160.0)),
+    //   .addLineToPoint(CGPoint(x: 28.5, y: 160.0)),
+    //   .addCurveToPoint(CGPoint(x: 16.7551220060506, y: 160.0), CGPoint(x: 6.2643264902435485, y: 152.65426589801527), CGPoint(x: 2.2473416354104794, y: 141.6176907150702)),
+    //   .addCurveToPoint(CGPoint(x: 0.0, y: 134.5102961781099), CGPoint(x: 0.0, y: 127.90771577144413), CGPoint(x: 0.0, y: 114.70255495811253)),
+    //   .addLineToPoint(CGPoint(x: 0.0, y: 61.1466)),
+    //   .addCurveToPoint(CGPoint(x: 0.0, y: 32.09228422855587), CGPoint(x: 0.0, y: 25.48970382189007), CGPoint(x: 2.247341635410475, y: 18.38230928492978)),
+    //   .addLineToPoint(CGPoint(x: 2.2473416354104763, y: 18.38230928492978)),
+    //   .addCurveToPoint(CGPoint(x: 6.264326490243543, y: 7.34573410198472), CGPoint(x: 16.75512200605059, y: 1.2212453270876722e-15), CGPoint(x: 28.499999999999996, y: -8.881784197001252e-16)),
+    //   .addCurveToPoint(CGPoint(x: 30.0, y: 0.0), CGPoint(x: 30.0, y: 0.0), CGPoint(x: 30.0, y: 0.0)),
+    //   .addLineToPoint(CGPoint(x: 30.0, y: 0.0)),
+    // ]
+
+    // RoundingCorners: [.topLeft, .topRight, .bottomLeft]
+    // [
+    //   .moveToPoint(CGPoint(x: 30.0, y: 0.0)),
+    //   .addLineToPoint(CGPoint(x: 30.0, y: 0.0)),
+    //   .addCurveToPoint(CGPoint(x: 30.0, y: 0.0), CGPoint(x: 30.0, y: 0.0), CGPoint(x: 30.0, y: 0.0)),
+    //   .addLineToPoint(CGPoint(x: 31.499999999999996, y: -8.881784197001252e-16)),
+    //   .addCurveToPoint(CGPoint(x: 43.2448779939494, y: -2.9976021664879227e-15), CGPoint(x: 53.73567350975645, y: 7.345734101984717), CGPoint(x: 57.75265836458952, y: 18.38230928492978)),
+    //   .addCurveToPoint(CGPoint(x: 60.0, y: 25.48970382189007), CGPoint(x: 60.0, y: 32.09228422855587), CGPoint(x: 60.0, y: 45.29744504188747)),
+    //   .addLineToPoint(CGPoint(x: 60.0, y: 160.0)),
+    //   .addCurveToPoint(CGPoint(x: 60.0, y: 160.0), CGPoint(x: 60.0, y: 160.0), CGPoint(x: 60.0, y: 160.0)),
+    //   .addLineToPoint(CGPoint(x: 60.0, y: 160.0)),
+    //   .addCurveToPoint(CGPoint(x: 60.0, y: 160.0), CGPoint(x: 60.0, y: 160.0), CGPoint(x: 60.0, y: 160.0)),
+    //   .addCurveToPoint(CGPoint(x: 60.0, y: 160.0), CGPoint(x: 60.0, y: 160.0), CGPoint(x: 60.0, y: 160.0)),
+    //   .addLineToPoint(CGPoint(x: 30.0, y: 160.0)),
+    //   .addCurveToPoint(CGPoint(x: 30.0, y: 160.0), CGPoint(x: 30.0, y: 160.0), CGPoint(x: 30.0, y: 160.0)),
+    //   .addLineToPoint(CGPoint(x: 28.5, y: 160.0)),
+    //   .addCurveToPoint(CGPoint(x: 16.7551220060506, y: 160.0), CGPoint(x: 6.2643264902435485, y: 152.65426589801527), CGPoint(x: 2.2473416354104794, y: 141.6176907150702)),
+    //   .addCurveToPoint(CGPoint(x: 0.0, y: 134.5102961781099), CGPoint(x: 0.0, y: 127.90771577144413), CGPoint(x: 0.0, y: 114.70255495811253)),
+    //   .addLineToPoint(CGPoint(x: 0.0, y: 61.1466)),
+    //   .addCurveToPoint(CGPoint(x: 0.0, y: 32.09228422855587), CGPoint(x: 0.0, y: 25.48970382189007), CGPoint(x: 2.247341635410475, y: 18.38230928492978)),
+    //   .addLineToPoint(CGPoint(x: 2.2473416354104763, y: 18.38230928492978)),
+    //   .addCurveToPoint(CGPoint(x: 6.264326490243543, y: 7.34573410198472), CGPoint(x: 16.75512200605059, y: 1.2212453270876722e-15), CGPoint(x: 28.499999999999996, y: -8.881784197001252e-16)),
+    //   .addCurveToPoint(CGPoint(x: 30.0, y: 0.0), CGPoint(x: 30.0, y: 0.0), CGPoint(x: 30.0, y: 0.0)),
+    //   .addLineToPoint(CGPoint(x: 30.0, y: 0.0)),
+    // ]
+
+    // RoundingCorners: [.topLeft, .topRight, .bottomRight
+    // [
+    //   .moveToPoint(CGPoint(x: 30.0, y: 0.0)),
+    //   .addLineToPoint(CGPoint(x: 30.0, y: 0.0)),
+    //   .addCurveToPoint(CGPoint(x: 30.0, y: 0.0), CGPoint(x: 30.0, y: 0.0), CGPoint(x: 30.0, y: 0.0)),
+    //   .addLineToPoint(CGPoint(x: 31.499999999999996, y: -8.881784197001252e-16)),
+    //   .addCurveToPoint(CGPoint(x: 43.2448779939494, y: -2.9976021664879227e-15), CGPoint(x: 53.73567350975645, y: 7.345734101984717), CGPoint(x: 57.75265836458952, y: 18.38230928492978)),
+    //   .addCurveToPoint(CGPoint(x: 60.0, y: 25.48970382189007), CGPoint(x: 60.0, y: 32.09228422855587), CGPoint(x: 60.0, y: 45.29744504188747)),
+    //   .addLineToPoint(CGPoint(x: 60.0, y: 98.8534)),
+    //   .addCurveToPoint(CGPoint(x: 60.0, y: 127.90771577144413), CGPoint(x: 60.0, y: 134.5102961781099), CGPoint(x: 57.75265836458952, y: 141.6176907150702)),
+    //   .addLineToPoint(CGPoint(x: 57.75265836458952, y: 141.6176907150702)),
+    //   .addCurveToPoint(CGPoint(x: 53.73567350975645, y: 152.65426589801527), CGPoint(x: 43.2448779939494, y: 160.0), CGPoint(x: 31.5, y: 160.0)),
+    //   .addCurveToPoint(CGPoint(x: 30.0, y: 160.0), CGPoint(x: 30.0, y: 160.0), CGPoint(x: 30.0, y: 160.0)),
+    //   .addLineToPoint(CGPoint(x: 30.0, y: 160.0)),
+    //   .addCurveToPoint(CGPoint(x: 0.0, y: 160.0), CGPoint(x: 0.0, y: 160.0), CGPoint(x: 0.0, y: 160.0)),
+    //   .addLineToPoint(CGPoint(x: 0.0, y: 160.0)),
+    //   .addCurveToPoint(CGPoint(x: 0.0, y: 160.0), CGPoint(x: 0.0, y: 160.0), CGPoint(x: 0.0, y: 160.0)),
+    //   .addCurveToPoint(CGPoint(x: 0.0, y: 160.0), CGPoint(x: 0.0, y: 160.0), CGPoint(x: 0.0, y: 160.0)),
+    //   .addLineToPoint(CGPoint(x: 0.0, y: 61.1466)),
+    //   .addCurveToPoint(CGPoint(x: 0.0, y: 32.09228422855587), CGPoint(x: 0.0, y: 25.48970382189007), CGPoint(x: 2.247341635410475, y: 18.38230928492978)),
+    //   .addLineToPoint(CGPoint(x: 2.2473416354104763, y: 18.38230928492978)),
+    //   .addCurveToPoint(CGPoint(x: 6.264326490243543, y: 7.34573410198472), CGPoint(x: 16.75512200605059, y: 1.2212453270876722e-15), CGPoint(x: 28.499999999999996, y: -8.881784197001252e-16)),
+    //   .addCurveToPoint(CGPoint(x: 30.0, y: 0.0), CGPoint(x: 30.0, y: 0.0), CGPoint(x: 30.0, y: 0.0)),
+    //   .addLineToPoint(CGPoint(x: 30.0, y: 0.0)),
+    // ]
+  }
+
+  func test_verticalRect_shape2b_roundingCorners_topRight() {
+    let rect = CGRect(x: 0, y: 0, width: 60, height: 160)
+    let roundingCorners: RectCorner = [.topRight]
+    let cornerRadii = CGSize(width: 40, height: 40)
+
+    Assert.setTestAssertionFailureHandler { message, metadata, file, line, column in
+      expect(message) == "shape 2b only supports all rounding corners"
+      expect(metadata["rect"]) == "\(rect)"
+      expect(metadata["cornerRadius"]) == "\(cornerRadii.width)"
+      expect(metadata["roundingCorners"]) == "\(roundingCorners)"
+    }
+
+    _ = BezierPath(roundedRect: rect, byRoundingCorners: roundingCorners, cornerRadii: cornerRadii)
+
+    Assert.resetTestAssertionFailureHandler()
+  }
+
+  func test_verticalRect_shape3a_roundingCorners_none() {
     let rect = CGRect(x: 0, y: 0, width: 60, height: 160)
     let path = BezierPath(roundedRect: rect, byRoundingCorners: [], cornerRadii: CGSize(width: 64, height: 64))
 
@@ -583,11 +1037,32 @@ class NSBezierPath_RoundedRectTests: XCTestCase {
     expectPathElementsEqual(path.cgPath.pathElements(), expectedElements)
   }
 
+  func test_verticalRect_shape3a_roundingCorners_topRight() {
+    let rect = CGRect(x: 0, y: 0, width: 60, height: 160)
+    let roundingCorners: RectCorner = [.topRight]
+    let cornerRadii = CGSize(width: 64, height: 64)
+
+    Assert.setTestAssertionFailureHandler { message, metadata, file, line, column in
+      expect(message) == "shape 3a only supports all or none rounding corners"
+      expect(metadata["rect"]) == "\(rect)"
+      expect(metadata["cornerRadius"]) == "\(cornerRadii.width)"
+      expect(metadata["roundingCorners"]) == "\(roundingCorners)"
+    }
+
+    _ = BezierPath(roundedRect: rect, byRoundingCorners: roundingCorners, cornerRadii: cornerRadii)
+
+    Assert.resetTestAssertionFailureHandler()
+  }
+
   // MARK: - Code Generation
 
   #if canImport(UIKit)
   func test_generate_shape1() {
     NSBezierPathRoundedRectGenerator.generateShape1Code()
+  }
+
+  func test_generate_shape2b() {
+    NSBezierPathRoundedRectGenerator.generateShape2bCode()
   }
   #endif
 }
@@ -666,6 +1141,103 @@ public enum NSBezierPathRoundedRectGenerator {
     ChouTi.assert(shape1PathElements.count == 22)
 
     for (i, e) in shape1PathElements.enumerated() {
+      switch i {
+      // top left
+      case 0:
+        print("// top left")
+        print("if roundingCorners.contains(.topLeft) {")
+        print("  ", terminator: "")
+        printCodeLine(rect, cornerRadius, e, .topLeft)
+        print("} else {")
+        print("  move(to: rect.topLeft)")
+        print("}\n")
+      // top right
+      case 1:
+        print("// top right")
+        print("if roundingCorners.contains(.topRight) {")
+        print("  ", terminator: "")
+        printCodeLine(rect, cornerRadius, e, .topRight)
+      case 2 ... 4:
+        print("  ", terminator: "")
+        printCodeLine(rect, cornerRadius, e, .topRight)
+      case 5:
+        print("  ", terminator: "")
+        printCodeLine(rect, cornerRadius, e, .topRight)
+        print("} else {")
+        print("  addLine(to: rect.topRight)")
+        print("}\n")
+      // bottom right
+      case 6:
+        print("// bottom right")
+        print("if roundingCorners.contains(.bottomRight) {")
+        print("  ", terminator: "")
+        printCodeLine(rect, cornerRadius, e, .bottomRight)
+      case 7 ... 9:
+        print("  ", terminator: "")
+        printCodeLine(rect, cornerRadius, e, .bottomRight)
+      case 10:
+        print("  ", terminator: "")
+        printCodeLine(rect, cornerRadius, e, .bottomRight)
+        print("} else {")
+        print("  addLine(to: rect.bottomRight)")
+        print("}\n")
+      // bottom left
+      case 11:
+        print("// bottom left")
+        print("if roundingCorners.contains(.bottomLeft) {")
+        print("  ", terminator: "")
+        printCodeLine(rect, cornerRadius, e, .bottomLeft)
+      case 12 ... 14:
+        print("  ", terminator: "")
+        printCodeLine(rect, cornerRadius, e, .bottomLeft)
+      case 15:
+        print("  ", terminator: "")
+        printCodeLine(rect, cornerRadius, e, .bottomLeft)
+        print("} else {")
+        print("  addLine(to: rect.bottomLeft)")
+        print("}\n")
+      // top left
+      case 16:
+        print("// top left")
+        print("if roundingCorners.contains(.topLeft) {")
+        print("  ", terminator: "")
+        printCodeLine(rect, cornerRadius, e, .topLeft)
+      case 17 ... 20:
+        print("  ", terminator: "")
+        printCodeLine(rect, cornerRadius, e, .topLeft)
+      case 21:
+        print("  ", terminator: "")
+        printCodeLine(rect, cornerRadius, e, .topLeft)
+        print("} else {")
+        print("  addLine(to: rect.topLeft)")
+        print("}\n")
+      default:
+        ChouTi.assertFailure("unexpected")
+      }
+    }
+
+    print("close()")
+
+    print("==================== End ====================")
+  }
+
+  public static func generateShape2bCode() {
+    print(
+      """
+      ==================== Shape 2b ====================
+      let limit: CGFloat = min(rect.width, rect.height) / 2 / 1.52866483
+      let limitedRadius: CGFloat = min(cornerRadius, limit)
+
+      """
+    )
+
+    let rect = CGRect(0, 0, 90, 120)
+    let cornerRadius: CGFloat = 50
+    let shape2b = BezierPath(roundedRect: rect, cornerRadius: cornerRadius).cgPath
+    let shape2bPathElements = shape2b.pathElements()
+    ChouTi.assert(shape2bPathElements.count == 22)
+
+    for (i, e) in shape2bPathElements.enumerated() {
       switch i {
       // top left
       case 0:
