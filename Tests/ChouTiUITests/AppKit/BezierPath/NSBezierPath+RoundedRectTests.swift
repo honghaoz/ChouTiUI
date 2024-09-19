@@ -1112,32 +1112,19 @@ class NSBezierPath_RoundedRectTests: XCTestCase {
 
   func test_verticalRect_shape3a_roundingCorners_none() {
     let rect = CGRect(x: 0, y: 0, width: 60, height: 160)
-    let path = BezierPath(roundedRect: rect, byRoundingCorners: [], cornerRadii: CGSize(width: 64, height: 64))
+    let roundingCorners: RectCorner = []
+    let cornerRadii = CGSize(width: 64, height: 64)
 
-    // printPathElements(path.cgPath.pathElements())
+    Assert.setTestAssertionFailureHandler { message, metadata, file, line, column in
+      expect(message) == "shape 3a only supports all rounding corners"
+      expect(metadata["rect"]) == "\(rect)"
+      expect(metadata["cornerRadius"]) == "\(cornerRadii.width)"
+      expect(metadata["roundingCorners"]) == "\(roundingCorners)"
+    }
 
-    var expectedElements: [CGPathElement.Element] = [
-      .moveToPoint(CGPoint(x: 0.0, y: 0.0)),
-      .addLineToPoint(CGPoint(x: 60.0, y: 0.0)),
-      .addLineToPoint(CGPoint(x: 60.0, y: 160.0)),
-      .addLineToPoint(CGPoint(x: 0.0, y: 160.0)),
-      .addLineToPoint(CGPoint(x: 0.0, y: 0.0)),
-    ]
+    _ = BezierPath(roundedRect: rect, byRoundingCorners: roundingCorners, cornerRadii: cornerRadii)
 
-    #if canImport(AppKit)
-    expectedElements += [
-      .closeSubpath,
-      .moveToPoint(CGPoint(x: 0.0, y: 0.0)),
-    ]
-    #endif
-
-    #if canImport(UIKit)
-    expectedElements += [
-      .addLineToPoint(CGPoint(x: 0.0, y: 0.0)),
-    ]
-    #endif
-
-    expectPathElementsEqual(path.cgPath.pathElements(), expectedElements)
+    Assert.resetTestAssertionFailureHandler()
   }
 
   func test_verticalRect_shape3a_roundingCorners_topRight() {
@@ -1146,7 +1133,7 @@ class NSBezierPath_RoundedRectTests: XCTestCase {
     let cornerRadii = CGSize(width: 64, height: 64)
 
     Assert.setTestAssertionFailureHandler { message, metadata, file, line, column in
-      expect(message) == "shape 3a only supports all or none rounding corners"
+      expect(message) == "shape 3a only supports all rounding corners"
       expect(metadata["rect"]) == "\(rect)"
       expect(metadata["cornerRadius"]) == "\(cornerRadii.width)"
       expect(metadata["roundingCorners"]) == "\(roundingCorners)"
