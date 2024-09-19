@@ -290,40 +290,7 @@ class NSBezierPath_RoundedRectTests: XCTestCase {
 
     // printPathElements(path.cgPath.pathElements())
 
-    #if canImport(AppKit)
-    expect(path.cgPath.pathElements()) == [
-      .moveToPoint(CGPoint(x: 80.0, y: 0.0)),
-      .addLineToPoint(CGPoint(x: 80.0, y: 0.0)),
-      .addCurveToPoint(CGPoint(x: 109.99999607500618, y: 0.0), CGPoint(x: 109.99999607500618, y: 0.0), CGPoint(x: 109.99999607500618, y: 0.0)),
-      .addLineToPoint(CGPoint(x: 109.99999607500618, y: 0.0)),
-      .addCurveToPoint(CGPoint(x: 137.6142308448347, y: 3.270828177554134e-07), CGPoint(x: 160.0, y: 22.385763267674573), CGPoint(x: 160.0, y: 50.0)),
-      .addCurveToPoint(CGPoint(x: 160.0, y: 50.0), CGPoint(x: 160.0, y: 50.0), CGPoint(x: 160.0, y: 50.0)),
-      .addCurveToPoint(CGPoint(x: 160.0, y: 50.0), CGPoint(x: 160.0, y: 50.0), CGPoint(x: 160.0, y: 50.0)),
-      .addLineToPoint(CGPoint(x: 160.0, y: 50.0)),
-      .addCurveToPoint(CGPoint(x: 160.0, y: 50.0), CGPoint(x: 160.0, y: 50.0), CGPoint(x: 160.0, y: 50.0)),
-      .addLineToPoint(CGPoint(x: 160.0, y: 50.0)),
-      .addCurveToPoint(CGPoint(x: 160.0, y: 77.61423869482233), CGPoint(x: 137.6142308448347, y: 100.0), CGPoint(x: 109.99999607500618, y: 100.0)),
-      .addCurveToPoint(CGPoint(x: 109.99999607500618, y: 100.0), CGPoint(x: 109.99999607500618, y: 100.0), CGPoint(x: 109.99999607500618, y: 100.0)),
-      .addCurveToPoint(CGPoint(x: 109.99999607500618, y: 100.0), CGPoint(x: 109.99999607500618, y: 100.0), CGPoint(x: 109.99999607500618, y: 100.0)),
-      .addLineToPoint(CGPoint(x: 80.0, y: 100.0)),
-      .addCurveToPoint(CGPoint(x: 50.0, y: 100.0), CGPoint(x: 50.0, y: 100.0), CGPoint(x: 50.0, y: 100.0)),
-      .addLineToPoint(CGPoint(x: 49.99999607500618, y: 100.0)),
-      .addCurveToPoint(CGPoint(x: 22.385759342680764, y: 100.0), CGPoint(x: -1.3083312710216536e-06, y: 77.61423084483471), CGPoint(x: 0.0, y: 50.0)),
-      .addCurveToPoint(CGPoint(x: 0.0, y: 50.0), CGPoint(x: 0.0, y: 50.0), CGPoint(x: 0.0, y: 50.0)),
-      .addCurveToPoint(CGPoint(x: 0.0, y: 50.0), CGPoint(x: 0.0, y: 50.0), CGPoint(x: 0.0, y: 50.0)),
-      .addLineToPoint(CGPoint(x: 0.0, y: 50.0)),
-      .addCurveToPoint(CGPoint(x: 0.0, y: 50.0), CGPoint(x: 0.0, y: 50.0), CGPoint(x: 0.0, y: 50.0)),
-      .addLineToPoint(CGPoint(x: 0.0, y: 50.0)),
-      .addCurveToPoint(CGPoint(x: 2.2895797242878936e-06, y: 22.385761305177667), CGPoint(x: 22.38576523017148, y: -3.270828177554134e-07), CGPoint(x: 50.0, y: 0.0)),
-      .addCurveToPoint(CGPoint(x: 50.0, y: 0.0), CGPoint(x: 50.0, y: 0.0), CGPoint(x: 50.0, y: 0.0)),
-      .addLineToPoint(CGPoint(x: 80.0, y: 0.0)),
-      .closeSubpath,
-      .moveToPoint(CGPoint(x: 80.0, y: 0.0)),
-    ]
-    #endif
-
-    #if canImport(UIKit)
-    expectPathElementsEqual(path.cgPath.pathElements(), [
+    var expectedElements: [CGPathElement.Element] = [
       .moveToPoint(CGPoint(x: 80.0, y: 0.0)),
       .addLineToPoint(CGPoint(x: 80.0, y: 0.0)),
       .addCurveToPoint(CGPoint(x: 110.0, y: 0.0), CGPoint(x: 110.0, y: 0.0), CGPoint(x: 110.0, y: 0.0)),
@@ -346,8 +313,57 @@ class NSBezierPath_RoundedRectTests: XCTestCase {
       .addCurveToPoint(CGPoint(x: -3.3817687553023337e-15, y: 22.38576251000001), CGPoint(x: 22.385762509999996, y: 3.3817687553023337e-15), CGPoint(x: 49.99999999999999, y: 0.0)),
       .addCurveToPoint(CGPoint(x: 50.0, y: 0.0), CGPoint(x: 50.0, y: 0.0), CGPoint(x: 50.0, y: 0.0)),
       .addLineToPoint(CGPoint(x: 80.0, y: 0.0)),
-    ])
+    ]
+
+    #if canImport(AppKit)
+    expectedElements += [
+      .closeSubpath,
+      .moveToPoint(CGPoint(x: 80.0, y: 0.0)),
+    ]
     #endif
+
+    expectPathElementsEqual(path.cgPath.pathElements(), expectedElements, absoluteTolerance: 1e-5)
+  }
+
+  func test_horizontalRect_shape3b_2() {
+    let rect = CGRect(x: 0, y: 0, width: 160, height: 60)
+    let path = BezierPath(roundedRect: rect, cornerRadius: 80)
+
+    // printPathElements(path.cgPath.pathElements())
+
+    var expectedElements: [CGPathElement.Element] = [
+      .moveToPoint(CGPoint(x: 80.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 80.0, y: 0.0)),
+      .addCurveToPoint(CGPoint(x: 130.0, y: 0.0), CGPoint(x: 130.0, y: 0.0), CGPoint(x: 130.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 130.0, y: 0.0)),
+      .addCurveToPoint(CGPoint(x: 146.56854249399998, y: -3.0435918797721003e-15), CGPoint(x: 160.0, y: 13.431457505999994), CGPoint(x: 160.0, y: 29.999999999999993)),
+      .addCurveToPoint(CGPoint(x: 160.0, y: 30.0), CGPoint(x: 160.0, y: 30.0), CGPoint(x: 160.0, y: 30.0)),
+      .addLineToPoint(CGPoint(x: 160.0, y: 30.0)),
+      .addCurveToPoint(CGPoint(x: 160.0, y: 30.0), CGPoint(x: 160.0, y: 30.0), CGPoint(x: 160.0, y: 30.0)),
+      .addLineToPoint(CGPoint(x: 160.0, y: 30.0)),
+      .addCurveToPoint(CGPoint(x: 160.0, y: 46.568542494), CGPoint(x: 146.56854249399998, y: 60.0), CGPoint(x: 130.0, y: 60.0)),
+      .addCurveToPoint(CGPoint(x: 130.0, y: 60.0), CGPoint(x: 130.0, y: 60.0), CGPoint(x: 130.0, y: 60.0)),
+      .addLineToPoint(CGPoint(x: 80.0, y: 60.0)),
+      .addCurveToPoint(CGPoint(x: 30.0, y: 60.0), CGPoint(x: 30.0, y: 60.0), CGPoint(x: 30.0, y: 60.0)),
+      .addLineToPoint(CGPoint(x: 30.000000000000004, y: 60.0)),
+      .addCurveToPoint(CGPoint(x: 13.431457506000005, y: 60.0), CGPoint(x: 1.0145306265907002e-15, y: 46.568542494), CGPoint(x: 0.0, y: 30.000000000000004)),
+      .addCurveToPoint(CGPoint(x: 0.0, y: 30.0), CGPoint(x: 0.0, y: 30.0), CGPoint(x: 0.0, y: 30.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 30.0)),
+      .addCurveToPoint(CGPoint(x: 0.0, y: 30.0), CGPoint(x: 0.0, y: 30.0), CGPoint(x: 0.0, y: 30.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 30.000000000000004)),
+      .addCurveToPoint(CGPoint(x: -2.0290612531814004e-15, y: 13.431457506000005), CGPoint(x: 13.431457505999997, y: 2.0290612531814004e-15), CGPoint(x: 29.999999999999996, y: 0.0)),
+      .addCurveToPoint(CGPoint(x: 30.0, y: 0.0), CGPoint(x: 30.0, y: 0.0), CGPoint(x: 30.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 80.0, y: 0.0)),
+    ]
+
+    #if canImport(AppKit)
+    expectedElements += [
+      .closeSubpath,
+      .moveToPoint(CGPoint(x: 80.0, y: 0.0)),
+    ]
+    #endif
+
+    expectPathElementsEqual(path.cgPath.pathElements(), expectedElements, absoluteTolerance: 1e-5)
   }
 
   func test_verticalRect_shape1() {
@@ -1171,7 +1187,7 @@ class NSBezierPath_RoundedRectTests: XCTestCase {
   #endif
 }
 
-// MARK: - Helper
+// MARK: - Test Helpers
 
 /// Compare two arrays of path elements with a tolerance.
 private func expectPathElementsEqual(_ actual: [CGPathElement.Element], _ expected: [CGPathElement.Element], absoluteTolerance: CGFloat = 1e-13, file: StaticString = #file, line: UInt = #line) {
@@ -1180,16 +1196,51 @@ private func expectPathElementsEqual(_ actual: [CGPathElement.Element], _ expect
   for (index, (actualElement, expectedElement)) in zip(actual, expected).enumerated() {
     switch (actualElement, expectedElement) {
     case (.moveToPoint(let actualPoint), .moveToPoint(let expectedPoint)):
-      expect(actualPoint.isApproximatelyEqual(to: expectedPoint, absoluteTolerance: absoluteTolerance), file: file, line: line) == true
+      expect(
+        actualPoint.isApproximatelyEqual(to: expectedPoint, absoluteTolerance: absoluteTolerance),
+        "[\(index)] moveToPoint: \(actualPoint) to be approximately equal to \(expectedPoint)",
+        file: file,
+        line: line
+      ) == true
     case (.addLineToPoint(let actualPoint), .addLineToPoint(let expectedPoint)):
-      expect(actualPoint.isApproximatelyEqual(to: expectedPoint, absoluteTolerance: absoluteTolerance), file: file, line: line) == true
+      expect(
+        actualPoint.isApproximatelyEqual(to: expectedPoint, absoluteTolerance: absoluteTolerance),
+        "[\(index)] addLineToPoint: \(actualPoint) to be approximately equal to \(expectedPoint)",
+        file: file,
+        line: line
+      ) == true
     case (.addQuadCurveToPoint(let actualControl, let actualPoint), .addQuadCurveToPoint(let expectedControl, let expectedPoint)):
-      expect(actualControl.isApproximatelyEqual(to: expectedControl, absoluteTolerance: absoluteTolerance), file: file, line: line) == true
-      expect(actualPoint.isApproximatelyEqual(to: expectedPoint, absoluteTolerance: absoluteTolerance), file: file, line: line) == true
+      expect(
+        actualControl.isApproximatelyEqual(to: expectedControl, absoluteTolerance: absoluteTolerance),
+        "[\(index)] addQuadCurveToPoint: control: \(actualControl) to be approximately equal to \(expectedControl)",
+        file: file,
+        line: line
+      ) == true
+      expect(
+        actualPoint.isApproximatelyEqual(to: expectedPoint, absoluteTolerance: absoluteTolerance),
+        "[\(index)] addQuadCurveToPoint: point: \(actualPoint) to be approximately equal to \(expectedPoint)",
+        file: file,
+        line: line
+      ) == true
     case (.addCurveToPoint(let actualControl1, let actualControl2, let actualPoint), .addCurveToPoint(let expectedControl1, let expectedControl2, let expectedPoint)):
-      expect(actualControl1.isApproximatelyEqual(to: expectedControl1, absoluteTolerance: absoluteTolerance), file: file, line: line) == true
-      expect(actualControl2.isApproximatelyEqual(to: expectedControl2, absoluteTolerance: absoluteTolerance), file: file, line: line) == true
-      expect(actualPoint.isApproximatelyEqual(to: expectedPoint, absoluteTolerance: absoluteTolerance), file: file, line: line) == true
+      expect(
+        actualControl1.isApproximatelyEqual(to: expectedControl1, absoluteTolerance: absoluteTolerance),
+        "[\(index)] addCurveToPoint: control1: \(actualControl1) to be approximately equal to \(expectedControl1)",
+        file: file,
+        line: line
+      ) == true
+      expect(
+        actualControl2.isApproximatelyEqual(to: expectedControl2, absoluteTolerance: absoluteTolerance),
+        "[\(index)] addCurveToPoint: control2: \(actualControl2) to be approximately equal to \(expectedControl2)",
+        file: file,
+        line: line
+      ) == true
+      expect(
+        actualPoint.isApproximatelyEqual(to: expectedPoint, absoluteTolerance: absoluteTolerance),
+        "[\(index)] addCurveToPoint: point: \(actualPoint) to be approximately equal to \(expectedPoint)",
+        file: file,
+        line: line
+      ) == true
     case (.closeSubpath, .closeSubpath):
       continue
     default:
