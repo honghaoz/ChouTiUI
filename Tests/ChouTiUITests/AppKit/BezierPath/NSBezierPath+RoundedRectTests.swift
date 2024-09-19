@@ -503,40 +503,7 @@ class NSBezierPath_RoundedRectTests: XCTestCase {
 
     // printPathElements(path.cgPath.pathElements())
 
-    #if canImport(AppKit)
-    expect(path.cgPath.pathElements()) == [
-      .moveToPoint(CGPoint(x: 30.0, y: 0.0)),
-      .addLineToPoint(CGPoint(x: 30.0, y: 0.0)),
-      .addCurveToPoint(CGPoint(x: 30.0, y: 0.0), CGPoint(x: 30.0, y: 0.0), CGPoint(x: 30.0, y: 0.0)),
-      .addLineToPoint(CGPoint(x: 30.0, y: 0.0)),
-      .addCurveToPoint(CGPoint(x: 46.568544394391544, y: 1.9624969065324802e-07), CGPoint(x: 60.0, y: 13.431457960604744), CGPoint(x: 60.0, y: 30.0)),
-      .addCurveToPoint(CGPoint(x: 60.0, y: 30.000002354996287), CGPoint(x: 60.0, y: 30.000002354996287), CGPoint(x: 60.0, y: 30.00000470999257)),
-      .addCurveToPoint(CGPoint(x: 60.0, y: 30.0), CGPoint(x: 60.0, y: 30.0), CGPoint(x: 60.0, y: 30.0)),
-      .addLineToPoint(CGPoint(x: 60.0, y: 80.0)),
-      .addCurveToPoint(CGPoint(x: 60.0, y: 130.0000023549963), CGPoint(x: 60.0, y: 130.0000023549963), CGPoint(x: 60.0, y: 130.0000023549963)),
-      .addLineToPoint(CGPoint(x: 60.0, y: 130.0000023549963)),
-      .addCurveToPoint(CGPoint(x: 60.0, y: 146.56854439439155), CGPoint(x: 46.568544394391544, y: 160.0), CGPoint(x: 30.0, y: 160.0)),
-      .addCurveToPoint(CGPoint(x: 30.0, y: 160.0), CGPoint(x: 30.0, y: 160.0), CGPoint(x: 30.0, y: 160.0)),
-      .addCurveToPoint(CGPoint(x: 30.0, y: 160.0), CGPoint(x: 30.0, y: 160.0), CGPoint(x: 30.0, y: 160.0)),
-      .addLineToPoint(CGPoint(x: 30.0, y: 160.0)),
-      .addCurveToPoint(CGPoint(x: 30.0, y: 160.0), CGPoint(x: 30.0, y: 160.0), CGPoint(x: 30.0, y: 160.0)),
-      .addLineToPoint(CGPoint(x: 30.0, y: 160.0)),
-      .addCurveToPoint(CGPoint(x: 13.431455605608457, y: 160.0), CGPoint(x: -7.849987626129921e-07, y: 146.56854439439155), CGPoint(x: 0.0, y: 130.0000023549963)),
-      .addCurveToPoint(CGPoint(x: 0.0, y: 130.0000023549963), CGPoint(x: 0.0, y: 129.9999976450037), CGPoint(x: 0.0, y: 129.9999976450037)),
-      .addCurveToPoint(CGPoint(x: 0.0, y: 130.0000023549963), CGPoint(x: 0.0, y: 130.0000023549963), CGPoint(x: 0.0, y: 130.0000023549963)),
-      .addLineToPoint(CGPoint(x: 0.0, y: 80.0)),
-      .addCurveToPoint(CGPoint(x: 0.0, y: 30.0), CGPoint(x: 0.0, y: 30.0), CGPoint(x: 0.0, y: 30.0)),
-      .addLineToPoint(CGPoint(x: 0.0, y: 29.999997645003706)),
-      .addCurveToPoint(CGPoint(x: 1.3737478345727363e-06, y: 13.4314567831066), CGPoint(x: 13.431457960604744, y: -1.9624969065324802e-07), CGPoint(x: 30.0, y: 0.0)),
-      .addCurveToPoint(CGPoint(x: 30.0, y: 0.0), CGPoint(x: 30.0, y: 0.0), CGPoint(x: 30.0, y: 0.0)),
-      .addLineToPoint(CGPoint(x: 30.0, y: 0.0)),
-      .closeSubpath,
-      .moveToPoint(CGPoint(x: 30.0, y: 0.0)),
-    ]
-    #endif
-
-    #if canImport(UIKit)
-    expectPathElementsEqual(path.cgPath.pathElements(), [
+    var expectedElements: [CGPathElement.Element] = [
       .moveToPoint(CGPoint(x: 30.0, y: 0.0)),
       .addLineToPoint(CGPoint(x: 30.0, y: 0.0)),
       .addCurveToPoint(CGPoint(x: 30.0, y: 0.0), CGPoint(x: 30.0, y: 0.0), CGPoint(x: 30.0, y: 0.0)),
@@ -559,8 +526,57 @@ class NSBezierPath_RoundedRectTests: XCTestCase {
       .addCurveToPoint(CGPoint(x: -2.0290612531814004e-15, y: 13.431457506000005), CGPoint(x: 13.431457505999997, y: 2.0290612531814004e-15), CGPoint(x: 29.999999999999996, y: 0.0)),
       .addCurveToPoint(CGPoint(x: 30.0, y: 0.0), CGPoint(x: 30.0, y: 0.0), CGPoint(x: 30.0, y: 0.0)),
       .addLineToPoint(CGPoint(x: 30.0, y: 0.0)),
-    ])
+    ]
+
+    #if canImport(AppKit)
+    expectedElements += [
+      .closeSubpath,
+      .moveToPoint(CGPoint(x: 30.0, y: 0.0)),
+    ]
     #endif
+
+    expectPathElementsEqual(path.cgPath.pathElements(), expectedElements, absoluteTolerance: 1e-5)
+  }
+
+  func test_verticalRect_shape3a_2() {
+    let rect = CGRect(x: 0, y: 0, width: 60, height: 240)
+    let path = BezierPath(roundedRect: rect, cornerRadius: 100)
+
+    // printPathElements(path.cgPath.pathElements())
+
+    var expectedElements: [CGPathElement.Element] = [
+      .moveToPoint(CGPoint(x: 30.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 30.0, y: 0.0)),
+      .addCurveToPoint(CGPoint(x: 30.0, y: 0.0), CGPoint(x: 30.0, y: 0.0), CGPoint(x: 30.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 29.999999999999993, y: 0.0)),
+      .addCurveToPoint(CGPoint(x: 46.56854249399999, y: -3.0435918797721003e-15), CGPoint(x: 60.0, y: 13.431457505999994), CGPoint(x: 60.0, y: 29.999999999999993)),
+      .addCurveToPoint(CGPoint(x: 60.0, y: 30.0), CGPoint(x: 60.0, y: 30.0), CGPoint(x: 60.0, y: 30.0)),
+      .addLineToPoint(CGPoint(x: 60.0, y: 120.0)),
+      .addCurveToPoint(CGPoint(x: 60.0, y: 210.0), CGPoint(x: 60.0, y: 210.0), CGPoint(x: 60.0, y: 210.0)),
+      .addLineToPoint(CGPoint(x: 60.0, y: 210.0)),
+      .addCurveToPoint(CGPoint(x: 60.0, y: 226.56854249399998), CGPoint(x: 46.568542494, y: 240.0), CGPoint(x: 30.0, y: 240.0)),
+      .addCurveToPoint(CGPoint(x: 30.0, y: 240.0), CGPoint(x: 30.0, y: 240.0), CGPoint(x: 30.0, y: 240.0)),
+      .addLineToPoint(CGPoint(x: 30.0, y: 240.0)),
+      .addCurveToPoint(CGPoint(x: 30.0, y: 240.0), CGPoint(x: 30.0, y: 240.0), CGPoint(x: 30.0, y: 240.0)),
+      .addLineToPoint(CGPoint(x: 30.000000000000004, y: 240.0)),
+      .addCurveToPoint(CGPoint(x: 13.431457506000005, y: 240.0), CGPoint(x: 1.0145306265907002e-15, y: 226.56854249399998), CGPoint(x: 0.0, y: 210.0)),
+      .addCurveToPoint(CGPoint(x: 0.0, y: 210.0), CGPoint(x: 0.0, y: 210.0), CGPoint(x: 0.0, y: 210.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 120.0)),
+      .addCurveToPoint(CGPoint(x: 0.0, y: 30.0), CGPoint(x: 0.0, y: 30.0), CGPoint(x: 0.0, y: 30.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 30.000000000000004)),
+      .addCurveToPoint(CGPoint(x: -2.0290612531814004e-15, y: 13.431457506000005), CGPoint(x: 13.431457505999997, y: 2.0290612531814004e-15), CGPoint(x: 29.999999999999996, y: 0.0)),
+      .addCurveToPoint(CGPoint(x: 30.0, y: 0.0), CGPoint(x: 30.0, y: 0.0), CGPoint(x: 30.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 30.0, y: 0.0)),
+    ]
+
+    #if canImport(AppKit)
+    expectedElements += [
+      .closeSubpath,
+      .moveToPoint(CGPoint(x: 30.0, y: 0.0)),
+    ]
+    #endif
+
+    expectPathElementsEqual(path.cgPath.pathElements(), expectedElements, absoluteTolerance: 1e-5)
   }
 
   // MARK: - Oval Corner Radius
