@@ -193,7 +193,6 @@ public extension NSBezierPath {
     } else if rect.size.height > rect.size.width {
       // vertical rect
       path.addRoundedRect3a(rect, cornerRadius: radius, roundingCorners: corners)
-      // TODO: shape 3a doesn't match UIKit exactly, need to write the code gen for shape 3 and update the test case
     } else {
       // horizontal rect
       path.addRoundedRect3b(rect, cornerRadius: radius, roundingCorners: corners)
@@ -388,36 +387,36 @@ public extension NSBezierPath {
     addLine(to: rect.topCenter)
 
     // top right
-    addCurve(to: topRight(rect, 0, 1.52866483, limitedRadius), controlPoint1: topRight(rect, 0.68440646, 0.00000001, limitedRadius), controlPoint2: topRight(rect, 0, 0.68440658, limitedRadius))
+    addCurve(to: topRight(rect, 0, 1.5286648299999999, limitedRadius), controlPoint1: topRight(rect, 0.6844065568353908, -1.550877287827066e-16, limitedRadius), controlPoint2: topRight(rect, 0, 0.6844065568353903, limitedRadius))
     addCurve(to: topRight(rect, 0, 1.52866483, limitedRadius), controlPoint1: topRight(rect, 0, 1.52866483, limitedRadius), controlPoint2: topRight(rect, 0, 1.52866483, limitedRadius))
 
     // right center
     addLine(to: rect.rightCenter)
 
     // bottom right
-    addCurve(to: bottomRight(rect, 0, 1.52866471, limitedRadius), controlPoint1: bottomRight(rect, 0, 1.52866471, limitedRadius), controlPoint2: bottomRight(rect, 0, 1.52866471, limitedRadius))
-    addLine(to: bottomRight(rect, 0, 1.52866471, limitedRadius))
+    addCurve(to: bottomRight(rect, 0, 1.52866483, limitedRadius), controlPoint1: bottomRight(rect, 0, 1.52866483, limitedRadius), controlPoint2: bottomRight(rect, 0, 1.52866483, limitedRadius))
+    addLine(to: bottomRight(rect, 0, 1.52866483, limitedRadius))
 
     // bottom center
-    addCurve(to: rect.bottomCenter, controlPoint1: bottomRight(rect, 0, 0.68440646, limitedRadius), controlPoint2: bottomRight(rect, 0.68440646, 0, limitedRadius))
+    addCurve(to: rect.bottomCenter, controlPoint1: bottomRight(rect, 0, 0.6844065568353903, limitedRadius), controlPoint2: bottomRight(rect, 0.6844065568353903, 0, limitedRadius))
     addCurve(to: rect.bottomCenter, controlPoint1: rect.bottomCenter, controlPoint2: rect.bottomCenter)
     addLine(to: rect.bottomCenter)
     addCurve(to: rect.bottomCenter, controlPoint1: rect.bottomCenter, controlPoint2: rect.bottomCenter)
     addLine(to: rect.bottomCenter)
 
     // bottom left
-    addCurve(to: bottomLeft(rect, 0, 1.52866471, limitedRadius), controlPoint1: bottomLeft(rect, 0.68440646, 0, limitedRadius), controlPoint2: bottomLeft(rect, -0.00000004, 0.68440646, limitedRadius))
-    addCurve(to: bottomLeft(rect, 0, 1.52866495, limitedRadius), controlPoint1: bottomLeft(rect, 0, 1.52866471, limitedRadius), controlPoint2: bottomLeft(rect, 0, 1.52866495, limitedRadius))
+    addCurve(to: bottomLeft(rect, 0, 1.52866483, limitedRadius), controlPoint1: bottomLeft(rect, 0.6844065568353905, 0, limitedRadius), controlPoint2: bottomLeft(rect, 5.1695909594235537e-17, 0.6844065568353903, limitedRadius))
+    addCurve(to: bottomLeft(rect, 0, 1.52866483, limitedRadius), controlPoint1: bottomLeft(rect, 0, 1.52866483, limitedRadius), controlPoint2: bottomLeft(rect, 0, 1.52866483, limitedRadius))
 
     // left center
     addLine(to: rect.leftCenter)
 
     // top left
     addCurve(to: topLeft(rect, 0, 1.52866483, limitedRadius), controlPoint1: topLeft(rect, 0, 1.52866483, limitedRadius), controlPoint2: topLeft(rect, 0, 1.52866483, limitedRadius))
-    addLine(to: topLeft(rect, 0, 1.52866471, limitedRadius))
+    addLine(to: topLeft(rect, 0, 1.5286648300000003, limitedRadius))
 
     // top center
-    addCurve(to: rect.topCenter, controlPoint1: topLeft(rect, 0.00000007, 0.68440652, limitedRadius), controlPoint2: topLeft(rect, 0.68440658, -0.00000001, limitedRadius))
+    addCurve(to: rect.topCenter, controlPoint1: topLeft(rect, -1.0339181918847107e-16, 0.6844065568353908, limitedRadius), controlPoint2: topLeft(rect, 0.6844065568353903, 1.0339181918847107e-16, limitedRadius))
     addCurve(to: rect.topCenter, controlPoint1: rect.topCenter, controlPoint2: rect.topCenter)
     addLine(to: rect.topCenter)
 
