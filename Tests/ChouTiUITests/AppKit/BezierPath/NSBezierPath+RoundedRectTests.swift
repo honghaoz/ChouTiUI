@@ -378,7 +378,7 @@ class NSBezierPath_RoundedRectTests: XCTestCase {
     ]
     #endif
 
-    expectPathElementsEqual(path.cgPath.pathElements(), expectedElements, absoluteTolerance: 1.5)
+    expectPathElementsEqual(path.cgPath.pathElements(), expectedElements)
   }
 
   func test_verticalRect_shape3a() {
@@ -1223,96 +1223,79 @@ public enum NSBezierPathRoundedRectGenerator {
 
   public static func generateShape2bCode() {
     print(
-      """
+      #"""
       ==================== Shape 2b ====================
+      ChouTi.assert(roundingCorners == .all, "shape 2b only supports all rounding corners", metadata: [
+        "rect": "\(rect)",
+        "cornerRadius": "\(cornerRadius)",
+        "roundingCorners": "\(roundingCorners)",
+      ])
+
       let limit: CGFloat = min(rect.width, rect.height) / 2 / 1.52866483
       let limitedRadius: CGFloat = min(cornerRadius, limit)
 
-      """
+      """#
     )
 
     let rect = CGRect(0, 0, 90, 120)
-    let cornerRadius: CGFloat = 50
+
+    let cornerRadius: CGFloat = 36
+    let limit = min(rect.width, rect.height) / 2 / 1.52866483
+    let limitedRadius = min(cornerRadius, limit)
+
     let shape2b = BezierPath(roundedRect: rect, cornerRadius: cornerRadius).cgPath
     let shape2bPathElements = shape2b.pathElements()
     ChouTi.assert(shape2bPathElements.count == 22)
 
     for (i, e) in shape2bPathElements.enumerated() {
       switch i {
-      // top left
       case 0:
-        print("if roundingCorners.contains(.topLeft) {")
-        print("  ", terminator: "")
-        printCodeLine(rect, cornerRadius, e, .topLeft)
-        print("} else {")
-        print("  move(to: rect.topLeft)")
-        print("}\n")
-      // top right
+        print("move(to: rect.topCenter)")
+        print("")
       case 1:
+        print("// top center")
+        print("addLine(to: rect.topCenter)")
+      case 2:
+        print("addCurve(to: rect.topCenter, controlPoint1: rect.topCenter, controlPoint2: rect.topCenter)")
+        print("")
+      case 3:
         print("// top right")
-        print("if roundingCorners.contains(.topRight) {")
-        print("  ", terminator: "")
-        printCodeLine(rect, cornerRadius, e, .topRight)
-      case 2 ... 4:
-        print("  ", terminator: "")
-        printCodeLine(rect, cornerRadius, e, .topRight)
-      case 5:
-        print("  ", terminator: "")
-        printCodeLine(rect, cornerRadius, e, .topRight)
-        print("} else {")
-        print("  addLine(to: rect.topRight)")
-        print("}\n")
-      // bottom right
+        printCodeLine(rect, limitedRadius, e, .topRight)
+      case 4 ... 5:
+        printCodeLine(rect, limitedRadius, e, .topRight)
       case 6:
-        print("// bottom right")
-        print("if roundingCorners.contains(.bottomRight) {")
-        print("  ", terminator: "")
-        printCodeLine(rect, cornerRadius, e, .bottomRight)
+        print("\n// bottom right")
+        printCodeLine(rect, cornerRadius, e, .bottomRight, "cornerRadius")
       case 7 ... 9:
-        print("  ", terminator: "")
-        printCodeLine(rect, cornerRadius, e, .bottomRight)
+        printCodeLine(rect, limitedRadius, e, .bottomRight)
       case 10:
-        print("  ", terminator: "")
-        printCodeLine(rect, cornerRadius, e, .bottomRight)
-        print("} else {")
-        print("  addLine(to: rect.bottomRight)")
-        print("}\n")
-      // bottom left
+        print("\n// bottom center")
+        print("addCurve(to: rect.bottomCenter, controlPoint1: rect.bottomCenter, controlPoint2: rect.bottomCenter)")
       case 11:
-        print("// bottom left")
-        print("if roundingCorners.contains(.bottomLeft) {")
-        print("  ", terminator: "")
-        printCodeLine(rect, cornerRadius, e, .bottomLeft)
-      case 12 ... 14:
-        print("  ", terminator: "")
-        printCodeLine(rect, cornerRadius, e, .bottomLeft)
-      case 15:
-        print("  ", terminator: "")
-        printCodeLine(rect, cornerRadius, e, .bottomLeft)
-        print("} else {")
-        print("  addLine(to: rect.bottomLeft)")
-        print("}\n")
-      // top left
+        print("addLine(to: rect.bottomCenter)")
+      case 12:
+        print("addCurve(to: rect.bottomCenter, controlPoint1: rect.bottomCenter, controlPoint2: rect.bottomCenter)")
+      case 13:
+        print("\n// bottom left")
+        printCodeLine(rect, limitedRadius, e, .bottomLeft)
+      case 14 ... 15:
+        printCodeLine(rect, limitedRadius, e, .bottomLeft)
       case 16:
-        print("// top left")
-        print("if roundingCorners.contains(.topLeft) {")
-        print("  ", terminator: "")
-        printCodeLine(rect, cornerRadius, e, .topLeft)
-      case 17 ... 20:
-        print("  ", terminator: "")
-        printCodeLine(rect, cornerRadius, e, .topLeft)
+        print("\n// top left")
+        printCodeLine(rect, cornerRadius, e, .topLeft, "cornerRadius")
+      case 17 ... 19:
+        printCodeLine(rect, limitedRadius, e, .topLeft)
+      case 20:
+        print("\n// top center")
+        print("addCurve(to: rect.topCenter, controlPoint1: rect.topCenter, controlPoint2: rect.topCenter)")
       case 21:
-        print("  ", terminator: "")
-        printCodeLine(rect, cornerRadius, e, .topLeft)
-        print("} else {")
-        print("  addLine(to: rect.topLeft)")
-        print("}\n")
+        print("addLine(to: rect.topCenter)")
       default:
         ChouTi.assertFailure("unexpected")
       }
     }
 
-    print("close()")
+    print("\nclose()")
 
     print("==================== End ====================")
   }
@@ -1349,40 +1332,12 @@ private func reverseBottomLeft(_ rect: CGRect, _ radius: CGFloat, point: CGPoint
   return (x, y)
 }
 
-private func reverseTop(_ rect: CGRect, _ radius: CGFloat, point: CGPoint) -> CGFloat {
-  // CGPoint(x: rect.midX, y: rect.origin.y + y * rect.width) == point.y
-  let y = (point.y - rect.origin.y) / rect.width
-  return y
-}
-
-private func reverseBottom(_ rect: CGRect, _ radius: CGFloat, point: CGPoint) -> CGFloat {
-  // CGPoint(x: rect.midX, y: rect.origin.y + rect.height - y * radius) == point.y
-  let y = (point.y - rect.origin.y - rect.height) / -radius
-  return y
-}
-
-private func reverseLeft(_ rect: CGRect, _ radius: CGFloat, point: CGPoint) -> CGFloat {
-  // CGPoint(x: rect.origin.x + x * rect.height, y: rect.midY) == point.x
-  let x = (point.x - rect.origin.x) / rect.height
-  return x
-}
-
-private func reverseRight(_ rect: CGRect, _ radius: CGFloat, point: CGPoint) -> CGFloat {
-  // CGPoint(x: rect.right - x * radius, y: rect.midY) == point.x
-  let x = (point.x - rect.right) / -radius
-  return x
-}
-
 private enum FunctionType {
 
   case topLeft
   case topRight
   case bottomLeft
   case bottomRight
-  case top
-  case bottom
-  case left
-  case right
 
   var funcName: String {
     switch self {
@@ -1394,73 +1349,41 @@ private enum FunctionType {
       return "bottomLeft"
     case .bottomRight:
       return "bottomRight"
-    case .top:
-      return "top"
-    case .bottom:
-      return "bottom"
-    case .left:
-      return "left"
-    case .right:
-      return "right"
     }
   }
 }
 
-private func printCodeLine(_ rect: CGRect, _ radius: CGFloat, _ element: CGPathElement.Element, _ functionType: FunctionType) {
+private func printCodeLine(_ rect: CGRect, _ radius: CGFloat, _ element: CGPathElement.Element, _ functionType: FunctionType, _ radiusName: String = "limitedRadius") {
   switch element {
   case .moveToPoint(let point):
     switch functionType {
     case .topLeft:
       let (x, y) = reverseTopLeft(rect, radius, point: point)
-      print("move(to: \(functionType.funcName)(rect, \(formattedNumber(x)), \(formattedNumber(y)), limitedRadius))")
+      print("move(to: \(functionType.funcName)(rect, \(formattedNumber(x)), \(formattedNumber(y)), \(radiusName))")
     case .topRight:
       let (x, y) = reverseTopRight(rect, radius, point: point)
-      print("move(to: \(functionType.funcName)(rect, \(formattedNumber(x)), \(formattedNumber(y)), limitedRadius))")
+      print("move(to: \(functionType.funcName)(rect, \(formattedNumber(x)), \(formattedNumber(y)), \(radiusName)))")
     case .bottomLeft:
       let (x, y) = reverseBottomLeft(rect, radius, point: point)
-      print("move(to: \(functionType.funcName)(rect, \(formattedNumber(x)), \(formattedNumber(y)), limitedRadius))")
+      print("move(to: \(functionType.funcName)(rect, \(formattedNumber(x)), \(formattedNumber(y)), \(radiusName)))")
     case .bottomRight:
       let (x, y) = reverseBottomRight(rect, radius, point: point)
-      print("move(to: \(functionType.funcName)(rect, \(formattedNumber(x)), \(formattedNumber(y)), limitedRadius))")
-    case .top:
-      let y = reverseTop(rect, radius, point: point)
-      print("move(to: \(functionType.funcName)(rect, \(formattedNumber(y)), limitedRadius))")
-    case .bottom:
-      let y = reverseBottom(rect, radius, point: point)
-      print("move(to: \(functionType.funcName)(rect, \(formattedNumber(y)), limitedRadius))")
-    case .left:
-      let x = reverseLeft(rect, radius, point: point)
-      print("move(to: \(functionType.funcName)(rect, \(formattedNumber(x)), limitedRadius))")
-    case .right:
-      let x = reverseRight(rect, radius, point: point)
-      print("move(to: \(functionType.funcName)(rect, \(formattedNumber(x)), limitedRadius))")
+      print("move(to: \(functionType.funcName)(rect, \(formattedNumber(x)), \(formattedNumber(y)), \(radiusName)))")
     }
   case .addLineToPoint(let point):
     switch functionType {
     case .topLeft:
       let (x, y) = reverseTopLeft(rect, radius, point: point)
-      print("addLine(to: \(functionType.funcName)(rect, \(formattedNumber(x)), \(formattedNumber(y)), limitedRadius))")
+      print("addLine(to: \(functionType.funcName)(rect, \(formattedNumber(x)), \(formattedNumber(y)), \(radiusName)))")
     case .topRight:
       let (x, y) = reverseTopRight(rect, radius, point: point)
-      print("addLine(to: \(functionType.funcName)(rect, \(formattedNumber(x)), \(formattedNumber(y)), limitedRadius))")
+      print("addLine(to: \(functionType.funcName)(rect, \(formattedNumber(x)), \(formattedNumber(y)), \(radiusName)))")
     case .bottomLeft:
       let (x, y) = reverseBottomLeft(rect, radius, point: point)
-      print("addLine(to: \(functionType.funcName)(rect, \(formattedNumber(x)), \(formattedNumber(y)), limitedRadius))")
+      print("addLine(to: \(functionType.funcName)(rect, \(formattedNumber(x)), \(formattedNumber(y)), \(radiusName)))")
     case .bottomRight:
       let (x, y) = reverseBottomRight(rect, radius, point: point)
-      print("addLine(to: \(functionType.funcName)(rect, \(formattedNumber(x)), \(formattedNumber(y)), limitedRadius))")
-    case .top:
-      let y = reverseTop(rect, radius, point: point)
-      print("addLine(to: \(functionType.funcName)(rect, \(formattedNumber(y)), limitedRadius))")
-    case .bottom:
-      let y = reverseBottom(rect, radius, point: point)
-      print("addLine(to: \(functionType.funcName)(rect, \(formattedNumber(y)), limitedRadius))")
-    case .left:
-      let x = reverseLeft(rect, radius, point: point)
-      print("addLine(to: \(functionType.funcName)(rect, \(formattedNumber(x)), limitedRadius))")
-    case .right:
-      let x = reverseRight(rect, radius, point: point)
-      print("addLine(to: \(functionType.funcName)(rect, \(formattedNumber(x)), limitedRadius))")
+      print("addLine(to: \(functionType.funcName)(rect, \(formattedNumber(x)), \(formattedNumber(y)), \(radiusName)))")
     }
   case .addQuadCurveToPoint:
     ChouTi.assertFailure("unexpected")
@@ -1470,30 +1393,22 @@ private func printCodeLine(_ rect: CGRect, _ radius: CGFloat, _ element: CGPathE
       let (x, y) = reverseTopLeft(rect, radius, point: point)
       let (c1x, c1y) = reverseTopLeft(rect, radius, point: c1)
       let (c2x, c2y) = reverseTopLeft(rect, radius, point: c2)
-      print("addCurve(to: \(functionType.funcName)(rect, \(formattedNumber(x)), \(formattedNumber(y)), limitedRadius), controlPoint1: \(functionType.funcName)(rect, \(formattedNumber(c1x)), \(formattedNumber(c1y)), limitedRadius), controlPoint2: \(functionType.funcName)(rect, \(formattedNumber(c2x)), \(formattedNumber(c2y)), limitedRadius))")
+      print("addCurve(to: \(functionType.funcName)(rect, \(formattedNumber(x)), \(formattedNumber(y)), \(radiusName)), controlPoint1: \(functionType.funcName)(rect, \(formattedNumber(c1x)), \(formattedNumber(c1y)), \(radiusName)), controlPoint2: \(functionType.funcName)(rect, \(formattedNumber(c2x)), \(formattedNumber(c2y)), \(radiusName)))")
     case .topRight:
       let (x, y) = reverseTopRight(rect, radius, point: point)
       let (c1x, c1y) = reverseTopRight(rect, radius, point: c1)
       let (c2x, c2y) = reverseTopRight(rect, radius, point: c2)
-      print("addCurve(to: \(functionType.funcName)(rect, \(formattedNumber(x)), \(formattedNumber(y)), limitedRadius), controlPoint1: \(functionType.funcName)(rect, \(formattedNumber(c1x)), \(formattedNumber(c1y)), limitedRadius), controlPoint2: \(functionType.funcName)(rect, \(formattedNumber(c2x)), \(formattedNumber(c2y)), limitedRadius))")
+      print("addCurve(to: \(functionType.funcName)(rect, \(formattedNumber(x)), \(formattedNumber(y)), \(radiusName)), controlPoint1: \(functionType.funcName)(rect, \(formattedNumber(c1x)), \(formattedNumber(c1y)), \(radiusName)), controlPoint2: \(functionType.funcName)(rect, \(formattedNumber(c2x)), \(formattedNumber(c2y)), \(radiusName)))")
     case .bottomLeft:
       let (x, y) = reverseBottomLeft(rect, radius, point: point)
       let (c1x, c1y) = reverseBottomLeft(rect, radius, point: c1)
       let (c2x, c2y) = reverseBottomLeft(rect, radius, point: c2)
-      print("addCurve(to: \(functionType.funcName)(rect, \(formattedNumber(x)), \(formattedNumber(y)), limitedRadius), controlPoint1: \(functionType.funcName)(rect, \(formattedNumber(c1x)), \(formattedNumber(c1y)), limitedRadius), controlPoint2: \(functionType.funcName)(rect, \(formattedNumber(c2x)), \(formattedNumber(c2y)), limitedRadius))")
+      print("addCurve(to: \(functionType.funcName)(rect, \(formattedNumber(x)), \(formattedNumber(y)), \(radiusName)), controlPoint1: \(functionType.funcName)(rect, \(formattedNumber(c1x)), \(formattedNumber(c1y)), \(radiusName)), controlPoint2: \(functionType.funcName)(rect, \(formattedNumber(c2x)), \(formattedNumber(c2y)), \(radiusName)))")
     case .bottomRight:
       let (x, y) = reverseBottomRight(rect, radius, point: point)
       let (c1x, c1y) = reverseBottomRight(rect, radius, point: c1)
       let (c2x, c2y) = reverseBottomRight(rect, radius, point: c2)
-      print("addCurve(to: \(functionType.funcName)(rect, \(formattedNumber(x)), \(formattedNumber(y)), limitedRadius), controlPoint1: \(functionType.funcName)(rect, \(formattedNumber(c1x)), \(formattedNumber(c1y)), limitedRadius), controlPoint2: \(functionType.funcName)(rect, \(formattedNumber(c2x)), \(formattedNumber(c2y)), limitedRadius))")
-    case .top:
-      ChouTi.assertFailure("unexpected")
-    case .bottom:
-      ChouTi.assertFailure("unexpected")
-    case .left:
-      ChouTi.assertFailure("unexpected")
-    case .right:
-      ChouTi.assertFailure("unexpected")
+      print("addCurve(to: \(functionType.funcName)(rect, \(formattedNumber(x)), \(formattedNumber(y)), \(radiusName)), controlPoint1: \(functionType.funcName)(rect, \(formattedNumber(c1x)), \(formattedNumber(c1y)), \(radiusName)), controlPoint2: \(functionType.funcName)(rect, \(formattedNumber(c2x)), \(formattedNumber(c2y)), \(radiusName)))")
     }
   case .closeSubpath:
     print("close()")
