@@ -322,7 +322,7 @@ class NSBezierPath_RoundedRectTests: XCTestCase {
     ]
     #endif
 
-    expectPathElementsEqual(path.cgPath.pathElements(), expectedElements, absoluteTolerance: 1e-5)
+    expectPathElementsEqual(path.cgPath.pathElements(), expectedElements)
   }
 
   func test_horizontalRect_shape3b_2() {
@@ -363,7 +363,7 @@ class NSBezierPath_RoundedRectTests: XCTestCase {
     ]
     #endif
 
-    expectPathElementsEqual(path.cgPath.pathElements(), expectedElements, absoluteTolerance: 1e-5)
+    expectPathElementsEqual(path.cgPath.pathElements(), expectedElements)
   }
 
   func test_verticalRect_shape1() {
@@ -728,32 +728,19 @@ class NSBezierPath_RoundedRectTests: XCTestCase {
 
   func test_horizontalRect_shape3b_roundingCorners_none() {
     let rect = CGRect(x: 0, y: 0, width: 160, height: 100)
-    let path = BezierPath(roundedRect: rect, byRoundingCorners: [], cornerRadii: CGSize(width: 64, height: 64))
+    let roundingCorners: RectCorner = []
+    let cornerRadii = CGSize(width: 64, height: 64)
 
-    // printPathElements(path.cgPath.pathElements())
+    Assert.setTestAssertionFailureHandler { message, metadata, file, line, column in
+      expect(message) == "shape 3b only supports all rounding corners"
+      expect(metadata["rect"]) == "\(rect)"
+      expect(metadata["cornerRadius"]) == "\(cornerRadii.width)"
+      expect(metadata["roundingCorners"]) == "\(roundingCorners)"
+    }
 
-    var expectedElements: [CGPathElement.Element] = [
-      .moveToPoint(CGPoint(x: 0.0, y: 0.0)),
-      .addLineToPoint(CGPoint(x: 160.0, y: 0.0)),
-      .addLineToPoint(CGPoint(x: 160.0, y: 100.0)),
-      .addLineToPoint(CGPoint(x: 0.0, y: 100.0)),
-      .addLineToPoint(CGPoint(x: 0.0, y: 0.0)),
-    ]
+    _ = BezierPath(roundedRect: rect, byRoundingCorners: roundingCorners, cornerRadii: cornerRadii)
 
-    #if canImport(AppKit)
-    expectedElements += [
-      .closeSubpath,
-      .moveToPoint(CGPoint(x: 0.0, y: 0.0)),
-    ]
-    #endif
-
-    #if canImport(UIKit)
-    expectedElements += [
-      .addLineToPoint(CGPoint(x: 0.0, y: 0.0)),
-    ]
-    #endif
-
-    expectPathElementsEqual(path.cgPath.pathElements(), expectedElements)
+    Assert.resetTestAssertionFailureHandler()
   }
 
   func test_horizontalRect_shape3b_roundingCorners_topRight() {
@@ -762,7 +749,7 @@ class NSBezierPath_RoundedRectTests: XCTestCase {
     let cornerRadii = CGSize(width: 64, height: 64)
 
     Assert.setTestAssertionFailureHandler { message, metadata, file, line, column in
-      expect(message) == "shape 3b only supports all or none rounding corners"
+      expect(message) == "shape 3b only supports all rounding corners"
       expect(metadata["rect"]) == "\(rect)"
       expect(metadata["cornerRadius"]) == "\(cornerRadii.width)"
       expect(metadata["roundingCorners"]) == "\(roundingCorners)"
@@ -1184,6 +1171,10 @@ class NSBezierPath_RoundedRectTests: XCTestCase {
   func test_generate_shape2b() {
     NSBezierPathRoundedRectGenerator.generateShape2bCode()
   }
+
+  func test_generate_shape3b() {
+    NSBezierPathRoundedRectGenerator.generateShape3bCode()
+  }
   #endif
 }
 
@@ -1519,6 +1510,107 @@ public enum NSBezierPathRoundedRectGenerator {
       case 20:
         print("\n// top center")
         print("addCurve(to: rect.topCenter, controlPoint1: rect.topCenter, controlPoint2: rect.topCenter)")
+      case 21:
+        print("addLine(to: rect.topCenter)")
+      default:
+        ChouTi.assertFailure("unexpected")
+      }
+    }
+
+    print("\nclose()")
+
+    print("==================== End ====================")
+  }
+
+  public static func generateShape3bCode() {
+    print(
+      #"""
+      ==================== Shape 3b ====================
+      ChouTi.assert(roundingCorners == .all, "shape 3b only supports all rounding corners", metadata: [
+        "rect": "\(rect)",
+        "cornerRadius": "\(cornerRadius)",
+        "roundingCorners": "\(roundingCorners)",
+      ])
+
+      let limit: CGFloat = min(rect.width, rect.height) / 2 / 1.52866483
+      let limitedRadius: CGFloat = min(cornerRadius, limit)
+
+      """#
+    )
+
+    let rect = CGRect(0, 0, 120, 90)
+    let cornerRadius: CGFloat = 44
+    let limit = min(rect.width, rect.height) / 2 / 1.52866483
+    let limitedRadius = min(cornerRadius, limit)
+
+    let shape3b = BezierPath(roundedRect: rect, cornerRadius: cornerRadius).cgPath
+    let shape3bPathElements = shape3b.pathElements()
+    ChouTi.assert(shape3bPathElements.count == 22)
+
+    for (i, e) in shape3bPathElements.enumerated() {
+      switch i {
+      case 0:
+        print("move(to: rect.topCenter)")
+      case 1:
+        print("\n// top center")
+        print("addLine(to: rect.topCenter)")
+      case 2:
+        print("\n// top right")
+        printCodeLine(rect, limitedRadius, e, .topRight)
+      case 3:
+        printCodeLine(rect, limitedRadius, e, .topRight)
+      case 4:
+        print("\n// right center")
+        if case .addCurveToPoint(let c1, let c2, let point) = e {
+          let (c1x, c1y) = reverseTopRight(rect, limitedRadius, point: c1)
+          let (c2x, c2y) = reverseTopRight(rect, limitedRadius, point: c2)
+          print("addCurve(to: rect.rightCenter, controlPoint1: topRight(rect, \(formattedNumber(c1x)), \(formattedNumber(c1y)), limitedRadius), controlPoint2: topRight(rect, \(formattedNumber(c2x)), \(formattedNumber(c2y)), limitedRadius))")
+        } else {
+          ChouTi.assertFailure("unexpected element: \(e)")
+        }
+      case 5:
+        print("addCurve(to: rect.rightCenter, controlPoint1: rect.rightCenter, controlPoint2: rect.rightCenter)")
+      case 6:
+        print("addLine(to: rect.rightCenter)")
+      case 7:
+        print("addCurve(to: rect.rightCenter, controlPoint1: rect.rightCenter, controlPoint2: rect.rightCenter)")
+      case 8:
+        print("addLine(to: rect.rightCenter)")
+      case 9:
+        print("\n// bottom right")
+        printCodeLine(rect, limitedRadius, e, .bottomRight)
+      case 10:
+        printCodeLine(rect, limitedRadius, e, .bottomRight)
+      case 11:
+        print("\n// bottom center")
+        print("addLine(to: rect.bottomCenter)")
+      case 12:
+        print("\n// bottom left")
+        printCodeLine(rect, limitedRadius, e, .bottomLeft)
+      case 13:
+        printCodeLine(rect, limitedRadius, e, .bottomLeft)
+      case 14:
+        print("\n// left center")
+        if case .addCurveToPoint(let c1, let c2, let point) = e {
+          let (c1x, c1y) = reverseBottomLeft(rect, limitedRadius, point: c1)
+          let (c2x, c2y) = reverseBottomLeft(rect, limitedRadius, point: c2)
+          print("addCurve(to: rect.leftCenter, controlPoint1: bottomLeft(rect, \(formattedNumber(c1x)), \(formattedNumber(c1y)), limitedRadius), controlPoint2: bottomLeft(rect, \(formattedNumber(c2x)), \(formattedNumber(c2y)), limitedRadius))")
+        } else {
+          ChouTi.assertFailure("unexpected element: \(e)")
+        }
+      case 15:
+        print("addCurve(to: rect.leftCenter, controlPoint1: rect.leftCenter, controlPoint2: rect.leftCenter)")
+      case 16:
+        print("addLine(to: rect.leftCenter)")
+      case 17:
+        print("addCurve(to: rect.leftCenter, controlPoint1: rect.leftCenter, controlPoint2: rect.leftCenter)")
+      case 18:
+        print("addLine(to: rect.leftCenter)")
+      case 19:
+        print("\n// top left")
+        printCodeLine(rect, limitedRadius, e, .topLeft)
+      case 20:
+        printCodeLine(rect, limitedRadius, e, .topLeft)
       case 21:
         print("addLine(to: rect.topCenter)")
       default:
