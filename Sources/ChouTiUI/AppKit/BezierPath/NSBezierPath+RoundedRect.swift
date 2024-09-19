@@ -347,7 +347,7 @@ public extension NSBezierPath {
     ])
 
     let limit: CGFloat = min(rect.width, rect.height) / 2 / 1.52866483
-    let radius: CGFloat = min(cornerRadius, limit)
+    let limitedRadius: CGFloat = min(cornerRadius, limit)
 
     move(to: rect.topCenter)
 
@@ -356,15 +356,15 @@ public extension NSBezierPath {
     addCurve(to: rect.topCenter, controlPoint1: rect.topCenter, controlPoint2: rect.topCenter)
 
     // top right
-    addLine(to: topRight(rect, 1.45223153, 0, radius))
-    addCurve(to: topRight(rect, 0.11451442, 0.93667936, radius), controlPoint1: topRight(rect, 0.85376573, 0.00000001, radius), controlPoint2: topRight(rect, 0.31920189, 0.37430537, radius))
-    addCurve(to: topRight(rect, 0, 2.30815387, radius), controlPoint1: topRight(rect, 0, 1.29884040, radius), controlPoint2: topRight(rect, 0, 1.63527822, radius))
+    addLine(to: topRight(rect, 1.45223153, 0, limitedRadius))
+    addCurve(to: topRight(rect, 0.11451442, 0.93667936, limitedRadius), controlPoint1: topRight(rect, 0.85376573, 0.00000001, limitedRadius), controlPoint2: topRight(rect, 0.31920189, 0.37430537, limitedRadius))
+    addCurve(to: topRight(rect, 0, 2.30815387, limitedRadius), controlPoint1: topRight(rect, 0, 1.29884040, limitedRadius), controlPoint2: topRight(rect, 0, 1.63527822, limitedRadius))
 
     // bottom right
     addLine(to: bottomRight(rect, 0, 1.52866483, cornerRadius))
-    addCurve(to: bottomRight(rect, 0.10012137, 0.99544269, radius), controlPoint1: bottomRight(rect, 0, 1.63527822, radius), controlPoint2: bottomRight(rect, 0, 1.29884028, radius))
-    addLine(to: bottomRight(rect, 0.11451442, 0.93667972, radius))
-    addCurve(to: bottomRight(rect, 1.45223165, 0, radius), controlPoint1: bottomRight(rect, 0.31920189, 0.37430552, radius), controlPoint2: bottomRight(rect, 0.85376549, 0, radius))
+    addCurve(to: bottomRight(rect, 0.10012137, 0.99544269, limitedRadius), controlPoint1: bottomRight(rect, 0, 1.63527822, limitedRadius), controlPoint2: bottomRight(rect, 0, 1.29884028, limitedRadius))
+    addLine(to: bottomRight(rect, 0.11451442, 0.93667972, limitedRadius))
+    addCurve(to: bottomRight(rect, 1.45223165, 0, limitedRadius), controlPoint1: bottomRight(rect, 0.31920189, 0.37430552, limitedRadius), controlPoint2: bottomRight(rect, 0.85376549, 0, limitedRadius))
 
     // bottom center
     addCurve(to: rect.bottomCenter, controlPoint1: rect.bottomCenter, controlPoint2: rect.bottomCenter)
@@ -372,15 +372,15 @@ public extension NSBezierPath {
     addCurve(to: rect.bottomCenter, controlPoint1: rect.bottomCenter, controlPoint2: rect.bottomCenter)
 
     // bottom left
-    addLine(to: bottomLeft(rect, 1.45223141, 0, radius))
-    addCurve(to: bottomLeft(rect, 0.11451446, 0.93667972, radius), controlPoint1: bottomLeft(rect, 0.85376543, 0, radius), controlPoint2: bottomLeft(rect, 0.31920192, 0.37430552, radius))
-    addCurve(to: bottomLeft(rect, 0, 2.30815387, radius), controlPoint1: bottomLeft(rect, 0, 1.29884028, radius), controlPoint2: bottomLeft(rect, 0, 1.63527822, radius))
+    addLine(to: bottomLeft(rect, 1.45223141, 0, limitedRadius))
+    addCurve(to: bottomLeft(rect, 0.11451446, 0.93667972, limitedRadius), controlPoint1: bottomLeft(rect, 0.85376543, 0, limitedRadius), controlPoint2: bottomLeft(rect, 0.31920192, 0.37430552, limitedRadius))
+    addCurve(to: bottomLeft(rect, 0, 2.30815387, limitedRadius), controlPoint1: bottomLeft(rect, 0, 1.29884028, limitedRadius), controlPoint2: bottomLeft(rect, 0, 1.63527822, limitedRadius))
 
     // top left
     addLine(to: topLeft(rect, 0, 1.52866483, cornerRadius))
-    addCurve(to: topLeft(rect, 0.10012126, 0.99544257, radius), controlPoint1: topLeft(rect, 0, 1.63527822, radius), controlPoint2: topLeft(rect, 0, 1.29884040, radius))
-    addLine(to: topLeft(rect, 0.11451443, 0.93667966, radius))
-    addCurve(to: topLeft(rect, 1.45223153, 0, radius), controlPoint1: topLeft(rect, 0.31920189, 0.37430552, radius), controlPoint2: topLeft(rect, 0.85376549, 0, radius))
+    addCurve(to: topLeft(rect, 0.10012126, 0.99544257, limitedRadius), controlPoint1: topLeft(rect, 0, 1.63527822, limitedRadius), controlPoint2: topLeft(rect, 0, 1.29884040, limitedRadius))
+    addLine(to: topLeft(rect, 0.11451443, 0.93667966, limitedRadius))
+    addCurve(to: topLeft(rect, 1.45223153, 0, limitedRadius), controlPoint1: topLeft(rect, 0.31920189, 0.37430552, limitedRadius), controlPoint2: topLeft(rect, 0.85376549, 0, limitedRadius))
 
     // top center
     addCurve(to: rect.topCenter, controlPoint1: rect.topCenter, controlPoint2: rect.topCenter)
