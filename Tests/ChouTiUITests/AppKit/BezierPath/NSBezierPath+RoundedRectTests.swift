@@ -136,6 +136,39 @@ class NSBezierPath_RoundedRectTests: XCTestCase {
     expect(path.cgPath.pathElements()) == expectedElements
   }
 
+  func test_horizontalRect_shape1_leastPositiveCornerRadius() {
+    let rect = CGRect(x: 0, y: 0, width: 160, height: 100)
+    let path = BezierPath(roundedRect: rect, cornerRadius: .leastNonzeroMagnitude)
+
+    // printPathElements(path.cgPath.pathElements())
+
+    let expectedElements: [CGPathElement.Element] = [
+      .moveToPoint(CGPoint(x: 1e-323, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 160.0, y: 0.0)),
+      .addCurveToPoint(CGPoint(x: 160.0, y: 0.0), CGPoint(x: 160.0, y: 0.0), CGPoint(x: 160.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 160.0, y: 0.0)),
+      .addCurveToPoint(CGPoint(x: 160.0, y: 0.0), CGPoint(x: 160.0, y: 5e-324), CGPoint(x: 160.0, y: 5e-324)),
+      .addCurveToPoint(CGPoint(x: 160.0, y: 5e-324), CGPoint(x: 160.0, y: 5e-324), CGPoint(x: 160.0, y: 5e-324)),
+      .addLineToPoint(CGPoint(x: 160.0, y: 100.0)),
+      .addCurveToPoint(CGPoint(x: 160.0, y: 100.0), CGPoint(x: 160.0, y: 100.0), CGPoint(x: 160.0, y: 100.0)),
+      .addLineToPoint(CGPoint(x: 160.0, y: 100.0)),
+      .addCurveToPoint(CGPoint(x: 160.0, y: 100.0), CGPoint(x: 160.0, y: 100.0), CGPoint(x: 160.0, y: 100.0)),
+      .addCurveToPoint(CGPoint(x: 160.0, y: 100.0), CGPoint(x: 160.0, y: 100.0), CGPoint(x: 160.0, y: 100.0)),
+      .addLineToPoint(CGPoint(x: 1e-323, y: 100.0)),
+      .addCurveToPoint(CGPoint(x: 5e-324, y: 100.0), CGPoint(x: 5e-324, y: 100.0), CGPoint(x: 5e-324, y: 100.0)),
+      .addLineToPoint(CGPoint(x: 5e-324, y: 100.0)),
+      .addCurveToPoint(CGPoint(x: 5e-324, y: 100.0), CGPoint(x: 0.0, y: 100.0), CGPoint(x: 0.0, y: 100.0)),
+      .addCurveToPoint(CGPoint(x: 0.0, y: 100.0), CGPoint(x: 0.0, y: 100.0), CGPoint(x: 0.0, y: 100.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 1e-323)),
+      .addCurveToPoint(CGPoint(x: 0.0, y: 5e-324), CGPoint(x: 0.0, y: 5e-324), CGPoint(x: 0.0, y: 5e-324)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 5e-324)),
+      .addCurveToPoint(CGPoint(x: 0.0, y: 5e-324), CGPoint(x: 5e-324, y: 0.0), CGPoint(x: 5e-324, y: 0.0)),
+      .addCurveToPoint(CGPoint(x: 5e-324, y: 0.0), CGPoint(x: 5e-324, y: 0.0), CGPoint(x: 5e-324, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 1e-323, y: 0.0)),
+    ]
+    expectPathElementsEqual(path.cgPath.pathElements(), expectedElements)
+  }
+
   func test_horizontalRect_shape1_negativeCornerRadius() {
     let rect = CGRect(x: 0, y: 0, width: 160, height: 100)
     let path = BezierPath(roundedRect: rect, cornerRadius: -10)
@@ -548,6 +581,27 @@ class NSBezierPath_RoundedRectTests: XCTestCase {
     expectPathElementsEqual(path.cgPath.pathElements(), expectedElements)
   }
 
+  func test_horizontalRect_shape1_roundingCorners_topLeft() {
+    let rect = CGRect(x: 0, y: 0, width: 160, height: 100)
+    let path = BezierPath(roundedRect: rect, byRoundingCorners: [.topLeft], cornerRadii: CGSize(width: 20, height: 20))
+
+    // printPathElements(path.cgPath.pathElements())
+
+    let expectedElements: [CGPathElement.Element] = [
+      .moveToPoint(CGPoint(x: 30.5733, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 160.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 160.0, y: 100.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 100.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 30.5733)),
+      .addCurveToPoint(CGPoint(x: 0.0, y: 21.76985915237058), CGPoint(x: 0.0, y: 17.368138881260045), CGPoint(x: 1.4982277569403166, y: 12.62987585661985)),
+      .addLineToPoint(CGPoint(x: 1.4982277569403175, y: 12.62987585661985)),
+      .addCurveToPoint(CGPoint(x: 3.381191120887396, y: 7.456476532514936), CGPoint(x: 7.456476532514937, y: 3.3811911208873955), CGPoint(x: 12.629875856619853, y: 1.4982277569403175)),
+      .addCurveToPoint(CGPoint(x: 17.368138881260045, y: 0.0), CGPoint(x: 21.76985915237058, y: 0.0), CGPoint(x: 30.573299694591647, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 30.5733, y: 0.0)),
+    ]
+    expectPathElementsEqual(path.cgPath.pathElements(), expectedElements)
+  }
+
   func test_horizontalRect_shape1_roundingCorners_topRight() {
     let rect = CGRect(x: 0, y: 0, width: 160, height: 100)
     let path = BezierPath(roundedRect: rect, byRoundingCorners: [.topRight], cornerRadii: CGSize(width: 20, height: 20))
@@ -561,6 +615,552 @@ class NSBezierPath_RoundedRectTests: XCTestCase {
       .addLineToPoint(CGPoint(x: 147.37012414338017, y: 1.4982277569403195)),
       .addCurveToPoint(CGPoint(x: 152.54352346748507, y: 3.3811911208874), CGPoint(x: 156.6188088791126, y: 7.4564765325149365), CGPoint(x: 158.5017722430597, y: 12.629875856619853)),
       .addCurveToPoint(CGPoint(x: 160.0, y: 17.368138881260045), CGPoint(x: 160.0, y: 21.76985915237058), CGPoint(x: 160.0, y: 30.573299694591647)),
+      .addLineToPoint(CGPoint(x: 160.0, y: 100.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 100.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 0.0)),
+    ]
+    expectPathElementsEqual(path.cgPath.pathElements(), expectedElements)
+  }
+
+  func test_horizontalRect_shape1_roundingCorners_bottomRight() {
+    let rect = CGRect(x: 0, y: 0, width: 160, height: 100)
+    let path = BezierPath(roundedRect: rect, byRoundingCorners: [.bottomRight], cornerRadii: CGSize(width: 20, height: 20))
+
+    // printPathElements(path.cgPath.pathElements())
+
+    let expectedElements: [CGPathElement.Element] = [
+      .moveToPoint(CGPoint(x: 0.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 160.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 160.0, y: 69.4267)),
+      .addCurveToPoint(CGPoint(x: 160.0, y: 78.23014084762943), CGPoint(x: 160.0, y: 82.63186111873995), CGPoint(x: 158.5017722430597, y: 87.37012414338015)),
+      .addLineToPoint(CGPoint(x: 158.5017722430597, y: 87.37012414338015)),
+      .addCurveToPoint(CGPoint(x: 156.6188088791126, y: 92.54352346748507), CGPoint(x: 152.54352346748504, y: 96.61880887911259), CGPoint(x: 147.37012414338014, y: 98.50177224305968)),
+      .addCurveToPoint(CGPoint(x: 142.63186111873995, y: 100.0), CGPoint(x: 138.23014084762943, y: 100.0), CGPoint(x: 129.42670030540836, y: 100.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 100.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 0.0)),
+    ]
+    expectPathElementsEqual(path.cgPath.pathElements(), expectedElements)
+  }
+
+  func test_horizontalRect_shape1_roundingCorners_bottomLeft() {
+    let rect = CGRect(x: 0, y: 0, width: 160, height: 100)
+    let path = BezierPath(roundedRect: rect, byRoundingCorners: [.bottomLeft], cornerRadii: CGSize(width: 20, height: 20))
+
+    // printPathElements(path.cgPath.pathElements())
+
+    let expectedElements: [CGPathElement.Element] = [
+      .moveToPoint(CGPoint(x: 0.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 160.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 160.0, y: 100.0)),
+      .addLineToPoint(CGPoint(x: 30.5733, y: 100.0)),
+      .addCurveToPoint(CGPoint(x: 21.76985915237058, y: 100.0), CGPoint(x: 17.368138881260045, y: 100.0), CGPoint(x: 12.62987585661985, y: 98.50177224305969)),
+      .addLineToPoint(CGPoint(x: 12.62987585661985, y: 98.50177224305968)),
+      .addCurveToPoint(CGPoint(x: 7.456476532514935, y: 96.61880887911259), CGPoint(x: 3.3811911208873995, y: 92.54352346748507), CGPoint(x: 1.4982277569403195, y: 87.37012414338015)),
+      .addCurveToPoint(CGPoint(x: 0.0, y: 82.63186111873995), CGPoint(x: 0.0, y: 78.23014084762943), CGPoint(x: 0.0, y: 69.42670030540836)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 0.0)),
+    ]
+    expectPathElementsEqual(path.cgPath.pathElements(), expectedElements)
+  }
+
+  func test_horizontalRect_shape1_roundingCorners_topLeft_topRight() {
+    let rect = CGRect(x: 0, y: 0, width: 160, height: 100)
+    let path = BezierPath(roundedRect: rect, byRoundingCorners: [.topLeft, .topRight], cornerRadii: CGSize(width: 20, height: 20))
+
+    // printPathElements(path.cgPath.pathElements())
+
+    let expectedElements: [CGPathElement.Element] = [
+      .moveToPoint(CGPoint(x: 30.5733, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 129.4267, y: 0.0)),
+      .addCurveToPoint(CGPoint(x: 138.23014084762943, y: 0.0), CGPoint(x: 142.63186111873995, y: 0.0), CGPoint(x: 147.37012414338017, y: 1.4982277569403202)),
+      .addLineToPoint(CGPoint(x: 147.37012414338017, y: 1.4982277569403195)),
+      .addCurveToPoint(CGPoint(x: 152.54352346748507, y: 3.3811911208874), CGPoint(x: 156.6188088791126, y: 7.4564765325149365), CGPoint(x: 158.5017722430597, y: 12.629875856619853)),
+      .addCurveToPoint(CGPoint(x: 160.0, y: 17.368138881260045), CGPoint(x: 160.0, y: 21.76985915237058), CGPoint(x: 160.0, y: 30.573299694591647)),
+      .addLineToPoint(CGPoint(x: 160.0, y: 100.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 100.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 30.5733)),
+      .addCurveToPoint(CGPoint(x: 0.0, y: 21.76985915237058), CGPoint(x: 0.0, y: 17.368138881260045), CGPoint(x: 1.4982277569403166, y: 12.62987585661985)),
+      .addLineToPoint(CGPoint(x: 1.4982277569403175, y: 12.62987585661985)),
+      .addCurveToPoint(CGPoint(x: 3.381191120887396, y: 7.456476532514936), CGPoint(x: 7.456476532514937, y: 3.3811911208873955), CGPoint(x: 12.629875856619853, y: 1.4982277569403175)),
+      .addCurveToPoint(CGPoint(x: 17.368138881260045, y: 0.0), CGPoint(x: 21.76985915237058, y: 0.0), CGPoint(x: 30.573299694591647, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 30.5733, y: 0.0)),
+    ]
+    expectPathElementsEqual(path.cgPath.pathElements(), expectedElements)
+  }
+
+  func test_horizontalRect_shape1_roundingCorners_topLeft_bottomRight() {
+    let rect = CGRect(x: 0, y: 0, width: 160, height: 100)
+    let path = BezierPath(roundedRect: rect, byRoundingCorners: [.topLeft, .bottomRight], cornerRadii: CGSize(width: 20, height: 20))
+
+    // printPathElements(path.cgPath.pathElements())
+
+    let expectedElements: [CGPathElement.Element] = [
+      .moveToPoint(CGPoint(x: 30.5733, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 160.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 160.0, y: 69.4267)),
+      .addCurveToPoint(CGPoint(x: 160.0, y: 78.23014084762943), CGPoint(x: 160.0, y: 82.63186111873995), CGPoint(x: 158.5017722430597, y: 87.37012414338015)),
+      .addLineToPoint(CGPoint(x: 158.5017722430597, y: 87.37012414338015)),
+      .addCurveToPoint(CGPoint(x: 156.6188088791126, y: 92.54352346748507), CGPoint(x: 152.54352346748504, y: 96.61880887911259), CGPoint(x: 147.37012414338014, y: 98.50177224305968)),
+      .addCurveToPoint(CGPoint(x: 142.63186111873995, y: 100.0), CGPoint(x: 138.23014084762943, y: 100.0), CGPoint(x: 129.42670030540836, y: 100.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 100.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 30.5733)),
+      .addCurveToPoint(CGPoint(x: 0.0, y: 21.76985915237058), CGPoint(x: 0.0, y: 17.368138881260045), CGPoint(x: 1.4982277569403166, y: 12.62987585661985)),
+      .addLineToPoint(CGPoint(x: 1.4982277569403175, y: 12.62987585661985)),
+      .addCurveToPoint(CGPoint(x: 3.381191120887396, y: 7.456476532514936), CGPoint(x: 7.456476532514937, y: 3.3811911208873955), CGPoint(x: 12.629875856619853, y: 1.4982277569403175)),
+      .addCurveToPoint(CGPoint(x: 17.368138881260045, y: 0.0), CGPoint(x: 21.76985915237058, y: 0.0), CGPoint(x: 30.573299694591647, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 30.5733, y: 0.0)),
+    ]
+    expectPathElementsEqual(path.cgPath.pathElements(), expectedElements)
+  }
+
+  func test_horizontalRect_shape1_roundingCorners_topLeft_bottomLeft() {
+    let rect = CGRect(x: 0, y: 0, width: 160, height: 100)
+    let path = BezierPath(roundedRect: rect, byRoundingCorners: [.topLeft, .bottomLeft], cornerRadii: CGSize(width: 20, height: 20))
+
+    // printPathElements(path.cgPath.pathElements())
+
+    let expectedElements: [CGPathElement.Element] = [
+      .moveToPoint(CGPoint(x: 30.5733, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 160.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 160.0, y: 100.0)),
+      .addLineToPoint(CGPoint(x: 30.5733, y: 100.0)),
+      .addCurveToPoint(CGPoint(x: 21.76985915237058, y: 100.0), CGPoint(x: 17.368138881260045, y: 100.0), CGPoint(x: 12.62987585661985, y: 98.50177224305969)),
+      .addLineToPoint(CGPoint(x: 12.62987585661985, y: 98.50177224305968)),
+      .addCurveToPoint(CGPoint(x: 7.456476532514935, y: 96.61880887911259), CGPoint(x: 3.3811911208873995, y: 92.54352346748507), CGPoint(x: 1.4982277569403195, y: 87.37012414338015)),
+      .addCurveToPoint(CGPoint(x: 0.0, y: 82.63186111873995), CGPoint(x: 0.0, y: 78.23014084762943), CGPoint(x: 0.0, y: 69.42670030540836)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 30.5733)),
+      .addCurveToPoint(CGPoint(x: 0.0, y: 21.76985915237058), CGPoint(x: 0.0, y: 17.368138881260045), CGPoint(x: 1.4982277569403166, y: 12.62987585661985)),
+      .addLineToPoint(CGPoint(x: 1.4982277569403175, y: 12.62987585661985)),
+      .addCurveToPoint(CGPoint(x: 3.381191120887396, y: 7.456476532514936), CGPoint(x: 7.456476532514937, y: 3.3811911208873955), CGPoint(x: 12.629875856619853, y: 1.4982277569403175)),
+      .addCurveToPoint(CGPoint(x: 17.368138881260045, y: 0.0), CGPoint(x: 21.76985915237058, y: 0.0), CGPoint(x: 30.573299694591647, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 30.5733, y: 0.0)),
+    ]
+    expectPathElementsEqual(path.cgPath.pathElements(), expectedElements)
+  }
+
+  func test_horizontalRect_shape1_roundingCorners_topRight_bottomRight() {
+    let rect = CGRect(x: 0, y: 0, width: 160, height: 100)
+    let path = BezierPath(roundedRect: rect, byRoundingCorners: [.topRight, .bottomRight], cornerRadii: CGSize(width: 20, height: 20))
+
+    // printPathElements(path.cgPath.pathElements())
+
+    let expectedElements: [CGPathElement.Element] = [
+      .moveToPoint(CGPoint(x: 0.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 129.4267, y: 0.0)),
+      .addCurveToPoint(CGPoint(x: 138.23014084762943, y: 0.0), CGPoint(x: 142.63186111873995, y: 0.0), CGPoint(x: 147.37012414338017, y: 1.4982277569403202)),
+      .addLineToPoint(CGPoint(x: 147.37012414338017, y: 1.4982277569403195)),
+      .addCurveToPoint(CGPoint(x: 152.54352346748507, y: 3.3811911208874), CGPoint(x: 156.6188088791126, y: 7.4564765325149365), CGPoint(x: 158.5017722430597, y: 12.629875856619853)),
+      .addCurveToPoint(CGPoint(x: 160.0, y: 17.368138881260045), CGPoint(x: 160.0, y: 21.76985915237058), CGPoint(x: 160.0, y: 30.573299694591647)),
+      .addLineToPoint(CGPoint(x: 160.0, y: 69.4267)),
+      .addCurveToPoint(CGPoint(x: 160.0, y: 78.23014084762943), CGPoint(x: 160.0, y: 82.63186111873995), CGPoint(x: 158.5017722430597, y: 87.37012414338015)),
+      .addLineToPoint(CGPoint(x: 158.5017722430597, y: 87.37012414338015)),
+      .addCurveToPoint(CGPoint(x: 156.6188088791126, y: 92.54352346748507), CGPoint(x: 152.54352346748504, y: 96.61880887911259), CGPoint(x: 147.37012414338014, y: 98.50177224305968)),
+      .addCurveToPoint(CGPoint(x: 142.63186111873995, y: 100.0), CGPoint(x: 138.23014084762943, y: 100.0), CGPoint(x: 129.42670030540836, y: 100.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 100.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 0.0)),
+    ]
+    expectPathElementsEqual(path.cgPath.pathElements(), expectedElements)
+  }
+
+  func test_horizontalRect_shape1_roundingCorners_topRight_bottomLeft() {
+    let rect = CGRect(x: 0, y: 0, width: 160, height: 100)
+    let path = BezierPath(roundedRect: rect, byRoundingCorners: [.topRight, .bottomLeft], cornerRadii: CGSize(width: 20, height: 20))
+
+    // printPathElements(path.cgPath.pathElements())
+
+    let expectedElements: [CGPathElement.Element] = [
+      .moveToPoint(CGPoint(x: 0.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 129.4267, y: 0.0)),
+      .addCurveToPoint(CGPoint(x: 138.23014084762943, y: 0.0), CGPoint(x: 142.63186111873995, y: 0.0), CGPoint(x: 147.37012414338017, y: 1.4982277569403202)),
+      .addLineToPoint(CGPoint(x: 147.37012414338017, y: 1.4982277569403195)),
+      .addCurveToPoint(CGPoint(x: 152.54352346748507, y: 3.3811911208874), CGPoint(x: 156.6188088791126, y: 7.4564765325149365), CGPoint(x: 158.5017722430597, y: 12.629875856619853)),
+      .addCurveToPoint(CGPoint(x: 160.0, y: 17.368138881260045), CGPoint(x: 160.0, y: 21.76985915237058), CGPoint(x: 160.0, y: 30.573299694591647)),
+      .addLineToPoint(CGPoint(x: 160.0, y: 100.0)),
+      .addLineToPoint(CGPoint(x: 30.5733, y: 100.0)),
+      .addCurveToPoint(CGPoint(x: 21.76985915237058, y: 100.0), CGPoint(x: 17.368138881260045, y: 100.0), CGPoint(x: 12.62987585661985, y: 98.50177224305969)),
+      .addLineToPoint(CGPoint(x: 12.62987585661985, y: 98.50177224305968)),
+      .addCurveToPoint(CGPoint(x: 7.456476532514935, y: 96.61880887911259), CGPoint(x: 3.3811911208873995, y: 92.54352346748507), CGPoint(x: 1.4982277569403195, y: 87.37012414338015)),
+      .addCurveToPoint(CGPoint(x: 0.0, y: 82.63186111873995), CGPoint(x: 0.0, y: 78.23014084762943), CGPoint(x: 0.0, y: 69.42670030540836)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 0.0)),
+    ]
+    expectPathElementsEqual(path.cgPath.pathElements(), expectedElements)
+  }
+
+  func test_horizontalRect_shape1_roundingCorners_bottomRight_bottomLeft() {
+    let rect = CGRect(x: 0, y: 0, width: 160, height: 100)
+    let path = BezierPath(roundedRect: rect, byRoundingCorners: [.bottomRight, .bottomLeft], cornerRadii: CGSize(width: 20, height: 20))
+
+    // printPathElements(path.cgPath.pathElements())
+
+    let expectedElements: [CGPathElement.Element] = [
+      .moveToPoint(CGPoint(x: 0.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 160.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 160.0, y: 69.4267)),
+      .addCurveToPoint(CGPoint(x: 160.0, y: 78.23014084762943), CGPoint(x: 160.0, y: 82.63186111873995), CGPoint(x: 158.5017722430597, y: 87.37012414338015)),
+      .addLineToPoint(CGPoint(x: 158.5017722430597, y: 87.37012414338015)),
+      .addCurveToPoint(CGPoint(x: 156.6188088791126, y: 92.54352346748507), CGPoint(x: 152.54352346748504, y: 96.61880887911259), CGPoint(x: 147.37012414338014, y: 98.50177224305968)),
+      .addCurveToPoint(CGPoint(x: 142.63186111873995, y: 100.0), CGPoint(x: 138.23014084762943, y: 100.0), CGPoint(x: 129.42670030540836, y: 100.0)),
+      .addLineToPoint(CGPoint(x: 30.5733, y: 100.0)),
+      .addCurveToPoint(CGPoint(x: 21.76985915237058, y: 100.0), CGPoint(x: 17.368138881260045, y: 100.0), CGPoint(x: 12.62987585661985, y: 98.50177224305969)),
+      .addLineToPoint(CGPoint(x: 12.62987585661985, y: 98.50177224305968)),
+      .addCurveToPoint(CGPoint(x: 7.456476532514935, y: 96.61880887911259), CGPoint(x: 3.3811911208873995, y: 92.54352346748507), CGPoint(x: 1.4982277569403195, y: 87.37012414338015)),
+      .addCurveToPoint(CGPoint(x: 0.0, y: 82.63186111873995), CGPoint(x: 0.0, y: 78.23014084762943), CGPoint(x: 0.0, y: 69.42670030540836)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 0.0)),
+    ]
+    expectPathElementsEqual(path.cgPath.pathElements(), expectedElements)
+  }
+
+  func test_horizontalRect_shape1_roundingCorners_no_topLeft() {
+    let rect = CGRect(x: 0, y: 0, width: 160, height: 100)
+    let path = BezierPath(roundedRect: rect, byRoundingCorners: [.topRight, .bottomRight, .bottomLeft], cornerRadii: CGSize(width: 20, height: 20))
+
+    // printPathElements(path.cgPath.pathElements())
+
+    let expectedElements: [CGPathElement.Element] = [
+      .moveToPoint(CGPoint(x: 0.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 129.4267, y: 0.0)),
+      .addCurveToPoint(CGPoint(x: 138.23014084762943, y: 0.0), CGPoint(x: 142.63186111873995, y: 0.0), CGPoint(x: 147.37012414338017, y: 1.4982277569403202)),
+      .addLineToPoint(CGPoint(x: 147.37012414338017, y: 1.4982277569403195)),
+      .addCurveToPoint(CGPoint(x: 152.54352346748507, y: 3.3811911208874), CGPoint(x: 156.6188088791126, y: 7.4564765325149365), CGPoint(x: 158.5017722430597, y: 12.629875856619853)),
+      .addCurveToPoint(CGPoint(x: 160.0, y: 17.368138881260045), CGPoint(x: 160.0, y: 21.76985915237058), CGPoint(x: 160.0, y: 30.573299694591647)),
+      .addLineToPoint(CGPoint(x: 160.0, y: 69.4267)),
+      .addCurveToPoint(CGPoint(x: 160.0, y: 78.23014084762943), CGPoint(x: 160.0, y: 82.63186111873995), CGPoint(x: 158.5017722430597, y: 87.37012414338015)),
+      .addLineToPoint(CGPoint(x: 158.5017722430597, y: 87.37012414338015)),
+      .addCurveToPoint(CGPoint(x: 156.6188088791126, y: 92.54352346748507), CGPoint(x: 152.54352346748504, y: 96.61880887911259), CGPoint(x: 147.37012414338014, y: 98.50177224305968)),
+      .addCurveToPoint(CGPoint(x: 142.63186111873995, y: 100.0), CGPoint(x: 138.23014084762943, y: 100.0), CGPoint(x: 129.42670030540836, y: 100.0)),
+      .addLineToPoint(CGPoint(x: 30.5733, y: 100.0)),
+      .addCurveToPoint(CGPoint(x: 21.76985915237058, y: 100.0), CGPoint(x: 17.368138881260045, y: 100.0), CGPoint(x: 12.62987585661985, y: 98.50177224305969)),
+      .addLineToPoint(CGPoint(x: 12.62987585661985, y: 98.50177224305968)),
+      .addCurveToPoint(CGPoint(x: 7.456476532514935, y: 96.61880887911259), CGPoint(x: 3.3811911208873995, y: 92.54352346748507), CGPoint(x: 1.4982277569403195, y: 87.37012414338015)),
+      .addCurveToPoint(CGPoint(x: 0.0, y: 82.63186111873995), CGPoint(x: 0.0, y: 78.23014084762943), CGPoint(x: 0.0, y: 69.42670030540836)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 0.0)),
+    ]
+    expectPathElementsEqual(path.cgPath.pathElements(), expectedElements)
+  }
+
+  func test_horizontalRect_shape1_roundingCorners_no_topRight() {
+    let rect = CGRect(x: 0, y: 0, width: 160, height: 100)
+    let path = BezierPath(roundedRect: rect, byRoundingCorners: [.topLeft, .bottomRight, .bottomLeft], cornerRadii: CGSize(width: 20, height: 20))
+
+    // printPathElements(path.cgPath.pathElements())
+
+    let expectedElements: [CGPathElement.Element] = [
+      .moveToPoint(CGPoint(x: 30.5733, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 160.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 160.0, y: 69.4267)),
+      .addCurveToPoint(CGPoint(x: 160.0, y: 78.23014084762943), CGPoint(x: 160.0, y: 82.63186111873995), CGPoint(x: 158.5017722430597, y: 87.37012414338015)),
+      .addLineToPoint(CGPoint(x: 158.5017722430597, y: 87.37012414338015)),
+      .addCurveToPoint(CGPoint(x: 156.6188088791126, y: 92.54352346748507), CGPoint(x: 152.54352346748504, y: 96.61880887911259), CGPoint(x: 147.37012414338014, y: 98.50177224305968)),
+      .addCurveToPoint(CGPoint(x: 142.63186111873995, y: 100.0), CGPoint(x: 138.23014084762943, y: 100.0), CGPoint(x: 129.42670030540836, y: 100.0)),
+      .addLineToPoint(CGPoint(x: 30.5733, y: 100.0)),
+      .addCurveToPoint(CGPoint(x: 21.76985915237058, y: 100.0), CGPoint(x: 17.368138881260045, y: 100.0), CGPoint(x: 12.62987585661985, y: 98.50177224305969)),
+      .addLineToPoint(CGPoint(x: 12.62987585661985, y: 98.50177224305968)),
+      .addCurveToPoint(CGPoint(x: 7.456476532514935, y: 96.61880887911259), CGPoint(x: 3.3811911208873995, y: 92.54352346748507), CGPoint(x: 1.4982277569403195, y: 87.37012414338015)),
+      .addCurveToPoint(CGPoint(x: 0.0, y: 82.63186111873995), CGPoint(x: 0.0, y: 78.23014084762943), CGPoint(x: 0.0, y: 69.42670030540836)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 30.5733)),
+      .addCurveToPoint(CGPoint(x: 0.0, y: 21.76985915237058), CGPoint(x: 0.0, y: 17.368138881260045), CGPoint(x: 1.4982277569403166, y: 12.62987585661985)),
+      .addLineToPoint(CGPoint(x: 1.4982277569403175, y: 12.62987585661985)),
+      .addCurveToPoint(CGPoint(x: 3.381191120887396, y: 7.456476532514936), CGPoint(x: 7.456476532514937, y: 3.3811911208873955), CGPoint(x: 12.629875856619853, y: 1.4982277569403175)),
+      .addCurveToPoint(CGPoint(x: 17.368138881260045, y: 0.0), CGPoint(x: 21.76985915237058, y: 0.0), CGPoint(x: 30.573299694591647, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 30.5733, y: 0.0)),
+    ]
+    expectPathElementsEqual(path.cgPath.pathElements(), expectedElements)
+  }
+
+  func test_horizontalRect_shape1_roundingCorners_no_bottomRight() {
+    let rect = CGRect(x: 0, y: 0, width: 160, height: 100)
+    let path = BezierPath(roundedRect: rect, byRoundingCorners: [.topLeft, .topRight, .bottomLeft], cornerRadii: CGSize(width: 20, height: 20))
+
+    // printPathElements(path.cgPath.pathElements())
+
+    let expectedElements: [CGPathElement.Element] = [
+      .moveToPoint(CGPoint(x: 30.5733, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 129.4267, y: 0.0)),
+      .addCurveToPoint(CGPoint(x: 138.23014084762943, y: 0.0), CGPoint(x: 142.63186111873995, y: 0.0), CGPoint(x: 147.37012414338017, y: 1.4982277569403202)),
+      .addLineToPoint(CGPoint(x: 147.37012414338017, y: 1.4982277569403195)),
+      .addCurveToPoint(CGPoint(x: 152.54352346748507, y: 3.3811911208874), CGPoint(x: 156.6188088791126, y: 7.4564765325149365), CGPoint(x: 158.5017722430597, y: 12.629875856619853)),
+      .addCurveToPoint(CGPoint(x: 160.0, y: 17.368138881260045), CGPoint(x: 160.0, y: 21.76985915237058), CGPoint(x: 160.0, y: 30.573299694591647)),
+      .addLineToPoint(CGPoint(x: 160.0, y: 100.0)),
+      .addLineToPoint(CGPoint(x: 30.5733, y: 100.0)),
+      .addCurveToPoint(CGPoint(x: 21.76985915237058, y: 100.0), CGPoint(x: 17.368138881260045, y: 100.0), CGPoint(x: 12.62987585661985, y: 98.50177224305969)),
+      .addLineToPoint(CGPoint(x: 12.62987585661985, y: 98.50177224305968)),
+      .addCurveToPoint(CGPoint(x: 7.456476532514935, y: 96.61880887911259), CGPoint(x: 3.3811911208873995, y: 92.54352346748507), CGPoint(x: 1.4982277569403195, y: 87.37012414338015)),
+      .addCurveToPoint(CGPoint(x: 0.0, y: 82.63186111873995), CGPoint(x: 0.0, y: 78.23014084762943), CGPoint(x: 0.0, y: 69.42670030540836)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 30.5733)),
+      .addCurveToPoint(CGPoint(x: 0.0, y: 21.76985915237058), CGPoint(x: 0.0, y: 17.368138881260045), CGPoint(x: 1.4982277569403166, y: 12.62987585661985)),
+      .addLineToPoint(CGPoint(x: 1.4982277569403175, y: 12.62987585661985)),
+      .addCurveToPoint(CGPoint(x: 3.381191120887396, y: 7.456476532514936), CGPoint(x: 7.456476532514937, y: 3.3811911208873955), CGPoint(x: 12.629875856619853, y: 1.4982277569403175)),
+      .addCurveToPoint(CGPoint(x: 17.368138881260045, y: 0.0), CGPoint(x: 21.76985915237058, y: 0.0), CGPoint(x: 30.573299694591647, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 30.5733, y: 0.0)),
+    ]
+    expectPathElementsEqual(path.cgPath.pathElements(), expectedElements)
+  }
+
+  func test_horizontalRect_shape1_roundingCorners_no_bottomLeft() {
+    let rect = CGRect(x: 0, y: 0, width: 160, height: 100)
+    let path = BezierPath(roundedRect: rect, byRoundingCorners: [.topLeft, .topRight, .bottomRight], cornerRadii: CGSize(width: 20, height: 20))
+
+    // printPathElements(path.cgPath.pathElements())
+
+    let expectedElements: [CGPathElement.Element] = [
+      .moveToPoint(CGPoint(x: 30.5733, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 129.4267, y: 0.0)),
+      .addCurveToPoint(CGPoint(x: 138.23014084762943, y: 0.0), CGPoint(x: 142.63186111873995, y: 0.0), CGPoint(x: 147.37012414338017, y: 1.4982277569403202)),
+      .addLineToPoint(CGPoint(x: 147.37012414338017, y: 1.4982277569403195)),
+      .addCurveToPoint(CGPoint(x: 152.54352346748507, y: 3.3811911208874), CGPoint(x: 156.6188088791126, y: 7.4564765325149365), CGPoint(x: 158.5017722430597, y: 12.629875856619853)),
+      .addCurveToPoint(CGPoint(x: 160.0, y: 17.368138881260045), CGPoint(x: 160.0, y: 21.76985915237058), CGPoint(x: 160.0, y: 30.573299694591647)),
+      .addLineToPoint(CGPoint(x: 160.0, y: 69.4267)),
+      .addCurveToPoint(CGPoint(x: 160.0, y: 78.23014084762943), CGPoint(x: 160.0, y: 82.63186111873995), CGPoint(x: 158.5017722430597, y: 87.37012414338015)),
+      .addLineToPoint(CGPoint(x: 158.5017722430597, y: 87.37012414338015)),
+      .addCurveToPoint(CGPoint(x: 156.6188088791126, y: 92.54352346748507), CGPoint(x: 152.54352346748504, y: 96.61880887911259), CGPoint(x: 147.37012414338014, y: 98.50177224305968)),
+      .addCurveToPoint(CGPoint(x: 142.63186111873995, y: 100.0), CGPoint(x: 138.23014084762943, y: 100.0), CGPoint(x: 129.42670030540836, y: 100.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 100.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 30.5733)),
+      .addCurveToPoint(CGPoint(x: 0.0, y: 21.76985915237058), CGPoint(x: 0.0, y: 17.368138881260045), CGPoint(x: 1.4982277569403166, y: 12.62987585661985)),
+      .addLineToPoint(CGPoint(x: 1.4982277569403175, y: 12.62987585661985)),
+      .addCurveToPoint(CGPoint(x: 3.381191120887396, y: 7.456476532514936), CGPoint(x: 7.456476532514937, y: 3.3811911208873955), CGPoint(x: 12.629875856619853, y: 1.4982277569403175)),
+      .addCurveToPoint(CGPoint(x: 17.368138881260045, y: 0.0), CGPoint(x: 21.76985915237058, y: 0.0), CGPoint(x: 30.573299694591647, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 30.5733, y: 0.0)),
+    ]
+    expectPathElementsEqual(path.cgPath.pathElements(), expectedElements)
+  }
+
+  func test_horizontalRect_shape1_zeroCornerRadius_roundingCorners_none() {
+    let rect = CGRect(x: 0, y: 0, width: 160, height: 100)
+    let path = BezierPath(roundedRect: rect, byRoundingCorners: [], cornerRadii: CGSize.zero)
+
+    // printPathElements(path.cgPath.pathElements())
+
+    let expectedElements: [CGPathElement.Element] = [
+      .moveToPoint(CGPoint(x: 0.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 160.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 160.0, y: 100.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 100.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 0.0)),
+    ]
+    expectPathElementsEqual(path.cgPath.pathElements(), expectedElements)
+  }
+
+  func test_horizontalRect_shape1_zeroCornerRadius_roundingCorners_topLeft() {
+    let rect = CGRect(x: 0, y: 0, width: 160, height: 100)
+    let path = BezierPath(roundedRect: rect, byRoundingCorners: [.topLeft], cornerRadii: CGSize.zero)
+
+    // printPathElements(path.cgPath.pathElements())
+
+    let expectedElements: [CGPathElement.Element] = [
+      .moveToPoint(CGPoint(x: 0.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 160.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 160.0, y: 100.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 100.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 0.0)),
+    ]
+    expectPathElementsEqual(path.cgPath.pathElements(), expectedElements)
+  }
+
+  func test_horizontalRect_shape1_zeroCornerRadius_roundingCorners_topRight() {
+    let rect = CGRect(x: 0, y: 0, width: 160, height: 100)
+    let path = BezierPath(roundedRect: rect, byRoundingCorners: [.topRight], cornerRadii: CGSize.zero)
+
+    // printPathElements(path.cgPath.pathElements())
+
+    let expectedElements: [CGPathElement.Element] = [
+      .moveToPoint(CGPoint(x: 0.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 160.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 160.0, y: 100.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 100.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 0.0)),
+    ]
+    expectPathElementsEqual(path.cgPath.pathElements(), expectedElements)
+  }
+
+  func test_horizontalRect_shape1_zeroCornerRadius_roundingCorners_bottomRight() {
+    let rect = CGRect(x: 0, y: 0, width: 160, height: 100)
+    let path = BezierPath(roundedRect: rect, byRoundingCorners: [.bottomRight], cornerRadii: CGSize.zero)
+
+    // printPathElements(path.cgPath.pathElements())
+
+    let expectedElements: [CGPathElement.Element] = [
+      .moveToPoint(CGPoint(x: 0.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 160.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 160.0, y: 100.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 100.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 0.0)),
+    ]
+    expectPathElementsEqual(path.cgPath.pathElements(), expectedElements)
+  }
+
+  func test_horizontalRect_shape1_zeroCornerRadius_roundingCorners_bottomLeft() {
+    let rect = CGRect(x: 0, y: 0, width: 160, height: 100)
+    let path = BezierPath(roundedRect: rect, byRoundingCorners: [.bottomLeft], cornerRadii: CGSize.zero)
+
+    // printPathElements(path.cgPath.pathElements())
+
+    let expectedElements: [CGPathElement.Element] = [
+      .moveToPoint(CGPoint(x: 0.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 160.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 160.0, y: 100.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 100.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 0.0)),
+    ]
+    expectPathElementsEqual(path.cgPath.pathElements(), expectedElements)
+  }
+
+  func test_horizontalRect_shape1_zeroCornerRadius_roundingCorners_topLeft_topRight() {
+    let rect = CGRect(x: 0, y: 0, width: 160, height: 100)
+    let path = BezierPath(roundedRect: rect, byRoundingCorners: [.topLeft, .topRight], cornerRadii: CGSize.zero)
+
+    // printPathElements(path.cgPath.pathElements())
+
+    let expectedElements: [CGPathElement.Element] = [
+      .moveToPoint(CGPoint(x: 0.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 160.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 160.0, y: 100.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 100.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 0.0)),
+    ]
+    expectPathElementsEqual(path.cgPath.pathElements(), expectedElements)
+  }
+
+  func test_horizontalRect_shape1_zeroCornerRadius_roundingCorners_topLeft_bottomRight() {
+    let rect = CGRect(x: 0, y: 0, width: 160, height: 100)
+    let path = BezierPath(roundedRect: rect, byRoundingCorners: [.topLeft, .bottomRight], cornerRadii: CGSize.zero)
+
+    // printPathElements(path.cgPath.pathElements())
+
+    let expectedElements: [CGPathElement.Element] = [
+      .moveToPoint(CGPoint(x: 0.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 160.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 160.0, y: 100.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 100.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 0.0)),
+    ]
+    expectPathElementsEqual(path.cgPath.pathElements(), expectedElements)
+  }
+
+  func test_horizontalRect_shape1_zeroCornerRadius_roundingCorners_topLeft_bottomLeft() {
+    let rect = CGRect(x: 0, y: 0, width: 160, height: 100)
+    let path = BezierPath(roundedRect: rect, byRoundingCorners: [.topLeft, .bottomLeft], cornerRadii: CGSize.zero)
+
+    // printPathElements(path.cgPath.pathElements())
+
+    let expectedElements: [CGPathElement.Element] = [
+      .moveToPoint(CGPoint(x: 0.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 160.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 160.0, y: 100.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 100.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 0.0)),
+    ]
+    expectPathElementsEqual(path.cgPath.pathElements(), expectedElements)
+  }
+
+  func test_horizontalRect_shape1_zeroCornerRadius_roundingCorners_topRight_bottomRight() {
+    let rect = CGRect(x: 0, y: 0, width: 160, height: 100)
+    let path = BezierPath(roundedRect: rect, byRoundingCorners: [.topRight, .bottomRight], cornerRadii: CGSize.zero)
+
+    // printPathElements(path.cgPath.pathElements())
+
+    let expectedElements: [CGPathElement.Element] = [
+      .moveToPoint(CGPoint(x: 0.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 160.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 160.0, y: 100.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 100.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 0.0)),
+    ]
+    expectPathElementsEqual(path.cgPath.pathElements(), expectedElements)
+  }
+
+  func test_horizontalRect_shape1_zeroCornerRadius_roundingCorners_topRight_bottomLeft() {
+    let rect = CGRect(x: 0, y: 0, width: 160, height: 100)
+    let path = BezierPath(roundedRect: rect, byRoundingCorners: [.topRight, .bottomLeft], cornerRadii: CGSize.zero)
+
+    // printPathElements(path.cgPath.pathElements())
+
+    let expectedElements: [CGPathElement.Element] = [
+      .moveToPoint(CGPoint(x: 0.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 160.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 160.0, y: 100.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 100.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 0.0)),
+    ]
+    expectPathElementsEqual(path.cgPath.pathElements(), expectedElements)
+  }
+
+  func test_horizontalRect_shape1_zeroCornerRadius_roundingCorners_no_topLeft() {
+    let rect = CGRect(x: 0, y: 0, width: 160, height: 100)
+    let path = BezierPath(roundedRect: rect, byRoundingCorners: [.topRight, .bottomRight, .bottomLeft], cornerRadii: CGSize.zero)
+
+    // printPathElements(path.cgPath.pathElements())
+
+    let expectedElements: [CGPathElement.Element] = [
+      .moveToPoint(CGPoint(x: 0.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 160.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 160.0, y: 100.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 100.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 0.0)),
+    ]
+    expectPathElementsEqual(path.cgPath.pathElements(), expectedElements)
+  }
+
+  func test_horizontalRect_shape1_zeroCornerRadius_roundingCorners_no_topRight() {
+    let rect = CGRect(x: 0, y: 0, width: 160, height: 100)
+    let path = BezierPath(roundedRect: rect, byRoundingCorners: [.topLeft, .bottomRight, .bottomLeft], cornerRadii: CGSize.zero)
+
+    // printPathElements(path.cgPath.pathElements())
+
+    let expectedElements: [CGPathElement.Element] = [
+      .moveToPoint(CGPoint(x: 0.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 160.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 160.0, y: 100.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 100.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 0.0)),
+    ]
+    expectPathElementsEqual(path.cgPath.pathElements(), expectedElements)
+  }
+
+  func test_horizontalRect_shape1_zeroCornerRadius_roundingCorners_no_bottomRight() {
+    let rect = CGRect(x: 0, y: 0, width: 160, height: 100)
+    let path = BezierPath(roundedRect: rect, byRoundingCorners: [.topLeft, .topRight, .bottomLeft], cornerRadii: CGSize.zero)
+
+    // printPathElements(path.cgPath.pathElements())
+
+    let expectedElements: [CGPathElement.Element] = [
+      .moveToPoint(CGPoint(x: 0.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 160.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 160.0, y: 100.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 100.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 0.0, y: 0.0)),
+    ]
+    expectPathElementsEqual(path.cgPath.pathElements(), expectedElements)
+  }
+
+  func test_horizontalRect_shape1_zeroCornerRadius_roundingCorners_no_bottomLeft() {
+    let rect = CGRect(x: 0, y: 0, width: 160, height: 100)
+    let path = BezierPath(roundedRect: rect, byRoundingCorners: [.topLeft, .topRight, .bottomRight], cornerRadii: CGSize.zero)
+
+    // printPathElements(path.cgPath.pathElements())
+
+    let expectedElements: [CGPathElement.Element] = [
+      .moveToPoint(CGPoint(x: 0.0, y: 0.0)),
+      .addLineToPoint(CGPoint(x: 160.0, y: 0.0)),
       .addLineToPoint(CGPoint(x: 160.0, y: 100.0)),
       .addLineToPoint(CGPoint(x: 0.0, y: 100.0)),
       .addLineToPoint(CGPoint(x: 0.0, y: 0.0)),
