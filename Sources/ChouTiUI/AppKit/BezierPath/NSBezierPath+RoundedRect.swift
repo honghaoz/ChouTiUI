@@ -36,12 +36,21 @@ public extension BezierPath {
 
   /// The BezierPath can generate different shapes when `(width or height / corner radius)` ratio exceeds a magic number.
   ///
+  /// `BezierPath(roundedRect:cornerRadius:)` can generate 3 type of shapes.
   /// Specifically, 1) when the corner radius is smaller than both the width and height divided by the magic number,
   /// the generated shape is a good rounded rectangle, i.e. matching the `CALayer.cornerRadius`. 2) when the corner radius
   /// is larger than both the width and height divided by the magic number, the shape is a capsule. 3) when the corner radius
   /// is larger than width or height divided by the magic number but smaller than the other dimension, the shape is a weird
   /// shape that doesn't match either the layer.cornerRadius nor the capsule shape.
   static let shapeBreakRatio: CGFloat = 3.0573299 // 1.52866495 * 2
+
+  /// The max corner radius for a rectangle that `BezierPath(roundedRect:cornerRadius:)` can generate a correct rounded rect path.
+  ///
+  /// - Parameter rect: The bounding rect.
+  /// - Returns: The max corner radius.
+  static func limitedCornerRadius(rect: CGRect) -> CGFloat {
+    min(rect.width, rect.height) / shapeBreakRatio
+  }
 }
 
 #if canImport(AppKit)
@@ -485,6 +494,8 @@ private func bottomLeft(_ rect: CGRect, _ x: CGFloat, _ y: CGFloat, _ radius: CG
 }
 
 /// https://www.paintcodeapp.com/news/code-for-ios-7-rounded-rectangles
+/// https://stackoverflow.com/questions/24936003/crazy-rounded-rect-uibezierpath-behavior-on-ios-7-what-is-the-deal
+/// https://gist.github.com/renssies/96ab3ba1426ad97fa91497b59a4d73c3
 /// https://gist.github.com/cemolcay/28cb15001cd4786e78830369e074aa5c
 /// [UIBezierPath+Superellipsoid](https://gist.github.com/nicolas-miari/46f05ab939c3778a665510bebdc7fd54)
 /// https://stackoverflow.com/questions/18389114/draw-ios-7-style-squircle-programmatically
