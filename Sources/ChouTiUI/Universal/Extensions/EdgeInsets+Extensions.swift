@@ -38,8 +38,10 @@ import UIKit
 
 public extension EdgeInsets {
 
+  #if canImport(AppKit)
   /// The zero `EdgeInsets`.
   static let zero = EdgeInsets(0, 0, 0, 0)
+  #endif
 
   /// The inset amount on the horizontal axis.
   var horizontal: CGFloat { left + right }

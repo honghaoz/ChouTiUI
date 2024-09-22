@@ -1951,7 +1951,7 @@ public enum NSBezierPathRoundedRectGenerator {
         printCodeLine(rect, limitedRadius, e, .bottomRight)
       case 9:
         print("\n// bottom center")
-        if case .addCurveToPoint(let c1, let c2, let point) = e {
+        if case .addCurveToPoint(let c1, let c2, _) = e {
           let (c1x, c1y) = reverseBottomRight(rect, limitedRadius, point: c1)
           let (c2x, c2y) = reverseBottomRight(rect, limitedRadius, point: c2)
           print("addCurve(to: rect.bottomCenter, controlPoint1: bottomRight(rect, \(formattedNumber(c1x)), \(formattedNumber(c1y)), limitedRadius), controlPoint2: bottomRight(rect, \(formattedNumber(c2x)), \(formattedNumber(c2y)), limitedRadius))")
@@ -1981,7 +1981,7 @@ public enum NSBezierPathRoundedRectGenerator {
         printCodeLine(rect, limitedRadius, e, .topLeft)
       case 19:
         print("\n// top center")
-        if case .addCurveToPoint(let c1, let c2, let point) = e {
+        if case .addCurveToPoint(let c1, let c2, _) = e {
           let (c1x, c1y) = reverseTopLeft(rect, limitedRadius, point: c1)
           let (c2x, c2y) = reverseTopLeft(rect, limitedRadius, point: c2)
           print("addCurve(to: rect.topCenter, controlPoint1: topLeft(rect, \(formattedNumber(c1x)), \(formattedNumber(c1y)), limitedRadius), controlPoint2: topLeft(rect, \(formattedNumber(c2x)), \(formattedNumber(c2y)), limitedRadius))")
@@ -2039,7 +2039,7 @@ public enum NSBezierPathRoundedRectGenerator {
         printCodeLine(rect, limitedRadius, e, .topRight)
       case 4:
         print("\n// right center")
-        if case .addCurveToPoint(let c1, let c2, let point) = e {
+        if case .addCurveToPoint(let c1, let c2, _) = e {
           let (c1x, c1y) = reverseTopRight(rect, limitedRadius, point: c1)
           let (c2x, c2y) = reverseTopRight(rect, limitedRadius, point: c2)
           print("addCurve(to: rect.rightCenter, controlPoint1: topRight(rect, \(formattedNumber(c1x)), \(formattedNumber(c1y)), limitedRadius), controlPoint2: topRight(rect, \(formattedNumber(c2x)), \(formattedNumber(c2y)), limitedRadius))")
@@ -2069,7 +2069,7 @@ public enum NSBezierPathRoundedRectGenerator {
         printCodeLine(rect, limitedRadius, e, .bottomLeft)
       case 14:
         print("\n// left center")
-        if case .addCurveToPoint(let c1, let c2, let point) = e {
+        if case .addCurveToPoint(let c1, let c2, _) = e {
           let (c1x, c1y) = reverseBottomLeft(rect, limitedRadius, point: c1)
           let (c2x, c2y) = reverseBottomLeft(rect, limitedRadius, point: c2)
           print("addCurve(to: rect.leftCenter, controlPoint1: bottomLeft(rect, \(formattedNumber(c1x)), \(formattedNumber(c1y)), limitedRadius), controlPoint2: bottomLeft(rect, \(formattedNumber(c2x)), \(formattedNumber(c2y)), limitedRadius))")
