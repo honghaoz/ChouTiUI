@@ -2,7 +2,7 @@
 //  RectCorner+ExtensionsTests.swift
 //  ChouTiUI
 //
-//  Created by Honghao Zhang on 9/15/24.
+//  Created by Honghao Zhang on 12/30/23.
 //  Copyright © 2020 Honghao Zhang.
 //
 //  MIT License
@@ -60,4 +60,48 @@ class RectCorner_ExtensionsTests: XCTestCase {
     expect(RectCorner.bottomLeft.cornerMask) == CACornerMask.layerMinXMaxYCorner
     expect(RectCorner.bottomRight.cornerMask) == CACornerMask.layerMaxXMaxYCorner
   }
+
+  #if !os(macOS)
+  func testHashable() {
+    let corner: UIRectCorner = [.topLeft, .topRight]
+    let corner2: UIRectCorner = [.topLeft, .topRight]
+    expect(corner.hashValue) == corner2.hashValue
+  }
+
+  func testHashable2() {
+    let corner: UIRectCorner = [.topLeft, .topRight, .bottomLeft]
+    let corner2: UIRectCorner = [.topLeft, .topRight]
+    expect(corner.hashValue) != corner2.hashValue
+  }
+
+  func testHashable3() {
+    let corner: UIRectCorner = [.topLeft, .topRight, .bottomLeft, .bottomRight]
+    let corner2: UIRectCorner = [.topLeft, .topRight]
+    expect(corner.hashValue) != corner2.hashValue
+  }
+
+  func testHashable4() {
+    let corner: UIRectCorner = [.topLeft, .topRight, .bottomLeft, .bottomRight]
+    let corner2: UIRectCorner = [.topLeft, .topRight, .bottomLeft, .bottomRight]
+    expect(corner.hashValue) == corner2.hashValue
+  }
+
+  func testHashable5() {
+    let corner: UIRectCorner = [.topLeft, .topRight, .bottomLeft, .bottomRight]
+    let corner2: UIRectCorner = [.topLeft, .topRight, .bottomLeft, .bottomRight, .allCorners]
+    expect(corner.hashValue) != corner2.hashValue
+  }
+
+  func testHashable6() {
+    let corner: UIRectCorner = [.topLeft, .topRight, .bottomLeft, .bottomRight]
+    let corner2: UIRectCorner = .allCorners
+    expect(corner.hashValue) != corner2.hashValue
+  }
+
+  func testHashable7() {
+    let corner: UIRectCorner = [.allCorners, .topLeft]
+    let corner2: UIRectCorner = .allCorners
+    expect(corner.hashValue) == corner2.hashValue
+  }
+  #endif
 }
