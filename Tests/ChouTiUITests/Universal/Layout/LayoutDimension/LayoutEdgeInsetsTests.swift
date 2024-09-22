@@ -67,6 +67,14 @@ class LayoutEdgeInsetsTests: XCTestCase {
     expect(edgeInsets.bottom) == edgeInsets.right
   }
 
+  func testInitializeWithCGFloats() {
+    let edgeInsets = LayoutEdgeInsets(1, 2, 3, 4)
+    expect(edgeInsets.top) == LayoutDimension.absolute(1)
+    expect(edgeInsets.left) == LayoutDimension.absolute(2)
+    expect(edgeInsets.bottom) == LayoutDimension.absolute(3)
+    expect(edgeInsets.right) == LayoutDimension.absolute(4)
+  }
+
   func testInitializeFromEdgeInsets() {
     let edgeInsets = LayoutEdgeInsets(edgeInsets: EdgeInsets(top: 1, left: 2, bottom: 4, right: 5))
     expect(edgeInsets.top) == LayoutDimension.absolute(1)

@@ -90,6 +90,24 @@ public struct LayoutEdgeInsets: Hashable, Sendable {
     self.right = right
   }
 
+  /// Initializes an edge insets with the given edge insets.
+  ///
+  /// - Parameters:
+  ///   - top: The top edge inset.
+  ///   - left: The left edge inset.
+  ///   - bottom: The bottom edge inset.
+  ///   - right: The right edge inset.
+  public init(_ top: CGFloat,
+              _ left: CGFloat,
+              _ bottom: CGFloat,
+              _ right: CGFloat)
+  {
+    self.top = .absolute(top)
+    self.left = .absolute(left)
+    self.bottom = .absolute(bottom)
+    self.right = .absolute(right)
+  }
+
   /// Initializes an edge insets with the same amount for all edges.
   ///
   /// - Parameters:
