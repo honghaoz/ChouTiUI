@@ -72,29 +72,32 @@ class OffsetShapeTests: XCTestCase {
     expect(path.pathElements()) == expectedPath.pathElements()
   }
 
-  // func testSuperEllipse_cornerRadius_0_outer() {
-  //   let superEllipse = SuperEllipse(cornerRadius: 0)
-  //   let offsetSuperEllipse = OffsetShape(shape: superEllipse, offset: 10)
-  //   let path = offsetSuperEllipse.path(in: CGRect(x: 0, y: 0, width: 100, height: 100))
-  //   let expectedPath = SuperEllipse(cornerRadius: 0).path(in: CGRect(x: -10, y: -10, width: 120, height: 120))
-  //   XCTAssertEqual(path, expectedPath)
-  // }
-  //
-  // func testSuperEllipse_cornerRadius_10_outer() {
-  //   let superEllipse = SuperEllipse(cornerRadius: 10)
-  //   let offsetSuperEllipse = OffsetShape(shape: superEllipse, offset: 10)
-  //   let path = offsetSuperEllipse.path(in: CGRect(x: 0, y: 0, width: 100, height: 100))
-  //   let expectedPath = SuperEllipse(cornerRadius: 20).path(in: CGRect(x: -10, y: -10, width: 120, height: 120))
-  //   XCTAssertEqual(path, expectedPath)
-  // }
-  //
-  // func testSuperEllipse_cornerRadius_10_inner() {
-  //   let superEllipse = SuperEllipse(cornerRadius: 10)
-  //   let offsetSuperEllipse = OffsetShape(shape: superEllipse, offset: -10)
-  //   let path = offsetSuperEllipse.path(in: CGRect(x: 0, y: 0, width: 100, height: 100))
-  //   let expectedPath = SuperEllipse(cornerRadius: 0).path(in: CGRect(x: 10, y: 10, width: 80, height: 80))
-  //   XCTAssertEqual(path, expectedPath)
-  // }
+  func testSuperEllipse_cornerRadius_0_outer() {
+    let superEllipse = SuperEllipse(cornerRadius: 0)
+    let offsetSuperEllipse = OffsetShape(shape: superEllipse, offset: 10)
+
+    let path = offsetSuperEllipse.path(in: CGRect(x: 0, y: 0, width: 100, height: 100))
+    let expectedPath = SuperEllipse(cornerRadius: 0).path(in: CGRect(x: -10, y: -10, width: 120, height: 120))
+    expect(path.pathElements()) == expectedPath.pathElements()
+  }
+
+  func testSuperEllipse_cornerRadius_10_outer() {
+    let superEllipse = SuperEllipse(cornerRadius: 10)
+    let offsetSuperEllipse = OffsetShape(shape: superEllipse, offset: 10)
+
+    let path = offsetSuperEllipse.path(in: CGRect(x: 0, y: 0, width: 100, height: 100))
+    let expectedPath = SuperEllipse(cornerRadius: 20).path(in: CGRect(x: -10, y: -10, width: 120, height: 120))
+    expect(path.pathElements()) == expectedPath.pathElements()
+  }
+
+  func testSuperEllipse_cornerRadius_10_inner() {
+    let superEllipse = SuperEllipse(cornerRadius: 10)
+    let offsetSuperEllipse = OffsetShape(shape: superEllipse, offset: -10)
+
+    let path = offsetSuperEllipse.path(in: CGRect(x: 0, y: 0, width: 100, height: 100))
+    let expectedPath = SuperEllipse(cornerRadius: 0).path(in: CGRect(x: 10, y: 10, width: 80, height: 80))
+    expect(path.pathElements()) == expectedPath.pathElements()
+  }
 
   // MARK: - OffsetableShape
 
