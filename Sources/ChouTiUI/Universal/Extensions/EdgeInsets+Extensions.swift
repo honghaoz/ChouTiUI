@@ -38,11 +38,6 @@ import UIKit
 
 public extension EdgeInsets {
 
-  #if canImport(AppKit)
-  /// The zero `EdgeInsets`.
-  static let zero = EdgeInsets(0, 0, 0, 0)
-  #endif
-
   /// The inset amount on the horizontal axis.
   var horizontal: CGFloat { left + right }
 
@@ -90,9 +85,5 @@ extension EdgeInsets: Hashable {
     hasher.combine(left)
     hasher.combine(bottom)
     hasher.combine(right)
-  }
-
-  public static func == (lhs: EdgeInsets, rhs: EdgeInsets) -> Bool {
-    lhs.top == rhs.top && lhs.left == rhs.left && lhs.bottom == rhs.bottom && lhs.right == rhs.right
   }
 }
