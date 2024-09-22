@@ -117,6 +117,10 @@ public extension SuperEllipse {
 }
 
 /// A continuous rounded rect.
+///
+/// `Rectangle` is a `Shape` that can be also used to create a rectangle with continuous rounded corners.
+/// The main difference between `SuperEllipse` and `Rectangle` is that `SuperEllipse` supports different corner radii for each corner.
+/// And `SuperEllipse` uses a custom algorithm to draw the rounded corners, while `Rectangle` uses `BezierPath` to draw the rounded corners.
 public struct SuperEllipse: Shape, OffsetableShape {
 
   /// The corner radius of the super ellipse.
