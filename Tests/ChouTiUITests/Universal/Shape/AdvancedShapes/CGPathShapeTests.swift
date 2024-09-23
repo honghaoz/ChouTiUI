@@ -132,7 +132,7 @@ class CGPathShapeTests: XCTestCase {
 
         expect(shape.path(in: CGRect(0, 0, 50, 80)).boundingBoxOfPath) == CGRect(-5.0, 0.0, 60.0, 80.0)
 
-        expect(shape.path(in: CGRect(0, 0, 80, 80)).boundingBoxOfPath) == CGRect(0.0, -13.333333333333329, 80.0, 106.66666666666666)
+        expect(shape.path(in: CGRect(0, 0, 80, 80)).boundingBoxOfPath.isApproximatelyEqual(to: CGRect(0.0, -13.333333333333329, 80.0, 106.66666666666666), absoluteTolerance: 1e-9)) == true
         expect(shape.path(in: CGRect(0, 0, 50, 100)).boundingBoxOfPath) == CGRect(-12.5, 0.0, 75.0, 100.0)
 
         expect(shape.path(in: CGRect(10, 20, 50, 80)).boundingBoxOfPath) == CGRect(5.0, 20.0, 60.0, 80.0)
@@ -143,12 +143,12 @@ class CGPathShapeTests: XCTestCase {
         let cgPath = CGPath(rect: CGRect(10, 20, 30, 40), transform: nil)
         let shape = CGPathShape(cgPath: cgPath, contentMode: .resizeAspectFit)
 
-        expect(shape.path(in: CGRect(0, 0, 50, 80)).boundingBoxOfPath) == CGRect(0.0, 6.666666666666664, 50.0, 66.66666666666669)
+        expect(shape.path(in: CGRect(0, 0, 50, 80)).boundingBoxOfPath.isApproximatelyEqual(to: CGRect(0.0, 6.666666666666664, 50.0, 66.66666666666669), absoluteTolerance: 1e-9)) == true
 
         expect(shape.path(in: CGRect(0, 0, 80, 80)).boundingBoxOfPath) == CGRect(10.0, 0.0, 60.0, 80.0)
-        expect(shape.path(in: CGRect(0, 0, 50, 100)).boundingBoxOfPath) == CGRect(0.0, 16.666666666666664, 50.0, 66.66666666666669)
+        expect(shape.path(in: CGRect(0, 0, 50, 100)).boundingBoxOfPath.isApproximatelyEqual(to: CGRect(0.0, 16.666666666666664, 50.0, 66.66666666666669), absoluteTolerance: 1e-9)) == true
 
-        expect(shape.path(in: CGRect(10, 20, 50, 80)).boundingBoxOfPath) == CGRect(10.0, 26.666666666666664, 50.0, 66.66666666666669)
+        expect(shape.path(in: CGRect(10, 20, 50, 80)).boundingBoxOfPath.isApproximatelyEqual(to: CGRect(10.0, 26.666666666666664, 50.0, 66.66666666666669), absoluteTolerance: 1e-9)) == true
       }
     }
   }
