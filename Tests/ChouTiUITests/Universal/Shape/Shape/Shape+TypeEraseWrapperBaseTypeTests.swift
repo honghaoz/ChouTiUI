@@ -35,17 +35,17 @@ import ChouTiUI
 
 class Shape_TypeEraseWrapperBaseTypeTests: XCTestCase {
 
-//  func test_nonOffsetableShape_casting() {
-//    let shape = Symbol.Help()
-//    expect(shape.as(Symbol.Help.self)) != nil
-//    expect(shape.as((any Shape).self)) != nil
-//    expect(shape.as((any OffsetableShape).self)) == nil
-//
-//    let anyShape: any Shape = AnyShape(shape)
-//    expect(anyShape as? Symbol.Help) == nil // can't cast
-//    expect(anyShape.as(Symbol.Help.self)) != nil // can cast
-//    expect(anyShape.as((any OffsetableShape).self)) == nil
-//  }
+  func test_nonOffsetableShape_casting() {
+    let shape = NonOffsetableShape()
+    expect(shape.as(NonOffsetableShape.self)) != nil
+    expect(shape.as((any Shape).self)) != nil
+    expect(shape.as((any OffsetableShape).self)) == nil
+
+    let anyShape: any Shape = AnyShape(shape)
+    expect(anyShape as? NonOffsetableShape) == nil // can't cast
+    expect(anyShape.as(NonOffsetableShape.self)) != nil // can cast
+    expect(anyShape.as((any OffsetableShape).self)) == nil
+  }
 
   func test_offsetableShape_casting() {
     let shape = Rectangle()
@@ -64,16 +64,16 @@ class Shape_TypeEraseWrapperBaseTypeTests: XCTestCase {
     expect(anyOffsetableShape.as((any OffsetableShape).self)) != nil // can cast
   }
 
-//  func test_nonOffsetableShape_is() {
-//    let shape = Symbol.Help()
-//    expect(shape.is(Symbol.Help.self)) == true
-//    expect(shape.is((any Shape).self)) == true
-//    expect(shape.is((any OffsetableShape).self)) == false
-//
-//    let anyShape: any Shape = AnyShape(shape)
-//    expect(anyShape.is(Symbol.Help.self)) == true
-//    expect(anyShape.is((any OffsetableShape).self)) == false
-//  }
+  func test_nonOffsetableShape_is() {
+    let shape = NonOffsetableShape()
+    expect(shape.is(NonOffsetableShape.self)) == true
+    expect(shape.is((any Shape).self)) == true
+    expect(shape.is((any OffsetableShape).self)) == false
+
+    let anyShape: any Shape = AnyShape(shape)
+    expect(anyShape.is(NonOffsetableShape.self)) == true
+    expect(anyShape.is((any OffsetableShape).self)) == false
+  }
 
   func test_offsetableShape_is() {
     let shape = Rectangle()
@@ -88,5 +88,12 @@ class Shape_TypeEraseWrapperBaseTypeTests: XCTestCase {
     let anyOffsetableShape: any OffsetableShape = AnyOffsetableShape(shape)
     expect(anyOffsetableShape.is(Rectangle.self)) == true
     expect(anyOffsetableShape.is((any OffsetableShape).self)) == true
+  }
+}
+
+private struct NonOffsetableShape: Shape {
+
+  func path(in rect: CGRect) -> CGPath {
+    return CGPath(rect: rect, transform: nil)
   }
 }
