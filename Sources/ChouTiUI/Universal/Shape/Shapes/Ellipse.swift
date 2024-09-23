@@ -32,6 +32,7 @@ import CoreGraphics
 
 public extension Shape where Self == Ellipse {
 
+  /// An ellipse shape.
   static var ellipse: Ellipse { Ellipse.ellipse }
 }
 

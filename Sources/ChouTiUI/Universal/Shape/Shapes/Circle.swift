@@ -34,6 +34,7 @@ import ChouTi
 
 public extension Shape where Self == Circle {
 
+  /// A circle shape.
   static var circle: Circle { Circle.circle }
 }
 

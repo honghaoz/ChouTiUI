@@ -42,6 +42,8 @@ public extension BezierPath {
   /// is larger than both the width and height divided by the magic number, the shape is a capsule. 3) when the corner radius
   /// is larger than width or height divided by the magic number but smaller than the other dimension, the shape is a weird
   /// shape that doesn't match either the layer.cornerRadius nor the capsule shape.
+  ///
+  /// - Tag: BezierPath.shapeBreakRatio
   static let shapeBreakRatio: CGFloat = 3.0573299 // 1.52866495 * 2
 
   /// The max corner radius for a rectangle that `BezierPath(roundedRect:cornerRadius:)` can generate a correct rounded rect path.
