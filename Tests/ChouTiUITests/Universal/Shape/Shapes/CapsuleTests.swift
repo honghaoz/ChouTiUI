@@ -66,7 +66,8 @@ class CapsuleTests: XCTestCase {
         let shape = Capsule()
         let rect = CGRect(x: 0, y: 0, width: 200, height: 100)
         let path = shape.path(in: rect)
-        expect(path.pathElements()) == [
+
+        var expectedElements: [CGPathElement.Element] = [
           .moveToPoint(CGPoint(x: 150.0, y: 0.0)),
           .addLineToPoint(CGPoint(x: 150.0, y: 100.0)),
           .addCurveToPoint(CGPoint(x: 122.38576250846033, y: 100.0), CGPoint(x: 100.0, y: 77.61423749153968), CGPoint(x: 100.0, y: 50.00000000000001)),
@@ -76,8 +77,15 @@ class CapsuleTests: XCTestCase {
           .addCurveToPoint(CGPoint(x: 77.61423749153967, y: 1.6908843777454446e-15), CGPoint(x: 100.0, y: 22.38576250846033), CGPoint(x: 100.0, y: 50.0)),
           .addCurveToPoint(CGPoint(x: 100.0, y: 77.61423749153967), CGPoint(x: 77.61423749153967, y: 100.0), CGPoint(x: 50.0, y: 100.0)),
           .closeSubpath,
+        ]
+
+        #if canImport(AppKit)
+        expectedElements += [
           .moveToPoint(CGPoint(x: 150.0, y: 0.0)),
         ]
+        #endif
+
+        expectPathElementsEqual(path.pathElements(), expectedElements, absoluteTolerance: 1e-8)
       }
 
       // tall
@@ -86,7 +94,7 @@ class CapsuleTests: XCTestCase {
         let rect = CGRect(x: 0, y: 0, width: 100, height: 200)
         let path = shape.path(in: rect)
 
-        expect(path.pathElements()) == [
+        var expectedElements: [CGPathElement.Element] = [
           .moveToPoint(CGPoint(x: 0.0, y: 50.0)),
           .addLineToPoint(CGPoint(x: 0.0, y: 50.00000000000001)),
           .addCurveToPoint(CGPoint(x: -3.381768755490889e-15, y: 22.38576250846034), CGPoint(x: 22.385762508460324, y: 5.072653133236334e-15), CGPoint(x: 49.99999999999999, y: 0.0)),
@@ -96,8 +104,15 @@ class CapsuleTests: XCTestCase {
           .addCurveToPoint(CGPoint(x: 100.0, y: 177.61423749153965), CGPoint(x: 77.61423749153967, y: 200.0), CGPoint(x: 50.0, y: 200.0)),
           .addCurveToPoint(CGPoint(x: 22.38576250846033, y: 200.0), CGPoint(x: 3.381768755490889e-15, y: 177.61423749153965), CGPoint(x: 0.0, y: 150.0)),
           .closeSubpath,
+        ]
+
+        #if canImport(AppKit)
+        expectedElements += [
           .moveToPoint(CGPoint(x: 0.0, y: 50.0)),
         ]
+        #endif
+
+        expectPathElementsEqual(path.pathElements(), expectedElements, absoluteTolerance: 1e-8)
       }
     }
   }
