@@ -62,20 +62,25 @@ public struct Capsule: Shape, OffsetableShape {
           │               │
           └───────────────┘
          */
+
+        // top right
         path.move(to: CGPoint(rect.maxX - radius, rect.minY))
+        // right arc
         path.addArc(
           withCenter: CGPoint(x: rect.maxX - radius, y: rect.midY),
           radius: radius,
-          startAngle: .pi / 2,
-          endAngle: -.pi / 2,
+          startAngle: .pi * 1.5,
+          endAngle: .pi * 0.5,
           clockwise: true
         )
+        // bottom left
         path.addLine(to: CGPoint(rect.minX + radius, rect.maxY))
+        // left arc
         path.addArc(
           withCenter: CGPoint(x: rect.minX + radius, y: rect.midY),
           radius: radius,
-          startAngle: -.pi / 2,
-          endAngle: .pi / 2,
+          startAngle: .pi * 0.5,
+          endAngle: .pi * 1.5,
           clockwise: true
         )
         path.close()
@@ -89,7 +94,10 @@ public struct Capsule: Shape, OffsetableShape {
           │   │
           └───┘
          */
+
+        // top left
         path.move(to: CGPoint(rect.minX, rect.minY + radius))
+        // top arc
         path.addArc(
           withCenter: CGPoint(x: rect.midX, y: rect.minY + radius),
           radius: radius,
@@ -97,7 +105,9 @@ public struct Capsule: Shape, OffsetableShape {
           endAngle: 0,
           clockwise: true
         )
+        // bottom right
         path.addLine(to: CGPoint(rect.maxX, rect.maxY - radius))
+        // bottom arc
         path.addArc(
           withCenter: CGPoint(x: rect.midX, y: rect.maxY - radius),
           radius: radius,

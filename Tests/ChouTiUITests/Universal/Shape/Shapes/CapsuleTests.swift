@@ -69,13 +69,13 @@ class CapsuleTests: XCTestCase {
 
         var expectedElements: [CGPathElement.Element] = [
           .moveToPoint(CGPoint(x: 150.0, y: 0.0)),
-          .addLineToPoint(CGPoint(x: 150.0, y: 100.0)),
-          .addCurveToPoint(CGPoint(x: 122.38576250846033, y: 100.0), CGPoint(x: 100.0, y: 77.61423749153968), CGPoint(x: 100.0, y: 50.00000000000001)),
-          .addCurveToPoint(CGPoint(x: 100.0, y: 22.38576250846034), CGPoint(x: 122.38576250846033, y: 5.072653133236334e-15), CGPoint(x: 150.0, y: 0.0)),
+          .addLineToPoint(CGPoint(x: 150.0, y: 0.0)),
+          .addCurveToPoint(CGPoint(x: 177.61423749, y: -5.0726531329535e-15), CGPoint(x: 200.0, y: 22.385762509999996), CGPoint(x: 200.0, y: 49.99999999999999)),
+          .addCurveToPoint(CGPoint(x: 200.0, y: 77.61423749), CGPoint(x: 177.61423749, y: 100.0), CGPoint(x: 150.0, y: 100.0)),
           .addLineToPoint(CGPoint(x: 50.0, y: 100.0)),
-          .addLineToPoint(CGPoint(x: 50.0, y: 0.0)),
-          .addCurveToPoint(CGPoint(x: 77.61423749153967, y: 1.6908843777454446e-15), CGPoint(x: 100.0, y: 22.38576250846033), CGPoint(x: 100.0, y: 50.0)),
-          .addCurveToPoint(CGPoint(x: 100.0, y: 77.61423749153967), CGPoint(x: 77.61423749153967, y: 100.0), CGPoint(x: 50.0, y: 100.0)),
+          .addLineToPoint(CGPoint(x: 50.0, y: 100.0)),
+          .addCurveToPoint(CGPoint(x: 22.385762510000003, y: 100.0), CGPoint(x: 1.6908843776511668e-15, y: 77.61423749), CGPoint(x: 0.0, y: 50.0)),
+          .addCurveToPoint(CGPoint(x: -1.6908843776511668e-15, y: 22.385762510000003), CGPoint(x: 22.385762510000003, y: 1.6908843776511668e-15), CGPoint(x: 50.0, y: 0.0)),
           .closeSubpath,
         ]
 
