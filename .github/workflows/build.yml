@@ -23,14 +23,22 @@ env:
 jobs:
   build:
     name: Build
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [macOS, iOS, visionOS]
+    timeout-minutes: 30
     runs-on: ${{ vars.MACOS }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
       - name: Bootstrap
         uses: ./.github/actions/bootstrap
-      - name: Build for release
-        run: make build-release
+      - name: Download visionOS simulator
+        if: matrix.platform == 'visionOS'
+        run: xcodebuild -downloadPlatform visionOS
+      - name: Build
+        run: make build-release-${{ matrix.platform }}
 
   test:
     name: Test
@@ -49,7 +57,6 @@ jobs:
         if: matrix.platform == 'visionOS'
         run: xcodebuild -downloadPlatform visionOS
       - name: Test
-        if: success() || failure()
         run: make test-${{ matrix.platform }}
 
   test-codecov:
@@ -61,7 +68,6 @@ jobs:
       - name: Bootstrap
         uses: ./.github/actions/bootstrap
       - name: Test with Codecov
-        if: success() || failure()
         run: make test-codecov
       - name: Upload code coverage
         uses: codecov/codecov-action@v4.5.0

@@ -12,8 +12,19 @@ build: # Build with debug configuration.
 	@$(REPO_ROOT)/scripts/swift-package/build-workspace.sh --workspace-path "Project.xcworkspace" --scheme "ChouTiUI" --configuration "Debug" --os "iOS macOS visionOS"
 
 .PHONY: build-release
-build-release: # Build the package.
+build-release: # Build with release configuration on all platforms.
 	@$(REPO_ROOT)/scripts/swift-package/build-workspace.sh --workspace-path "Project.xcworkspace" --scheme "ChouTiUI" --configuration "Release" --os "iOS macOS visionOS"
+
+.PHONY: build-release-iOS
+build-release-iOS: # Build with release configuration on iOS.
+	@$(REPO_ROOT)/scripts/swift-package/build-workspace.sh --workspace-path "Project.xcworkspace" --scheme "ChouTiUI" --configuration "Release" --os "iOS"
+
+.PHONY: build-release-macOS
+build-release-macOS: # Build with release configuration on macOS.
+	@$(REPO_ROOT)/scripts/swift-package/build-workspace.sh --workspace-path "Project.xcworkspace" --scheme "ChouTiUI" --configuration "Release" --os "macOS"
+
+.PHONY: build-release-visionOS
+build-release-visionOS: # Build with release configuration on visionOS.
 
 .PHONY: test
 test: # Run tests on all platforms.
