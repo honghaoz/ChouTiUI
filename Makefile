@@ -16,8 +16,20 @@ build-release: # Build the package.
 	@$(REPO_ROOT)/scripts/swift-package/build-workspace.sh --workspace-path "Project.xcworkspace" --scheme "ChouTiUI" --configuration "Release" --os "iOS macOS visionOS"
 
 .PHONY: test
-test: # Run tests.
+test: # Run tests on all platforms.
 	@$(REPO_ROOT)/scripts/swift-package/test-workspace.sh --workspace-path "Project.xcworkspace" --scheme "ChouTiUI" --os "iOS macOS visionOS"
+
+.PHONY: test-iOS
+test-iOS: # Run tests on iOS.
+	@$(REPO_ROOT)/scripts/swift-package/test-workspace.sh --workspace-path "Project.xcworkspace" --scheme "ChouTiUI" --os "iOS"
+
+.PHONY: test-macOS
+test-macOS: # Run tests on macOS.
+	@$(REPO_ROOT)/scripts/swift-package/test-workspace.sh --workspace-path "Project.xcworkspace" --scheme "ChouTiUI" --os "macOS"
+
+.PHONY: test-visionOS
+test-visionOS: # Run tests on visionOS.
+	@$(REPO_ROOT)/scripts/swift-package/test-workspace.sh --workspace-path "Project.xcworkspace" --scheme "ChouTiUI" --os "visionOS"
 
 .PHONY: test-codecov
 test-codecov: # Run tests with code coverage.

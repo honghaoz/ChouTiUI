@@ -1,3 +1,5 @@
+# This workflow is used to lint the code in the repository.
+
 name: lint
 on:
   push:
@@ -22,6 +24,6 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
       - name: Bootstrap
-        run: make bootstrap
+        uses: ./.github/actions/bootstrap
       - name: Lint
         run: make lint

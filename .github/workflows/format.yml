@@ -1,3 +1,5 @@
+# This workflow is used to format the code in the repository.
+
 name: format
 on:
   workflow_dispatch: # manual trigger to run workflow
@@ -26,7 +28,7 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
       - name: Bootstrap
-        run: make bootstrap
+        uses: ./.github/actions/bootstrap
       - name: Format
         run: make format
       - name: Lint
