@@ -40,25 +40,6 @@ jobs:
       - name: Build
         run: make build-release-${{ matrix.platform }}
 
-  test:
-    name: Test
-    strategy:
-      fail-fast: false
-      matrix:
-        platform: [iOS, visionOS]
-    timeout-minutes: 30
-    runs-on: ${{ vars.MACOS }}
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-      - name: Bootstrap
-        uses: ./.github/actions/bootstrap
-      - name: Download visionOS simulator
-        if: matrix.platform == 'visionOS'
-        run: xcodebuild -downloadPlatform visionOS
-      - name: Test
-        run: make test-${{ matrix.platform }}
-
   test-codecov:
     name: Test (macOS)
     runs-on: ${{ vars.MACOS }}
@@ -78,3 +59,22 @@ jobs:
           flags: ChouTiUI
           name: ChouTiUI
           fail_ci_if_error: true
+
+  test:
+    name: Test
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [iOS, visionOS]
+    timeout-minutes: 30
+    runs-on: ${{ vars.MACOS }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Bootstrap
+        uses: ./.github/actions/bootstrap
+      - name: Download visionOS simulator
+        if: matrix.platform == 'visionOS'
+        run: xcodebuild -downloadPlatform visionOS
+      - name: Test
+        run: make test-${{ matrix.platform }}
