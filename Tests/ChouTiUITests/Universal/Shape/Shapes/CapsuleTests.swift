@@ -40,6 +40,9 @@ class CapsuleTests: XCTestCase {
     let shape: Capsule = .capsule
     expect(shape) == Capsule()
     expect(shape.style) == .continuous
+
+    expect(Capsule.capsule) == Capsule(style: .continuous)
+    expect(Capsule.capsule(style: .circular)) == Capsule(style: .circular)
   }
 
   func test_isEqual() {

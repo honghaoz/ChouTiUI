@@ -34,8 +34,16 @@ import ChouTi
 
 public extension Shape where Self == Capsule {
 
-  /// A capsule shape.
+  /// A continuous capsule shape.
   static var capsule: Capsule { Capsule.capsule }
+
+  /// Creates a capsule with the given style.
+  ///
+  /// - Parameters:
+  ///   - style: The style of the capsule.
+  static func capsule(style: Capsule.Style) -> Capsule {
+    Capsule(style: style)
+  }
 }
 
 /// A capsule shape.
