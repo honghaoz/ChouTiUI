@@ -45,7 +45,8 @@ public extension Shape where Self == Rectangle {
 
 /// A continuous rounded rectangle.
 ///
-/// - Note: This shape's path can only be generated correctly when the corner radius is smaller than (1 / BezierPath.shapeBreakRatio) of the shorter edge of the rect.
+/// - Note: The corner radius is clamped to approximately 1/3 of the shorter edge of the rect.
+///   See [BezierPath.limitedCornerRadius(rect:)](x-source-tag://BezierPath.limitedCornerRadius) for more details.
 public struct Rectangle: Shape, OffsetableShape {
 
   public let cornerRadius: CGFloat

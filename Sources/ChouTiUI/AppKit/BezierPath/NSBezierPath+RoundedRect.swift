@@ -40,13 +40,16 @@ public extension BezierPath {
   /// Specifically, 1) when the corner radius is smaller than both the width and height divided by the magic number,
   /// the generated shape is a good rounded rectangle, i.e. matching the `CALayer.cornerRadius`. 2) when the corner radius
   /// is larger than both the width and height divided by the magic number, the shape is a capsule. 3) when the corner radius
-  /// is larger than width or height divided by the magic number but smaller than the other dimension, the shape is a weird
-  /// shape that doesn't match either the layer.cornerRadius nor the capsule shape.
+  /// is larger than width or height divided by the magic number but smaller than the other dimension, the shape is a near
+  /// capsule shape (but doesn't match the CALayer with continuous cornerRadius shape exactly).
   ///
   /// - Tag: BezierPath.shapeBreakRatio
   static let shapeBreakRatio: CGFloat = 3.0573299 // 1.52866495 * 2
 
-  /// The max corner radius for a rectangle that `BezierPath(roundedRect:cornerRadius:)` can generate a correct rounded rect path.
+  /// The max corner radius for a rectangle that `BezierPath(roundedRect:cornerRadius:)` can generate a correct rounded
+  /// rect path (shape 1, see [BezierPath.shapeBreakRatio](x-source-tag://BezierPath.shapeBreakRatio) for more details).
+  ///
+  /// The limited corner radius is approximately 1/3 of the shorter edge of the rect.
   ///
   /// - Parameter rect: The bounding rect.
   /// - Returns: The max corner radius.
@@ -64,10 +67,11 @@ public extension NSBezierPath {
   /// Creates and returns a new Bézier path object with a rounded rectangular path.
   ///
   /// The BezierPath can generate different shapes depending on the `cornerRadius` value relative to the width and height of the rect.
-  /// It's recommended to ensure the `cornerRadius` is smaller than the width and height divided by `BezierPath.shapeBreakRatio`. For other cases,
-  /// use `SuperEllipse` or `Capsule` shape instead.
+  /// It's recommended to ensure the `cornerRadius` is smaller than the width and height divided by `BezierPath.shapeBreakRatio`. You can
+  /// use `BezierPath.limitedCornerRadius(rect:)` to get the max corner radius for a rectangle.
+  /// For other cases, use `SuperEllipse` or `Capsule` shape instead.
   ///
-  /// See `BezierPath.shapeBreakRatio` for more details.
+  /// See [BezierPath.shapeBreakRatio](x-source-tag://BezierPath.shapeBreakRatio) for more details.
   ///
   /// - Parameters:
   ///   - rect: The rectangle that defines the basic shape of the path.
@@ -158,10 +162,11 @@ public extension NSBezierPath {
   /// - Note: Rounding corners only works when the radius is smaller than the width and height divided by `BezierPath.shapeBreakRatio`.
   ///
   /// The BezierPath can generate different shapes depending on the `cornerRadius` value relative to the width and height of the rect.
-  /// It's recommended to ensure the `cornerRadius` is smaller than the width and height divided by `BezierPath.shapeBreakRatio`. For other cases,
-  /// use `SuperEllipse` or `Capsule` shape instead.
+  /// It's recommended to ensure the `cornerRadius` is smaller than the width and height divided by `BezierPath.shapeBreakRatio`. You can
+  /// use `BezierPath.limitedCornerRadius(rect:)` to get the max corner radius for a rectangle.
+  /// For other cases, use `SuperEllipse` or `Capsule` shape instead.
   ///
-  /// See `BezierPath.shapeBreakRatio` for more details.
+  /// See [BezierPath.shapeBreakRatio](x-source-tag://BezierPath.shapeBreakRatio) for more details.
   ///
   /// - Parameters:
   ///   - rect: The rectangle that defines the basic shape of the path.
