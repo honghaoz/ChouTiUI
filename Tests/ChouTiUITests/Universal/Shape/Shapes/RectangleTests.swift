@@ -116,14 +116,14 @@ class RectangleTests: XCTestCase {
       expect(path) == BezierPath(roundedRect: rect, byRoundingCorners: .topLeft, cornerRadii: CGSize(16, 16)).cgPath
     }
 
-    // limited corner radius
+    // corner radius is not limited
     do {
-      let shape = Rectangle(cornerRadius: 48)
+      let cornerRadius: CGFloat = 48
+      let shape = Rectangle(cornerRadius: cornerRadius)
       let rect = CGRect(x: 0, y: 0, width: 200, height: 100)
       let path = shape.path(in: rect)
 
-      let limitedCornerRadius = BezierPath.limitedCornerRadius(rect: rect)
-      expect(path) == BezierPath(roundedRect: rect, byRoundingCorners: .all, cornerRadii: CGSize(limitedCornerRadius, limitedCornerRadius)).cgPath
+      expect(path) == BezierPath(roundedRect: rect, byRoundingCorners: .all, cornerRadii: CGSize(cornerRadius, cornerRadius)).cgPath
     }
   }
 

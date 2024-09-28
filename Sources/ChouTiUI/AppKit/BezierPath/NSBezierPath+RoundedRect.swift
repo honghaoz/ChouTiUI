@@ -53,6 +53,8 @@ public extension BezierPath {
   ///
   /// - Parameter rect: The bounding rect.
   /// - Returns: The max corner radius.
+  ///
+  /// - Tag: BezierPath.limitedCornerRadius
   static func limitedCornerRadius(rect: CGRect) -> CGFloat {
     min(rect.width, rect.height) / shapeBreakRatio
   }

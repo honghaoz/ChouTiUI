@@ -45,8 +45,16 @@ public extension Shape where Self == Rectangle {
 
 /// A continuous rounded rectangle.
 ///
-/// - Note: The corner radius is clamped to approximately 1/3 of the shorter edge of the rect.
-///   See [BezierPath.limitedCornerRadius(rect:)](x-source-tag://BezierPath.limitedCornerRadius) for more details.
+/// The shape's path is generated using `BezierPath`. The appearance of the rounded corners
+/// depends on the relationship between `cornerRadius` and the rectangle's dimensions.
+///
+/// Note: The generated path may appear incorrect when the corner radius exceeds approximately
+/// 1/3 of the rectangle's shorter edge. To ensure a correct path, it's recommended to use
+/// `BezierPath.limitedCornerRadius(rect:)` to clamp the corner radius.
+///
+/// For more details, see:
+/// - [BezierPath.shapeBreakRatio](x-source-tag://BezierPath.shapeBreakRatio)
+/// - [BezierPath.limitedCornerRadius(rect:)](x-source-tag://BezierPath.limitedCornerRadius)
 public struct Rectangle: Shape, OffsetableShape {
 
   public let cornerRadius: CGFloat
@@ -75,15 +83,14 @@ public struct Rectangle: Shape, OffsetableShape {
   // MARK: - Shape
 
   public func path(in rect: CGRect) -> CGPath {
-    let limitedCornerRadius = min(BezierPath.limitedCornerRadius(rect: rect), cornerRadius)
     if roundingCorners == .all {
       if cornerRadius == 0 {
         return BezierPath(rect: rect).cgPath
       } else {
-        return BezierPath(roundedRect: rect, cornerRadius: limitedCornerRadius).cgPath
+        return BezierPath(roundedRect: rect, cornerRadius: cornerRadius).cgPath
       }
     } else {
-      return BezierPath(roundedRect: rect, byRoundingCorners: roundingCorners, cornerRadii: CGSize(limitedCornerRadius, limitedCornerRadius)).cgPath
+      return BezierPath(roundedRect: rect, byRoundingCorners: roundingCorners, cornerRadii: CGSize(cornerRadius, cornerRadius)).cgPath
     }
   }
 
