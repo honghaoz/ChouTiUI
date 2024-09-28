@@ -215,7 +215,6 @@ public extension NSBezierPath {
           path.closeSubpath()
         @unknown default:
           ChouTi.assertFailure("Unknown CGPath element type", metadata: ["type": "\(type)"])
-          continue
         }
       }
 

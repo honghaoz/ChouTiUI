@@ -37,6 +37,11 @@ import ChouTiUI
 
 class NSBezierPath_RoundedRectTests: XCTestCase {
 
+  func test_limitedCornerRadius() {
+    expect(BezierPath.limitedCornerRadius(rect: CGRect(x: 0, y: 0, width: 100, height: 50))) == 50 / BezierPath.shapeBreakRatio
+    expect(BezierPath.limitedCornerRadius(rect: CGRect(x: 0, y: 0, width: 50, height: 100))) == 50 / BezierPath.shapeBreakRatio
+  }
+
   #if canImport(AppKit)
   func test_invalidRect() {
     let rect = CGRect(x: 0, y: 0, width: 0, height: 0)
