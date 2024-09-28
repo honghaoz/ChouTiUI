@@ -37,13 +37,13 @@ public struct CGPathShape: Shape {
   public enum ContentMode: Hashable {
 
     /// The shape is resized to fill the entire rect, with aspect ratio preserved.
-    case resizeAspectFill
+    case aspectFill
 
     /// The shape is resized to fit the entire rect, with aspect ratio preserved.
-    case resizeAspectFit
+    case aspectFit
 
     /// The shape is resized to fill the entire rect, without preserving aspect ratio.
-    case scaleToFill
+    case stretch
   }
 
   /// The raw CGPath.
@@ -90,11 +90,11 @@ public struct CGPathShape: Shape {
   public func path(in rect: CGRect) -> CGPath {
     let mode: CGPath.ResizeMode
     switch contentMode {
-    case .resizeAspectFill:
+    case .aspectFill:
       mode = .aspectFill
-    case .resizeAspectFit:
+    case .aspectFit:
       mode = .aspectFit
-    case .scaleToFill:
+    case .stretch:
       mode = .fill
     }
 

@@ -40,19 +40,19 @@ class CGPathShapeTests: XCTestCase {
     // with canvas size
     do {
       let cgPath = CGPath(rect: CGRect(10, 20, 30, 40), transform: nil)
-      let shape = CGPathShape(cgPath: cgPath, canvasSize: CGSize(40, 60), contentMode: .scaleToFill)
+      let shape = CGPathShape(cgPath: cgPath, canvasSize: CGSize(40, 60), contentMode: .stretch)
       expect(shape.cgPath) == cgPath
       expect(shape.canvasSize) == CGSize(40, 60)
-      expect(shape.contentMode) == .scaleToFill
+      expect(shape.contentMode) == .stretch
     }
 
     // without canvas size
     do {
       let cgPath = CGPath(rect: CGRect(10, 20, 30, 40), transform: nil)
-      let shape = CGPathShape(cgPath: cgPath, contentMode: .resizeAspectFit)
+      let shape = CGPathShape(cgPath: cgPath, contentMode: .aspectFit)
       expect(shape.cgPath.pathElements()) == CGPath(rect: CGRect(0, 0, 30, 40), transform: nil).pathElements()
       expect(shape.canvasSize) == CGSize(30, 40)
-      expect(shape.contentMode) == .resizeAspectFit
+      expect(shape.contentMode) == .aspectFit
     }
   }
 
@@ -70,10 +70,10 @@ class CGPathShapeTests: XCTestCase {
 
     // with canvasSize
     do {
-      // scaleToFill
+      // stretch
       do {
         let cgPath = CGPath(rect: CGRect(10, 20, 30, 40), transform: nil)
-        let shape = CGPathShape(cgPath: cgPath, canvasSize: CGSize(50, 80), contentMode: .scaleToFill)
+        let shape = CGPathShape(cgPath: cgPath, canvasSize: CGSize(50, 80), contentMode: .stretch)
 
         expect(shape.path(in: CGRect(0, 0, 50, 80)).boundingBoxOfPath) == CGRect(10, 20, 30, 40)
 
@@ -83,10 +83,10 @@ class CGPathShapeTests: XCTestCase {
         expect(shape.path(in: CGRect(10, 20, 50, 80)).boundingBoxOfPath) == CGRect(20, 40, 30, 40)
       }
 
-      // resizeAspectFill
+      // aspectFill
       do {
         let cgPath = CGPath(rect: CGRect(10, 20, 30, 40), transform: nil)
-        let shape = CGPathShape(cgPath: cgPath, canvasSize: CGSize(50, 80), contentMode: .resizeAspectFill)
+        let shape = CGPathShape(cgPath: cgPath, canvasSize: CGSize(50, 80), contentMode: .aspectFill)
 
         expect(shape.path(in: CGRect(0, 0, 50, 80)).boundingBoxOfPath) == CGRect(10, 20, 30, 40)
 
@@ -96,10 +96,10 @@ class CGPathShapeTests: XCTestCase {
         expect(shape.path(in: CGRect(10, 20, 50, 80)).boundingBoxOfPath) == CGRect(20, 40, 30, 40)
       }
 
-      // resizeAspectFit
+      // aspectFit
       do {
         let cgPath = CGPath(rect: CGRect(10, 20, 30, 40), transform: nil)
-        let shape = CGPathShape(cgPath: cgPath, canvasSize: CGSize(50, 80), contentMode: .resizeAspectFit)
+        let shape = CGPathShape(cgPath: cgPath, canvasSize: CGSize(50, 80), contentMode: .aspectFit)
 
         expect(shape.path(in: CGRect(0, 0, 50, 80)).boundingBoxOfPath) == CGRect(10, 20, 30, 40)
 
@@ -112,10 +112,10 @@ class CGPathShapeTests: XCTestCase {
 
     // without canvas size
     do {
-      // scaleToFill
+      // stretch
       do {
         let cgPath = CGPath(rect: CGRect(10, 20, 30, 40), transform: nil)
-        let shape = CGPathShape(cgPath: cgPath, contentMode: .scaleToFill)
+        let shape = CGPathShape(cgPath: cgPath, contentMode: .stretch)
 
         expect(shape.path(in: CGRect(0, 0, 50, 80)).boundingBoxOfPath) == CGRect(0, 0, 50, 80)
 
@@ -125,10 +125,10 @@ class CGPathShapeTests: XCTestCase {
         expect(shape.path(in: CGRect(10, 20, 50, 80)).boundingBoxOfPath) == CGRect(10.0, 20.0, 50.0, 80.0)
       }
 
-      // resizeAspectFill
+      // aspectFill
       do {
         let cgPath = CGPath(rect: CGRect(10, 20, 30, 40), transform: nil)
-        let shape = CGPathShape(cgPath: cgPath, contentMode: .resizeAspectFill)
+        let shape = CGPathShape(cgPath: cgPath, contentMode: .aspectFill)
 
         expect(shape.path(in: CGRect(0, 0, 50, 80)).boundingBoxOfPath) == CGRect(-5.0, 0.0, 60.0, 80.0)
 
@@ -138,10 +138,10 @@ class CGPathShapeTests: XCTestCase {
         expect(shape.path(in: CGRect(10, 20, 50, 80)).boundingBoxOfPath) == CGRect(5.0, 20.0, 60.0, 80.0)
       }
 
-      // resizeAspectFit
+      // aspectFit
       do {
         let cgPath = CGPath(rect: CGRect(10, 20, 30, 40), transform: nil)
-        let shape = CGPathShape(cgPath: cgPath, contentMode: .resizeAspectFit)
+        let shape = CGPathShape(cgPath: cgPath, contentMode: .aspectFit)
 
         expect(shape.path(in: CGRect(0, 0, 50, 80)).boundingBoxOfPath.isApproximatelyEqual(to: CGRect(0.0, 6.666666666666664, 50.0, 66.66666666666669), absoluteTolerance: 1e-9)) == true
 
@@ -157,8 +157,8 @@ class CGPathShapeTests: XCTestCase {
     // same cgPath, canvasSize, contentMode
     do {
       let cgPath = CGPath(rect: CGRect(10, 20, 30, 40), transform: nil)
-      let shape1 = CGPathShape(cgPath: cgPath, canvasSize: CGSize(40, 60), contentMode: .scaleToFill)
-      let shape2 = CGPathShape(cgPath: cgPath, canvasSize: CGSize(40, 60), contentMode: .scaleToFill)
+      let shape1 = CGPathShape(cgPath: cgPath, canvasSize: CGSize(40, 60), contentMode: .stretch)
+      let shape2 = CGPathShape(cgPath: cgPath, canvasSize: CGSize(40, 60), contentMode: .stretch)
       expect(shape1) == shape2
     }
 
@@ -166,145 +166,25 @@ class CGPathShapeTests: XCTestCase {
     do {
       let cgPath1 = CGPath(rect: CGRect(10, 20, 30, 40), transform: nil)
       let cgPath2 = CGPath(rect: CGRect(11, 20, 30, 40), transform: nil)
-      let shape1 = CGPathShape(cgPath: cgPath1, canvasSize: CGSize(40, 60), contentMode: .scaleToFill)
-      let shape2 = CGPathShape(cgPath: cgPath2, canvasSize: CGSize(40, 60), contentMode: .scaleToFill)
+      let shape1 = CGPathShape(cgPath: cgPath1, canvasSize: CGSize(40, 60), contentMode: .stretch)
+      let shape2 = CGPathShape(cgPath: cgPath2, canvasSize: CGSize(40, 60), contentMode: .stretch)
       expect(shape1) != shape2
     }
 
     // different canvasSize
     do {
       let cgPath = CGPath(rect: CGRect(10, 20, 30, 40), transform: nil)
-      let shape1 = CGPathShape(cgPath: cgPath, canvasSize: CGSize(40, 60), contentMode: .scaleToFill)
-      let shape2 = CGPathShape(cgPath: cgPath, canvasSize: CGSize(50, 70), contentMode: .scaleToFill)
+      let shape1 = CGPathShape(cgPath: cgPath, canvasSize: CGSize(40, 60), contentMode: .stretch)
+      let shape2 = CGPathShape(cgPath: cgPath, canvasSize: CGSize(50, 70), contentMode: .stretch)
       expect(shape1) != shape2
     }
 
     // different contentMode
     do {
       let cgPath = CGPath(rect: CGRect(10, 20, 30, 40), transform: nil)
-      let shape1 = CGPathShape(cgPath: cgPath, canvasSize: CGSize(40, 60), contentMode: .scaleToFill)
-      let shape2 = CGPathShape(cgPath: cgPath, canvasSize: CGSize(40, 60), contentMode: .resizeAspectFit)
+      let shape1 = CGPathShape(cgPath: cgPath, canvasSize: CGSize(40, 60), contentMode: .stretch)
+      let shape2 = CGPathShape(cgPath: cgPath, canvasSize: CGSize(40, 60), contentMode: .aspectFit)
       expect(shape1) != shape2
     }
   }
 }
-
-// class CGPathShapeTests: QuickSpec {
-
-//   override func spec() {
-//     context("for a shape with a rectangle CGPath") {
-//       var cgPath: CGPath!
-//       var shape: CGPathShape!
-
-//       context("providing canvas size") {
-//         context("fill") {
-//           beforeEach {
-//             cgPath = CGPath(rect: CGRect(10, 20, 30, 40), transform: nil)
-//             shape = CGPathShape(cgPath: cgPath, canvasSize: CGSize(40, 60), contentMode: .scaleToFill)
-//           }
-
-//           it("should return correct path") {
-//             expect(shape.path(in: CGRect(0, 0, 40, 60))) == CGPath(rect: CGRect(10, 20, 30, 40), transform: nil)
-//             expect(shape.path(in: CGRect(10, 20, 40, 60))) == CGPath(rect: CGRect(20, 40, 30, 40), transform: nil)
-//             expect(shape.path(in: CGRect(0, 0, 60, 60))) == CGPath(rect: CGRect(15, 20, 45, 40), transform: nil)
-//             expect(shape.path(in: CGRect(20, 20, 60, 60))) == CGPath(rect: CGRect(35, 40, 45, 40), transform: nil)
-//           }
-//         }
-
-//         context("fit") {
-//           beforeEach {
-//             cgPath = CGPath(rect: CGRect(10, 20, 30, 40), transform: nil)
-//             shape = CGPathShape(cgPath: cgPath, canvasSize: CGSize(40, 60), contentMode: .resizeAspectFit)
-//           }
-
-//           it("should return correct path") {
-//             expect(shape.path(in: CGRect(0, 0, 40, 60))) == CGPath(rect: CGRect(10, 20, 30, 40), transform: nil)
-//             expect(shape.path(in: CGRect(10, 20, 40, 60))) == CGPath(rect: CGRect(20, 40, 30, 40), transform: nil)
-//             expect(shape.path(in: CGRect(0, 0, 60, 60))) == CGPath(rect: CGRect(20, 20, 30, 40), transform: nil)
-//             expect(shape.path(in: CGRect(20, 20, 60, 60))) == CGPath(rect: CGRect(40, 40, 30, 40), transform: nil)
-//           }
-//         }
-//       }
-
-//       context("providing no canvas size") {
-//         context("fill") {
-//           beforeEach {
-//             cgPath = CGPath(rect: CGRect(10, 20, 30, 40), transform: nil)
-//             shape = CGPathShape(cgPath: cgPath, contentMode: .scaleToFill)
-//           }
-
-//           it("should return correct path") {
-//             expect(shape.path(in: CGRect(0, 0, 40, 60))) == CGPath(rect: CGRect(0, 0, 40, 60), transform: nil)
-//             expect(shape.path(in: CGRect(10, 20, 40, 60))) == CGPath(rect: CGRect(10, 20, 40, 60), transform: nil)
-//             expect(shape.path(in: CGRect(0, 0, 60, 60))) == CGPath(rect: CGRect(0, 0, 60, 60), transform: nil)
-//             expect(shape.path(in: CGRect(20, 20, 60, 60))) == CGPath(rect: CGRect(20, 20, 60, 60), transform: nil)
-//           }
-//         }
-
-//         context("fit") {
-//           beforeEach {
-//             cgPath = CGPath(rect: CGRect(10, 20, 30, 40), transform: nil)
-//             shape = CGPathShape(cgPath: cgPath, contentMode: .resizeAspectFit)
-//           }
-
-//           it("should return correct path") {
-//             expect(shape.path(in: CGRect(0, 0, 60, 40))) == CGPath(rect: CGRect(15, 0, 30, 40), transform: nil)
-//             expect(shape.path(in: CGRect(10, 20, 60, 40))) == CGPath(rect: CGRect(25, 20, 30, 40), transform: nil)
-//             expect(shape.path(in: CGRect(0, 0, 60, 60))) == CGPath(rect: CGRect(7.5, 0, 45, 60), transform: nil)
-//             expect(shape.path(in: CGRect(20, 20, 60, 60))) == CGPath(rect: CGRect(27.5, 20, 45, 60), transform: nil)
-//           }
-//         }
-//       }
-//     }
-
-//     context("compare") {
-//       var shape: CGPathShape!
-
-//       context("when compare different shape") {
-//         beforeEach {
-//           let cgPath = CGPath(rect: CGRect(10, 20, 30, 40), transform: nil)
-//           shape = CGPathShape(cgPath: cgPath, contentMode: .resizeAspectFit)
-//         }
-
-//         it("should be not equal") {
-//           expect(shape.isEqual(to: Rectangle())) == false
-//         }
-//       }
-
-//       context("when compare same shape") {
-//         beforeEach {
-//           let cgPath = CGPath(rect: CGRect(10, 20, 30, 40), transform: nil)
-//           shape = CGPathShape(cgPath: cgPath, contentMode: .resizeAspectFit)
-//         }
-
-//         context("when cgPath is same") {
-//           it("should be equal") {
-//             expect(shape.isEqual(to: CGPathShape(cgPath: CGPath(rect: CGRect(10, 20, 30, 40), transform: nil), contentMode: .resizeAspectFit))) == true
-//             expect(shape == CGPathShape(cgPath: CGPath(rect: CGRect(10, 20, 30, 40), transform: nil), contentMode: .resizeAspectFit)) == true
-//           }
-//         }
-
-//         context("when cgPath is different") {
-//           it("should be not equal") {
-//             expect(shape.isEqual(to: CGPathShape(cgPath: CGPath(ellipseIn: CGRect(10, 20, 30, 40), transform: nil), contentMode: .resizeAspectFit))) == false
-//             expect(shape == CGPathShape(cgPath: CGPath(ellipseIn: CGRect(10, 20, 30, 40), transform: nil), contentMode: .resizeAspectFit)) == false
-//           }
-//         }
-
-//         context("when canvasSize is different") {
-//           it("should be not equal") {
-//             expect(shape.isEqual(to: CGPathShape(cgPath: CGPath(ellipseIn: CGRect(10, 20, 30, 40), transform: nil), canvasSize: CGSize(100, 100), contentMode: .resizeAspectFit))) == false
-//             expect(shape == CGPathShape(cgPath: CGPath(ellipseIn: CGRect(10, 20, 30, 40), transform: nil), canvasSize: CGSize(100, 100), contentMode: .resizeAspectFit)) == false
-//           }
-//         }
-
-//         context("when contentMode is different") {
-//           it("should be not equal") {
-//             expect(shape.isEqual(to: CGPathShape(cgPath: CGPath(ellipseIn: CGRect(10, 20, 30, 40), transform: nil), contentMode: .resizeAspectFill))) == false
-//             expect(shape == CGPathShape(cgPath: CGPath(ellipseIn: CGRect(10, 20, 30, 40), transform: nil), contentMode: .resizeAspectFill)) == false
-//           }
-//         }
-//       }
-//     }
-//   }
-// }
