@@ -5,7 +5,7 @@ on:
       - "github-actions/**" # ignore github-actions branches
       - "dependabot/**" # ignore dependabot branches
   pull_request: # any pull request against any branch
-  workflow_dispatch: # manual trigger to run workflow
+  workflow_dispatch: # manual trigger
   schedule:
     # ┌───────────── minute (0 - 59)
     # │ ┌───────────── hour (0 - 23)

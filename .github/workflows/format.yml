@@ -2,7 +2,7 @@
 
 name: format
 on:
-  workflow_dispatch: # manual trigger to run workflow
+  workflow_dispatch: # manual trigger
   schedule:
     # ┌───────────── minute (0 - 59)
     # │ ┌───────────── hour (0 - 23)
