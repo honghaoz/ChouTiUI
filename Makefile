@@ -9,34 +9,43 @@ bootstrap: # Bootstrap the environment.
 
 .PHONY: build
 build: # Build with debug configuration.
-	@$(REPO_ROOT)/scripts/swift-package/build-workspace.sh --workspace-path "Project.xcworkspace" --scheme "ChouTiUI" --configuration "Debug" --os "iOS macOS visionOS"
+	@$(REPO_ROOT)/scripts/swift-package/build-workspace.sh --workspace-path "Project.xcworkspace" --scheme "ChouTiUI" --configuration "Debug" --os "macOS iOS tvOS visionOS"
 
 .PHONY: build-release
 build-release: # Build with release configuration on all platforms.
-	@$(REPO_ROOT)/scripts/swift-package/build-workspace.sh --workspace-path "Project.xcworkspace" --scheme "ChouTiUI" --configuration "Release" --os "iOS macOS visionOS"
-
-.PHONY: build-release-iOS
-build-release-iOS: # Build with release configuration on iOS.
-	@$(REPO_ROOT)/scripts/swift-package/build-workspace.sh --workspace-path "Project.xcworkspace" --scheme "ChouTiUI" --configuration "Release" --os "iOS"
+	@$(REPO_ROOT)/scripts/swift-package/build-workspace.sh --workspace-path "Project.xcworkspace" --scheme "ChouTiUI" --configuration "Release" --os "macOS iOS tvOS visionOS"
 
 .PHONY: build-release-macOS
 build-release-macOS: # Build with release configuration on macOS.
 	@$(REPO_ROOT)/scripts/swift-package/build-workspace.sh --workspace-path "Project.xcworkspace" --scheme "ChouTiUI" --configuration "Release" --os "macOS"
 
+.PHONY: build-release-iOS
+build-release-iOS: # Build with release configuration on iOS.
+	@$(REPO_ROOT)/scripts/swift-package/build-workspace.sh --workspace-path "Project.xcworkspace" --scheme "ChouTiUI" --configuration "Release" --os "iOS"
+
+.PHONY: build-release-tvOS
+build-release-tvOS: # Build with release configuration on tvOS.
+	@$(REPO_ROOT)/scripts/swift-package/build-workspace.sh --workspace-path "Project.xcworkspace" --scheme "ChouTiUI" --configuration "Release" --os "tvOS"
+
 .PHONY: build-release-visionOS
 build-release-visionOS: # Build with release configuration on visionOS.
+	@$(REPO_ROOT)/scripts/swift-package/build-workspace.sh --workspace-path "Project.xcworkspace" --scheme "ChouTiUI" --configuration "Release" --os "visionOS"
 
 .PHONY: test
 test: # Run tests on all platforms.
-	@$(REPO_ROOT)/scripts/swift-package/test-workspace.sh --workspace-path "Project.xcworkspace" --scheme "ChouTiUI" --os "iOS macOS visionOS"
+	@$(REPO_ROOT)/scripts/swift-package/test-workspace.sh --workspace-path "Project.xcworkspace" --scheme "ChouTiUI" --os "macOS iOS tvOS visionOS"
+
+.PHONY: test-macOS
+test-macOS: # Run tests on macOS.
+	@$(REPO_ROOT)/scripts/swift-package/test-workspace.sh --workspace-path "Project.xcworkspace" --scheme "ChouTiUI" --os "macOS"
 
 .PHONY: test-iOS
 test-iOS: # Run tests on iOS.
 	@$(REPO_ROOT)/scripts/swift-package/test-workspace.sh --workspace-path "Project.xcworkspace" --scheme "ChouTiUI" --os "iOS"
 
-.PHONY: test-macOS
-test-macOS: # Run tests on macOS.
-	@$(REPO_ROOT)/scripts/swift-package/test-workspace.sh --workspace-path "Project.xcworkspace" --scheme "ChouTiUI" --os "macOS"
+.PHONY: test-tvOS
+test-tvOS: # Run tests on tvOS.
+	@$(REPO_ROOT)/scripts/swift-package/test-workspace.sh --workspace-path "Project.xcworkspace" --scheme "ChouTiUI" --os "tvOS"
 
 .PHONY: test-visionOS
 test-visionOS: # Run tests on visionOS.

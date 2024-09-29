@@ -45,7 +45,11 @@ class DeviceTests: XCTestCase {
   }
 
   func test_hasRoundedDisplayCorners() {
+    #if os(iOS)
     expect(Device.hasRoundedDisplayCorners) == true
+    #elseif os(tvOS)
+    expect(Device.hasRoundedDisplayCorners) == false
+    #endif
   }
 }
 

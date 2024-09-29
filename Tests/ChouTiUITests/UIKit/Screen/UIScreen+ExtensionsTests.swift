@@ -39,7 +39,11 @@ import ChouTiUI
 class UIScreenExtensionsTests: XCTestCase {
 
   func test_displayCornerRadius() {
+    #if os(iOS)
     expect(UIScreen.main.displayCornerRadius) > 0
+    #elseif os(tvOS)
+    expect(UIScreen.main.displayCornerRadius) == 0
+    #endif
   }
 }
 

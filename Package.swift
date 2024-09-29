@@ -5,8 +5,10 @@ import PackageDescription
 let package = Package(
   name: "ChouTiUI",
   platforms: [
-    .iOS(.v13),
     .macOS(.v10_15),
+    .iOS(.v13),
+    .tvOS(.v13),
+    .visionOS(.v1),
   ],
   products: [
     .library(name: "ChouTiUI", targets: ["ChouTiUI"]),
