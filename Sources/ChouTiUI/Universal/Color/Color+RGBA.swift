@@ -317,7 +317,7 @@ public extension Color {
   ///
   /// - Parameters:
   ///   - toColor: The end `Color`.
-  ///   - t: The interpolation progress. The value should be within `[0 ... 1]`.
+  ///   - t: The interpolation progress. The value is allowed to be be out of the `[0 ... 1]` range.
   ///   - colorSpace: The working color space. Default value is `.sRGB`.
   /// - Returns: An interpolated `Color`.
   func lerp(to toColor: Color, t: Double, colorSpace: ColorSpace = .sRGB) -> Color {
@@ -328,9 +328,6 @@ public extension Color {
       ])
       return self
     }
-
-    ChouTi.assert(t >= 0 && t <= 1, "t should be within 0...1", metadata: ["t": "\(t)"])
-    let t = t.clamped(to: 0.0 ... 1.0)
 
     let red = from.red + (to.red - from.red) * t
     let green = from.green + (to.green - from.green) * t

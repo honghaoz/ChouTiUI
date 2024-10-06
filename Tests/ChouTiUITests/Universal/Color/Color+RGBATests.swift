@@ -773,23 +773,11 @@ class Color_RGBATests: XCTestCase {
     let startColor = Color(red: 0.0, green: 0.0, blue: 0.0, alpha: 1.0)
     let endColor = Color(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
 
-    Assert.setTestAssertionFailureHandler { message, metadata, file, line, column in
-      expect(message) == "t should be within 0...1"
-      expect(metadata["t"]) == "-1.0"
-    }
+    let lerpColor1 = startColor.lerp(to: endColor, t: -0.1)
+    expect(lerpColor1) == Color(red: -0.1, green: -0.1, blue: -0.1, alpha: 1.0)
 
-    let lerpColor1 = startColor.lerp(to: endColor, t: -1.0)
-    expect(lerpColor1) == startColor
-
-    Assert.setTestAssertionFailureHandler { message, metadata, file, line, column in
-      expect(message) == "t should be within 0...1"
-      expect(metadata["t"]) == "2.0"
-    }
-
-    let lerpColor2 = startColor.lerp(to: endColor, t: 2.0)
-    expect(lerpColor2) == endColor
-
-    Assert.resetTestAssertionFailureHandler()
+    let lerpColor2 = startColor.lerp(to: endColor, t: 1.1)
+    expect(lerpColor2) == Color(red: 1.1, green: 1.1, blue: 1.1, alpha: 1.0)
   }
 
   func testLerpWithSameColors() {
