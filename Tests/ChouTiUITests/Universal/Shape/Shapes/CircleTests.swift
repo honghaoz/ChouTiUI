@@ -32,6 +32,7 @@ import CoreGraphics
 
 import ChouTiTest
 
+import ChouTi
 import ChouTiUI
 
 class CircleTests: XCTestCase {
@@ -72,7 +73,7 @@ class CircleTests: XCTestCase {
       let shape = Circle()
       let rect = CGRect(x: 0, y: 0, width: -100, height: -100)
       let path = shape.path(in: rect)
-      expect(path) == CGPath(ellipseIn: rect, transform: nil)
+      expect(path) == CGPath(ellipseIn: .zero, transform: nil)
     }
 
     // rect with negative width
@@ -80,7 +81,7 @@ class CircleTests: XCTestCase {
       let shape = Circle()
       let rect = CGRect(x: 0, y: 0, width: -100, height: 100)
       let path = shape.path(in: rect)
-      expect(path) == CGPath(ellipseIn: rect, transform: nil)
+      expect(path) == CGPath(ellipseIn: .zero, transform: nil)
     }
   }
 

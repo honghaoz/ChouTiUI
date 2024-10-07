@@ -49,7 +49,22 @@ public struct Circle: Shape, OffsetableShape {
   // MARK: - Shape
 
   public func path(in rect: CGRect) -> CGPath {
-    CGPath(ellipseIn: rect, transform: nil)
+    guard rect.size.area > 0 else {
+      return CGPath(ellipseIn: .zero, transform: nil)
+    }
+    return CGPath(ellipseIn: rect.squareRect(), transform: nil)
+
+    // 1000 times performance:
+    // 0.000466375s for CGPath.init(ellipseIn:transform:)
+    //
+    // 0.000886791 for the below code:
+    // BezierPath(
+    //   arcCenter: rect.center,
+    //   radius: min(rect.width, rect.height) / 2,
+    //   startAngle: 0,
+    //   endAngle: 2 * CGFloat.pi,
+    //   clockwise: true
+    // ).cgPath
   }
 
   // MARK: - OffsetableShape
