@@ -64,23 +64,12 @@ final class CALayer_DisableImplicitAnimationDelegateTests: XCTestCase {
 
 private class LayerImplicitAnimationTester {
 
-  private let window: Window
+  private let environment = LayerTestEnvironment()
   let layer: CALayer
 
   init() {
     layer = CALayer(frame: CGRect(x: 50, y: 50, width: 100, height: 100))
-
-    #if os(macOS)
-    window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 500, height: 500),
-                      styleMask: [.titled, .closable, .miniaturizable, .resizable],
-                      backing: .buffered,
-                      defer: false)
-    window.contentView?.wantsLayer = true
-    window.contentView?.layer?.addSublayer(layer)
-    #else
-    window = UIWindow(frame: CGRect(x: 0, y: 0, width: 500, height: 500))
-    window.layer.addSublayer(layer)
-    #endif
+    environment.containerLayer.addSublayer(layer)
   }
 
   func getImplicitAnimations() -> [CABasicAnimation] {
