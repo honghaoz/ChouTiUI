@@ -232,6 +232,12 @@ final class TextSizeProviderTests: XCTestCase {
         #if os(macOS)
         expect(size.width) == 1667.3399999999997
         expect(size.height).to(beApproximatelyEqual(to: 23, within: 1e-4))
+        #elseif os(tvOS)
+        expect(size.width) == 1664.0
+        expect(size.height).to(beApproximatelyEqual(to: 24, within: 1e-4))
+        #elseif os(visionOS)
+        expect(size.width) == 1663.5
+        expect(size.height).to(beApproximatelyEqual(to: 23.5, within: 1e-4))
         #else
         expect(size.width) == 1663.6666666666667
         expect(size.height).to(beApproximatelyEqual(to: 23.333333333333332, within: 1e-4))
@@ -244,6 +250,12 @@ final class TextSizeProviderTests: XCTestCase {
         #if os(macOS)
         expect(size.width) == 1667.3399999999997
         expect(size.height).to(beApproximatelyEqual(to: 23, within: 1e-4))
+        #elseif os(tvOS)
+        expect(size.width) == 1664.0
+        expect(size.height).to(beApproximatelyEqual(to: 24, within: 1e-4))
+        #elseif os(visionOS)
+        expect(size.width) == 1663.5
+        expect(size.height).to(beApproximatelyEqual(to: 23.5, within: 1e-4))
         #else
         expect(size.width) == 1663.6666666666667
         expect(size.height).to(beApproximatelyEqual(to: 23.333333333333332, within: 1e-4))
@@ -256,6 +268,12 @@ final class TextSizeProviderTests: XCTestCase {
         #if os(macOS)
         expect(size.width) == 1667.3399999999997
         expect(size.height).to(beApproximatelyEqual(to: 23, within: 1e-4))
+        #elseif os(tvOS)
+        expect(size.width) == 1664.0
+        expect(size.height).to(beApproximatelyEqual(to: 24, within: 1e-4))
+        #elseif os(visionOS)
+        expect(size.width) == 1663.5
+        expect(size.height).to(beApproximatelyEqual(to: 23.5, within: 1e-4))
         #else
         expect(size.width) == 1663.6666666666667
         expect(size.height).to(beApproximatelyEqual(to: 23.333333333333332, within: 1e-4))
@@ -268,6 +286,12 @@ final class TextSizeProviderTests: XCTestCase {
         #if os(macOS)
         expect(size.width) == 1667.3399999999997
         expect(size.height).to(beApproximatelyEqual(to: 23, within: 1e-4))
+        #elseif os(tvOS)
+        expect(size.width) == 1664.0
+        expect(size.height).to(beApproximatelyEqual(to: 24, within: 1e-4))
+        #elseif os(visionOS)
+        expect(size.width) == 1663.5
+        expect(size.height).to(beApproximatelyEqual(to: 23.5, within: 1e-4))
         #else
         expect(size.width) == 1663.6666666666667
         expect(size.height).to(beApproximatelyEqual(to: 23.333333333333332, within: 1e-4))
@@ -280,6 +304,12 @@ final class TextSizeProviderTests: XCTestCase {
         #if os(macOS)
         expect(size.width) == 1667.3399999999997
         expect(size.height).to(beApproximatelyEqual(to: 23, within: 1e-4))
+        #elseif os(tvOS)
+        expect(size.width) == 1664.0
+        expect(size.height).to(beApproximatelyEqual(to: 24, within: 1e-4))
+        #elseif os(visionOS)
+        expect(size.width) == 1663.5
+        expect(size.height).to(beApproximatelyEqual(to: 23.5, within: 1e-4))
         #else
         expect(size.width) == 1663.6666666666667
         expect(size.height).to(beApproximatelyEqual(to: 23.333333333333332, within: 1e-4))
@@ -292,6 +322,12 @@ final class TextSizeProviderTests: XCTestCase {
         #if os(macOS)
         expect(size.width) == 273.68
         expect(size.height).to(beApproximatelyEqual(to: 46, within: 1e-4))
+        #elseif os(tvOS)
+        expect(size.width) == 270
+        expect(size.height).to(beApproximatelyEqual(to: 47, within: 1e-4))
+        #elseif os(visionOS)
+        expect(size.width) == 270.0
+        expect(size.height).to(beApproximatelyEqual(to: 47, within: 1e-4))
         #else
         expect(size.width) == 270.0
         expect(size.height).to(beApproximatelyEqual(to: 46.666666666666664, within: 1e-4))
@@ -304,6 +340,12 @@ final class TextSizeProviderTests: XCTestCase {
         #if os(macOS)
         expect(size.width) == 1667.3399999999997
         expect(size.height).to(beApproximatelyEqual(to: 23, within: 1e-4))
+        #elseif os(tvOS)
+        expect(size.width) == 1664.0
+        expect(size.height).to(beApproximatelyEqual(to: 24, within: 1e-4))
+        #elseif os(visionOS)
+        expect(size.width) == 1663.5
+        expect(size.height).to(beApproximatelyEqual(to: 23.5, within: 1e-4))
         #else
         expect(size.width) == 1663.6666666666667
         expect(size.height).to(beApproximatelyEqual(to: 23.333333333333332, within: 1e-4))
@@ -316,6 +358,12 @@ final class TextSizeProviderTests: XCTestCase {
         #if os(macOS)
         expect(size.width) == 1667.3399999999997
         expect(size.height).to(beApproximatelyEqual(to: 23, within: 1e-4))
+        #elseif os(tvOS)
+        expect(size.width) == 1664.0
+        expect(size.height).to(beApproximatelyEqual(to: 24, within: 1e-4))
+        #elseif os(visionOS)
+        expect(size.width) == 1663.5
+        expect(size.height).to(beApproximatelyEqual(to: 23.5, within: 1e-4))
         #else
         expect(size.width) == 1663.6666666666667
         expect(size.height).to(beApproximatelyEqual(to: 23.333333333333332, within: 1e-4))
@@ -328,6 +376,12 @@ final class TextSizeProviderTests: XCTestCase {
         #if os(macOS)
         expect(size.width) == 295.54
         expect(size.height).to(beApproximatelyEqual(to: 69, within: 1e-4))
+        #elseif os(tvOS)
+        expect(size.width) == 292
+        expect(size.height).to(beApproximatelyEqual(to: 70, within: 1e-4))
+        #elseif os(visionOS)
+        expect(size.width) == 292
+        expect(size.height).to(beApproximatelyEqual(to: 70, within: 1e-4))
         #else
         expect(size.width) == 291.6666666666667
         expect(size.height).to(beApproximatelyEqual(to: 70, within: 1e-4))
@@ -340,6 +394,12 @@ final class TextSizeProviderTests: XCTestCase {
         #if os(macOS)
         expect(size.width) == 1667.3399999999997
         expect(size.height).to(beApproximatelyEqual(to: 23, within: 1e-4))
+        #elseif os(tvOS)
+        expect(size.width) == 1664.0
+        expect(size.height).to(beApproximatelyEqual(to: 24, within: 1e-4))
+        #elseif os(visionOS)
+        expect(size.width) == 1663.5
+        expect(size.height).to(beApproximatelyEqual(to: 23.5, within: 1e-4))
         #else
         expect(size.width) == 1663.6666666666667
         expect(size.height).to(beApproximatelyEqual(to: 23.333333333333332, within: 1e-4))
@@ -352,6 +412,12 @@ final class TextSizeProviderTests: XCTestCase {
         #if os(macOS)
         expect(size.width) == 1667.3399999999997
         expect(size.height).to(beApproximatelyEqual(to: 23, within: 1e-4))
+        #elseif os(tvOS)
+        expect(size.width) == 1664.0
+        expect(size.height).to(beApproximatelyEqual(to: 24, within: 1e-4))
+        #elseif os(visionOS)
+        expect(size.width) == 1663.5
+        expect(size.height).to(beApproximatelyEqual(to: 23.5, within: 1e-4))
         #else
         expect(size.width) == 1663.6666666666667
         expect(size.height).to(beApproximatelyEqual(to: 23.333333333333332, within: 1e-4))
