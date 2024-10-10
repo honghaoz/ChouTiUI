@@ -65,7 +65,7 @@ jobs:
         uses: codecov/codecov-action@v4.5.0
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          file: .build/debug/codecov/coverage.lcov
+          file: ChouTiUI/.build/debug/codecov/coverage.lcov
           disable_search: true
           flags: ChouTiUI
           name: ChouTiUI

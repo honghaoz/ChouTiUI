@@ -54,7 +54,7 @@ playground.xcworkspace
 
 # swiftpm
 # .swiftpm/**/*
-# **/.swiftpm/**/*.xcworkspacedata
+**/.swiftpm/**/*.xcworkspacedata
 # !**/.swiftpm/**/xcshareddata/**/*.xcscheme
 .build/
 
