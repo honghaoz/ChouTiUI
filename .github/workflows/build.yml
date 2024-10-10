@@ -21,6 +21,17 @@ env:
   DEVELOPER_DIR: /Applications/Xcode_${{ vars.XCODE_VERSION }}.app/Contents/Developer
 
 jobs:
+  build-root:
+    name: Build root package
+    runs-on: ${{ vars.MACOS }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Bootstrap
+        uses: ./.github/actions/bootstrap
+      - name: Build root package
+        run: make build
+
   build:
     name: Build
     strategy:
@@ -38,7 +49,7 @@ jobs:
         if: matrix.platform == 'visionOS'
         run: xcodebuild -downloadPlatform visionOS
       - name: Build
-        run: make build-release-${{ matrix.platform }}
+        run: make build-release-${{ matrix.platform }} -C ChouTiUI
 
   test-codecov:
     name: Test (macOS)
@@ -49,7 +60,7 @@ jobs:
       - name: Bootstrap
         uses: ./.github/actions/bootstrap
       - name: Test with Codecov
-        run: make test-codecov
+        run: make test-codecov -C ChouTiUI
       - name: Upload code coverage
         uses: codecov/codecov-action@v4.5.0
         with:
@@ -77,4 +88,4 @@ jobs:
         if: matrix.platform == 'visionOS'
         run: xcodebuild -downloadPlatform visionOS
       - name: Test
-        run: make test-${{ matrix.platform }}
+        run: make test-${{ matrix.platform }} -C ChouTiUI
