@@ -36,7 +36,7 @@ import ChouTiTest
 
 import ChouTiUI
 
-final class NSTextField_ExtensionsTests: XCTestCase {
+class NSTextField_ExtensionsTests: XCTestCase {
 
   func test_numberOfLines() {
     let textField = NSTextField()

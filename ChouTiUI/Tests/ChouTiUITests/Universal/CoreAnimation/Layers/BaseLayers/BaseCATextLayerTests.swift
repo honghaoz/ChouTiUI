@@ -44,7 +44,7 @@ import ChouTiTest
 import ChouTi
 import ChouTiUI
 
-final class BaseCATextLayerTests: XCTestCase {
+class BaseCATextLayerTests: XCTestCase {
 
   func test_init() {
     let layer = BaseCATextLayer()

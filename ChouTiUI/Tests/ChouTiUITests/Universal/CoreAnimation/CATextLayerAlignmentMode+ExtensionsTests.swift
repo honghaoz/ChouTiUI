@@ -43,7 +43,7 @@ import ChouTiTest
 import ChouTi
 import ChouTiUI
 
-final class CATextLayerAlignmentMode_ExtensionsTests: XCTestCase {
+class CATextLayerAlignmentMode_ExtensionsTests: XCTestCase {
 
   func test_nsTextAlignment() {
     expect(CATextLayerAlignmentMode.natural.nsTextAlignment) == .natural

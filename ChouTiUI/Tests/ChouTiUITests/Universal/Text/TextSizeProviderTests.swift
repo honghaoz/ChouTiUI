@@ -44,7 +44,7 @@ import ChouTiTest
 import ChouTi
 import ChouTiUI
 
-final class TextSizeProviderTests: XCTestCase {
+class TextSizeProviderTests: XCTestCase {
 
   func test_singleLine() throws {
     // one line attributed string

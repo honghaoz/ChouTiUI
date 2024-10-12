@@ -43,7 +43,7 @@ import ChouTiTest
 import ChouTi
 import ChouTiUI
 
-final class CATextLayerTruncationMode_ExtensionsTests: XCTestCase {
+class CATextLayerTruncationMode_ExtensionsTests: XCTestCase {
 
   func test_nsLineBreakMode() {
     expect(CATextLayerTruncationMode.none.nsLineBreakMode) == .byClipping

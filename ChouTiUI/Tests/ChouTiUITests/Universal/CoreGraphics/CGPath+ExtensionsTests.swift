@@ -35,7 +35,7 @@ import ChouTiTest
 import ChouTi
 import ChouTiUI
 
-final class CGPath_ExtensionsTests: XCTestCase {
+class CGPath_ExtensionsTests: XCTestCase {
 
   // MARK: - Factory
 

@@ -34,7 +34,7 @@ import ChouTiTest
 
 import ChouTiUI
 
-final class CALayer_ExtensionsTests: XCTestCase {
+class CALayer_ExtensionsTests: XCTestCase {
 
   func test_init_frame() {
     let layer = CALayer(frame: CGRect(x: 10, y: 20, width: 100, height: 100))

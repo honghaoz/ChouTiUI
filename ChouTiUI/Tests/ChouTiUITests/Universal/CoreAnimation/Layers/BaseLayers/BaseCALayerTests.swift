@@ -35,7 +35,7 @@ import ChouTiTest
 import ChouTi
 import ChouTiUI
 
-final class BaseCALayerTests: XCTestCase {
+class BaseCALayerTests: XCTestCase {
 
   func test_init() {
     let layer = BaseCALayer()

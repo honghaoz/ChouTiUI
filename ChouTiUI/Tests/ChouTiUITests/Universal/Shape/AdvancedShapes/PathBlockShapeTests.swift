@@ -34,7 +34,7 @@ import ChouTiTest
 
 import ChouTiUI
 
-final class PathBlockShapeTests: XCTestCase {
+class PathBlockShapeTests: XCTestCase {
 
   func test_path() {
     let shape = PathBlockShape(.key("100") { rect in

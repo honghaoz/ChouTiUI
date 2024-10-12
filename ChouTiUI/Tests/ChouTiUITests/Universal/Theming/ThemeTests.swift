@@ -32,7 +32,7 @@ import ChouTiTest
 
 import ChouTiUI
 
-final class ThemeTests: XCTestCase {
+class ThemeTests: XCTestCase {
 
   func test_isLight() {
     do {

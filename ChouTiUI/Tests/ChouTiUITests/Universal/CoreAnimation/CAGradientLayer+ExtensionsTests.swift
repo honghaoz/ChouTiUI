@@ -34,7 +34,7 @@ import ChouTiTest
 
 import ChouTiUI
 
-final class CAGradientLayer_ExtensionsTests: XCTestCase {
+class CAGradientLayer_ExtensionsTests: XCTestCase {
 
   func test_setBackgroundGradientColor() {
     let layer = CAGradientLayer()

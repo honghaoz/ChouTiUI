@@ -42,7 +42,7 @@ import ChouTiTest
 
 import ChouTiUI
 
-final class CGContext_ExtensionsTests: XCTestCase {
+class CGContext_ExtensionsTests: XCTestCase {
 
   func testFlipCoordinatesVertically() throws {
     // matching height

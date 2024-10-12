@@ -34,7 +34,7 @@ import ChouTiTest
 
 import ChouTiUI
 
-final class CALayer_DisableImplicitAnimationDelegateTests: XCTestCase {
+class CALayer_DisableImplicitAnimationDelegateTests: XCTestCase {
 
   func test_disableImplicitAnimation() {
     // has implicit animations by default

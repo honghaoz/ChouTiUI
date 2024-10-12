@@ -35,7 +35,7 @@ import ChouTiTest
 import ChouTi
 import ChouTiUI
 
-final class BaseCAShapeLayerTests: XCTestCase {
+class BaseCAShapeLayerTests: XCTestCase {
 
   func test_init() {
     let layer = BaseCAShapeLayer()
