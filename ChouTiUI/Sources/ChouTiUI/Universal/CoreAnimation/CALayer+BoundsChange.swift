@@ -34,8 +34,6 @@ import ChouTi
 
 /**
  Extends `CALayer` to support bounds change callbacks.
-
- Also check `View+BoundsChange.swift`
  */
 
 private enum AssociateKey {
