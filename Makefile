@@ -12,6 +12,10 @@ build: # Build the package.
 	@echo build: $(MAKEFILE_DIR_NAME)
 	swift build -c release
 
+.PHONY: build-playground-macOS
+build-playground-macOS: # Build the macOS playground.
+	@./scripts/xcodebuild/build-project.sh --project "./playgrounds/ChouTiUIPlayground-macOS/ChouTiUIPlayground-macOS.xcodeproj" --scheme "ChouTiUIPlayground-macOS" --configuration "Release" --os "macOS"
+
 .PHONY: format
 format: # Format the code.
 	@"$(REPO_ROOT)/scripts/format.sh" --all
@@ -22,4 +26,4 @@ lint: # Lint the code.
 
 .PHONY: help
 help:
-	@awk 'BEGIN {FS = ":.*?# "}; /^[a-zA-Z_-]+:.*?# .*$$/ && $$1 != "help" {system("tput bold; tput setaf 6"); printf "%-20s", $$1; system("tput sgr0"); print $$2}' $(MAKEFILE_LIST)
+	@awk 'BEGIN {FS = ":.*?# "}; /^[a-zA-Z_-]+:.*?# .*$$/ && $$1 != "help" {system("tput bold; tput setaf 6"); printf "%-24s", $$1; system("tput sgr0"); print $$2}' $(MAKEFILE_LIST)
