@@ -1,8 +1,8 @@
 //
-//  UIViewController+Theming.swift
+//  NSView+Theming.swift
 //  ChouTiUI
 //
-//  Created by Honghao Zhang on 11/28/22.
+//  Created by Honghao Zhang on 11/25/22.
 //  Copyright © 2020 Honghao Zhang.
 //
 //  MIT License
@@ -28,24 +28,26 @@
 //  IN THE SOFTWARE.
 //
 
-#if canImport(UIKit)
+#if canImport(AppKit)
 
-import UIKit
+import AppKit
 
-extension UIViewController: Theming {
+extension NSView: Theming {
 
   public var theme: Theme {
-    // uses view's theme instead of view controller's `traitCollection.userInterfaceStyle` and `overrideUserInterfaceStyle`
-    // because the latter doesn't work as expected when setting `overrideUserInterfaceStyle` to .light or .dark then resetting it to nil.
-    view.theme
+    effectiveAppearance.theme
   }
 
   public var overrideTheme: Theme? {
     get {
-      view.overrideTheme
+      appearance?.theme ?? nil
     }
     set {
-      view.overrideTheme = newValue
+      if let newValue {
+        appearance = NSAppearance(named: newValue.isLight ? .aqua : .darkAqua)
+      } else {
+        appearance = nil
+      }
     }
   }
 }

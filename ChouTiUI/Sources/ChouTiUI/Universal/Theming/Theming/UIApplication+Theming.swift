@@ -32,8 +32,6 @@
 
 import UIKit
 
-import ChouTi
-
 extension UIApplication: Theming {
 
   public var theme: Theme {

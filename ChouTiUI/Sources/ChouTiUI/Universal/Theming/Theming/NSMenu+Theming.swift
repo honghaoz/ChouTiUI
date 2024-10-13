@@ -1,5 +1,5 @@
 //
-//  UIViewController+Theming.swift
+//  NSMenu+Theming.swift
 //  ChouTiUI
 //
 //  Created by Honghao Zhang on 11/28/22.
@@ -28,24 +28,31 @@
 //  IN THE SOFTWARE.
 //
 
-#if canImport(UIKit)
+#if canImport(AppKit)
 
-import UIKit
+import AppKit
 
-extension UIViewController: Theming {
+extension NSMenu: Theming {
 
   public var theme: Theme {
-    // uses view's theme instead of view controller's `traitCollection.userInterfaceStyle` and `overrideUserInterfaceStyle`
-    // because the latter doesn't work as expected when setting `overrideUserInterfaceStyle` to .light or .dark then resetting it to nil.
-    view.theme
+    effectiveAppearance.theme
   }
 
   public var overrideTheme: Theme? {
     get {
-      view.overrideTheme
+      appearance?.theme ?? nil
     }
     set {
-      view.overrideTheme = newValue
+      if let newValue {
+        appearance = NSAppearance(named: newValue.isLight ? .aqua : .darkAqua)
+      } else {
+        appearance = nil
+      }
+
+      // for each menu item, set its view's override theme
+      for item in items {
+        item.view?.overrideTheme = newValue
+      }
     }
   }
 }

@@ -1,5 +1,5 @@
 //
-//  UIViewController+Theming.swift
+//  NSPopover+Theming.swift
 //  ChouTiUI
 //
 //  Created by Honghao Zhang on 11/28/22.
@@ -28,24 +28,30 @@
 //  IN THE SOFTWARE.
 //
 
-#if canImport(UIKit)
+#if canImport(AppKit)
 
-import UIKit
+import AppKit
 
-extension UIViewController: Theming {
+extension NSPopover: Theming {
 
   public var theme: Theme {
-    // uses view's theme instead of view controller's `traitCollection.userInterfaceStyle` and `overrideUserInterfaceStyle`
-    // because the latter doesn't work as expected when setting `overrideUserInterfaceStyle` to .light or .dark then resetting it to nil.
-    view.theme
+    effectiveAppearance.theme
   }
 
   public var overrideTheme: Theme? {
     get {
-      view.overrideTheme
+      appearance?.theme ?? nil
     }
     set {
-      view.overrideTheme = newValue
+      if let newValue {
+        appearance = NSAppearance(named: newValue.isLight ? .aqua : .darkAqua)
+      } else {
+        appearance = nil
+      }
+
+      // expected to affect content view controller's theme
+      // but it seems not working, so set the view's override theme here
+      contentViewController?.view.overrideTheme = newValue
     }
   }
 }

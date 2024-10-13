@@ -1,8 +1,8 @@
 //
-//  UIViewController+Theming.swift
+//  NSApplication+ThemingTests.swift
 //  ChouTiUI
 //
-//  Created by Honghao Zhang on 11/28/22.
+//  Created by Honghao Zhang on 10/13/24.
 //  Copyright © 2020 Honghao Zhang.
 //
 //  MIT License
@@ -28,25 +28,35 @@
 //  IN THE SOFTWARE.
 //
 
-#if canImport(UIKit)
+#if canImport(AppKit)
 
-import UIKit
+import AppKit
 
-extension UIViewController: Theming {
+import ChouTiTest
 
-  public var theme: Theme {
-    // uses view's theme instead of view controller's `traitCollection.userInterfaceStyle` and `overrideUserInterfaceStyle`
-    // because the latter doesn't work as expected when setting `overrideUserInterfaceStyle` to .light or .dark then resetting it to nil.
-    view.theme
-  }
+import ChouTiUI
 
-  public var overrideTheme: Theme? {
-    get {
-      view.overrideTheme
-    }
-    set {
-      view.overrideTheme = newValue
-    }
+class NSApplication_ThemingTests: XCTestCase {
+
+  func test_theme() {
+    let application = NSApplication.shared
+    let currentTheme = application.theme
+
+    application.overrideTheme = .dark
+    expect(application.theme) == .dark
+    expect(application.overrideTheme) == .dark
+
+    application.overrideTheme = nil
+    expect(application.theme) == currentTheme
+    expect(application.overrideTheme) == nil
+
+    application.overrideTheme = .light
+    expect(application.theme) == .light
+    expect(application.overrideTheme) == .light
+
+    application.overrideTheme = nil
+    expect(application.theme) == currentTheme
+    expect(application.overrideTheme) == nil
   }
 }
 
