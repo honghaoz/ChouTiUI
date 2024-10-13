@@ -1,5 +1,5 @@
 //
-//  NSAppearance+Theme.swift
+//  UIView+Theming.swift
 //  ChouTiUI
 //
 //  Created by Honghao Zhang on 11/28/22.
@@ -28,29 +28,57 @@
 //  IN THE SOFTWARE.
 //
 
-#if canImport(AppKit)
+#if canImport(UIKit)
 
-import AppKit
+import UIKit
 
-public extension NSAppearance {
+import ChouTi
 
-  /// The theme that matches the current appearance.
-  var theme: Theme {
-    if bestMatch(from: [.darkAqua, .aqua]) == .darkAqua {
-      return .dark
-    } else {
+extension UIView: Theming {
+
+  public var theme: Theme {
+    let getThemeFromTraitCollection: () -> Theme = {
+      switch self.traitCollection.userInterfaceStyle {
+      case .unspecified:
+        #if !os(tvOS)
+        ChouTi.assertFailure("unspecified traitCollection.userInterfaceStyle")
+        #endif
+        return self.window?.theme ?? .light
+      case .light:
+        return .light
+      case .dark:
+        return .dark
+      @unknown default:
+        ChouTi.assertFailure("unknown UIUserInterfaceStyle: \(self.traitCollection.userInterfaceStyle)")
+        return self.window?.theme ?? .light
+      }
+    }
+
+    switch overrideUserInterfaceStyle {
+    case .unspecified:
+      return getThemeFromTraitCollection()
+    case .light:
       return .light
+    case .dark:
+      return .dark
+    @unknown default:
+      ChouTi.assertFailure("unknown overrideUserInterfaceStyle: \(overrideUserInterfaceStyle)")
+      return getThemeFromTraitCollection()
+    }
+  }
+
+  public var overrideTheme: Theme? {
+    get {
+      overrideUserInterfaceStyle.theme
+    }
+    set {
+      if let newValue {
+        overrideUserInterfaceStyle = newValue.isLight ? .light : .dark
+      } else {
+        overrideUserInterfaceStyle = .unspecified
+      }
     }
   }
 }
-
-/// References:
-/// - https://indiestack.com/2018/10/supporting-dark-mode-checking-appearances/
-/// - https://developer.apple.com/forums/thread/105584
-/// - https://stackoverflow.com/a/58448816/3164091
-
-/// See also:
-/// - https://developer.apple.com/forums/thread/105584
-/// - https://stackoverflow.com/a/58448816/12969481
 
 #endif

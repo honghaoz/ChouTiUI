@@ -1,8 +1,8 @@
 //
-//  NSAppearance+Theme.swift
+//  Theming.swift
 //  ChouTiUI
 //
-//  Created by Honghao Zhang on 11/28/22.
+//  Created by Honghao Zhang on 11/25/22.
 //  Copyright © 2020 Honghao Zhang.
 //
 //  MIT License
@@ -28,29 +28,12 @@
 //  IN THE SOFTWARE.
 //
 
-#if canImport(AppKit)
+/// A type that can set and provide a theme.
+public protocol Theming {
 
-import AppKit
+  /// The final theme.
+  var theme: Theme { get }
 
-public extension NSAppearance {
-
-  /// The theme that matches the current appearance.
-  var theme: Theme {
-    if bestMatch(from: [.darkAqua, .aqua]) == .darkAqua {
-      return .dark
-    } else {
-      return .light
-    }
-  }
+  /// The override theme that set explicitly.
+  var overrideTheme: Theme? { get set }
 }
-
-/// References:
-/// - https://indiestack.com/2018/10/supporting-dark-mode-checking-appearances/
-/// - https://developer.apple.com/forums/thread/105584
-/// - https://stackoverflow.com/a/58448816/3164091
-
-/// See also:
-/// - https://developer.apple.com/forums/thread/105584
-/// - https://stackoverflow.com/a/58448816/12969481
-
-#endif

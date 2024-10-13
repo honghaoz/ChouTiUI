@@ -36,6 +36,7 @@ import ChouTi
 
 public extension UIUserInterfaceStyle {
 
+  /// The theme that matches the current user interface style.
   var theme: Theme? {
     switch self {
     case .unspecified:

@@ -1,5 +1,5 @@
 //
-//  NSAppearance+Theme.swift
+//  UIApplication+Theming.swift
 //  ChouTiUI
 //
 //  Created by Honghao Zhang on 11/28/22.
@@ -28,29 +28,30 @@
 //  IN THE SOFTWARE.
 //
 
-#if canImport(AppKit)
+#if canImport(UIKit)
 
-import AppKit
+import UIKit
 
-public extension NSAppearance {
+import ChouTi
 
-  /// The theme that matches the current appearance.
-  var theme: Theme {
-    if bestMatch(from: [.darkAqua, .aqua]) == .darkAqua {
-      return .dark
-    } else {
-      return .light
+extension UIApplication: Theming {
+
+  public var theme: Theme {
+    foregroundActiveWindowScenes.first.assert("No foreground active window scene")?.theme
+      ?? windowScenes.first.assert("No window scene")?.theme ?? .light
+  }
+
+  public var overrideTheme: Theme? {
+    get {
+      // swiftlint:disable:next fatal_error
+      fatalError("UIApplication doesn't support getting overrideTheme")
+    }
+    set {
+      // swiftlint:disable:next fatal_error
+      fatalError("UIApplication doesn't support setting overrideTheme")
+      _ = newValue
     }
   }
 }
-
-/// References:
-/// - https://indiestack.com/2018/10/supporting-dark-mode-checking-appearances/
-/// - https://developer.apple.com/forums/thread/105584
-/// - https://stackoverflow.com/a/58448816/3164091
-
-/// See also:
-/// - https://developer.apple.com/forums/thread/105584
-/// - https://stackoverflow.com/a/58448816/12969481
 
 #endif

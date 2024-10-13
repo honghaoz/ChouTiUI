@@ -1,5 +1,5 @@
 //
-//  NSAppearance+Theme.swift
+//  UIViewController+Theming.swift
 //  ChouTiUI
 //
 //  Created by Honghao Zhang on 11/28/22.
@@ -28,29 +28,28 @@
 //  IN THE SOFTWARE.
 //
 
-#if canImport(AppKit)
+#if canImport(UIKit)
 
-import AppKit
+import UIKit
 
-public extension NSAppearance {
+import ChouTi
 
-  /// The theme that matches the current appearance.
-  var theme: Theme {
-    if bestMatch(from: [.darkAqua, .aqua]) == .darkAqua {
-      return .dark
-    } else {
-      return .light
+extension UIViewController: Theming {
+
+  public var theme: Theme {
+    // uses view's theme instead of view controller's `traitCollection.userInterfaceStyle` and `overrideUserInterfaceStyle`
+    // because the latter doesn't work as expected when setting `overrideUserInterfaceStyle` to .light or .dark then resetting it to nil.
+    view.theme
+  }
+
+  public var overrideTheme: Theme? {
+    get {
+      view.overrideTheme
+    }
+    set {
+      view.overrideTheme = newValue
     }
   }
 }
-
-/// References:
-/// - https://indiestack.com/2018/10/supporting-dark-mode-checking-appearances/
-/// - https://developer.apple.com/forums/thread/105584
-/// - https://stackoverflow.com/a/58448816/3164091
-
-/// See also:
-/// - https://developer.apple.com/forums/thread/105584
-/// - https://stackoverflow.com/a/58448816/12969481
 
 #endif

@@ -1,5 +1,5 @@
 //
-//  NSAppearance+Theme.swift
+//  UIWindowScene+Theming.swift
 //  ChouTiUI
 //
 //  Created by Honghao Zhang on 11/28/22.
@@ -28,29 +28,48 @@
 //  IN THE SOFTWARE.
 //
 
-#if canImport(AppKit)
+#if canImport(UIKit)
 
-import AppKit
+import UIKit
 
-public extension NSAppearance {
+import ChouTi
 
-  /// The theme that matches the current appearance.
-  var theme: Theme {
-    if bestMatch(from: [.darkAqua, .aqua]) == .darkAqua {
-      return .dark
-    } else {
+extension UIWindowScene: Theming {
+
+  public var theme: Theme {
+    switch traitCollection.userInterfaceStyle {
+    case .unspecified:
+      ChouTi.assertFailure("unspecified traitCollection.userInterfaceStyle")
+      #if os(visionOS)
       return .light
+      #else
+      return screen.theme
+      #endif
+    case .light:
+      return .light
+    case .dark:
+      return .dark
+    @unknown default:
+      ChouTi.assertFailure("unknown UIUserInterfaceStyle: \(traitCollection.userInterfaceStyle)")
+      #if os(visionOS)
+      return .light
+      #else
+      return screen.theme
+      #endif
+    }
+  }
+
+  public var overrideTheme: Theme? {
+    get {
+      // swiftlint:disable:next fatal_error
+      fatalError("UIWindowScene doesn't support getting overrideTheme")
+    }
+    set {
+      // swiftlint:disable:next fatal_error
+      fatalError("UIWindowScene doesn't support setting overrideTheme")
+      _ = newValue
     }
   }
 }
-
-/// References:
-/// - https://indiestack.com/2018/10/supporting-dark-mode-checking-appearances/
-/// - https://developer.apple.com/forums/thread/105584
-/// - https://stackoverflow.com/a/58448816/3164091
-
-/// See also:
-/// - https://developer.apple.com/forums/thread/105584
-/// - https://stackoverflow.com/a/58448816/12969481
 
 #endif
