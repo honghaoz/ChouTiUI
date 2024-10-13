@@ -290,6 +290,35 @@ open class BaseCALayer: CALayer, BaseCALayerInternalType {
  - changing `frame` is not a good idea. Should change `position`, `bounds.size` and `transform`.
  */
 
+/// On mac, setting layer's position can make the view's frame and layer's frame out of sync
+/// should use the backed view to set frame. Some testing code:
+///
+/// ```swift
+/// let dummyView = BaseView()
+/// dummyView.frame = CGRect(100, 200, 100, 200)
+/// dummyView.setBackgroundColor(.red)
+/// view.addSubview(dummyView)
+///
+/// dummyView.printGeometryInfo()
+/// // ➜ geometry<<ChouTiUI.BaseNSView: 0x1476859f0>>:
+/// //   frame: (100.0, 200.0, 100.0, 200.0)
+/// //   bounds: (0.0, 0.0, 100.0, 200.0)
+/// //   layer.frame: (100.0, 200.0, 100.0, 200.0)
+/// //   layer.bounds: (0.0, 0.0, 100.0, 200.0)
+/// //   layer.position: (100.0, 200.0)
+/// //   layer.anchorPoint: (0.0, 0.0)
+///
+/// dummyView.layer!.position = dummyView.layer!.position.translate(dx: 100, dy: 0)
+/// dummyView.printGeometryInfo()
+/// // ➜ geometry<<ChouTiUI.BaseNSView: 0x1476859f0>>:
+/// //   frame: (100.0, 200.0, 100.0, 200.0) // <---
+/// //   bounds: (0.0, 0.0, 100.0, 200.0)
+/// //   layer.frame: (200.0, 200.0, 100.0, 200.0) // <--- layer frame is mismatched with view frame
+/// //   layer.bounds: (0.0, 0.0, 100.0, 200.0)
+/// //   layer.position: (200.0, 200.0)
+/// //   layer.anchorPoint: (0.0, 0.0)
+/// ```
+
 // Apply Core Image filtering to CALayer
 // https://www.reddit.com/r/iOSProgramming/comments/ru292r/realtime_core_image_filtering_core_animation_on/
 

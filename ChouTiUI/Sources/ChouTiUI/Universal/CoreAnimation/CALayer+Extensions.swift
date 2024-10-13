@@ -36,6 +36,31 @@ public extension CALayer {
     self.init()
     self.frame = frame
   }
+
+  /// The layer's backed view if it is a backing layer for a view.
+  ///
+  /// On Mac, for layer-backed views, setting the layer's frame won't affect the backed view's frame.
+  /// Use this property to find the backed view if you want to manipulate the view's frame.
+  @inlinable
+  @inline(__always)
+  var backedView: View? {
+    delegate as? View
+  }
+
+  /// Find the view that is presenting this layer.
+  ///
+  /// If this layer has a backed view, it returns the backed view as the presenting view.
+  /// Otherwise, it traverse the layer hierarchy to find the first backed view.
+  ///
+  /// This method is useful if you want to find the view that shows the layer, and can use the view to find the presenting view controller.
+  /// For example: `layer.presentingView?.presentingViewController`
+  var presentingView: View? {
+    if let backedView {
+      return backedView
+    } else {
+      return superlayer?.presentingView
+    }
+  }
 }
 
 // MARK: - Strong

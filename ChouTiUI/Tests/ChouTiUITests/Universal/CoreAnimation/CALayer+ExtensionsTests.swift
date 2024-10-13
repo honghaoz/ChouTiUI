@@ -41,6 +41,41 @@ class CALayer_ExtensionsTests: XCTestCase {
     expect(layer.frame) == CGRect(x: 10, y: 20, width: 100, height: 100)
   }
 
+  func test_backedView() {
+    #if os(macOS)
+    do {
+      expect(CALayer().backedView) == nil
+    }
+
+    // layer-backed view
+    do {
+      let view = View()
+      view.wantsLayer = true
+      expect(view.unsafeLayer.backedView) === view
+    }
+    #else
+    let view = View()
+    expect(view.layer.backedView) === view
+    #endif
+  }
+
+  func test_presentingView() {
+    let view = View()
+    #if os(macOS)
+    view.wantsLayer = true
+    #else
+    expect(view.unsafeLayer.presentingView) === view
+
+    let sublayer = CALayer()
+    view.unsafeLayer.addSublayer(sublayer)
+    expect(sublayer.presentingView) === view
+
+    let subSublayer = CALayer()
+    sublayer.addSublayer(subSublayer)
+    expect(subSublayer.presentingView) === view
+    #endif
+  }
+
   func test_strongDelegate() {
     class Delegate: NSObject, CALayerDelegate {
 
