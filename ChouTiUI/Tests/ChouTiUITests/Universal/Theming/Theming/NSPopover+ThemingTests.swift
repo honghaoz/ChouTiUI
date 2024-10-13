@@ -40,8 +40,10 @@ class NSPopover_ThemingTests: XCTestCase {
 
   func test_theme() {
     let popover = NSPopover()
-    let currentTheme = popover.theme
-    _ = currentTheme
+    let currentTheme = NSApplication.shared.theme
+
+    expect(popover.theme) == currentTheme
+    expect(popover.overrideTheme) == nil
 
     popover.overrideTheme = .dark
     expect(popover.theme) == .dark
@@ -61,33 +63,40 @@ class NSPopover_ThemingTests: XCTestCase {
   }
 
   func test_contentViewController() {
+    let currentTheme = NSApplication.shared.theme
+
     let popover = NSPopover()
     let viewController = NSViewController()
     popover.contentViewController = viewController
 
-    let currentPopoverTheme = popover.theme
-    let currentViewControllerTheme = viewController.view.theme
-    _ = currentViewControllerTheme
+    expect(popover.theme) == currentTheme
+    expect(popover.overrideTheme) == nil
+    expect(viewController.view.theme) == currentTheme
+    expect(viewController.view.overrideTheme) == nil
 
     // override popover theme, should affect view controller theme
     do {
       popover.overrideTheme = .dark
       expect(popover.theme) == .dark
+      expect(popover.overrideTheme) == .dark
       expect(viewController.view.theme) == .dark
       expect(viewController.view.overrideTheme) == .dark
 
       popover.overrideTheme = nil
-      expect(popover.theme) == currentPopoverTheme
+      expect(popover.theme) == currentTheme
+      expect(popover.overrideTheme) == nil
       expect(viewController.view.theme) == .dark // expected to be currentViewControllerTheme, but it returns the last override theme
       expect(viewController.view.overrideTheme) == nil
 
       popover.overrideTheme = .light
       expect(popover.theme) == .light
+      expect(popover.overrideTheme) == .light
       expect(viewController.view.theme) == .light
       expect(viewController.view.overrideTheme) == .light
 
       popover.overrideTheme = nil
-      expect(popover.theme) == currentPopoverTheme
+      expect(popover.theme) == currentTheme
+      expect(popover.overrideTheme) == nil
       expect(viewController.view.theme) == .light // expected to be currentViewControllerTheme, but it returns the last override theme
       expect(viewController.view.overrideTheme) == nil
     }
@@ -97,25 +106,25 @@ class NSPopover_ThemingTests: XCTestCase {
       viewController.view.overrideTheme = .light
       expect(viewController.view.theme) == .light
       expect(viewController.view.overrideTheme) == .light
-      expect(popover.theme) == currentPopoverTheme
+      expect(popover.theme) == currentTheme
       expect(popover.overrideTheme) == nil
 
       viewController.view.overrideTheme = nil
       expect(viewController.view.theme) == .light // follows the last override theme
       expect(viewController.view.overrideTheme) == nil
-      expect(popover.theme) == currentPopoverTheme
+      expect(popover.theme) == currentTheme
       expect(popover.overrideTheme) == nil
 
       viewController.view.overrideTheme = .dark
       expect(viewController.view.theme) == .dark
       expect(viewController.view.overrideTheme) == .dark
-      expect(popover.theme) == currentPopoverTheme
+      expect(popover.theme) == currentTheme
       expect(popover.overrideTheme) == nil
 
       viewController.view.overrideTheme = nil
       expect(viewController.view.theme) == .dark // follows the last override theme
       expect(viewController.view.overrideTheme) == nil
-      expect(popover.theme) == currentPopoverTheme
+      expect(popover.theme) == currentTheme
       expect(popover.overrideTheme) == nil
     }
   }

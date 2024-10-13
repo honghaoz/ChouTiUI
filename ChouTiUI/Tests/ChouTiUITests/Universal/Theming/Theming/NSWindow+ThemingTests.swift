@@ -40,7 +40,10 @@ class NSWindow_ThemingTests: XCTestCase {
 
   func test_theme() {
     let window = NSWindow()
-    let currentTheme = window.theme
+    let currentTheme = NSApplication.shared.theme
+
+    expect(window.theme) == currentTheme
+    expect(window.overrideTheme) == nil
 
     window.overrideTheme = .dark
     expect(window.theme) == .dark
@@ -64,8 +67,7 @@ class NSWindow_ThemingTests: XCTestCase {
     let view = NSView()
     window.contentView = view
 
-    let currentWindowTheme = window.theme
-    let currentViewTheme = view.theme
+    let currentTheme = NSApplication.shared.theme
 
     // override window theme, should affect view theme
     do {
@@ -76,9 +78,9 @@ class NSWindow_ThemingTests: XCTestCase {
       expect(view.overrideTheme) == nil
 
       window.overrideTheme = nil
-      expect(window.theme) == currentWindowTheme
+      expect(window.theme) == currentTheme
       expect(window.overrideTheme) == nil
-      expect(view.theme) == currentViewTheme
+      expect(view.theme) == currentTheme
       expect(view.overrideTheme) == nil
 
       window.overrideTheme = .light
@@ -88,9 +90,9 @@ class NSWindow_ThemingTests: XCTestCase {
       expect(view.overrideTheme) == nil
 
       window.overrideTheme = nil
-      expect(window.theme) == currentWindowTheme
+      expect(window.theme) == currentTheme
       expect(window.overrideTheme) == nil
-      expect(view.theme) == currentViewTheme
+      expect(view.theme) == currentTheme
       expect(view.overrideTheme) == nil
     }
 
@@ -99,25 +101,25 @@ class NSWindow_ThemingTests: XCTestCase {
       view.overrideTheme = .light
       expect(view.theme) == .light
       expect(view.overrideTheme) == .light
-      expect(window.theme) == currentWindowTheme
+      expect(window.theme) == currentTheme
       expect(window.overrideTheme) == nil
 
       view.overrideTheme = nil
-      expect(view.theme) == currentViewTheme
+      expect(view.theme) == currentTheme
       expect(view.overrideTheme) == nil
-      expect(window.theme) == currentWindowTheme
+      expect(window.theme) == currentTheme
       expect(window.overrideTheme) == nil
 
       view.overrideTheme = .dark
       expect(view.theme) == .dark
       expect(view.overrideTheme) == .dark
-      expect(window.theme) == currentWindowTheme
+      expect(window.theme) == currentTheme
       expect(window.overrideTheme) == nil
 
       view.overrideTheme = nil
-      expect(view.theme) == currentViewTheme
+      expect(view.theme) == currentTheme
       expect(view.overrideTheme) == nil
-      expect(window.theme) == currentWindowTheme
+      expect(window.theme) == currentTheme
       expect(window.overrideTheme) == nil
     }
   }

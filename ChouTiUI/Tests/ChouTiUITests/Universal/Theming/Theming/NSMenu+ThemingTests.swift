@@ -40,7 +40,10 @@ class NSMenu_ThemingTests: XCTestCase {
 
   func test_theme() {
     let menu = NSMenu()
-    let currentTheme = menu.theme
+    let currentTheme = NSApplication.shared.theme
+
+    expect(menu.theme) == currentTheme
+    expect(menu.overrideTheme) == nil
 
     menu.overrideTheme = .dark
     expect(menu.theme) == .dark
@@ -61,12 +64,11 @@ class NSMenu_ThemingTests: XCTestCase {
 
   func test_menuItemView() {
     let menu = NSMenu()
-    let currentMenuTheme = menu.theme
+    let currentTheme = NSApplication.shared.theme
 
     let menuItem = NSMenuItem()
     let view = NSView()
     menuItem.view = view
-    let currentViewTheme = view.theme
 
     menu.addItem(menuItem)
 
@@ -79,9 +81,9 @@ class NSMenu_ThemingTests: XCTestCase {
       expect(view.overrideTheme) == .dark
 
       menu.overrideTheme = nil
-      expect(menu.theme) == currentMenuTheme
+      expect(menu.theme) == currentTheme
       expect(menu.overrideTheme) == nil
-      expect(view.theme) == currentViewTheme
+      expect(view.theme) == currentTheme
       expect(view.overrideTheme) == nil
 
       menu.overrideTheme = .light
@@ -91,9 +93,9 @@ class NSMenu_ThemingTests: XCTestCase {
       expect(view.overrideTheme) == .light
 
       menu.overrideTheme = nil
-      expect(menu.theme) == currentMenuTheme
+      expect(menu.theme) == currentTheme
       expect(menu.overrideTheme) == nil
-      expect(view.theme) == currentViewTheme
+      expect(view.theme) == currentTheme
       expect(view.overrideTheme) == nil
     }
 
@@ -102,25 +104,25 @@ class NSMenu_ThemingTests: XCTestCase {
       view.overrideTheme = .light
       expect(view.theme) == .light
       expect(view.overrideTheme) == .light
-      expect(menu.theme) == currentMenuTheme
+      expect(menu.theme) == currentTheme
       expect(menu.overrideTheme) == nil
 
       view.overrideTheme = nil
-      expect(view.theme) == currentViewTheme
+      expect(view.theme) == currentTheme
       expect(view.overrideTheme) == nil
-      expect(menu.theme) == currentMenuTheme
+      expect(menu.theme) == currentTheme
       expect(menu.overrideTheme) == nil
 
       view.overrideTheme = .dark
       expect(view.theme) == .dark
       expect(view.overrideTheme) == .dark
-      expect(menu.theme) == currentMenuTheme
+      expect(menu.theme) == currentTheme
       expect(menu.overrideTheme) == nil
 
       view.overrideTheme = nil
-      expect(view.theme) == currentViewTheme
+      expect(view.theme) == currentTheme
       expect(view.overrideTheme) == nil
-      expect(menu.theme) == currentMenuTheme
+      expect(menu.theme) == currentTheme
       expect(menu.overrideTheme) == nil
     }
   }

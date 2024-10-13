@@ -40,8 +40,10 @@ class NSView_ThemingTests: XCTestCase {
 
   func test_theme() {
     let view = NSView()
-    let currentTheme = view.theme
-    _ = currentTheme
+    let currentTheme = NSApplication.shared.theme
+
+    expect(view.theme) == currentTheme
+    expect(view.overrideTheme) == nil
 
     view.overrideTheme = .dark
     expect(view.theme) == .dark

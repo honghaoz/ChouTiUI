@@ -42,21 +42,55 @@ class NSApplication_ThemingTests: XCTestCase {
     let application = NSApplication.shared
     let currentTheme = application.theme
 
+    expect(NSView().theme) == currentTheme
+
     application.overrideTheme = .dark
     expect(application.theme) == .dark
     expect(application.overrideTheme) == .dark
+    expect(NSView().theme) == .dark
+    expect(NSView().overrideTheme) == nil
+    expect(NSWindow().theme) == .dark
+    expect(NSWindow().overrideTheme) == nil
+    expect(NSPopover().theme) == .dark
+    expect(NSPopover().overrideTheme) == nil
+    expect(NSMenu().theme) == .dark
+    expect(NSMenu().overrideTheme) == nil
 
     application.overrideTheme = nil
     expect(application.theme) == currentTheme
     expect(application.overrideTheme) == nil
+    expect(NSView().theme) == currentTheme
+    expect(NSView().overrideTheme) == nil
+    expect(NSWindow().theme) == currentTheme
+    expect(NSWindow().overrideTheme) == nil
+    expect(NSPopover().theme) == currentTheme
+    expect(NSPopover().overrideTheme) == nil
+    expect(NSMenu().theme) == currentTheme
+    expect(NSMenu().overrideTheme) == nil
 
     application.overrideTheme = .light
     expect(application.theme) == .light
     expect(application.overrideTheme) == .light
+    expect(NSView().theme) == .light
+    expect(NSView().overrideTheme) == nil
+    expect(NSWindow().theme) == .light
+    expect(NSWindow().overrideTheme) == nil
+    expect(NSPopover().theme) == .light
+    expect(NSPopover().overrideTheme) == nil
+    expect(NSMenu().theme) == .light
+    expect(NSMenu().overrideTheme) == nil
 
     application.overrideTheme = nil
     expect(application.theme) == currentTheme
     expect(application.overrideTheme) == nil
+    expect(NSView().theme) == currentTheme
+    expect(NSView().overrideTheme) == nil
+    expect(NSWindow().theme) == currentTheme
+    expect(NSWindow().overrideTheme) == nil
+    expect(NSPopover().theme) == currentTheme
+    expect(NSPopover().overrideTheme) == nil
+    expect(NSMenu().theme) == currentTheme
+    expect(NSMenu().overrideTheme) == nil
   }
 }
 
