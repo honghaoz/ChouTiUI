@@ -39,10 +39,12 @@ import ChouTiUI
 class UIViewController_ThemingTests: XCTestCase {
 
   func test_theme() {
+    let currentTheme: Theme = UITraitCollection.current.userInterfaceStyle.theme ?? .light
+
     let viewController = UIViewController()
-    expect(viewController.theme) == .light
+    expect(viewController.theme) == currentTheme
     expect(viewController.overrideTheme) == nil
-    expect(viewController.view.theme) == .light
+    expect(viewController.view.theme) == currentTheme
     expect(viewController.view.overrideTheme) == nil
 
     viewController.overrideTheme = .dark
@@ -52,9 +54,9 @@ class UIViewController_ThemingTests: XCTestCase {
     expect(viewController.view.overrideTheme) == .dark
 
     viewController.overrideTheme = nil
-    expect(viewController.theme) == .light
+    expect(viewController.theme) == currentTheme
     expect(viewController.overrideTheme) == nil
-    expect(viewController.view.theme) == .light
+    expect(viewController.view.theme) == currentTheme
     expect(viewController.view.overrideTheme) == nil
 
     viewController.overrideTheme = .light
@@ -64,19 +66,20 @@ class UIViewController_ThemingTests: XCTestCase {
     expect(viewController.view.overrideTheme) == .light
 
     viewController.overrideTheme = nil
-    expect(viewController.theme) == .light
+    expect(viewController.theme) == currentTheme
     expect(viewController.overrideTheme) == nil
-    expect(viewController.view.theme) == .light
+    expect(viewController.view.theme) == currentTheme
     expect(viewController.view.overrideTheme) == nil
   }
 
   func test_demoViewControllerIncorrectUserInterfaceStyle() {
+    // This test is for demonstrating the `overrideUserInterfaceStyle` resetting doesn't reset the `traitCollection.userInterfaceStyle`
+
     let viewController = UIViewController()
-    #if os(tvOS)
-    expect(viewController.traitCollection.userInterfaceStyle) == .unspecified
-    #else
-    expect(viewController.traitCollection.userInterfaceStyle) == .light
-    #endif
+
+    // on tvOS, it's .unspecified
+    let currentUserInterfaceStyle = UITraitCollection.current.userInterfaceStyle
+    expect(viewController.traitCollection.userInterfaceStyle) == currentUserInterfaceStyle
 
     viewController.overrideUserInterfaceStyle = .dark
     expect(viewController.traitCollection.userInterfaceStyle) == .dark
@@ -91,7 +94,7 @@ class UIViewController_ThemingTests: XCTestCase {
     expect(viewController.overrideUserInterfaceStyle) == .light
 
     viewController.overrideUserInterfaceStyle = .unspecified
-    expect(viewController.traitCollection.userInterfaceStyle) == .light
+    expect(viewController.traitCollection.userInterfaceStyle) == .light // still light, which is incorrect
     expect(viewController.overrideUserInterfaceStyle) == .unspecified
   }
 }

@@ -39,8 +39,10 @@ import ChouTiUI
 class UIView_ThemingTests: XCTestCase {
 
   func test_theme() {
+    let currentTheme: Theme = UITraitCollection.current.userInterfaceStyle.theme ?? .light
+
     let view = UIView()
-    expect(view.theme) == .light
+    expect(view.theme) == currentTheme
     expect(view.overrideTheme) == nil
 
     view.overrideTheme = .dark
@@ -48,7 +50,7 @@ class UIView_ThemingTests: XCTestCase {
     expect(view.overrideTheme) == .dark
 
     view.overrideTheme = nil
-    expect(view.theme) == .light
+    expect(view.theme) == currentTheme
     expect(view.overrideTheme) == nil
 
     view.overrideTheme = .light
@@ -56,7 +58,7 @@ class UIView_ThemingTests: XCTestCase {
     expect(view.overrideTheme) == .light
 
     view.overrideTheme = nil
-    expect(view.theme) == .light
+    expect(view.theme) == currentTheme
     expect(view.overrideTheme) == nil
   }
 }

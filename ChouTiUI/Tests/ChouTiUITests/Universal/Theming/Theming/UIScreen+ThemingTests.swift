@@ -39,7 +39,8 @@ import ChouTiUI
 class UIScreen_ThemingTests: XCTestCase {
 
   func test_theme() {
-    expect(UIScreen.main.theme) == .light
+    let currentTheme: Theme = UITraitCollection.current.userInterfaceStyle.theme ?? .light
+    expect(UIScreen.main.theme) == currentTheme
   }
 }
 
