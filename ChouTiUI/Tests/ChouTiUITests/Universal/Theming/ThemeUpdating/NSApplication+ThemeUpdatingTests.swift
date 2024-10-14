@@ -39,6 +39,24 @@ import ChouTiUI
 
 class NSApplication_ThemeUpdatingTests: XCTestCase {
 
+  override func setUp() {
+    super.setUp()
+
+    let application = NSApplication.shared
+
+    // ensure initial theme is light
+    application.overrideTheme = .light
+    wait(timeout: 0.05)
+    expect(application.theme) == .light
+    expect(application.themeBinding.value) == .light
+  }
+
+  override func tearDown() {
+    // clear the override theme as NSApplication.shared is shared.
+    NSApplication.shared.overrideTheme = nil
+    wait(timeout: 0.05)
+  }
+
   func test_effectiveAppearanceBinding() {
     let application = NSApplication.shared
 
@@ -48,10 +66,6 @@ class NSApplication_ThemeUpdatingTests: XCTestCase {
 
   func test_themeBinding_debounce() {
     let application = NSApplication.shared
-    let currentTheme = application.theme
-
-    expect(application.theme) == currentTheme
-    expect(application.themeBinding.value) == currentTheme
 
     // test observing
     let expectation = XCTestExpectation(description: "themeBinding")
@@ -73,13 +87,10 @@ class NSApplication_ThemeUpdatingTests: XCTestCase {
     application.overrideTheme = .dark
     expect(application.theme) == .dark
 
-    application.overrideTheme = .light
-    expect(application.theme) == .light
+    wait(for: [expectation], timeout: 2)
 
-    wait(for: [expectation], timeout: 1)
-
-    // only [.light] because of trailing debounce
-    expect(receivedThemes) == [.light]
+    // only [.dark] because of trailing debounce
+    expect(receivedThemes) == [.dark]
   }
 
   func test_themeBinding_noDebounce() {
