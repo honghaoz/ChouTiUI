@@ -87,7 +87,7 @@ class NSApplication_ThemeUpdatingTests: XCTestCase {
     application.overrideTheme = .dark
     expect(application.theme) == .dark
 
-    wait(for: [expectation], timeout: 2)
+    wait(for: [expectation], timeout: 1)
 
     // only [.dark] because of trailing debounce
     expect(receivedThemes) == [.dark]
