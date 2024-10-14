@@ -35,11 +35,9 @@ import ChouTiUI
 class View_ThemedBackgroundColorTests: XCTestCase {
 
   func test_setBackgroundColor() {
-    let view = View()
-
     #if os(macOS)
+    let view = View()
     view.wantsLayer = true
-    #endif
 
     view.setBackgroundColor(ThemedUnifiedColor(lightColor: .color(.red), darkColor: .color(.blue)))
 
@@ -60,5 +58,8 @@ class View_ThemedBackgroundColorTests: XCTestCase {
     view.overrideTheme = .dark
     wait(timeout: 0.01)
     expect(view.layer()?.backgroundColor) == Color.green.cgColor
+    #else
+    // TODO: test for iOS
+    #endif
   }
 }

@@ -63,17 +63,19 @@ class CALayer_ExtensionsTests: XCTestCase {
     let view = View()
     #if os(macOS)
     view.wantsLayer = true
-    #else
+    #endif
+
     expect(view.unsafeLayer.presentingView) === view
 
     let sublayer = CALayer()
+    expect(sublayer.presentingView) == nil
+
     view.unsafeLayer.addSublayer(sublayer)
     expect(sublayer.presentingView) === view
 
     let subSublayer = CALayer()
     sublayer.addSublayer(subSublayer)
     expect(subSublayer.presentingView) === view
-    #endif
   }
 
   func test_strongDelegate() {
