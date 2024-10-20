@@ -92,11 +92,19 @@ class LayerBorderTests: XCTestCase {
   func test_description() throws {
     let layerBorder = LayerBorder(borderColor: Color.red.cgColor, borderWidth: 1)
 
+    #if os(macOS)
+    // macOS
+    // LayerBorder(borderColor: <CGColor 0x600002f81f20> [<CGColorSpace 0x600002f81e60> (kCGColorSpaceICCBased; kCGColorSpaceModelRGB; sRGB IEC61966-2.1)] ( 1 0 0 1 ), borderWidth: 1.0)
     let regex = try NSRegularExpression(pattern: "LayerBorder\\(borderColor: \\<CGColor 0x[0-9a-f]+> \\[\\<CGColorSpace 0x[0-9a-f]+> \\(kCGColorSpaceICCBased; kCGColorSpaceModelRGB; sRGB IEC61966-2\\.1\\)] \\( 1 0 0 1 \\), borderWidth: 1.0\\)", options: [.dotMatchesLineSeparators])
+    #else
+    // iOS
+    // LayerBorder(borderColor: <CGColor 0x600002614a80> [<CGColorSpace 0x600002608c60> (kCGColorSpaceICCBased; kCGColorSpaceModelRGB; sRGB IEC61966-2.1; extended range)] ( 1 0 0 1 ), borderWidth: 1.0)
+    let regex = try NSRegularExpression(pattern: "LayerBorder\\(borderColor: \\<CGColor 0x[0-9a-f]+> \\[\\<CGColorSpace 0x[0-9a-f]+> \\(kCGColorSpaceICCBased; kCGColorSpaceModelRGB; sRGB IEC61966-2\\.1; extended range\\)] \\( 1 0 0 1 \\), borderWidth: 1.0\\)", options: [.dotMatchesLineSeparators])
+    #endif
     let range = NSRange(location: 0, length: layerBorder.description.utf16.count)
     let matches = regex.matches(in: layerBorder.description, options: [], range: range)
 
-    expect(matches.count == 1) == true
+    expect(matches.count == 1, "description: \(layerBorder.description)") == true
   }
 
   func test_view_layerBorder() {
@@ -114,8 +122,8 @@ class LayerBorderTests: XCTestCase {
     expect(view.layerBorder.borderWidth) == 2
 
     #if os(macOS)
+    // test for no layers
     view.wantsLayer = false
-    #endif
 
     var assertionCount = 0
     Assert.setTestAssertionFailureHandler { message, metadata, file, line, column in
@@ -133,6 +141,7 @@ class LayerBorderTests: XCTestCase {
     expect(view.layerBorder.borderWidth) == 0
 
     Assert.resetTestAssertionFailureHandler()
+    #endif
   }
 
   func test_view_updateBorder() {
@@ -146,8 +155,8 @@ class LayerBorderTests: XCTestCase {
     expect(view.layerBorder.borderWidth) == 1
 
     #if os(macOS)
+    // test for no layers
     view.wantsLayer = false
-    #endif
 
     var assertionCount = 0
     Assert.setTestAssertionFailureHandler { message, metadata, file, line, column in
@@ -163,5 +172,6 @@ class LayerBorderTests: XCTestCase {
     view.updateBorder(with: LayerBorder(border: Border(Color.green, 2)))
     expect(view.layerBorder.borderColor) == nil
     expect(view.layerBorder.borderWidth) == 0
+    #endif
   }
 }
