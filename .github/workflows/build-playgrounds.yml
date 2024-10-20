@@ -20,7 +20,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: [macOS]
+        platform: [macOS, iOS]
     timeout-minutes: 30
     runs-on: ${{ vars.MACOS }}
     steps:

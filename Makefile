@@ -16,6 +16,10 @@ build: # Build the package.
 build-playground-macOS: # Build the macOS playground.
 	@./scripts/xcodebuild/build-project.sh --project "./playgrounds/ChouTiUIPlayground-macOS/ChouTiUIPlayground-macOS.xcodeproj" --scheme "ChouTiUIPlayground-macOS" --configuration "Release" --os "macOS"
 
+.PHONY: build-playground-iOS
+build-playground-iOS: # Build the iOS playground.
+	@./scripts/xcodebuild/build-project.sh --project "./playgrounds/ChouTiUIPlayground-iOS/ChouTiUIPlayground-iOS.xcodeproj" --scheme "ChouTiUIPlayground-iOS" --configuration "Release" --os "iOS"
+
 .PHONY: format
 format: # Format the code.
 	@"$(REPO_ROOT)/scripts/format.sh" --all
