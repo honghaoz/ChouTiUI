@@ -34,7 +34,7 @@ import ChouTiTest
 
 import ChouTiUI
 
-final class BorderTests: XCTestCase {
+class BorderTests: XCTestCase {
 
   func test_init() {
     // unified color
