@@ -121,6 +121,12 @@ public final class ThemeMonitor: UIWindow, ThemeMonitorType {
       return
     }
     super.init(windowScene: windowScene)
+
+    if #available(iOS 17.0, tvOS 17.0, visionOS 1.0, *) {
+      registerForTraitChanges([UITraitUserInterfaceStyle.self]) { (self: Self, previousTraitCollection: UITraitCollection) in
+        self.updateThemeIfNeeded()
+      }
+    }
   }
 
   @available(*, unavailable)
@@ -129,9 +135,14 @@ public final class ThemeMonitor: UIWindow, ThemeMonitorType {
     fatalError("init(coder:) is unavailable")
   }
 
+  @available(visionOS, deprecated: 1.0, message: "Use trait change registration APIs")
   override public func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
     super.traitCollectionDidChange(previousTraitCollection)
 
+    updateThemeIfNeeded()
+  }
+
+  private func updateThemeIfNeeded() {
     if _themeBinding.value != theme {
       _themeBinding.value = theme
     }
