@@ -2,23 +2,30 @@
 
 set -e
 
-# change to the directory in which this script is located
-pushd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 || exit 1
-
-# ===------ BEGIN ------===
-
 # OVERVIEW:
 # Download scripts from https://github.com/honghaoz/ChouTi
+
+REPO_ROOT=$(git rev-parse --show-toplevel)
+
+cd "$REPO_ROOT" || exit 1
 
 # branch of ChouTi
 BRANCH="master"
 
 # an array of scripts to download
 declare -a scripts=(
-  "scripts/download-bin/"
-  "scripts/git/"
-  "scripts/swift-package/"
-  "scripts/xcodebuild/"
+  "scripts/download-bin/download-bin-helpers.sh"
+  "scripts/download-bin/download-bins.sh"
+  "scripts/download-bin/download-swiftformat.sh"
+  "scripts/download-bin/download-swiftlint.sh"
+  "scripts/download-bin/download-xcbeautify.sh"
+  "scripts/git/install-git-hooks.sh"
+  "scripts/git/git-hooks/post-checkout"
+  "scripts/git/git-hooks/post-merge"
+  "scripts/git/git-hooks/pre-commit"
+  "scripts/swift-package/build-workspace.sh"
+  "scripts/swift-package/test-workspace.sh"
+  "scripts/xcodebuild/build-project.sh"
   "scripts/filter-lcov.sh"
   "scripts/format.sh"
   "scripts/lint.sh"
@@ -55,10 +62,10 @@ function download_file() {
     return 1
   fi
   local path="$1"
-  local filename=$(basename "$path")
-  echo "Downloading $path..."
-  curl -fsSL https://raw.githubusercontent.com/honghaoz/ChouTi/$BRANCH/$path -o $filename
-  chmod +x $filename
+  echo "Downloading $path"
+  mkdir -p "$(dirname "$path")"
+  curl -fsSL https://raw.githubusercontent.com/honghaoz/ChouTi/$BRANCH/$path -o "$path"
+  chmod +x "$path"
 }
 
 # Download a list of executable files from GitHub
@@ -110,8 +117,3 @@ for path in "${scripts[@]}"; do
     download_file "$path"
   fi
 done
-
-# ===------ END ------===
-
-# return to whatever directory we were in when this script was run
-popd >/dev/null 2>&1 || exit 0
