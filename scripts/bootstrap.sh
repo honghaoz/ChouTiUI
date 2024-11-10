@@ -23,6 +23,17 @@ case "$OS" in
   CPU=$(uname -m)
   case "$CPU" in
   'arm64') # on Apple Silicon Mac
+    # download jq
+    echo ""
+    echo "📥 Download jq..."
+    curl -sL https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-macos-arm64 -o "$REPO_ROOT/bin/jq"
+    chmod +x "$REPO_ROOT/bin/jq"
+
+    # download scripts
+    echo ""
+    echo "📥 Download scripts..."
+    "$REPO_ROOT/scripts/download-scripts.sh"
+
     # download bins
     echo ""
     echo "📦 Download bins..."

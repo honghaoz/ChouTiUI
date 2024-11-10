@@ -98,7 +98,13 @@ vendor
 # ===== Environment =====
 .env
 
+# ===== Scripts =====
+scripts/*
+!scripts/bootstrap.sh
+!scripts/download-scripts.sh
+
 # ===== Binaries =====
+bin/jq
 bin/swiftformat
 bin/swiftlint
 bin/xcbeautify

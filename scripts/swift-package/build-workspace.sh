@@ -1,1 +1,0 @@
-../../ChouTi/scripts/swift-package/build-workspace.sh

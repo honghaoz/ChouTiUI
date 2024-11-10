@@ -1,1 +1,0 @@
-../../ChouTi/scripts/download-bin/download-xcbeautify.sh

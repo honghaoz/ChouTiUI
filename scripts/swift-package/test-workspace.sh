@@ -1,1 +1,0 @@
-../../ChouTi/scripts/swift-package/test-workspace.sh
