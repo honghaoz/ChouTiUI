@@ -58,14 +58,6 @@ test-codecov: # Run tests with code coverage.
 clean: # Clean build data.
 	swift package clean
 
-.PHONY: format
-format: # Format the code.
-	@"$(REPO_ROOT)/scripts/format.sh" --all
-
-.PHONY: lint
-lint: # Lint the code.
-	@"$(REPO_ROOT)/scripts/lint.sh" --all
-
 .PHONY: help
 help:
 	@awk 'BEGIN {FS = ":.*?# "}; /^[a-zA-Z_-]+:.*?# .*$$/ && $$1 != "help" {system("tput bold; tput setaf 6"); printf "%-24s", $$1; system("tput sgr0"); print $$2}' $(MAKEFILE_LIST)
