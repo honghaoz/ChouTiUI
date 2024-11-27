@@ -38,7 +38,7 @@ public extension EdgeInsets {
   static let zero = EdgeInsets(0, 0, 0, 0)
 }
 
-extension EdgeInsets: Equatable {
+extension AppKit.NSEdgeInsets: Swift.Equatable {
 
   public static func == (lhs: EdgeInsets, rhs: EdgeInsets) -> Bool {
     lhs.top == rhs.top && lhs.left == rhs.left && lhs.bottom == rhs.bottom && lhs.right == rhs.right

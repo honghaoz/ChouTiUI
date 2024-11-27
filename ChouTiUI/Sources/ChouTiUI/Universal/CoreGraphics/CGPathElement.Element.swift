@@ -83,7 +83,7 @@ public extension CGPathElement {
 
 // MARK: - CGPathElement + CustomStringConvertible
 
-extension CGPathElement: CustomStringConvertible {
+extension CoreGraphics.CGPathElement: Swift.CustomStringConvertible {
 
   public var description: String {
     element.description
@@ -92,7 +92,7 @@ extension CGPathElement: CustomStringConvertible {
 
 // MARK: - CGPathElementType + CustomStringConvertible
 
-extension CGPathElementType: CustomStringConvertible {
+extension CoreGraphics.CGPathElementType: Swift.CustomStringConvertible {
 
   public var description: String {
     switch self {

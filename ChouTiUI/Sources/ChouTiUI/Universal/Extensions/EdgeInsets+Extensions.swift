@@ -78,7 +78,8 @@ public extension EdgeInsets {
 
 // MARK: - Hashable
 
-extension EdgeInsets: Hashable {
+#if canImport(AppKit)
+extension AppKit.NSEdgeInsets: Swift.Hashable {
 
   public func hash(into hasher: inout Hasher) {
     hasher.combine(top)
@@ -87,3 +88,16 @@ extension EdgeInsets: Hashable {
     hasher.combine(right)
   }
 }
+#endif
+
+#if canImport(UIKit)
+extension UIKit.UIEdgeInsets: Swift.Hashable {
+
+  public func hash(into hasher: inout Hasher) {
+    hasher.combine(top)
+    hasher.combine(left)
+    hasher.combine(bottom)
+    hasher.combine(right)
+  }
+}
+#endif
