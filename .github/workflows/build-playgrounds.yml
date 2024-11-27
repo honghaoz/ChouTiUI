@@ -28,9 +28,9 @@ jobs:
         uses: actions/checkout@v4
       - name: Bootstrap
         uses: ./.github/actions/bootstrap
-      - name: Download visionOS simulator
-        if: matrix.platform == 'visionOS'
-        run: xcodebuild -downloadPlatform visionOS
+      # - name: Download visionOS simulator
+      #   if: matrix.platform == 'visionOS'
+      #   run: xcodebuild -downloadPlatform visionOS
       - name: Build ChouTiPlayground-${{ matrix.platform }}
         if: success() || failure()
         run: make build-playground-${{ matrix.platform }}
