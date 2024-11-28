@@ -1,6 +1,7 @@
 # rules
 --enable blankLineAfterImports
 --enable redundantNilInit
+--enable unusedPrivateDeclarations
 --enable wrapConditionalBodies
 --enable wrapEnumCases
 --enable wrapSwitchCases

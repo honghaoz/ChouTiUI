@@ -32,6 +32,6 @@
 
 import UIKit
 
-extension UIRectCorner: Hashable {}
+extension UIKit.UIRectCorner: Swift.Hashable {}
 
 #endif

@@ -35,7 +35,6 @@ import ChouTiUI
 
 class ViewController: NSViewController {
 
-  private var layerBoundsObserver: KVOObserverType?
   private var appearanceObserver: KVOObserverType?
 
   private var textField: NSTextField!
