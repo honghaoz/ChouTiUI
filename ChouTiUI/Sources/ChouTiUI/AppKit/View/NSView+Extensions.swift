@@ -44,7 +44,9 @@ public extension NSView {
     // translatesAutoresizingMaskIntoConstraints = false
 
     wantsLayer = true
-    layer()?.cornerCurve = .continuous
+
+    // don't set cornerCurve to .continuous to match the UIKit's default value
+    // layer()?.cornerCurve = .continuous
     layer()?.contentsScale = Screen.mainScreenScale
 
     // turns off clipping

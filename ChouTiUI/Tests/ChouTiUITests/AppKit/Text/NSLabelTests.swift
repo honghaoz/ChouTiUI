@@ -85,7 +85,7 @@ class NSLabelTests: XCTestCase {
     expect(label.cell?.truncatesLastVisibleLine) == true
 
     expect(label.wantsLayer) == true
-    expect(label.layer()?.cornerCurve) == .continuous
+    expect(label.layer()?.cornerCurve) == .circular
     expect(label.layer()?.contentsScale) == Screen.mainScreenScale
     expect(label.layer()?.masksToBounds) == false
 

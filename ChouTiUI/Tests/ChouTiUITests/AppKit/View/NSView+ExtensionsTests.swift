@@ -43,7 +43,7 @@ class NSView_ExtensionsTests: XCTestCase {
     let view = NSView()
     view.updateCommonSettings()
     expect(view.wantsLayer) == true
-    expect(view.layer()?.cornerCurve) == .continuous
+    expect(view.layer()?.cornerCurve) == .circular
     expect(view.layer()?.contentsScale) == Screen.mainScreenScale
     expect(view.layer()?.masksToBounds) == false
   }
