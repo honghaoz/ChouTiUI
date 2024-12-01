@@ -63,6 +63,16 @@ public struct LayoutPoint: Equatable, Sendable {
     self.y = y
   }
 
+  /// Initializes an absolute point with the given x and y coordinates.
+  ///
+  /// - Parameters:
+  ///   - x: The absolute x coordinate.
+  ///   - y: The absolute y coordinate.
+  public init(x: CGFloat, y: CGFloat) {
+    self.x = .absolute(x)
+    self.y = .absolute(y)
+  }
+
   /// Returns a Boolean value indicating whether the point is zero.
   public func isZero() -> Bool {
     x.isZero() && y.isZero()

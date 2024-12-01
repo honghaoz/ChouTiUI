@@ -40,6 +40,12 @@ class LayoutRectTests: XCTestCase {
     expect(rect.size) == LayoutSize.zero
   }
 
+  func testFull() {
+    let rect = LayoutRect.full
+    expect(rect.origin) == LayoutPoint.zero
+    expect(rect.size) == LayoutSize.full
+  }
+
   func testInitialization() {
     let rect = LayoutRect(LayoutPoint(.absolute(10), .absolute(20)), LayoutSize(.absolute(30), .absolute(40)))
     expect(rect.origin) == LayoutPoint(.absolute(10), .absolute(20))
@@ -48,6 +54,14 @@ class LayoutRectTests: XCTestCase {
     let rect2 = LayoutRect(origin: LayoutPoint(.absolute(10), .absolute(20)), size: LayoutSize(.absolute(30), .absolute(40)))
     expect(rect2.origin) == LayoutPoint(.absolute(10), .absolute(20))
     expect(rect2.size) == LayoutSize(.absolute(30), .absolute(40))
+
+    let rect3 = LayoutRect(origin: CGPoint(x: 10, y: 20), size: CGSize(width: 30, height: 40))
+    expect(rect3.origin) == LayoutPoint(.absolute(10), .absolute(20))
+    expect(rect3.size) == LayoutSize(.absolute(30), .absolute(40))
+
+    let rect4 = LayoutRect(x: 10, y: 20, width: 30, height: 40)
+    expect(rect4.origin) == LayoutPoint(.absolute(10), .absolute(20))
+    expect(rect4.size) == LayoutSize(.absolute(30), .absolute(40))
   }
 
   func testIsZero() {

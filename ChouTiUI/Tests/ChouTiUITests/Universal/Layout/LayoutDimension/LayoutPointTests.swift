@@ -42,6 +42,10 @@ class LayoutPointTests: XCTestCase {
     let point2 = LayoutPoint(.relative(0.2), .absolute(5))
     expect(point2.x) == .relative(0.2)
     expect(point2.y) == .absolute(5)
+
+    let point3 = LayoutPoint(x: 10, y: 5)
+    expect(point3.x) == .absolute(10)
+    expect(point3.y) == .absolute(5)
   }
 
   func testPointInFrame() {

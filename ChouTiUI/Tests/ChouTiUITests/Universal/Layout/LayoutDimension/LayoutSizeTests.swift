@@ -40,6 +40,12 @@ class LayoutSizeTests: XCTestCase {
     expect(size.height) == .absolute(0)
   }
 
+  func testFull() {
+    let size = LayoutSize.full
+    expect(size.width) == .relative(1)
+    expect(size.height) == .relative(1)
+  }
+
   func testInitialization() {
     let size = LayoutSize(.absolute(10), .absolute(20))
     expect(size.width) == .absolute(10)
@@ -48,6 +54,10 @@ class LayoutSizeTests: XCTestCase {
     let size2 = LayoutSize(width: .absolute(10), height: .absolute(20))
     expect(size2.width) == .absolute(10)
     expect(size2.height) == .absolute(20)
+
+    let size3 = LayoutSize(width: 10, height: 20)
+    expect(size3.width) == .absolute(10)
+    expect(size3.height) == .absolute(20)
   }
 
   func testIsZero() {

@@ -37,6 +37,9 @@ public struct LayoutSize: Equatable, Sendable {
   /// The zero size.
   public static let zero: LayoutSize = LayoutSize(.absolute(0), .absolute(0))
 
+  /// The full size.
+  public static let full: LayoutSize = LayoutSize(.relative(1), .relative(1))
+
   /// The width.
   public let width: LayoutDimension
 
@@ -61,6 +64,16 @@ public struct LayoutSize: Equatable, Sendable {
   public init(width: LayoutDimension, height: LayoutDimension) {
     self.width = width
     self.height = height
+  }
+
+  /// Initializes an absolute size with the given width and height.
+  ///
+  /// - Parameters:
+  ///   - width: The absolute width.
+  ///   - height: The absolute height.
+  public init(width: CGFloat, height: CGFloat) {
+    self.width = .absolute(width)
+    self.height = .absolute(height)
   }
 
   /// Returns a Boolean value indicating whether the size has zero width and height.

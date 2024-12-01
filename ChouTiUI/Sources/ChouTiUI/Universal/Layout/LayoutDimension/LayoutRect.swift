@@ -37,6 +37,9 @@ public struct LayoutRect: Equatable, Sendable {
   /// The zero rectangle, with zero origin and zero size.
   public static let zero: LayoutRect = LayoutRect(.zero, .zero)
 
+  /// The full rectangle, with full origin and full size.
+  public static let full: LayoutRect = LayoutRect(.zero, .full)
+
   /// The origin of the rectangle.
   public let origin: LayoutPoint
 
@@ -61,6 +64,28 @@ public struct LayoutRect: Equatable, Sendable {
   public init(origin: LayoutPoint, size: LayoutSize) {
     self.origin = origin
     self.size = size
+  }
+
+  /// Initializes a rectangle with the given origin and size.
+  ///
+  /// - Parameters:
+  ///   - origin: The origin of the rectangle.
+  ///   - size: The size of the rectangle.
+  public init(origin: CGPoint, size: CGSize) {
+    self.origin = LayoutPoint(x: .absolute(origin.x), y: .absolute(origin.y))
+    self.size = LayoutSize(width: .absolute(size.width), height: .absolute(size.height))
+  }
+
+  /// Initializes an absolute rectangle with the given origin and size.
+  ///
+  /// - Parameters:
+  ///   - x: The absolute x coordinate.
+  ///   - y: The absolute y coordinate.
+  ///   - width: The absolute width.
+  ///   - height: The absolute height.
+  public init(x: CGFloat, y: CGFloat, width: CGFloat, height: CGFloat) {
+    self.origin = LayoutPoint(x: .absolute(x), y: .absolute(y))
+    self.size = LayoutSize(width: .absolute(width), height: .absolute(height))
   }
 
   /// Returns a Boolean value indicating whether the rectangle has zero origin and zero size.
