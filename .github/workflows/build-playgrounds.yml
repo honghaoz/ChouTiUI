@@ -31,6 +31,6 @@ jobs:
       - name: Download visionOS simulator
         if: matrix.platform == 'visionOS'
         run: xcodebuild -downloadPlatform visionOS
-      - name: Build ChouTiPlayground-${{ matrix.platform }}
+      - name: Build ChouTiUIPlayground-${{ matrix.platform }}
         if: success() || failure()
         run: make build-playground-${{ matrix.platform }}
