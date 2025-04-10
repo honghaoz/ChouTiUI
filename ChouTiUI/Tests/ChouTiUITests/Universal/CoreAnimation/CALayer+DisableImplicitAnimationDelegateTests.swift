@@ -41,7 +41,7 @@ class CALayer_DisableImplicitAnimationDelegateTests: XCTestCase {
     do {
       let tester = LayerImplicitAnimationTester()
 
-      // wait for the window to be visible
+      // wait for the layer to have a presentation layer
       wait(timeout: 0.05)
 
       let implicitAnimations = tester.getImplicitAnimations()
@@ -53,7 +53,7 @@ class CALayer_DisableImplicitAnimationDelegateTests: XCTestCase {
       let tester = LayerImplicitAnimationTester()
       tester.layer.delegate = CALayer.DisableImplicitAnimationDelegate.shared
 
-      // wait for the window to be visible
+      // wait for the layer to have a presentation layer
       wait(timeout: 0.05)
 
       let implicitAnimations = tester.getImplicitAnimations()
