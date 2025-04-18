@@ -14,8 +14,8 @@ let package = Package(
     .library(name: "ChouTiUI", targets: ["ChouTiUI"]),
   ],
   dependencies: [
-    // TODO: once ChouTi is stable, use release instead of develop branch.
-    .package(url: "https://github.com/honghaoz/ChouTi", branch: "develop"),
+    // TODO: once ChouTi, ComposeUI are stable, use release tag.
+    .package(url: "https://github.com/honghaoz/ChouTi", branch: "master"),
     .package(url: "https://github.com/honghaoz/ComposeUI", branch: "master"),
   ],
   targets: [
