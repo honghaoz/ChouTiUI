@@ -127,7 +127,7 @@ class CALayer_ThemingTests: XCTestCase {
     expect(view.unsafeLayer.overrideTheme) == nil
 
     #else
-    // let currentTheme: Theme = UITraitCollection.current.userInterfaceStyle.theme ?? .light
+    // let currentTheme: Theme = UITraitCollection.current.userInterfaceStyle.theme
     // TODO: test for iOS
     #endif
   }

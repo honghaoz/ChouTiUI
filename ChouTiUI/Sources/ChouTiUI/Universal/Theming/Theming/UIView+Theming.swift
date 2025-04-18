@@ -69,7 +69,17 @@ extension UIView: Theming {
 
   public var overrideTheme: Theme? {
     get {
-      overrideUserInterfaceStyle.theme
+      switch overrideUserInterfaceStyle {
+      case .unspecified:
+        return nil
+      case .light:
+        return .light
+      case .dark:
+        return .dark
+      @unknown default:
+        assertionFailure("unknown UIUserInterfaceStyle: \(self)")
+        return nil
+      }
     }
     set {
       if let newValue {
