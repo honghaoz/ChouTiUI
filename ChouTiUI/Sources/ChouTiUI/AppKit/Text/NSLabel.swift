@@ -32,6 +32,8 @@
 
 import AppKit
 
+@_spi(Private) import ComposeUI
+
 /// A macOS counter part of `UILabel`.
 ///
 /// - The label renders the text vertically centered to match UILabel's default behavior.
