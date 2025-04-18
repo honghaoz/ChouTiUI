@@ -16,12 +16,14 @@ let package = Package(
   dependencies: [
     // TODO: once ChouTi is stable, use release instead of develop branch.
     .package(url: "https://github.com/honghaoz/ChouTi", branch: "develop"),
+    .package(url: "https://github.com/honghaoz/ComposeUI", branch: "master"),
   ],
   targets: [
     .target(
       name: "ChouTiUI",
       dependencies: [
         "ChouTi",
+        "ComposeUI",
       ]
     ),
     .testTarget(

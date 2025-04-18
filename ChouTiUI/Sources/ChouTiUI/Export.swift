@@ -1,8 +1,8 @@
 //
-//  Theme.swift
+//  Export.swift
 //  ChouTiUI
 //
-//  Created by Honghao Zhang on 8/29/21.
+//  Created by Honghao Zhang on 4/17/25.
 //  Copyright © 2020 Honghao Zhang.
 //
 //  MIT License
@@ -28,29 +28,4 @@
 //  IN THE SOFTWARE.
 //
 
-import Foundation
-
-/// A type that represents a theme.
-public enum Theme: Hashable {
-
-  /// The light theme.
-  case light
-
-  /// The dark theme.
-  case dark
-
-  /// Whether the theme is light.
-  public var isLight: Bool {
-    switch self {
-    case .light:
-      return true
-    case .dark:
-      return false
-    }
-  }
-
-  /// Whether the theme is dark.
-  @inlinable
-  @inline(__always)
-  public var isDark: Bool { !isLight }
-}
+@_exported import ComposeUI

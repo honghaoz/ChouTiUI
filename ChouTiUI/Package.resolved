@@ -8,6 +8,15 @@
         "branch" : "develop",
         "revision" : "4a604dc26be46527ba016b9bcbc899df2e21fdf5"
       }
+    },
+    {
+      "identity" : "composeui",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/honghaoz/ComposeUI",
+      "state" : {
+        "branch" : "master",
+        "revision" : "d32f38000e5d6247d006a250aef94abf725cf944"
+      }
     }
   ],
   "version" : 2
