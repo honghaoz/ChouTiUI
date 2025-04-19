@@ -1,8 +1,8 @@
 //
-//  LayoutAlignment.swift
+//  Layout.Alignment+ExtensionsTests.swift
 //  ChouTiUI
 //
-//  Created by Honghao Zhang on 8/15/21.
+//  Created by Honghao Zhang on 3/18/22.
 //  Copyright © 2020 Honghao Zhang.
 //
 //  MIT License
@@ -28,44 +28,21 @@
 //  IN THE SOFTWARE.
 //
 
-import Foundation
+import ChouTiTest
 
-/// The alignment of a subcomponent relative to its parent.
-public enum LayoutAlignment: Hashable, Sendable {
+import ChouTiUI
 
-  case center
-  case left
-  case right
-  case top
-  case bottom
-  case topLeft
-  case topRight
-  case bottomLeft
-  case bottomRight
+class Layout_Alignment_ExtensionsTests: XCTestCase {
 
-  /// Flips the alignment vertically.
-  ///
-  /// This is useful for `NSWindow` coordinates (bottom-left zero origin).
-  public func verticallyFlipped() -> LayoutAlignment {
-    switch self {
-    case .center:
-      return .center
-    case .left:
-      return .left
-    case .right:
-      return .right
-    case .top:
-      return .bottom
-    case .bottom:
-      return .top
-    case .topLeft:
-      return .bottomLeft
-    case .topRight:
-      return .bottomRight
-    case .bottomLeft:
-      return .topLeft
-    case .bottomRight:
-      return .topRight
-    }
+  func test_verticallyFlipped() {
+    expect(Layout.Alignment.center.verticallyFlipped()) == Layout.Alignment.center
+    expect(Layout.Alignment.left.verticallyFlipped()) == Layout.Alignment.left
+    expect(Layout.Alignment.right.verticallyFlipped()) == Layout.Alignment.right
+    expect(Layout.Alignment.top.verticallyFlipped()) == Layout.Alignment.bottom
+    expect(Layout.Alignment.bottom.verticallyFlipped()) == Layout.Alignment.top
+    expect(Layout.Alignment.topLeft.verticallyFlipped()) == Layout.Alignment.bottomLeft
+    expect(Layout.Alignment.topRight.verticallyFlipped()) == Layout.Alignment.bottomRight
+    expect(Layout.Alignment.bottomLeft.verticallyFlipped()) == Layout.Alignment.topLeft
+    expect(Layout.Alignment.bottomRight.verticallyFlipped()) == Layout.Alignment.topRight
   }
 }

@@ -1,5 +1,5 @@
 //
-//  LayoutVerticalAlignment.swift
+//  Layout.Alignment+Extensions.swift
 //  ChouTiUI
 //
 //  Created by Honghao Zhang on 8/15/21.
@@ -30,9 +30,32 @@
 
 import Foundation
 
-/// The vertical alignment of a subcomponent relative to its parent.
-public enum LayoutVerticalAlignment: Hashable, Sendable {
-  case center
-  case top
-  case bottom
+/// The alignment of a subcomponent relative to its parent.
+public extension Layout.Alignment {
+
+  /// Flips the alignment vertically.
+  ///
+  /// This is useful for `NSWindow` coordinates (bottom-left zero origin).
+  func verticallyFlipped() -> Layout.Alignment {
+    switch self {
+    case .center:
+      return .center
+    case .left:
+      return .left
+    case .right:
+      return .right
+    case .top:
+      return .bottom
+    case .bottom:
+      return .top
+    case .topLeft:
+      return .bottomLeft
+    case .topRight:
+      return .bottomRight
+    case .bottomLeft:
+      return .topLeft
+    case .bottomRight:
+      return .topRight
+    }
+  }
 }
