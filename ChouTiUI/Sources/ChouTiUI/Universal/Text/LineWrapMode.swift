@@ -37,13 +37,10 @@ import UIKit
 #endif
 
 /// Line wrap mode.
-public enum LineWrapMode: Hashable {
-
-  case byWord
-  case byChar
+public extension LineWrapMode {
 
   /// The line break mode in AppKit/UIKit.
-  public var lineBreakMode: NSLineBreakMode {
+  var lineBreakMode: NSLineBreakMode {
     switch self {
     case .byWord:
       return .byWordWrapping

@@ -39,15 +39,10 @@ import UIKit
 import QuartzCore
 
 /// Text truncation mode.
-public enum TextTruncationMode: Hashable {
-
-  case none
-  case head
-  case tail
-  case middle
+public extension TextTruncationMode {
 
   /// The line break mode in AppKit/UIKit.
-  public var lineBreakMode: NSLineBreakMode {
+  var lineBreakMode: NSLineBreakMode {
     switch self {
     case .none:
       return .byClipping
@@ -61,7 +56,7 @@ public enum TextTruncationMode: Hashable {
   }
 
   /// The text layer truncation mode in Core Animation.
-  public var textLayerTruncationMode: CATextLayerTruncationMode {
+  var textLayerTruncationMode: CATextLayerTruncationMode {
     switch self {
     case .none:
       return .none
