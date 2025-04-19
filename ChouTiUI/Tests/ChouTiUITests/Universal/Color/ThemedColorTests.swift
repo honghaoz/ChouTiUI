@@ -37,94 +37,94 @@ class ThemedColorTests: XCTestCase {
 
   func test_foreground() {
     let color = ThemedColor.foreground
-    expect(color.lightColor) == .black
-    expect(color.darkColor) == .white
+    expect(color.light) == .black
+    expect(color.dark) == .white
   }
 
   func test_foregroundSecondary() {
     let color = ThemedColor.foregroundSecondary
-    expect(color.lightColor) == .hex("#6A7278")
-    expect(color.darkColor) == .hex("#919FA6")
+    expect(color.light) == .hex("#6A7278")
+    expect(color.dark) == .hex("#919FA6")
   }
 
   func test_foregroundTertiary() {
     let color = ThemedColor.foregroundTertiary
-    expect(color.lightColor) == .hex("#B4BDC2")
-    expect(color.darkColor) == .hex("#545D61")
+    expect(color.light) == .hex("#B4BDC2")
+    expect(color.dark) == .hex("#545D61")
   }
 
   func test_background() {
     let color = ThemedColor.background
-    expect(color.lightColor) == .white
-    expect(color.darkColor) == .black
+    expect(color.light) == .white
+    expect(color.dark) == .black
   }
 
   func test_backgroundSecondary() {
     let color = ThemedColor.backgroundSecondary
-    expect(color.lightColor) == .hex("#F5F8FA")
-    expect(color.darkColor) == .hex("#1E2124")
+    expect(color.light) == .hex("#F5F8FA")
+    expect(color.dark) == .hex("#1E2124")
   }
 
   func test_backgroundTertiary() {
     let color = ThemedColor.backgroundTertiary
-    expect(color.lightColor) == .hex("#E3E9ED")
-    expect(color.darkColor) == .hex("#30363A")
+    expect(color.light) == .hex("#E3E9ED")
+    expect(color.dark) == .hex("#30363A")
   }
 
   #if DEBUG
   func test_debugRed() {
     let color = ThemedColor.debugRed
-    expect(color.lightColor) == .red.opacity(0.3)
-    expect(color.darkColor) == .red.opacity(0.3)
+    expect(color.light) == .red.opacity(0.3)
+    expect(color.dark) == .red.opacity(0.3)
   }
 
   func test_debugBlue() {
     let color = ThemedColor.debugBlue
-    expect(color.lightColor) == .blue.opacity(0.3)
-    expect(color.darkColor) == .blue.opacity(0.3)
+    expect(color.light) == .blue.opacity(0.3)
+    expect(color.dark) == .blue.opacity(0.3)
   }
 
   func test_debugYellow() {
     let color = ThemedColor.debugYellow
-    expect(color.lightColor) == .yellow.opacity(0.3)
-    expect(color.darkColor) == .yellow.opacity(0.3)
+    expect(color.light) == .yellow.opacity(0.3)
+    expect(color.dark) == .yellow.opacity(0.3)
   }
   #endif
 
   func test_init() {
     do {
-      let color = ThemedColor(lightColor: .red, darkColor: .blue)
-      expect(color.lightColor) == .red
-      expect(color.darkColor) == .blue
+      let color = ThemedColor(light: .red, dark: .blue)
+      expect(color.light) == .red
+      expect(color.dark) == .blue
 
-      expect(color.color(for: .light)) == .red
-      expect(color.color(for: .dark)) == .blue
+      expect(color.resolve(for: .light)) == .red
+      expect(color.resolve(for: .dark)) == .blue
     }
     do {
       let color = ThemedColor(.red)
-      expect(color.lightColor) == .red
-      expect(color.darkColor) == .red
+      expect(color.light) == .red
+      expect(color.dark) == .red
 
-      expect(color.color(for: .light)) == .red
-      expect(color.color(for: .dark)) == .red
+      expect(color.resolve(for: .light)) == .red
+      expect(color.resolve(for: .dark)) == .red
     }
   }
 
   func test_lighter() {
     // default percentage is 0.1
     do {
-      let color = ThemedColor(lightColor: .red, darkColor: .blue)
+      let color = ThemedColor(light: .red, dark: .blue)
       let lighterColor = color.lighter()
-      expect(lighterColor?.lightColor) == .red.lighter()
-      expect(lighterColor?.darkColor) == .blue.lighter()
+      expect(lighterColor?.light) == .red.lighter()
+      expect(lighterColor?.dark) == .blue.lighter()
     }
 
     // custom percentage
     do {
-      let color = ThemedColor(lightColor: .red, darkColor: .blue)
+      let color = ThemedColor(light: .red, dark: .blue)
       let lighterColor = color.lighter(by: 0.5)
-      expect(lighterColor?.lightColor) == .red.lighter(by: 0.5)
-      expect(lighterColor?.darkColor) == .blue.lighter(by: 0.5)
+      expect(lighterColor?.light) == .red.lighter(by: 0.5)
+      expect(lighterColor?.dark) == .blue.lighter(by: 0.5)
     }
 
     // non HSBA color
@@ -151,10 +151,10 @@ class ThemedColorTests: XCTestCase {
         assertIndex += 1
       }
 
-      let color = ThemedColor(lightColor: patternColor, darkColor: patternColor)
+      let color = ThemedColor(light: patternColor, dark: patternColor)
       let lighterColor = color.lighter()
-      expect(lighterColor?.lightColor) == nil
-      expect(lighterColor?.darkColor) == nil
+      expect(lighterColor?.light) == nil
+      expect(lighterColor?.dark) == nil
 
       Assert.resetTestAssertionFailureHandler()
     }
@@ -163,18 +163,18 @@ class ThemedColorTests: XCTestCase {
   func test_darker() {
     // default percentage is 0.1
     do {
-      let color = ThemedColor(lightColor: .red, darkColor: .blue)
+      let color = ThemedColor(light: .red, dark: .blue)
       let darkerColor = color.darker()
-      expect(darkerColor?.lightColor) == .red.darker()
-      expect(darkerColor?.darkColor) == .blue.darker()
+      expect(darkerColor?.light) == .red.darker()
+      expect(darkerColor?.dark) == .blue.darker()
     }
 
     // custom percentage
     do {
-      let color = ThemedColor(lightColor: .red, darkColor: .blue)
+      let color = ThemedColor(light: .red, dark: .blue)
       let darkerColor = color.darker(by: 0.5)
-      expect(darkerColor?.lightColor) == .red.darker(by: 0.5)
-      expect(darkerColor?.darkColor) == .blue.darker(by: 0.5)
+      expect(darkerColor?.light) == .red.darker(by: 0.5)
+      expect(darkerColor?.dark) == .blue.darker(by: 0.5)
     }
 
     // non HSBA color
@@ -201,10 +201,10 @@ class ThemedColorTests: XCTestCase {
         assertIndex += 1
       }
 
-      let color = ThemedColor(lightColor: patternColor, darkColor: patternColor)
+      let color = ThemedColor(light: patternColor, dark: patternColor)
       let darkerColor = color.darker()
-      expect(darkerColor?.lightColor) == nil
-      expect(darkerColor?.darkColor) == nil
+      expect(darkerColor?.light) == nil
+      expect(darkerColor?.dark) == nil
 
       Assert.resetTestAssertionFailureHandler()
     }
@@ -213,7 +213,7 @@ class ThemedColorTests: XCTestCase {
   func test_colorToThemeColor() {
     let color = Color.red
     let themedColor = color.themedColor
-    expect(themedColor.lightColor) == color
-    expect(themedColor.darkColor) == color
+    expect(themedColor.light) == color
+    expect(themedColor.dark) == color
   }
 }

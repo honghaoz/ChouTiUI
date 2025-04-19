@@ -31,43 +31,7 @@
 import Foundation
 
 /// A type describes a layer's border info for both light and dark theme.
-public struct ThemedBorder: Hashable {
-
-  /// The border for light theme.
-  public let lightBorder: Border
-
-  /// The border for dark theme.
-  public let darkBorder: Border
-
-  /// Creates a themed border with the given light and dark borders.
-  /// - Parameters:
-  ///   - lightBorder: The border for light theme.
-  ///   - darkBorder: The border for dark theme.
-  public init(lightBorder: Border, darkBorder: Border) {
-    self.lightBorder = lightBorder
-    self.darkBorder = darkBorder
-  }
-
-  /// Creates a themed border with the given border for both light and dark theme.
-  /// - Parameters:
-  ///   - border: The border for both light and dark theme.
-  public init(_ border: Border) {
-    self.lightBorder = border
-    self.darkBorder = border
-  }
-
-  /// Returns the border for the given theme.
-  /// - Parameter theme: The theme to get the border for.
-  /// - Returns: The border for the given theme.
-  public func border(for theme: Theme) -> Border {
-    switch theme {
-    case .light:
-      return lightBorder
-    case .dark:
-      return darkBorder
-    }
-  }
-}
+public typealias ThemedBorder = Themed<Border>
 
 public extension Border {
 

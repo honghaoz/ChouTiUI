@@ -33,70 +33,31 @@ import Foundation
 import ChouTi
 
 /// A type that represents a color that changes based on the theme.
-public struct ThemedColor: Hashable {
+public extension ThemedColor {
 
   /// The foreground color.
-  public static let foreground = ThemedColor(lightColor: .black, darkColor: .white)
+  static let foreground = ThemedColor(light: .black, dark: .white)
 
   /// The secondary foreground color.
-  public static let foregroundSecondary = ThemedColor(lightColor: .hex("#6A7278"), darkColor: .hex("#919FA6"))
+  static let foregroundSecondary = ThemedColor(light: .hex("#6A7278"), dark: .hex("#919FA6"))
 
   /// The tertiary foreground color.
-  public static let foregroundTertiary = ThemedColor(lightColor: .hex("#B4BDC2"), darkColor: .hex("#545D61"))
+  static let foregroundTertiary = ThemedColor(light: .hex("#B4BDC2"), dark: .hex("#545D61"))
 
   /// The background color.
-  public static let background = ThemedColor(lightColor: .white, darkColor: .black)
+  static let background = ThemedColor(light: .white, dark: .black)
 
   /// The secondary background color.
-  public static let backgroundSecondary = ThemedColor(lightColor: .hex("#F5F8FA"), darkColor: .hex("#1E2124"))
+  static let backgroundSecondary = ThemedColor(light: .hex("#F5F8FA"), dark: .hex("#1E2124"))
 
   /// The tertiary background color.
-  public static let backgroundTertiary = ThemedColor(lightColor: .hex("#E3E9ED"), darkColor: .hex("#30363A"))
+  static let backgroundTertiary = ThemedColor(light: .hex("#E3E9ED"), dark: .hex("#30363A"))
 
   #if DEBUG
-  public static let debugRed = ThemedColor(lightColor: .red.opacity(0.3), darkColor: .red.opacity(0.3))
-  public static let debugBlue = ThemedColor(lightColor: .blue.opacity(0.3), darkColor: .blue.opacity(0.3))
-  public static let debugYellow = ThemedColor(lightColor: .yellow.opacity(0.3), darkColor: .yellow.opacity(0.3))
+  static let debugRed = ThemedColor(light: .red.opacity(0.3), dark: .red.opacity(0.3))
+  static let debugBlue = ThemedColor(light: .blue.opacity(0.3), dark: .blue.opacity(0.3))
+  static let debugYellow = ThemedColor(light: .yellow.opacity(0.3), dark: .yellow.opacity(0.3))
   #endif
-
-  /// The color for light theme.
-  public let lightColor: Color
-
-  /// The color for dark theme.
-  public let darkColor: Color
-
-  /// Creates a new themed color.
-  ///
-  /// - Parameters:
-  ///   - lightColor: The color for light theme.
-  ///   - darkColor: The color for dark theme.
-  public init(lightColor: Color, darkColor: Color) {
-    self.lightColor = lightColor
-    self.darkColor = darkColor
-  }
-
-  /// Creates a new themed color with the same color for both light and dark theme.
-  ///
-  /// - Parameters:
-  ///   - color: The color for both light and dark theme.
-  public init(_ color: Color) {
-    self.lightColor = color
-    self.darkColor = color
-  }
-
-  /// Returns the color for the given theme.
-  ///
-  /// - Parameters:
-  ///   - theme: The theme.
-  /// - Returns: The color for the given theme.
-  public func color(for theme: Theme) -> Color {
-    switch theme {
-    case .light:
-      return lightColor
-    case .dark:
-      return darkColor
-    }
-  }
 
   // MARK: - Modifying Colors
 
@@ -107,19 +68,19 @@ public struct ThemedColor: Hashable {
   /// - Parameters:
   ///   - percentage: The percentage of lightness. `0` means no change, `1` means 100% brightness.
   /// - Returns: A new themed color by lightening the color by the given percentage.
-  public func lighter(by percentage: CGFloat = 0.1) -> ThemedColor? {
-    guard let lightColor = lightColor.lighter(by: percentage),
-          let darkColor = darkColor.lighter(by: percentage)
+  func lighter(by percentage: CGFloat = 0.1) -> ThemedColor? {
+    guard let lightColor = light.lighter(by: percentage),
+          let darkColor = dark.lighter(by: percentage)
     else {
       ChouTi.assertFailure("Failed to get lighter color", metadata: [
-        "lightColor": "\(lightColor)",
-        "darkColor": "\(darkColor)",
+        "lightColor": "\(light)",
+        "darkColor": "\(dark)",
         "percentage": "\(percentage)",
       ])
       return nil
     }
 
-    return ThemedColor(lightColor: lightColor, darkColor: darkColor)
+    return ThemedColor(light: lightColor, dark: darkColor)
   }
 
   /// Returns a new themed color by darkening the color by the given percentage.
@@ -129,19 +90,19 @@ public struct ThemedColor: Hashable {
   /// - Parameters:
   ///   - percentage: The percentage of darkness. `0` means no change, `1` means 0% brightness.
   /// - Returns: A new themed color by darkening the color by the given percentage.
-  public func darker(by percentage: CGFloat = 0.1) -> ThemedColor? {
-    guard let lightColor = lightColor.darker(by: percentage),
-          let darkColor = darkColor.darker(by: percentage)
+  func darker(by percentage: CGFloat = 0.1) -> ThemedColor? {
+    guard let lightColor = light.darker(by: percentage),
+          let darkColor = dark.darker(by: percentage)
     else {
       ChouTi.assertFailure("Failed to get darker color", metadata: [
-        "lightColor": "\(lightColor)",
-        "darkColor": "\(darkColor)",
+        "lightColor": "\(light)",
+        "darkColor": "\(dark)",
         "percentage": "\(percentage)",
       ])
       return nil
     }
 
-    return ThemedColor(lightColor: lightColor, darkColor: darkColor)
+    return ThemedColor(light: lightColor, dark: darkColor)
   }
 }
 

@@ -39,7 +39,7 @@ class View_ThemedBackgroundColorTests: XCTestCase {
     let view = View()
     view.wantsLayer = true
 
-    view.setBackgroundColor(ThemedUnifiedColor(lightColor: .color(.red), darkColor: .color(.blue)))
+    view.setBackgroundColor(ThemedUnifiedColor(light: .color(.red), dark: .color(.blue)))
 
     view.overrideTheme = .light
     wait(timeout: 0.01)
@@ -49,7 +49,7 @@ class View_ThemedBackgroundColorTests: XCTestCase {
     wait(timeout: 0.01)
     expect(view.layer()?.backgroundColor) == Color.blue.cgColor
 
-    view.setBackgroundColor(ThemedColor(lightColor: .yellow, darkColor: .green))
+    view.setBackgroundColor(ThemedColor(light: .yellow, dark: .green))
 
     view.overrideTheme = .light
     wait(timeout: 0.01)

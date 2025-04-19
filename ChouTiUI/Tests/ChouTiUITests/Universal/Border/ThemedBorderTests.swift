@@ -39,31 +39,31 @@ class ThemedBorderTests: XCTestCase {
   func test() {
     // with light and dark border
     do {
-      let themedBorder = ThemedBorder(lightBorder: Border(Color.red, 1), darkBorder: Border(Color.blue, 2))
-      expect(themedBorder.lightBorder) == Border(Color.red, 1)
-      expect(themedBorder.darkBorder) == Border(Color.blue, 2)
+      let themedBorder = ThemedBorder(light: Border(Color.red, 1), dark: Border(Color.blue, 2))
+      expect(themedBorder.light) == Border(Color.red, 1)
+      expect(themedBorder.dark) == Border(Color.blue, 2)
 
-      expect(themedBorder.border(for: .light)) == Border(Color.red, 1)
-      expect(themedBorder.border(for: .dark)) == Border(Color.blue, 2)
+      expect(themedBorder.resolve(for: .light)) == Border(Color.red, 1)
+      expect(themedBorder.resolve(for: .dark)) == Border(Color.blue, 2)
     }
 
     // with border for both light and dark theme
     do {
       let themedBorder = ThemedBorder(Border(Color.red, 1))
-      expect(themedBorder.lightBorder) == Border(Color.red, 1)
-      expect(themedBorder.darkBorder) == Border(Color.red, 1)
+      expect(themedBorder.light) == Border(Color.red, 1)
+      expect(themedBorder.dark) == Border(Color.red, 1)
 
-      expect(themedBorder.border(for: .light)) == Border(Color.red, 1)
-      expect(themedBorder.border(for: .dark)) == Border(Color.red, 1)
+      expect(themedBorder.resolve(for: .light)) == Border(Color.red, 1)
+      expect(themedBorder.resolve(for: .dark)) == Border(Color.red, 1)
     }
   }
 
   func test_border_themedBorder() {
     let themedBorder = Border(Color.red, 1).themedBorder
-    expect(themedBorder.lightBorder) == Border(Color.red, 1)
-    expect(themedBorder.darkBorder) == Border(Color.red, 1)
+    expect(themedBorder.light) == Border(Color.red, 1)
+    expect(themedBorder.dark) == Border(Color.red, 1)
 
-    expect(themedBorder.border(for: .light)) == Border(Color.red, 1)
-    expect(themedBorder.border(for: .dark)) == Border(Color.red, 1)
+    expect(themedBorder.resolve(for: .light)) == Border(Color.red, 1)
+    expect(themedBorder.resolve(for: .dark)) == Border(Color.red, 1)
   }
 }

@@ -31,99 +31,58 @@
 import Foundation
 
 /// A type that represents a unified color that changes based on the theme.
-public struct ThemedUnifiedColor: Hashable {
+public typealias ThemedUnifiedColor = Themed<UnifiedColor>
 
-  /// The unified color for light theme.
-  public let lightColor: UnifiedColor
-
-  /// The unified color for dark theme.
-  public let darkColor: UnifiedColor
-
-  /// Creates a new themed unified color.
-  ///
-  /// - Parameters:
-  ///   - lightColor: The unified color for light theme.
-  ///   - darkColor: The unified color for dark theme.
-  public init(lightColor: UnifiedColor, darkColor: UnifiedColor) {
-    self.lightColor = lightColor
-    self.darkColor = darkColor
-  }
+public extension ThemedUnifiedColor {
 
   /// Creates a new themed unified color with solid colors.
   ///
   /// - Parameters:
-  ///   - lightColor: The solid color for light theme.
-  ///   - darkColor: The solid color for dark theme.
-  public init(lightColor: Color, darkColor: Color) {
-    self.lightColor = .color(lightColor)
-    self.darkColor = .color(darkColor)
-  }
-
-  /// Creates a new themed unified color with linear gradient colors.
-  ///
-  /// - Parameters:
-  ///   - lightColor: The linear gradient color for light theme.
-  ///   - darkColor: The linear gradient color for dark theme.
-  public init(lightColor: LinearGradientColor, darkColor: LinearGradientColor) {
-    self.lightColor = .linearGradient(lightColor)
-    self.darkColor = .linearGradient(darkColor)
-  }
-
-  /// Creates a new themed unified color with radial gradient colors.
-  ///
-  /// - Parameters:
-  ///   - lightColor: The radial gradient color for light theme.
-  ///   - darkColor: The radial gradient color for dark theme.
-  public init(lightColor: RadialGradientColor, darkColor: RadialGradientColor) {
-    self.lightColor = .radialGradient(lightColor)
-    self.darkColor = .radialGradient(darkColor)
-  }
-
-  /// Creates a new themed unified color with angular gradient colors.
-  ///
-  /// - Parameters:
-  ///   - lightColor: The angular gradient color for light theme.
-  ///   - darkColor: The angular gradient color for dark theme.
-  public init(lightColor: AngularGradientColor, darkColor: AngularGradientColor) {
-    self.lightColor = .angularGradient(lightColor)
-    self.darkColor = .angularGradient(darkColor)
-  }
-
-  /// Creates a new themed unified color with the same color for both light and dark theme.
-  ///
-  /// - Parameter color: The unified color for both light and dark theme.
-  public init(_ color: UnifiedColor) {
-    self.lightColor = color
-    self.darkColor = color
+  ///   - light: The solid color for light theme.
+  ///   - dark: The solid color for dark theme.
+  init(light: Color, dark: Color) {
+    self.init(light: .color(light), dark: .color(dark))
   }
 
   /// Creates a new themed unified color with solid color for both light and dark theme.
   ///
   /// - Parameter color: The solid color for both light and dark theme.
-  public init(_ color: Color) {
-    self.lightColor = .color(color)
-    self.darkColor = .color(color)
+  init(_ color: Color) {
+    self.init(.color(color))
+  }
+
+  /// Creates a new themed unified color with linear gradient colors.
+  ///
+  /// - Parameters:
+  ///   - light: The linear gradient color for light theme.
+  ///   - dark: The linear gradient color for dark theme.
+  init(light: LinearGradientColor, dark: LinearGradientColor) {
+    self.init(light: .linearGradient(light), dark: .linearGradient(dark))
+  }
+
+  /// Creates a new themed unified color with radial gradient colors.
+  ///
+  /// - Parameters:
+  ///   - light: The radial gradient color for light theme.
+  ///   - dark: The radial gradient color for dark theme.
+  init(light: RadialGradientColor, dark: RadialGradientColor) {
+    self.init(light: .radialGradient(light), dark: .radialGradient(dark))
+  }
+
+  /// Creates a new themed unified color with angular gradient colors.
+  ///
+  /// - Parameters:
+  ///   - light: The angular gradient color for light theme.
+  ///   - dark: The angular gradient color for dark theme.
+  init(light: AngularGradientColor, dark: AngularGradientColor) {
+    self.init(light: .angularGradient(light), dark: .angularGradient(dark))
   }
 
   /// Creates a new themed unified color with the same color for both light and dark theme.
   ///
   /// - Parameter themedColor: The themed color.
-  public init(_ themedColor: ThemedColor) {
-    self.lightColor = .color(themedColor.lightColor)
-    self.darkColor = .color(themedColor.darkColor)
-  }
-
-  /// Returns the unified color for the given theme.
-  ///
-  /// - Parameter theme: The theme.
-  /// - Returns: The unified color for the given theme.
-  public func color(for theme: Theme) -> UnifiedColor {
-    switch theme {
-    case .light:
-      return lightColor
-    case .dark:
-      return darkColor
-    }
+  init(_ themedColor: ThemedColor) {
+    self.init(light: .color(themedColor.light), dark: .color(themedColor.dark))
   }
 }
 

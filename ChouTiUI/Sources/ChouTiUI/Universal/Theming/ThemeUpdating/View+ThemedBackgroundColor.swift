@@ -48,9 +48,9 @@ public extension ThemeUpdating where Self: View {
     themeBinding.emitCurrentValue().observe { [weak self] theme in
       switch theme {
       case .light:
-        self?.layer()?.background = color.lightColor
+        self?.layer()?.background = color.light
       case .dark:
-        self?.layer()?.background = color.darkColor
+        self?.layer()?.background = color.dark
       }
     }.store(in: bindingObservationStorage, for: "io.chouti.ChouTiUI.ThemeUpdating.themed-background-color") // set explicit key to override the old one
   }
