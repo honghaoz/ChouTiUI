@@ -66,7 +66,7 @@ public final class ThemeMonitor: ThemeMonitorType {
   }
 
   /// A binding to the current theme.
-  public lazy var themeBinding: AnyBinding<Theme> = NSApplication.shared.themeBinding
+  public private(set) lazy var themeBinding: AnyBinding<Theme> = NSApplication.shared.themeBinding
 
   private weak var accentColorListeningToken: (any NSObjectProtocol)?
 
@@ -109,7 +109,7 @@ public final class ThemeMonitor: UIWindow, ThemeMonitorType {
   public static let shared = ThemeMonitor()
 
   /// A binding to the current theme.
-  public lazy var themeBinding = _themeBinding.eraseToAnyBinding()
+  public private(set) lazy var themeBinding = _themeBinding.eraseToAnyBinding()
 
   private lazy var _themeBinding = Binding<Theme>(theme)
 

@@ -33,7 +33,7 @@ import Combine
 import ChouTiTest
 
 import ChouTi
-import ChouTiUI
+@testable import ChouTiUI
 
 class ThemeMonitorTests: XCTestCase {
 
@@ -54,6 +54,26 @@ class ThemeMonitorTests: XCTestCase {
     expect(themeMonitor.themeBinding.value) == .light
 
     expect(themeMonitor.accentColorBinding.value) == Color.controlAccentColor
+    #endif
+  }
+
+  func test_accentColorBinding() {
+    #if os(macOS)
+    let themeMonitor = ThemeMonitor()
+    expect(themeMonitor.accentColorBinding.value) == Color.controlAccentColor
+
+    var bindingEmissionCount = 0
+    var lastValue: Color?
+    let observation = themeMonitor.accentColorBinding.observe { value in
+      bindingEmissionCount += 1
+      lastValue = value
+    }
+    _ = observation
+
+    Foundation.DistributedNotificationCenter.default().postNotificationName(.accentColorDidChange, object: nil)
+    wait(timeout: 0.05)
+    expect(lastValue) == Color.controlAccentColor
+    expect(bindingEmissionCount) == 1
     #endif
   }
 }

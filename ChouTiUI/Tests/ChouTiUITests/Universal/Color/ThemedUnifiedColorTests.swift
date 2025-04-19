@@ -76,7 +76,7 @@ class ThemedUnifiedColorTests: XCTestCase {
   }
 
   func test_init_with_linear_gradient_color() {
-    let color = ThemedUnifiedColor(light: .linearGradient(LinearGradientColor(colors: [.red, .blue])), dark: .linearGradient(LinearGradientColor(colors: [.red, .yellow])))
+    let color = ThemedUnifiedColor(light: LinearGradientColor(colors: [.red, .blue]), dark: LinearGradientColor(colors: [.red, .yellow]))
     expect(color.light) == .linearGradient(LinearGradientColor(colors: [.red, .blue]))
     expect(color.dark) == .linearGradient(LinearGradientColor(colors: [.red, .yellow]))
     expect(color.resolve(for: .light)) == .linearGradient(LinearGradientColor(colors: [.red, .blue]))
@@ -84,7 +84,7 @@ class ThemedUnifiedColorTests: XCTestCase {
   }
 
   func test_init_with_radial_gradient_color() {
-    let color = ThemedUnifiedColor(light: .radialGradient(RadialGradientColor(colors: [.red, .blue], startPoint: .bottom, endPoint: .top)), dark: .radialGradient(RadialGradientColor(colors: [.red, .yellow], startPoint: .top, endPoint: .bottom)))
+    let color = ThemedUnifiedColor(light: RadialGradientColor(colors: [.red, .blue], startPoint: .bottom, endPoint: .top), dark: RadialGradientColor(colors: [.red, .yellow], startPoint: .top, endPoint: .bottom))
     expect(color.light) == .radialGradient(RadialGradientColor(colors: [.red, .blue], startPoint: .bottom, endPoint: .top))
     expect(color.dark) == .radialGradient(RadialGradientColor(colors: [.red, .yellow], startPoint: .top, endPoint: .bottom))
     expect(color.resolve(for: .light)) == .radialGradient(RadialGradientColor(colors: [.red, .blue], startPoint: .bottom, endPoint: .top))
@@ -92,7 +92,7 @@ class ThemedUnifiedColorTests: XCTestCase {
   }
 
   func test_init_with_angular_gradient_color() {
-    let color = ThemedUnifiedColor(light: .angularGradient(AngularGradientColor(colors: [.red, .blue], centerPoint: .center, aimingPoint: .top)), dark: .angularGradient(AngularGradientColor(colors: [.red, .yellow], centerPoint: .center, aimingPoint: .bottom)))
+    let color = ThemedUnifiedColor(light: AngularGradientColor(colors: [.red, .blue], centerPoint: .center, aimingPoint: .top), dark: AngularGradientColor(colors: [.red, .yellow], centerPoint: .center, aimingPoint: .bottom))
     expect(color.light) == .angularGradient(AngularGradientColor(colors: [.red, .blue], centerPoint: .center, aimingPoint: .top))
     expect(color.dark) == .angularGradient(AngularGradientColor(colors: [.red, .yellow], centerPoint: .center, aimingPoint: .bottom))
     expect(color.resolve(for: .light)) == .angularGradient(AngularGradientColor(colors: [.red, .blue], centerPoint: .center, aimingPoint: .top))

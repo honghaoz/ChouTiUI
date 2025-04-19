@@ -57,7 +57,7 @@ open class BaseCAShapeLayer: CAShapeLayer, BaseCALayerInternalType {
 
   // MARK: - BaseCALayerInternalType
 
-  private(set) lazy var bindingObservationStorage = BindingObservationStorage()
+  public private(set) lazy var bindingObservationStorage = BindingObservationStorage()
 
   var _debugDescription: String?
 

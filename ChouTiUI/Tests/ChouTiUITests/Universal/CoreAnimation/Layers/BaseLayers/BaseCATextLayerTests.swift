@@ -212,6 +212,10 @@ class BaseCATextLayerTests: XCTestCase {
     layer.setNeedsDisplay()
     wait(timeout: 0.01)
 
+    layer.verticalAlignment = .top
+    layer.setNeedsDisplay()
+    wait(timeout: 0.01)
+
     layer.verticalAlignment = .center
     layer.setNeedsDisplay()
     wait(timeout: 0.01)

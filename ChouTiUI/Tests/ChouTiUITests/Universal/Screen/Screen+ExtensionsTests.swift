@@ -67,14 +67,22 @@ class Screen_ExtensionsTests: XCTestCase {
   }
 
   func testHalfPoint() {
-    if let mainScreen = Screen.mainScreen() {
-      if mainScreen.is3x {
-        expect(mainScreen.halfPoint) == mainScreen.pixelSize * 2
-      } else if mainScreen.is2x {
-        expect(mainScreen.halfPoint) == mainScreen.pixelSize
-      } else {
-        expect(mainScreen.halfPoint) == mainScreen.pixelSize
-      }
+    do {
+      let screen = Screen()
+      screen.overrideScale(3)
+      expect(screen.halfPoint) == screen.pixelSize * 2
+    }
+
+    do {
+      let screen = Screen()
+      screen.overrideScale(2)
+      expect(screen.halfPoint) == screen.pixelSize
+    }
+
+    do {
+      let screen = Screen()
+      screen.overrideScale(1)
+      expect(screen.halfPoint) == screen.pixelSize
     }
   }
 
@@ -94,4 +102,77 @@ class Screen_ExtensionsTests: XCTestCase {
   }
 
   #endif
+}
+
+private extension Screen {
+
+  func overrideScale(_ scale: CGFloat) {
+    #if os(macOS)
+    guard let originalClass = object_getClass(self) else {
+      return
+    }
+    let originalClassName = String(cString: class_getName(originalClass))
+    let subclassName = originalClassName.appending("_scale_\(scale)")
+
+    let subclass: AnyClass
+    if let subclassClass = NSClassFromString(subclassName) {
+      subclass = subclassClass
+    } else {
+      guard let subclassNameUtf8 = (subclassName as NSString).utf8String,
+            let newSubclass = objc_allocateClassPair(originalClass, subclassNameUtf8, 0)
+      else {
+        return
+      }
+
+      // override `backingScaleFactor`
+      let selector = #selector(getter: NSScreen.backingScaleFactor)
+      guard let method = class_getInstanceMethod(originalClass, selector) else {
+        return
+      }
+
+      let block: @convention(block) (AnyObject) -> CGFloat = { object in
+        return scale
+      }
+      class_addMethod(newSubclass, selector, imp_implementationWithBlock(block), method_getTypeEncoding(method))
+
+      objc_registerClassPair(newSubclass)
+      subclass = newSubclass
+    }
+
+    object_setClass(self, subclass)
+    #else
+    guard let originalClass = object_getClass(self) else {
+      return
+    }
+    let originalClassName = String(cString: class_getName(originalClass))
+    let subclassName = originalClassName.appending("_scale_\(scale)")
+
+    let subclass: AnyClass
+    if let subclassClass = NSClassFromString(subclassName) {
+      subclass = subclassClass
+    } else {
+      guard let subclassNameUtf8 = (subclassName as NSString).utf8String,
+            let newSubclass = objc_allocateClassPair(originalClass, subclassNameUtf8, 0)
+      else {
+        return
+      }
+
+      // override `scale`
+      let selector = #selector(getter: UIScreen.scale)
+      guard let method = class_getInstanceMethod(originalClass, selector) else {
+        return
+      }
+
+      let block: @convention(block) (AnyObject) -> CGFloat = { object in
+        return scale
+      }
+      class_addMethod(newSubclass, selector, imp_implementationWithBlock(block), method_getTypeEncoding(method))
+
+      objc_registerClassPair(newSubclass)
+      subclass = newSubclass
+    }
+
+    object_setClass(self, subclass)
+    #endif
+  }
 }
