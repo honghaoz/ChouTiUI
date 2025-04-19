@@ -82,7 +82,7 @@ public typealias View = NSView
 public typealias Control = NSControl
 public typealias ScrollView = NSScrollView
 public typealias ImageView = NSImageView
-public typealias Label = ComposeUI.Label
+public typealias Label = NSLabel
 public typealias TextField = NSTextField
 public typealias TextView = NSTextView
 

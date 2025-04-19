@@ -120,7 +120,17 @@ public final class TextSizeProvider {
 
     let label = TextSizeProvider.helperLabel
     label.attributedText = attributedString
+
+    #if canImport(AppKit)
+    if numberOfLines == 1 {
+      label.setToSingleLineMode()
+    } else {
+      label.setToMultilineMode(numberOfLines: numberOfLines)
+    }
+    #endif
+    #if canImport(UIKit)
     label.numberOfLines = numberOfLines
+    #endif
 
     let boundingRectSize = label.sizeThatFits(CGSize(layoutWidth, .greatestFiniteMagnitude))
     return boundingRectSize
