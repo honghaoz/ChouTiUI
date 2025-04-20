@@ -67,6 +67,7 @@ class Screen_ExtensionsTests: XCTestCase {
   }
 
   func testHalfPoint() {
+    #if !os(visionOS)
     do {
       let screen = Screen()
       screen.overrideScale(3)
@@ -84,6 +85,7 @@ class Screen_ExtensionsTests: XCTestCase {
       screen.overrideScale(1)
       expect(screen.halfPoint) == screen.pixelSize
     }
+    #endif
   }
 
   func testIs3x() {
@@ -107,7 +109,7 @@ class Screen_ExtensionsTests: XCTestCase {
 private extension Screen {
 
   func overrideScale(_ scale: CGFloat) {
-    #if os(macOS)
+    #if canImport(AppKit)
     guard let originalClass = object_getClass(self) else {
       return
     }
@@ -140,7 +142,9 @@ private extension Screen {
     }
 
     object_setClass(self, subclass)
-    #else
+    #endif
+
+    #if canImport(UIKit) && !os(visionOS)
     guard let originalClass = object_getClass(self) else {
       return
     }
