@@ -61,4 +61,8 @@ If you're curious about how apps built with ChouTiUI look like, check out the [A
 
 ## Dependencies
 
-ChouTiUI relies on the [ChouTi](https://github.com/honghaoz/ChouTi) package.
+ChouTiUI relies on the [ChouTi](https://github.com/honghaoz/ChouTi) and [ComposéUI](https://github.com/honghaoz/ComposeUI).
+
+## License
+
+ChouTiUI is available under the MIT license. See the [LICENSE](https://github.com/honghaoz/ChouTiUI/blob/master/LICENSE) file for more info.
