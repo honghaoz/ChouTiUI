@@ -11,7 +11,7 @@ on:
     # │ │ │ │ ┌───────────── day of the week (0 - 6 or SUN-SAT)
     # │ │ │ │ │
     # * * * * *
-    - cron: "0 15 * * *" # every day at 15:00 UTC (7:00 PST, 8:00 PDT)
+    - cron: "30 14 * * *" # every day at 14:30 UTC (6:30 PST, 7:30 PDT)
 
 env:
   TERM: xterm-256color
