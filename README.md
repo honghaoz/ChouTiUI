@@ -61,7 +61,10 @@ If you're curious about how apps built with ChouTiUI look like, check out the [A
 
 ## Dependencies
 
-ChouTiUI relies on the [ChouTi](https://github.com/honghaoz/ChouTi) and [ComposéUI](https://github.com/honghaoz/ComposeUI).
+ChouTiUI is built on top of two frameworks:
+
+- **[ChouTi](https://github.com/honghaoz/ChouTi)**: A framework provides foundational utilities and extensions for efficient development on Apple platforms..
+- **[ComposéUI](https://github.com/honghaoz/ComposeUI)**: A framework for building UI using AppKit and UIKit with declarative syntax. It serves as the UI foundation for ChouTiUI.
 
 ## License
 
