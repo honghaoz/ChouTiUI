@@ -56,6 +56,13 @@ If you're curious about how apps built with ChouTiUI look like, check out the [A
         MenuBar IP
       </a>
     </td>
+    <td align="center" width="160">
+      <a href="https://apps.apple.com/app/rive-play/id6746145505">
+        <img src="https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/b0/8a/20/b08a2058-f444-f308-040e-59fa4612598d/AppIcon-0-0-85-220-0-5-0-2x.png/512x0w.webp" width="128" alt="MenuBar IP">
+        <br>
+        Rive Play
+      </a>
+    </td>
   </tr>
 </table>
 
