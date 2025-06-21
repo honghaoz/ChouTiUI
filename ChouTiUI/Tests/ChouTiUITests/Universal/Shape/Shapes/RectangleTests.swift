@@ -136,7 +136,7 @@ class RectangleTests: XCTestCase {
       // offset is positive
       do {
         let path = shape.path(in: rect, offset: 10)
-        expect(path) == BezierPath(roundedRect: rect.inset(by: -10), cornerRadius: 16 + 10).cgPath
+        expect(path.pathElements()) == BezierPath(roundedRect: rect.inset(by: -10), cornerRadius: 16 + 10).cgPath.pathElements()
       }
 
       // offset is negative
@@ -144,20 +144,20 @@ class RectangleTests: XCTestCase {
         // not enough negative offset
         do {
           let path = shape.path(in: rect, offset: -10)
-          expect(path) == BezierPath(roundedRect: rect.inset(by: 10), cornerRadius: 16 - 10).cgPath
+          expect(path.pathElements()) == BezierPath(roundedRect: rect.inset(by: 10), cornerRadius: 16 - 10).cgPath.pathElements()
         }
 
         // enough negative offset
         do {
           let path = shape.path(in: rect, offset: -18)
-          expect(path) == BezierPath(rect: rect.inset(by: 18)).cgPath
+          expect(path.pathElements()) == BezierPath(rect: rect.inset(by: 18)).cgPath.pathElements()
         }
       }
 
       // offset is 0
       do {
         let path = shape.path(in: rect, offset: 0)
-        expect(path) == BezierPath(roundedRect: rect, cornerRadius: 16).cgPath
+        expect(path.pathElements()) == BezierPath(roundedRect: rect, cornerRadius: 16).cgPath.pathElements()
       }
     }
 
@@ -169,7 +169,7 @@ class RectangleTests: XCTestCase {
       // offset is positive
       do {
         let path = shape.path(in: rect, offset: 10)
-        expect(path) == BezierPath(rect: rect.inset(by: -10)).cgPath
+        expect(path.pathElements()) == BezierPath(rect: rect.inset(by: -10)).cgPath.pathElements()
       }
     }
   }
