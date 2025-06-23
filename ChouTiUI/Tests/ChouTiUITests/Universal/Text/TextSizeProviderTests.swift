@@ -217,213 +217,213 @@ class TextSizeProviderTests: XCTestCase {
       }
     }
 
-    // layout mode: label
-    do {
-      // empty string
-      do {
-        let size = TextSizeProvider.shared.boundingRectSize(for: NSAttributedString(), numberOfLines: 1, layoutWidth: .greatestFiniteMagnitude, layoutMode: .label)
-        expect(size.width) == 0
-        expect(size.height) == 0
-      }
-
-      // 1 line, unlimited
-      do {
-        let size = TextSizeProvider.shared.boundingRectSize(for: attributedString, numberOfLines: 1, layoutWidth: .greatestFiniteMagnitude, layoutMode: .label)
-        #if os(macOS)
-        expect(size.width) == 1667.3399999999997
-        expect(size.height).to(beApproximatelyEqual(to: 23, within: 1e-4))
-        #elseif os(tvOS)
-        expect(size.width) == 1664.0
-        expect(size.height).to(beApproximatelyEqual(to: 24, within: 1e-4))
-        #elseif os(visionOS)
-        expect(size.width) == 1663.5
-        expect(size.height).to(beApproximatelyEqual(to: 23.5, within: 1e-4))
-        #else
-        expect(size.width) == 1663.6666666666667
-        expect(size.height).to(beApproximatelyEqual(to: 23.333333333333332, within: 1e-4))
-        #endif
-      }
-
-      // 1 line, big
-      do {
-        let size = TextSizeProvider.shared.boundingRectSize(for: attributedString, numberOfLines: 1, layoutWidth: 2000, layoutMode: .label)
-        #if os(macOS)
-        expect(size.width) == 1667.3399999999997
-        expect(size.height).to(beApproximatelyEqual(to: 23, within: 1e-4))
-        #elseif os(tvOS)
-        expect(size.width) == 1664.0
-        expect(size.height).to(beApproximatelyEqual(to: 24, within: 1e-4))
-        #elseif os(visionOS)
-        expect(size.width) == 1663.5
-        expect(size.height).to(beApproximatelyEqual(to: 23.5, within: 1e-4))
-        #else
-        expect(size.width) == 1663.6666666666667
-        expect(size.height).to(beApproximatelyEqual(to: 23.333333333333332, within: 1e-4))
-        #endif
-      }
-
-      // 1 line, small
-      do {
-        let size = TextSizeProvider.shared.boundingRectSize(for: attributedString, numberOfLines: 1, layoutWidth: 300, layoutMode: .label)
-        #if os(macOS)
-        expect(size.width) == 1667.3399999999997
-        expect(size.height).to(beApproximatelyEqual(to: 23, within: 1e-4))
-        #elseif os(tvOS)
-        expect(size.width) == 1664.0
-        expect(size.height).to(beApproximatelyEqual(to: 24, within: 1e-4))
-        #elseif os(visionOS)
-        expect(size.width) == 1663.5
-        expect(size.height).to(beApproximatelyEqual(to: 23.5, within: 1e-4))
-        #else
-        expect(size.width) == 1663.6666666666667
-        expect(size.height).to(beApproximatelyEqual(to: 23.333333333333332, within: 1e-4))
-        #endif
-      }
-
-      // 2 lines, unlimited
-      do {
-        let size = TextSizeProvider.shared.boundingRectSize(for: attributedString, numberOfLines: 2, layoutWidth: .greatestFiniteMagnitude, layoutMode: .label)
-        #if os(macOS)
-        expect(size.width) == 1667.3399999999997
-        expect(size.height).to(beApproximatelyEqual(to: 23, within: 1e-4))
-        #elseif os(tvOS)
-        expect(size.width) == 1664.0
-        expect(size.height).to(beApproximatelyEqual(to: 24, within: 1e-4))
-        #elseif os(visionOS)
-        expect(size.width) == 1663.5
-        expect(size.height).to(beApproximatelyEqual(to: 23.5, within: 1e-4))
-        #else
-        expect(size.width) == 1663.6666666666667
-        expect(size.height).to(beApproximatelyEqual(to: 23.333333333333332, within: 1e-4))
-        #endif
-      }
-
-      // 2 lines, big
-      do {
-        let size = TextSizeProvider.shared.boundingRectSize(for: attributedString, numberOfLines: 2, layoutWidth: 2000, layoutMode: .label)
-        #if os(macOS)
-        expect(size.width) == 1667.3399999999997
-        expect(size.height).to(beApproximatelyEqual(to: 23, within: 1e-4))
-        #elseif os(tvOS)
-        expect(size.width) == 1664.0
-        expect(size.height).to(beApproximatelyEqual(to: 24, within: 1e-4))
-        #elseif os(visionOS)
-        expect(size.width) == 1663.5
-        expect(size.height).to(beApproximatelyEqual(to: 23.5, within: 1e-4))
-        #else
-        expect(size.width) == 1663.6666666666667
-        expect(size.height).to(beApproximatelyEqual(to: 23.333333333333332, within: 1e-4))
-        #endif
-      }
-
-      // 2 lines, small
-      do {
-        let size = TextSizeProvider.shared.boundingRectSize(for: attributedString, numberOfLines: 2, layoutWidth: 300, layoutMode: .label)
-        #if os(macOS)
-        expect(size.width) == 273.68
-        expect(size.height).to(beApproximatelyEqual(to: 46, within: 1e-4))
-        #elseif os(tvOS)
-        expect(size.width) == 270
-        expect(size.height).to(beApproximatelyEqual(to: 47, within: 1e-4))
-        #elseif os(visionOS)
-        expect(size.width) == 270.0
-        expect(size.height).to(beApproximatelyEqual(to: 47, within: 1e-4))
-        #else
-        expect(size.width) == 270.0
-        expect(size.height).to(beApproximatelyEqual(to: 46.666666666666664, within: 1e-4))
-        #endif
-      }
-
-      // 3 lines, unlimited
-      do {
-        let size = TextSizeProvider.shared.boundingRectSize(for: attributedString, numberOfLines: 3, layoutWidth: .greatestFiniteMagnitude, layoutMode: .label)
-        #if os(macOS)
-        expect(size.width) == 1667.3399999999997
-        expect(size.height).to(beApproximatelyEqual(to: 23, within: 1e-4))
-        #elseif os(tvOS)
-        expect(size.width) == 1664.0
-        expect(size.height).to(beApproximatelyEqual(to: 24, within: 1e-4))
-        #elseif os(visionOS)
-        expect(size.width) == 1663.5
-        expect(size.height).to(beApproximatelyEqual(to: 23.5, within: 1e-4))
-        #else
-        expect(size.width) == 1663.6666666666667
-        expect(size.height).to(beApproximatelyEqual(to: 23.333333333333332, within: 1e-4))
-        #endif
-      }
-
-      // 3 lines, big
-      do {
-        let size = TextSizeProvider.shared.boundingRectSize(for: attributedString, numberOfLines: 3, layoutWidth: 2000, layoutMode: .label)
-        #if os(macOS)
-        expect(size.width) == 1667.3399999999997
-        expect(size.height).to(beApproximatelyEqual(to: 23, within: 1e-4))
-        #elseif os(tvOS)
-        expect(size.width) == 1664.0
-        expect(size.height).to(beApproximatelyEqual(to: 24, within: 1e-4))
-        #elseif os(visionOS)
-        expect(size.width) == 1663.5
-        expect(size.height).to(beApproximatelyEqual(to: 23.5, within: 1e-4))
-        #else
-        expect(size.width) == 1663.6666666666667
-        expect(size.height).to(beApproximatelyEqual(to: 23.333333333333332, within: 1e-4))
-        #endif
-      }
-
-      // 3 lines, small
-      do {
-        let size = TextSizeProvider.shared.boundingRectSize(for: attributedString, numberOfLines: 3, layoutWidth: 300, layoutMode: .label)
-        #if os(macOS)
-        expect(size.width) == 295.54
-        expect(size.height).to(beApproximatelyEqual(to: 69, within: 1e-4))
-        #elseif os(tvOS)
-        expect(size.width) == 292
-        expect(size.height).to(beApproximatelyEqual(to: 70, within: 1e-4))
-        #elseif os(visionOS)
-        expect(size.width) == 292
-        expect(size.height).to(beApproximatelyEqual(to: 70, within: 1e-4))
-        #else
-        expect(size.width) == 291.6666666666667
-        expect(size.height).to(beApproximatelyEqual(to: 70, within: 1e-4))
-        #endif
-      }
-
-      // 0 number of lines
-      do {
-        let size = TextSizeProvider.shared.boundingRectSize(for: attributedString, numberOfLines: 0, layoutWidth: .greatestFiniteMagnitude, layoutMode: .label)
-        #if os(macOS)
-        expect(size.width) == 1667.3399999999997
-        expect(size.height).to(beApproximatelyEqual(to: 23, within: 1e-4))
-        #elseif os(tvOS)
-        expect(size.width) == 1664.0
-        expect(size.height).to(beApproximatelyEqual(to: 24, within: 1e-4))
-        #elseif os(visionOS)
-        expect(size.width) == 1663.5
-        expect(size.height).to(beApproximatelyEqual(to: 23.5, within: 1e-4))
-        #else
-        expect(size.width) == 1663.6666666666667
-        expect(size.height).to(beApproximatelyEqual(to: 23.333333333333332, within: 1e-4))
-        #endif
-      }
-
-      // negative number of lines
-      do {
-        let size = TextSizeProvider.shared.boundingRectSize(for: attributedString, numberOfLines: -1, layoutWidth: .greatestFiniteMagnitude, layoutMode: .label)
-        #if os(macOS)
-        expect(size.width) == 1667.3399999999997
-        expect(size.height).to(beApproximatelyEqual(to: 23, within: 1e-4))
-        #elseif os(tvOS)
-        expect(size.width) == 1664.0
-        expect(size.height).to(beApproximatelyEqual(to: 24, within: 1e-4))
-        #elseif os(visionOS)
-        expect(size.width) == 1663.5
-        expect(size.height).to(beApproximatelyEqual(to: 23.5, within: 1e-4))
-        #else
-        expect(size.width) == 1663.6666666666667
-        expect(size.height).to(beApproximatelyEqual(to: 23.333333333333332, within: 1e-4))
-        #endif
-      }
-    }
+    //  // layout mode: label
+    //  do {
+    //    // empty string
+    //    do {
+    //      let size = TextSizeProvider.shared.boundingRectSize(for: NSAttributedString(), numberOfLines: 1, layoutWidth: .greatestFiniteMagnitude, layoutMode: .label)
+    //      expect(size.width) == 0
+    //      expect(size.height) == 0
+    //    }
+    //
+    //    // 1 line, unlimited
+    //    do {
+    //      let size = TextSizeProvider.shared.boundingRectSize(for: attributedString, numberOfLines: 1, layoutWidth: .greatestFiniteMagnitude, layoutMode: .label)
+    //      #if os(macOS)
+    //      expect(size.width) == 1667.3399999999997
+    //      expect(size.height).to(beApproximatelyEqual(to: 23, within: 1e-4))
+    //      #elseif os(tvOS)
+    //      expect(size.width) == 1664.0
+    //      expect(size.height).to(beApproximatelyEqual(to: 24, within: 1e-4))
+    //      #elseif os(visionOS)
+    //      expect(size.width) == 1663.5
+    //      expect(size.height).to(beApproximatelyEqual(to: 23.5, within: 1e-4))
+    //      #else
+    //      expect(size.width) == 1663.6666666666667
+    //      expect(size.height).to(beApproximatelyEqual(to: 23.333333333333332, within: 1e-4))
+    //      #endif
+    //    }
+    //
+    //    // 1 line, big
+    //    do {
+    //      let size = TextSizeProvider.shared.boundingRectSize(for: attributedString, numberOfLines: 1, layoutWidth: 2000, layoutMode: .label)
+    //      #if os(macOS)
+    //      expect(size.width) == 1667.3399999999997
+    //      expect(size.height).to(beApproximatelyEqual(to: 23, within: 1e-4))
+    //      #elseif os(tvOS)
+    //      expect(size.width) == 1664.0
+    //      expect(size.height).to(beApproximatelyEqual(to: 24, within: 1e-4))
+    //      #elseif os(visionOS)
+    //      expect(size.width) == 1663.5
+    //      expect(size.height).to(beApproximatelyEqual(to: 23.5, within: 1e-4))
+    //      #else
+    //      expect(size.width) == 1663.6666666666667
+    //      expect(size.height).to(beApproximatelyEqual(to: 23.333333333333332, within: 1e-4))
+    //      #endif
+    //    }
+    //
+    //    // 1 line, small
+    //    do {
+    //      let size = TextSizeProvider.shared.boundingRectSize(for: attributedString, numberOfLines: 1, layoutWidth: 300, layoutMode: .label)
+    //      #if os(macOS)
+    //      expect(size.width) == 1667.3399999999997
+    //      expect(size.height).to(beApproximatelyEqual(to: 23, within: 1e-4))
+    //      #elseif os(tvOS)
+    //      expect(size.width) == 1664.0
+    //      expect(size.height).to(beApproximatelyEqual(to: 24, within: 1e-4))
+    //      #elseif os(visionOS)
+    //      expect(size.width) == 1663.5
+    //      expect(size.height).to(beApproximatelyEqual(to: 23.5, within: 1e-4))
+    //      #else
+    //      expect(size.width) == 1663.6666666666667
+    //      expect(size.height).to(beApproximatelyEqual(to: 23.333333333333332, within: 1e-4))
+    //      #endif
+    //    }
+    //
+    //    // 2 lines, unlimited
+    //    do {
+    //      let size = TextSizeProvider.shared.boundingRectSize(for: attributedString, numberOfLines: 2, layoutWidth: .greatestFiniteMagnitude, layoutMode: .label)
+    //      #if os(macOS)
+    //      expect(size.width) == 1667.3399999999997
+    //      expect(size.height).to(beApproximatelyEqual(to: 23, within: 1e-4))
+    //      #elseif os(tvOS)
+    //      expect(size.width) == 1664.0
+    //      expect(size.height).to(beApproximatelyEqual(to: 24, within: 1e-4))
+    //      #elseif os(visionOS)
+    //      expect(size.width) == 1663.5
+    //      expect(size.height).to(beApproximatelyEqual(to: 23.5, within: 1e-4))
+    //      #else
+    //      expect(size.width) == 1663.6666666666667
+    //      expect(size.height).to(beApproximatelyEqual(to: 23.333333333333332, within: 1e-4))
+    //      #endif
+    //    }
+    //
+    //    // 2 lines, big
+    //    do {
+    //      let size = TextSizeProvider.shared.boundingRectSize(for: attributedString, numberOfLines: 2, layoutWidth: 2000, layoutMode: .label)
+    //      #if os(macOS)
+    //      expect(size.width) == 1667.3399999999997
+    //      expect(size.height).to(beApproximatelyEqual(to: 23, within: 1e-4))
+    //      #elseif os(tvOS)
+    //      expect(size.width) == 1664.0
+    //      expect(size.height).to(beApproximatelyEqual(to: 24, within: 1e-4))
+    //      #elseif os(visionOS)
+    //      expect(size.width) == 1663.5
+    //      expect(size.height).to(beApproximatelyEqual(to: 23.5, within: 1e-4))
+    //      #else
+    //      expect(size.width) == 1663.6666666666667
+    //      expect(size.height).to(beApproximatelyEqual(to: 23.333333333333332, within: 1e-4))
+    //      #endif
+    //    }
+    //
+    //    // 2 lines, small
+    //    do {
+    //      let size = TextSizeProvider.shared.boundingRectSize(for: attributedString, numberOfLines: 2, layoutWidth: 300, layoutMode: .label)
+    //      #if os(macOS)
+    //      expect(size.width) == 273.68
+    //      expect(size.height).to(beApproximatelyEqual(to: 46, within: 1e-4))
+    //      #elseif os(tvOS)
+    //      expect(size.width) == 270
+    //      expect(size.height).to(beApproximatelyEqual(to: 47, within: 1e-4))
+    //      #elseif os(visionOS)
+    //      expect(size.width) == 270.0
+    //      expect(size.height).to(beApproximatelyEqual(to: 47, within: 1e-4))
+    //      #else
+    //      expect(size.width) == 270.0
+    //      expect(size.height).to(beApproximatelyEqual(to: 46.666666666666664, within: 1e-4))
+    //      #endif
+    //    }
+    //
+    //    // 3 lines, unlimited
+    //    do {
+    //      let size = TextSizeProvider.shared.boundingRectSize(for: attributedString, numberOfLines: 3, layoutWidth: .greatestFiniteMagnitude, layoutMode: .label)
+    //      #if os(macOS)
+    //      expect(size.width) == 1667.3399999999997
+    //      expect(size.height).to(beApproximatelyEqual(to: 23, within: 1e-4))
+    //      #elseif os(tvOS)
+    //      expect(size.width) == 1664.0
+    //      expect(size.height).to(beApproximatelyEqual(to: 24, within: 1e-4))
+    //      #elseif os(visionOS)
+    //      expect(size.width) == 1663.5
+    //      expect(size.height).to(beApproximatelyEqual(to: 23.5, within: 1e-4))
+    //      #else
+    //      expect(size.width) == 1663.6666666666667
+    //      expect(size.height).to(beApproximatelyEqual(to: 23.333333333333332, within: 1e-4))
+    //      #endif
+    //    }
+    //
+    //    // 3 lines, big
+    //    do {
+    //      let size = TextSizeProvider.shared.boundingRectSize(for: attributedString, numberOfLines: 3, layoutWidth: 2000, layoutMode: .label)
+    //      #if os(macOS)
+    //      expect(size.width) == 1667.3399999999997
+    //      expect(size.height).to(beApproximatelyEqual(to: 23, within: 1e-4))
+    //      #elseif os(tvOS)
+    //      expect(size.width) == 1664.0
+    //      expect(size.height).to(beApproximatelyEqual(to: 24, within: 1e-4))
+    //      #elseif os(visionOS)
+    //      expect(size.width) == 1663.5
+    //      expect(size.height).to(beApproximatelyEqual(to: 23.5, within: 1e-4))
+    //      #else
+    //      expect(size.width) == 1663.6666666666667
+    //      expect(size.height).to(beApproximatelyEqual(to: 23.333333333333332, within: 1e-4))
+    //      #endif
+    //    }
+    //
+    //    // 3 lines, small
+    //    do {
+    //      let size = TextSizeProvider.shared.boundingRectSize(for: attributedString, numberOfLines: 3, layoutWidth: 300, layoutMode: .label)
+    //      #if os(macOS)
+    //      expect(size.width) == 295.54
+    //      expect(size.height).to(beApproximatelyEqual(to: 69, within: 1e-4))
+    //      #elseif os(tvOS)
+    //      expect(size.width) == 292
+    //      expect(size.height).to(beApproximatelyEqual(to: 70, within: 1e-4))
+    //      #elseif os(visionOS)
+    //      expect(size.width) == 292
+    //      expect(size.height).to(beApproximatelyEqual(to: 70, within: 1e-4))
+    //      #else
+    //      expect(size.width) == 291.6666666666667
+    //      expect(size.height).to(beApproximatelyEqual(to: 70, within: 1e-4))
+    //      #endif
+    //    }
+    //
+    //    // 0 number of lines
+    //    do {
+    //      let size = TextSizeProvider.shared.boundingRectSize(for: attributedString, numberOfLines: 0, layoutWidth: .greatestFiniteMagnitude, layoutMode: .label)
+    //      #if os(macOS)
+    //      expect(size.width) == 1667.3399999999997
+    //      expect(size.height).to(beApproximatelyEqual(to: 23, within: 1e-4))
+    //      #elseif os(tvOS)
+    //      expect(size.width) == 1664.0
+    //      expect(size.height).to(beApproximatelyEqual(to: 24, within: 1e-4))
+    //      #elseif os(visionOS)
+    //      expect(size.width) == 1663.5
+    //      expect(size.height).to(beApproximatelyEqual(to: 23.5, within: 1e-4))
+    //      #else
+    //      expect(size.width) == 1663.6666666666667
+    //      expect(size.height).to(beApproximatelyEqual(to: 23.333333333333332, within: 1e-4))
+    //      #endif
+    //    }
+    //
+    //    // negative number of lines
+    //    do {
+    //      let size = TextSizeProvider.shared.boundingRectSize(for: attributedString, numberOfLines: -1, layoutWidth: .greatestFiniteMagnitude, layoutMode: .label)
+    //      #if os(macOS)
+    //      expect(size.width) == 1667.3399999999997
+    //      expect(size.height).to(beApproximatelyEqual(to: 23, within: 1e-4))
+    //      #elseif os(tvOS)
+    //      expect(size.width) == 1664.0
+    //      expect(size.height).to(beApproximatelyEqual(to: 24, within: 1e-4))
+    //      #elseif os(visionOS)
+    //      expect(size.width) == 1663.5
+    //      expect(size.height).to(beApproximatelyEqual(to: 23.5, within: 1e-4))
+    //      #else
+    //      expect(size.width) == 1663.6666666666667
+    //      expect(size.height).to(beApproximatelyEqual(to: 23.333333333333332, within: 1e-4))
+    //      #endif
+    //    }
+    //  }
 
     // layout mode: attributedString
     do {

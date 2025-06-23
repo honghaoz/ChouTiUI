@@ -46,12 +46,12 @@ public final class TextSizeProvider {
 
   public static let shared = TextSizeProvider()
 
-  private static let helperLabel = Label()
+  // private static let helperLabel = Label()
 
   public enum LayoutMode: Hashable {
 
-    /// Use a helper Label with `sizeThatFits`.
-    case label
+    // /// Use a helper Label with `sizeThatFits`.
+    // case label
 
     /// Use `NSAttributedString.boundingRect(with:options:context:)`.
     case attributedString
@@ -84,8 +84,8 @@ public final class TextSizeProvider {
 
     let size: CGSize
     switch layoutMode {
-    case .label:
-      size = self.boundingRectSizeWithLabel(for: attributedString, numberOfLines: numberOfLines, layoutWidth: layoutWidth)
+    // case .label:
+    //   size = self.boundingRectSizeWithLabel(for: attributedString, numberOfLines: numberOfLines, layoutWidth: layoutWidth)
     case .attributedString:
       size = self.boundingRectSizeWithAttributedString(for: attributedString, numberOfLines: numberOfLines, layoutWidth: layoutWidth)
     case .coreTextSuggestFrameSizeWithConstraints:
@@ -97,44 +97,44 @@ public final class TextSizeProvider {
     return size
   }
 
-  /// Returns text bounding rect size.
-  ///
-  /// Uses `Label` under the hood.
-  /// - one line text returns the intrinsic size.
-  /// - multiline text returns size constrained by `numberOfLines` and `multilineLayoutWidth`.
-  ///
-  /// The line break mode in attributed string doesn't affect the bounding rect size.
-  ///
-  /// - Parameters:
-  ///   - attributedString: The attributed string.
-  ///   - numberOfLines: The max number of lines.
-  ///   - layoutWidth: The proposing layout width. If `numberOfLines != 1`, this value has no effects.
-  /// - Returns: The bounding rect size, is integral size.
-  private func boundingRectSizeWithLabel(for attributedString: NSAttributedString,
-                                         numberOfLines: Int,
-                                         layoutWidth: CGFloat) -> CGSize
-  {
-    guard attributedString.length > 0 else {
-      return .zero
-    }
-
-    let label = TextSizeProvider.helperLabel
-    label.attributedText = attributedString
-
-    #if canImport(AppKit)
-    if numberOfLines == 1 {
-      label.setToSingleLineMode()
-    } else {
-      label.setToMultilineMode(numberOfLines: numberOfLines)
-    }
-    #endif
-    #if canImport(UIKit)
-    label.numberOfLines = numberOfLines
-    #endif
-
-    let boundingRectSize = label.sizeThatFits(CGSize(layoutWidth, .greatestFiniteMagnitude))
-    return boundingRectSize
-  }
+  // /// Returns text bounding rect size.
+  // ///
+  // /// Uses `Label` under the hood.
+  // /// - one line text returns the intrinsic size.
+  // /// - multiline text returns size constrained by `numberOfLines` and `multilineLayoutWidth`.
+  // ///
+  // /// The line break mode in attributed string doesn't affect the bounding rect size.
+  // ///
+  // /// - Parameters:
+  // ///   - attributedString: The attributed string.
+  // ///   - numberOfLines: The max number of lines.
+  // ///   - layoutWidth: The proposing layout width. If `numberOfLines != 1`, this value has no effects.
+  // /// - Returns: The bounding rect size, is integral size.
+  // private func boundingRectSizeWithLabel(for attributedString: NSAttributedString,
+  //                                        numberOfLines: Int,
+  //                                        layoutWidth: CGFloat) -> CGSize
+  // {
+  //   guard attributedString.length > 0 else {
+  //     return .zero
+  //   }
+  //
+  //   let label = TextSizeProvider.helperLabel
+  //   label.attributedText = attributedString
+  //
+  //   #if canImport(AppKit)
+  //   if numberOfLines == 1 {
+  //     label.setToSingleLineMode()
+  //   } else {
+  //     label.setToMultilineMode(numberOfLines: numberOfLines)
+  //   }
+  //   #endif
+  //   #if canImport(UIKit)
+  //   label.numberOfLines = numberOfLines
+  //   #endif
+  //
+  //   let boundingRectSize = label.sizeThatFits(CGSize(layoutWidth, .greatestFiniteMagnitude))
+  //   return boundingRectSize
+  // }
 
   private func boundingRectSizeWithAttributedString(for attributedString: NSAttributedString,
                                                     numberOfLines: Int,

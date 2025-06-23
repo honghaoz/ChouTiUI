@@ -1,8 +1,7 @@
 //
-//  LineWrapMode.swift
+//  TextVerticalAlignment.swift
 //  ChouTiUI
 //
-//  Created by Honghao Zhang on 12/24/23.
 //  Copyright © 2020 Honghao Zhang.
 //
 //  MIT License
@@ -28,30 +27,17 @@
 //  IN THE SOFTWARE.
 //
 
-#if canImport(AppKit)
-import AppKit
-#endif
+import Foundation
 
-#if canImport(UIKit)
-import UIKit
-#endif
+/// The vertical alignment of text.
+public enum TextVerticalAlignment: Hashable {
 
-/// Line wrap mode.
-public enum LineWrapMode: Hashable {
+  /// The text is aligned to the top.
+  case top
 
-  /// Wrap the text by word.
-  case byWord
+  /// The text is aligned to the center.
+  case center
 
-  /// Wrap the text by character.
-  case byChar
-
-  /// The line break mode in AppKit/UIKit.
-  public var lineBreakMode: NSLineBreakMode {
-    switch self {
-    case .byWord:
-      return .byWordWrapping
-    case .byChar:
-      return .byCharWrapping
-    }
-  }
+  /// The text is aligned to the bottom.
+  case bottom
 }
