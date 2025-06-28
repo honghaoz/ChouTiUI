@@ -387,7 +387,7 @@ private extension NSAttributedString {
   /// In this case, each line can have two `CTRun`s.
   /// While with `byWord` or `byChar` line break mode, CoreText can return correct lines with each line have one `CTRun`.
   func updateLineWrap(_ lineWrap: LineWrapMode) -> NSAttributedString {
-    let attributedString = self.mutable(copy: false)
+    let attributedString = self.mutable(alwaysCopy: false)
     let lineBreakModeToSet = lineWrap.lineBreakMode
     attributedString.enumerateAttribute(.paragraphStyle, in: attributedString.fullRange, options: []) { value, range, stop in
       if let paragraphStyle = value as? NSParagraphStyle {
