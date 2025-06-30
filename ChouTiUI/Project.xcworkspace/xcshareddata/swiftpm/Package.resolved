@@ -5,8 +5,17 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/honghaoz/ChouTi",
       "state" : {
-        "branch" : "develop",
-        "revision" : "4a604dc26be46527ba016b9bcbc899df2e21fdf5"
+        "branch" : "master",
+        "revision" : "e77d431d5f2f0160601a3fc04d4ef3083561bc1b"
+      }
+    },
+    {
+      "identity" : "composeui",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/honghaoz/ComposeUI",
+      "state" : {
+        "branch" : "master",
+        "revision" : "15e65c3476b22303f5cad51ad92b428390832d92"
       }
     }
   ],

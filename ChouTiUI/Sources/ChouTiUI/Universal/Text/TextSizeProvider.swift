@@ -41,6 +41,8 @@ import CoreText
 
 import ChouTi
 
+// TODO: To use https://github.com/honghaoz/ComposeUI/blob/15e65c3476b22303f5cad51ad92b428390832d92/ComposeUI/Sources/ComposeUI/Extensions/NSAttributedString%2BSizing.swift="{{{{{
+
 /// A utility class for calculating text sizes.
 public final class TextSizeProvider {
 
