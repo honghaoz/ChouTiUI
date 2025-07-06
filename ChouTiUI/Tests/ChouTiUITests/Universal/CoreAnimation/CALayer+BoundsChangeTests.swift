@@ -55,35 +55,42 @@ class CALayer_BoundsChangeTests: XCTestCase {
 
     // add callback 1
     var callCount1 = 0
-    var calledBounds1: CGRect?
+    var calledOldBounds1: CGRect?
+    var calledNewBounds1: CGRect?
     weak var token1: CancellableToken?
-    token1 = layer.onBoundsChange(block: { layer in
+    token1 = layer.onBoundsChange(block: { layer, old, new in
       callCount1 += 1
-      calledBounds1 = layer.bounds
+      calledOldBounds1 = old
+      calledNewBounds1 = new
     })
 
     expect(layer.test.boundsKVOObservation) != nil
 
     layer.bounds = CGRect(x: 0, y: 0, width: 150, height: 280)
     expect(callCount1) == 1
-    expect(calledBounds1) == CGRect(x: 0, y: 0, width: 150, height: 280)
+    expect(calledOldBounds1) == CGRect(x: 0, y: 0, width: 50, height: 80)
+    expect(calledNewBounds1) == CGRect(x: 0, y: 0, width: 150, height: 280)
 
     // add callback 2
     var callCount2 = 0
-    var calledBounds2: CGRect?
+    var calledOldBounds2: CGRect?
+    var calledNewBounds2: CGRect?
     weak var token2: CancellableToken?
-    token2 = layer.onBoundsChange(block: { layer in
+    token2 = layer.onBoundsChange(block: { layer, old, new in
       callCount2 += 1
-      calledBounds2 = layer.bounds
+      calledOldBounds2 = old
+      calledNewBounds2 = new
     })
 
     expect(layer.test.boundsKVOObservation) != nil
 
     layer.bounds = CGRect(x: 0, y: 0, width: 250, height: 380)
     expect(callCount1) == 2
-    expect(calledBounds1) == CGRect(x: 0, y: 0, width: 250, height: 380)
+    expect(calledOldBounds1) == CGRect(x: 0, y: 0, width: 150, height: 280)
+    expect(calledNewBounds1) == CGRect(x: 0, y: 0, width: 250, height: 380)
     expect(callCount2) == 1
-    expect(calledBounds2) == CGRect(x: 0, y: 0, width: 250, height: 380)
+    expect(calledOldBounds2) == CGRect(x: 0, y: 0, width: 150, height: 280)
+    expect(calledNewBounds2) == CGRect(x: 0, y: 0, width: 250, height: 380)
 
     // cancel callback 1
     token1?.cancel()
@@ -91,9 +98,11 @@ class CALayer_BoundsChangeTests: XCTestCase {
 
     layer.bounds = CGRect(x: 0, y: 0, width: 350, height: 480)
     expect(callCount1) == 2
-    expect(calledBounds1) == CGRect(x: 0, y: 0, width: 250, height: 380)
+    expect(calledOldBounds1) == CGRect(x: 0, y: 0, width: 150, height: 280)
+    expect(calledNewBounds1) == CGRect(x: 0, y: 0, width: 250, height: 380)
     expect(callCount2) == 2
-    expect(calledBounds2) == CGRect(x: 0, y: 0, width: 350, height: 480)
+    expect(calledOldBounds2) == CGRect(x: 0, y: 0, width: 250, height: 380)
+    expect(calledNewBounds2) == CGRect(x: 0, y: 0, width: 350, height: 480)
 
     // cancel callback 2
     token2?.cancel()
@@ -101,15 +110,17 @@ class CALayer_BoundsChangeTests: XCTestCase {
 
     layer.bounds = CGRect(x: 0, y: 0, width: 450, height: 580)
     expect(callCount1) == 2
-    expect(calledBounds1) == CGRect(x: 0, y: 0, width: 250, height: 380)
+    expect(calledOldBounds1) == CGRect(x: 0, y: 0, width: 150, height: 280)
+    expect(calledNewBounds1) == CGRect(x: 0, y: 0, width: 250, height: 380)
     expect(callCount2) == 2
-    expect(calledBounds2) == CGRect(x: 0, y: 0, width: 350, height: 480)
+    expect(calledOldBounds2) == CGRect(x: 0, y: 0, width: 250, height: 380)
+    expect(calledNewBounds2) == CGRect(x: 0, y: 0, width: 350, height: 480)
   }
 
   func test_releaseSelf() {
     var layer: CALayer? = CALayer()
     weak var weakLayer: CALayer? = layer
-    layer?.onBoundsChange(block: { _ in })
+    layer?.onBoundsChange(block: { _, _, _ in })
 
     layer = nil
     expect(weakLayer) == nil
@@ -125,7 +136,7 @@ class CALayer_BoundsChangeTests: XCTestCase {
         expect(metadata["queue"]) == "background"
         expect(metadata["thread"]) == Thread.current.description
       }
-      self.layer.onBoundsChange(block: { _ in })
+      self.layer.onBoundsChange(block: { _, _, _ in })
       Assert.resetTestAssertionFailureHandler()
 
       expectation.fulfill()

@@ -153,7 +153,7 @@ public extension CALayer {
     if background?.gradientColor != nil {
       // if there's a gradient background, listen to bounds change to keep gradient layer's frame updated
       if boundsToken == nil {
-        boundsToken = onBoundsChange { [weak self] _ in
+        boundsToken = onBoundsChange { [weak self] _, _, _ in
           self?.boundsChanged()
         }
       }

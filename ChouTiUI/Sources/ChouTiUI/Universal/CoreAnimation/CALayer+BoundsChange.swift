@@ -43,9 +43,9 @@ private enum AssociateKey {
 
 public extension CALayer {
 
-  private var boundsChangeBlocks: OrderedDictionary<ObjectIdentifier, ValueCancellableToken<(CALayer) -> Void>> {
+  private var boundsChangeBlocks: OrderedDictionary<ObjectIdentifier, ValueCancellableToken<(CALayer, CGRect, CGRect) -> Void>> {
     get {
-      getAssociatedObject(for: &AssociateKey.boundsChangeBlocks) as? OrderedDictionary<ObjectIdentifier, ValueCancellableToken<(CALayer) -> Void>> ?? OrderedDictionary<ObjectIdentifier, ValueCancellableToken<(CALayer) -> Void>>()
+      getAssociatedObject(for: &AssociateKey.boundsChangeBlocks) as? OrderedDictionary<ObjectIdentifier, ValueCancellableToken<(CALayer, CGRect, CGRect) -> Void>> ?? OrderedDictionary<ObjectIdentifier, ValueCancellableToken<(CALayer, CGRect, CGRect) -> Void>>()
     }
     set {
       setAssociatedObject(newValue, for: &AssociateKey.boundsChangeBlocks)
@@ -63,10 +63,10 @@ public extension CALayer {
   /// This method should be called on the main thread.
   ///
   /// - Parameters:
-  ///   - block: The block to be called when the bounds change.
+  ///   - block: The block to be called when the bounds change. It will be called with the layer, the old bounds, and the new bounds.
   /// - Returns: A cancellable token that can be used to remove the block.
   @discardableResult
-  func onBoundsChange(block: @escaping (CALayer) -> Void) -> CancellableToken {
+  func onBoundsChange(block: @escaping (_ layer: CALayer, _ old: CGRect, _ new: CGRect) -> Void) -> CancellableToken {
     assertOnMainThread()
 
     let token = ValueCancellableToken(value: block) { [weak self] token in
@@ -92,12 +92,16 @@ public extension CALayer {
       return
     }
 
-    boundsKVOObservation = observe(\.bounds) { [weak self] layer, _ in
+    boundsKVOObservation = observe(\.bounds, options: [.old, .new]) { [weak self] layer, change in
       guard let self else {
         return
       }
       for token in self.boundsChangeBlocks.values {
-        token.value(self)
+        token.value(
+          self,
+          change.oldValue.assert("unexpected nil old value") ?? layer.bounds,
+          change.newValue.assert("unexpected nil new value") ?? layer.bounds
+        )
       }
     }
   }
