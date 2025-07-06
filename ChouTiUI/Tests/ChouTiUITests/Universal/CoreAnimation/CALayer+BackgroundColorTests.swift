@@ -33,7 +33,7 @@ import QuartzCore
 import ChouTiTest
 
 import ChouTi
-@testable import ChouTiUI
+@_spi(Private) import ChouTiUI
 
 class CALayer_BackgroundColorTests: XCTestCase {
 

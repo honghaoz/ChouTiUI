@@ -56,7 +56,8 @@ public extension CALayer {
   }
 
   /// An optional gradient layer used as the background layer.
-  internal private(set) var backgroundGradientLayer: BaseCAGradientLayer? {
+  @_spi(Private)
+  private(set) var backgroundGradientLayer: BaseCAGradientLayer? {
     get {
       getAssociatedObject(for: &AssociateKey.backgroundGradientLayer) as? BaseCAGradientLayer
     }
