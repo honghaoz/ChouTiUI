@@ -28,8 +28,10 @@
 //  IN THE SOFTWARE.
 //
 
-import ChouTi
 import QuartzCore
+
+import ChouTi
+@_spi(Private) import ComposeUI
 
 /**
  Extends `CALayer` to support unified background color.
@@ -153,8 +155,8 @@ public extension CALayer {
     if background?.gradientColor != nil {
       // if there's a gradient background, listen to bounds change to keep gradient layer's frame updated
       if boundsToken == nil {
-        boundsToken = onBoundsChange { [weak self] _, _, _ in
-          self?.boundsChanged()
+        boundsToken = onBoundsChange { [weak self] _, oldBounds, newBounds in
+          self?.boundsChanged(oldBounds, newBounds)
         }
       }
     } else {
@@ -163,13 +165,59 @@ public extension CALayer {
     }
   }
 
-  private func boundsChanged() {
+  private func boundsChanged(_ oldBounds: CGRect, _ newBounds: CGRect) {
     guard let backgroundGradientLayer, backgroundGradientLayer.superlayer === self else {
       ChouTi.assertFailure("bounds change call must have gradient background layer")
       return
     }
 
+    // update model value
     backgroundGradientLayer.frame = bounds
+
+    // add size synchronization animation to the gradient layer
+    RunLoop.main.perform { // schedule to the next run loop to make sure the animation added after the bounds change can be found
+      if let sizeAnimation = self.sizeAnimation() {
+
+        if let positionAnimationCopy = sizeAnimation.copy() as? CABasicAnimation,
+           let sizeAnimationCopy = sizeAnimation.copy() as? CABasicAnimation
+        {
+
+          positionAnimationCopy.keyPath = "position"
+          let positionAnimationKey: String
+          if positionAnimationCopy.isAdditive {
+            let oldPosition = backgroundGradientLayer.position(from: oldBounds)
+            let newPosition = backgroundGradientLayer.position(from: newBounds)
+            positionAnimationCopy.fromValue = CGPoint(x: oldPosition.x - newPosition.x, y: oldPosition.y - newPosition.y)
+            positionAnimationCopy.toValue = CGPoint.zero
+            positionAnimationKey = backgroundGradientLayer.uniqueAnimationKey(key: "position")
+          } else {
+            positionAnimationCopy.fromValue = (self.presentation()?.bounds ?? oldBounds).center
+            positionAnimationCopy.toValue = newBounds.center
+            positionAnimationKey = "position"
+          }
+
+          sizeAnimationCopy.keyPath = "bounds.size"
+          let sizeAnimationKey: String
+          if sizeAnimationCopy.isAdditive {
+            sizeAnimationCopy.fromValue = CGSize(width: oldBounds.size.width - newBounds.size.width, height: oldBounds.size.height - newBounds.size.height)
+            sizeAnimationCopy.toValue = CGSize.zero
+            sizeAnimationKey = backgroundGradientLayer.uniqueAnimationKey(key: "bounds.size")
+          } else {
+            sizeAnimationCopy.fromValue = (self.presentation()?.bounds ?? oldBounds).size
+            sizeAnimationCopy.toValue = newBounds.size
+            sizeAnimationKey = "bounds.size"
+          }
+
+          backgroundGradientLayer.add(positionAnimationCopy, forKey: positionAnimationKey)
+          backgroundGradientLayer.add(sizeAnimationCopy, forKey: sizeAnimationKey)
+
+        } else {
+          ChouTi.assertFailure("failed to copy size animation", metadata: [
+            "sizeAnimation": "\(sizeAnimation)",
+          ])
+        }
+      }
+    }
   }
 }
 

@@ -34,6 +34,7 @@ import ChouTiTest
 
 import ChouTi
 @_spi(Private) import ChouTiUI
+@_spi(Private) import ComposeUI
 
 class CALayer_BackgroundColorTests: XCTestCase {
 
@@ -185,5 +186,115 @@ class CALayer_BackgroundColorTests: XCTestCase {
     layer.setBackgroundColor(.red)
     layer.removeBackgroundColor()
     expect(layer.backgroundColor) == nil
+  }
+
+  func test_boundsChange_nonAdditiveAnimation_beforeBoundsChange() throws {
+    let layer = CALayer()
+    layer.bounds = CGRect(x: 0, y: 0, width: 100, height: 100)
+    layer.setBackgroundColor(LinearGradientColor(colors: [.red, .blue]))
+    let backgroundGradientLayer = try layer.backgroundGradientLayer.unwrap()
+
+    // non additive animation, animation added before the bounds change
+    layer.add(
+      {
+        let animation = CABasicAnimation(keyPath: "bounds.size")
+        animation.fromValue = CGSize(width: 100, height: 100)
+        animation.toValue = CGSize(width: 200, height: 200)
+        return animation
+      }(),
+      forKey: "bounds.size"
+    )
+    layer.bounds.size = CGSize(width: 200, height: 200)
+
+    let waitExpectation = expectation(description: "wait")
+
+    RunLoop.main.perform {
+      expect(backgroundGradientLayer.animationKeys()) == ["position", "bounds.size"]
+      waitExpectation.fulfill()
+    }
+
+    wait(for: [waitExpectation])
+  }
+
+  func test_boundsChange_nonAdditiveAnimation_afterBoundsChange() throws {
+    let layer = CALayer()
+    layer.bounds = CGRect(x: 0, y: 0, width: 100, height: 100)
+    layer.setBackgroundColor(LinearGradientColor(colors: [.red, .blue]))
+    let backgroundGradientLayer = try layer.backgroundGradientLayer.unwrap()
+
+    // non additive animation, animation added after the bounds change
+    layer.bounds.size = CGSize(width: 200, height: 200)
+    layer.add(
+      {
+        let animation = CABasicAnimation(keyPath: "bounds.size")
+        animation.fromValue = CGSize(width: 100, height: 100)
+        animation.toValue = CGSize(width: 200, height: 200)
+        return animation
+      }(),
+      forKey: "bounds.size"
+    )
+
+    let waitExpectation = expectation(description: "wait")
+
+    RunLoop.main.perform {
+      expect(backgroundGradientLayer.animationKeys()) == ["position", "bounds.size"]
+      waitExpectation.fulfill()
+    }
+
+    wait(for: [waitExpectation])
+  }
+
+  func test_boundsChange_additiveAnimation() throws {
+    let layer = CALayer()
+    layer.bounds = CGRect(x: 0, y: 0, width: 100, height: 100)
+    layer.setBackgroundColor(LinearGradientColor(colors: [.red, .blue]))
+    let backgroundGradientLayer = try layer.backgroundGradientLayer.unwrap()
+
+    // additive animation, animation added before the bounds change
+    layer.animateFrame(to: CGRect(x: 0, y: 0, width: 150, height: 200), timing: .spring())
+
+    let waitExpectation = expectation(description: "wait")
+
+    RunLoop.main.perform {
+      expect(backgroundGradientLayer.animationKeys()) == ["position", "bounds.size"]
+      waitExpectation.fulfill()
+    }
+
+    wait(for: [waitExpectation])
+  }
+
+  func test_boundsChange_implicitAnimation() throws {
+    let layer = CALayer()
+    layer.bounds = CGRect(x: 0, y: 0, width: 100, height: 100)
+    layer.setBackgroundColor(LinearGradientColor(colors: [.red, .blue]))
+    let backgroundGradientLayer = try layer.backgroundGradientLayer.unwrap()
+
+    #if canImport(AppKit)
+    let window = NSWindow(
+      contentRect: CGRect(x: 0, y: 0, width: 500, height: 500),
+      styleMask: [.titled, .closable, .miniaturizable, .resizable],
+      backing: .buffered,
+      defer: false
+    )
+    window.contentView?.wantsLayer = true
+    window.contentView?.layer?.addSublayer(layer)
+    #else
+    let window = UIWindow()
+    window.layer.addSublayer(layer)
+    #endif
+
+    // wait for the layer to have a presentation layer
+    wait(timeout: 0.05)
+
+    layer.bounds = CGRect(x: 0, y: 0, width: 200, height: 300)
+
+    let waitExpectation = expectation(description: "wait")
+
+    RunLoop.main.perform {
+      expect(backgroundGradientLayer.animationKeys()) == ["position", "bounds.size"]
+      waitExpectation.fulfill()
+    }
+
+    wait(for: [waitExpectation])
   }
 }
