@@ -31,7 +31,8 @@
 import AppKit
 
 import ChouTi
-import ChouTiUI
+@_spi(Private) import ChouTiUI
+@_spi(Private) import ComposeUI
 
 class ViewController: NSViewController {
 
@@ -44,17 +45,13 @@ class ViewController: NSViewController {
 
     self.view.wantsLayer = true
 
-    let gradientLayer = BaseCAGradientLayer()
-    view.unsafeLayer.addSublayer(gradientLayer)
-
-    gradientLayer.setBackgroundGradientColor(
+    self.view.layer?.background = .linearGradient(
       LinearGradientColor([.red, .blue], nil, UnitPoint(0.7, 0), UnitPoint(0.3, 1))
     )
 
-    view.layer?.onBoundsChange { [weak self, weak gradientLayer] layer in
+    self.view.layer?.onBoundsChange { [weak self] layer, _, _ in
       print("layer bounds changed: \(layer.bounds)")
       self?.updateTextField()
-      gradientLayer?.frame = layer.bounds
     }
 
     appearanceObserver = view.observe("effectiveAppearance") { [weak self] (object, old: NSAppearance, new: NSAppearance) in
@@ -76,6 +73,8 @@ class ViewController: NSViewController {
       textField.centerXAnchor.constraint(equalTo: self.view.centerXAnchor),
       textField.centerYAnchor.constraint(equalTo: self.view.centerYAnchor),
     ])
+
+    addLayerWithBackground()
   }
 
   deinit {
@@ -85,6 +84,57 @@ class ViewController: NSViewController {
   private func updateTextField() {
     textField.stringValue = "Bounds: \(view.layer?.bounds ?? .zero)\n"
       + "Appearance: \(view.effectiveAppearance.isDarkMode ? "Dark" : "Light")\n"
+  }
+
+  private func addLayerWithBackground() {
+    let layer = CALayer()
+    layer.borderColor = NSColor.black.cgColor
+    layer.borderWidth = 1
+    layer.background = .linearGradient(
+      LinearGradientColor([.red, .yellow], nil, UnitPoint(0.7, 0), UnitPoint(0.3, 1))
+    )
+    layer.frame = CGRect(x: 25, y: 50, width: 50, height: 100)
+    view.layer?.addSublayer(layer)
+
+    onMainAsync(delay: 1) {
+      layer.animateFrame(to: CGRect(x: 100, y: 20, width: 100, height: 150), timing: .spring(response: 2))
+    }
+
+    onMainAsync(delay: 1.5) {
+      layer.animateFrame(to: CGRect(x: 25, y: 100, width: 50, height: 100), timing: .spring(response: 2))
+    }
+
+    onMainAsync(delay: 5) {
+      let targetFrame = CGRect(x: 50, y: 20, width: 100, height: 50)
+      layer.animate(
+        keyPath: "position",
+        timing: .spring(response: 2),
+        from: { layer in layer.position },
+        to: { layer in layer.position(from: targetFrame) }
+      )
+      layer.animate(
+        keyPath: "bounds.size",
+        timing: .spring(response: 2),
+        from: { layer in layer.bounds.size },
+        to: { _ in targetFrame.size }
+      )
+    }
+
+    onMainAsync(delay: 5.5) {
+      let targetFrame = CGRect(x: 100, y: 60, width: 50, height: 100)
+      layer.animate(
+        keyPath: "position",
+        timing: .spring(response: 2),
+        from: { layer in layer.presentation()!.position }, // swiftlint:disable:this force_unwrapping
+        to: { layer in layer.position(from: targetFrame) }
+      )
+      layer.animate(
+        keyPath: "bounds.size",
+        timing: .spring(response: 2),
+        from: { layer in layer.presentation()!.bounds.size }, // swiftlint:disable:this force_unwrapping
+        to: { _ in targetFrame.size }
+      )
+    }
   }
 }
 
