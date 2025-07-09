@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		02F741F22E1CD6BA00065D8D /* LayerBackgroundWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02F741F12E1CD6BA00065D8D /* LayerBackgroundWindow.swift */; };
+		02F741F42E1D8B0600065D8D /* NSButton+Action.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02F741F32E1D8B0600065D8D /* NSButton+Action.swift */; };
 		E59D808F2CA8DFD3006A6467 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E59D808E2CA8DFD3006A6467 /* AppDelegate.swift */; };
 		E59D80912CA8DFD3006A6467 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E59D80902CA8DFD3006A6467 /* ViewController.swift */; };
 		E59D80932CA8DFD4006A6467 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E59D80922CA8DFD4006A6467 /* Assets.xcassets */; };
@@ -16,6 +18,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		02F741F12E1CD6BA00065D8D /* LayerBackgroundWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayerBackgroundWindow.swift; sourceTree = "<group>"; };
+		02F741F32E1D8B0600065D8D /* NSButton+Action.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSButton+Action.swift"; sourceTree = "<group>"; };
 		E59D808B2CA8DFD3006A6467 /* ChouTiUIPlayground-macOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "ChouTiUIPlayground-macOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E59D808E2CA8DFD3006A6467 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		E59D80902CA8DFD3006A6467 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -37,6 +41,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		02F741F52E1E237F00065D8D /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				02F741F32E1D8B0600065D8D /* NSButton+Action.swift */,
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
 		E59D80822CA8DFD3006A6467 = {
 			isa = PBXGroup;
 			children = (
@@ -59,6 +71,8 @@
 			children = (
 				E59D808E2CA8DFD3006A6467 /* AppDelegate.swift */,
 				E59D80902CA8DFD3006A6467 /* ViewController.swift */,
+				02F741F12E1CD6BA00065D8D /* LayerBackgroundWindow.swift */,
+				02F741F52E1E237F00065D8D /* Extensions */,
 				E59D80922CA8DFD4006A6467 /* Assets.xcassets */,
 				E59D80942CA8DFD4006A6467 /* Main.storyboard */,
 				E59D80972CA8DFD4006A6467 /* ChouTiUIPlayground_macOS.entitlements */,
@@ -152,6 +166,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				E59D80912CA8DFD3006A6467 /* ViewController.swift in Sources */,
+				02F741F22E1CD6BA00065D8D /* LayerBackgroundWindow.swift in Sources */,
+				02F741F42E1D8B0600065D8D /* NSButton+Action.swift in Sources */,
 				E59D808F2CA8DFD3006A6467 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

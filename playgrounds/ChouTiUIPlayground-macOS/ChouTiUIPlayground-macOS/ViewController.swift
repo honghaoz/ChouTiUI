@@ -45,8 +45,11 @@ class ViewController: NSViewController {
 
     self.view.wantsLayer = true
 
-    self.view.layer?.background = .linearGradient(
-      LinearGradientColor([.red, .blue], nil, UnitPoint(0.7, 0), UnitPoint(0.3, 1))
+    self.view.setBackgroundColor(
+      ThemedUnifiedColor(
+        light: LinearGradientColor([.red, .yellow], nil, UnitPoint(0.7, 0), UnitPoint(0.3, 1)),
+        dark: LinearGradientColor([.red, .blue], nil, UnitPoint(0.3, 1), UnitPoint(0.7, 0))
+      )
     )
 
     self.view.layer?.onBoundsChange { [weak self] layer, _, _ in
@@ -74,7 +77,40 @@ class ViewController: NSViewController {
       textField.centerYAnchor.constraint(equalTo: self.view.centerYAnchor),
     ])
 
-    addLayerWithBackground()
+    // bottom toolbar
+    let toolbarView = ComposeView {
+      ZStack {
+        ColorNode(Themed(light: .white, dark: .controlBackgroundColor))
+          .dropShadow(color: .black, opacity: 0.3, radius: 1, offset: CGSize(width: 0, height: -1), path: { renderable in
+            return CGPath(rect: renderable.frame.insetBy(dx: -4, dy: 0), transform: nil)
+          })
+
+        ViewNode(make: { _ in
+          let button = NSButton(title: "Layer Background", target: nil, action: nil)
+          let windowBox = WeakBox<LayerBackgroundWindow>(nil)
+          button.addAction {
+            windowBox.object?.close()
+
+            let newWindow = LayerBackgroundWindow()
+            newWindow.show()
+            windowBox.object = newWindow
+          }
+          button.wantsLayer = true
+          button.sizeToFit()
+          return button
+        })
+        .fixedSize()
+      }
+    }
+
+    toolbarView.translatesAutoresizingMaskIntoConstraints = false
+    self.view.addSubview(toolbarView)
+    NSLayoutConstraint.activate([
+      toolbarView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
+      toolbarView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
+      toolbarView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor),
+      toolbarView.heightAnchor.constraint(equalToConstant: 38),
+    ])
   }
 
   deinit {
@@ -84,57 +120,6 @@ class ViewController: NSViewController {
   private func updateTextField() {
     textField.stringValue = "Bounds: \(view.layer?.bounds ?? .zero)\n"
       + "Appearance: \(view.effectiveAppearance.isDarkMode ? "Dark" : "Light")\n"
-  }
-
-  private func addLayerWithBackground() {
-    let layer = CALayer()
-    layer.borderColor = NSColor.black.cgColor
-    layer.borderWidth = 1
-    layer.background = .linearGradient(
-      LinearGradientColor([.red, .yellow], nil, UnitPoint(0.7, 0), UnitPoint(0.3, 1))
-    )
-    layer.frame = CGRect(x: 25, y: 50, width: 50, height: 100)
-    view.layer?.addSublayer(layer)
-
-    onMainAsync(delay: 1) {
-      layer.animateFrame(to: CGRect(x: 100, y: 20, width: 100, height: 150), timing: .spring(response: 2))
-    }
-
-    onMainAsync(delay: 1.5) {
-      layer.animateFrame(to: CGRect(x: 25, y: 100, width: 50, height: 100), timing: .spring(response: 2))
-    }
-
-    onMainAsync(delay: 5) {
-      let targetFrame = CGRect(x: 50, y: 20, width: 100, height: 50)
-      layer.animate(
-        keyPath: "position",
-        timing: .spring(response: 2),
-        from: { layer in layer.position },
-        to: { layer in layer.position(from: targetFrame) }
-      )
-      layer.animate(
-        keyPath: "bounds.size",
-        timing: .spring(response: 2),
-        from: { layer in layer.bounds.size },
-        to: { _ in targetFrame.size }
-      )
-    }
-
-    onMainAsync(delay: 5.5) {
-      let targetFrame = CGRect(x: 100, y: 60, width: 50, height: 100)
-      layer.animate(
-        keyPath: "position",
-        timing: .spring(response: 2),
-        from: { layer in layer.presentation()!.position }, // swiftlint:disable:this force_unwrapping
-        to: { layer in layer.position(from: targetFrame) }
-      )
-      layer.animate(
-        keyPath: "bounds.size",
-        timing: .spring(response: 2),
-        from: { layer in layer.presentation()!.bounds.size }, // swiftlint:disable:this force_unwrapping
-        to: { _ in targetFrame.size }
-      )
-    }
   }
 }
 
