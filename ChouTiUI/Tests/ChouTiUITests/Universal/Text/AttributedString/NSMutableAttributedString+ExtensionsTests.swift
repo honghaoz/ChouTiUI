@@ -2,7 +2,7 @@
 //  NSMutableAttributedString+ExtensionsTests.swift
 //  ChouTiUI
 //
-//  Created by Honghao on 6/29/25.
+//  Created by Honghao Zhang on 6/29/25.
 //  Copyright © 2020 Honghao Zhang.
 //
 //  MIT License
