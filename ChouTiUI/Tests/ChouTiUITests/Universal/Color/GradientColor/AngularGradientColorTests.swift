@@ -50,7 +50,7 @@ class AngularGradientColorTests: XCTestCase {
   func test_clear() {
     let gradient = AngularGradientColor.clearGradientColor
     expect(gradient.colors) == [Color.clear, Color.clear]
-    expect(gradient.locations) == nil
+    expect(gradient.locations) == [0, 1]
     expect(gradient.startPoint) == UnitPoint.center
     expect(gradient.endPoint) == UnitPoint.top
   }
@@ -71,7 +71,7 @@ class AngularGradientColorTests: XCTestCase {
         endPoint: .bottom
       )
       expect(gradient.colors) == [Color.red, Color.blue]
-      expect(gradient.locations) == nil
+      expect(gradient.locations) == [0, 1]
       expect(gradient.startPoint) == UnitPoint.top
       expect(gradient.endPoint) == UnitPoint.bottom
     }
@@ -98,7 +98,7 @@ class AngularGradientColorTests: XCTestCase {
         aimingPoint: .bottom
       )
       expect(gradient.colors) == [Color.red, Color.blue]
-      expect(gradient.locations) == nil
+      expect(gradient.locations) == [0, 1]
       expect(gradient.startPoint) == UnitPoint.center
       expect(gradient.endPoint) == UnitPoint.bottom
       expect(gradient.centerPoint) == UnitPoint.center
@@ -119,12 +119,23 @@ class AngularGradientColorTests: XCTestCase {
 
     // one color
     do {
-      let colors = [Color.red]
+      let color = Color.red
+      var assertCount: Int = 0
       Assert.setTestAssertionFailureHandler { message, metadata, file, line, column in
-        expect(message) == "gradient color should have at least 2 colors."
-        expect(metadata["colors"]) == "\(colors)"
+        switch assertCount {
+        case 0:
+          expect(message) == "gradient color should have at least 2 colors."
+          expect(metadata["colors"]) == "[\(color)]"
+        case 1:
+          expect(message) == "locations should have the same count as colors."
+          expect(metadata["colors"]) == "[\(color)]"
+          expect(metadata["locations"]) == "[]"
+        default:
+          fail("unexpected assertion")
+        }
+        assertCount += 1
       }
-      _ = AngularGradientColor(colors: colors, startPoint: .left, endPoint: .right)
+      _ = AngularGradientColor(colors: [color], startPoint: .left, endPoint: .right)
       Assert.resetTestAssertionFailureHandler()
     }
 
@@ -133,7 +144,7 @@ class AngularGradientColorTests: XCTestCase {
       let colors = [Color.red, Color.blue]
       let locations: [CGFloat] = [0, 0.2, 1]
       Assert.setTestAssertionFailureHandler { message, metadata, file, line, column in
-        expect(message) == "locations should have the same count as colors"
+        expect(message) == "locations should have the same count as colors."
         expect(metadata["colors"]) == "\(colors)"
         expect(metadata["locations"]) == "\(locations)"
       }

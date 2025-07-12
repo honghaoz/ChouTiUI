@@ -50,7 +50,7 @@ public struct RadialGradientColor: GradientColorType, Equatable, Hashable {
   public var centerPoint: UnitPoint { startPoint }
 
   public let colors: [Color]
-  public let locations: [CGFloat]?
+  public let locations: [CGFloat]
   public let startPoint: UnitPoint
   public let endPoint: UnitPoint
 
@@ -62,17 +62,17 @@ public struct RadialGradientColor: GradientColorType, Equatable, Hashable {
   ///
   /// - Parameters:
   ///   - colors: The colors from the center to the end. The count should be at least 2.
-  ///   - locations: The color locations from the center to the end. The count should be the same as `colors`.
+  ///   - locations: The color locations from the center to the end. The count should be the same as `colors`. Defaults to `nil`.
   ///   - startPoint: The center point.
   ///   - endPoint: The end position represented in a `UnitPoint`.
   public init(colors: [Color], locations: [CGFloat]? = nil, startPoint: UnitPoint, endPoint: UnitPoint) {
     ChouTi.assert(colors.count >= 2, "gradient color should have at least 2 colors.", metadata: [
       "colors": "\(colors)",
     ])
-    // swiftlint:disable:next force_unwrapping
-    ChouTi.assert(locations == nil || locations!.count == colors.count, "locations should have the same count as colors", metadata: [
+    let locations: [CGFloat] = locations ?? GradientColor.locations(count: colors.count)
+    ChouTi.assert(locations.count == colors.count, "locations should have the same count as colors.", metadata: [
       "colors": "\(colors)",
-      "locations": "\(locations!)", // swiftlint:disable:this force_unwrapping
+      "locations": "\(locations)",
     ])
     self.colors = colors
     self.locations = locations
@@ -94,7 +94,7 @@ public struct RadialGradientColor: GradientColorType, Equatable, Hashable {
   ///
   /// - Parameters:
   ///   - colors: The colors from the center to the end. The count should be at least 2.
-  ///   - locations: The color locations from the center to the end. The count should be the same as `colors`.
+  ///   - locations: The color locations from the center to the end. The count should be the same as `colors`. Defaults to `nil`.
   ///   - centerPoint: The center point.
   ///   - endPoint: The end position represented in a `UnitPoint`. The endPoint.x is the x-axis of the end point. The endPoint.y is the y-axis of the end point.
   public init(colors: [Color], locations: [CGFloat]? = nil, centerPoint: UnitPoint, endPoint: UnitPoint) {
@@ -125,7 +125,7 @@ public extension RadialGradientColor {
 
    - Parameters:
      - colors: The colors from center to edge. The count should be at least 2.
-     - locations: The locations from center to edge. The count should be the same as `colors`.
+     - locations: The locations from center to edge. The count should be the same as `colors`. Defaults to `nil`.
      - radius: The radius in the narrow axis. For example, if `aspectRatio` < 1, 0.5 radius means the radial circle ends at the edge of x-axis.
      - aspectRatio: The aspect ratio of the frame.
    - Returns: A center radial gradient color.
@@ -180,7 +180,7 @@ public extension RadialGradientColor {
 
    - Parameters:
      - colors: The colors from center to edge. The count should be at least 2.
-     - locations: The locations from center to edge. The count should be the same as `colors`.
+     - locations: The locations from center to edge. The count should be the same as `colors`. Defaults to `nil`.
      - diameter: The circle diameter.
      - radiusScaleFactor: The radius scale factor. By default this is 1.
      - aspectRatio: The aspect ratio of the frame.

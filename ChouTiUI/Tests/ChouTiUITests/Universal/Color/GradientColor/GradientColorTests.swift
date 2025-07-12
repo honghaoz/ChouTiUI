@@ -33,7 +33,7 @@ import QuartzCore
 
 import ChouTiTest
 
-import ChouTiUI
+@testable import ChouTiUI
 
 class GradientColorTests: XCTestCase {
 
@@ -108,5 +108,14 @@ class GradientColorTests: XCTestCase {
       expect(newGradient.endPoint) == .topLeft
       expect(newGradient.gradientLayerType) == .conic
     }
+  }
+
+  func test_locations() {
+    expect(GradientColor.locations(count: 0)) == []
+    expect(GradientColor.locations(count: 1)) == []
+    expect(GradientColor.locations(count: 2)) == [0, 1]
+    expect(GradientColor.locations(count: 3)) == [0, 0.5, 1]
+    expect(GradientColor.locations(count: 4)) == [0, 0.3333333333333333, 0.6666666666666666, 1]
+    expect(GradientColor.locations(count: 5)) == [0, 0.25, 0.5, 0.75, 1]
   }
 }

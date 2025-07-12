@@ -50,7 +50,7 @@ class LinearGradientColorTests: XCTestCase {
   func test_clear() {
     let gradient = LinearGradientColor.clearGradientColor
     expect(gradient.colors) == [Color.clear, Color.clear]
-    expect(gradient.locations) == nil
+    expect(gradient.locations) == [0, 1]
     expect(gradient.startPoint) == UnitPoint.top
     expect(gradient.endPoint) == UnitPoint.bottom
   }
@@ -67,7 +67,7 @@ class LinearGradientColorTests: XCTestCase {
     do {
       let gradient = LinearGradientColor([Color.red, Color.blue])
       expect(gradient.colors) == [Color.red, Color.blue]
-      expect(gradient.locations) == nil
+      expect(gradient.locations) == [0, 1]
       expect(gradient.startPoint) == UnitPoint.top
       expect(gradient.endPoint) == UnitPoint.bottom
     }
@@ -85,7 +85,7 @@ class LinearGradientColorTests: XCTestCase {
     do {
       let gradient = LinearGradientColor(Color.red, Color.blue, Color.green)
       expect(gradient.colors) == [Color.red, Color.blue, Color.green]
-      expect(gradient.locations) == nil
+      expect(gradient.locations) == [0, 0.5, 1]
       expect(gradient.startPoint) == UnitPoint.top
       expect(gradient.endPoint) == UnitPoint.bottom
     }
@@ -128,9 +128,20 @@ class LinearGradientColorTests: XCTestCase {
     // one color
     do {
       let color = Color.red
+      var assertCount: Int = 0
       Assert.setTestAssertionFailureHandler { message, metadata, file, line, column in
-        expect(message) == "gradient color should have at least 2 colors."
-        expect(metadata["colors"]) == "[\(color)]"
+        switch assertCount {
+        case 0:
+          expect(message) == "gradient color should have at least 2 colors."
+          expect(metadata["colors"]) == "[\(color)]"
+        case 1:
+          expect(message) == "locations should have the same count as colors."
+          expect(metadata["colors"]) == "[\(color)]"
+          expect(metadata["locations"]) == "[]"
+        default:
+          fail("unexpected assertion")
+        }
+        assertCount += 1
       }
       _ = LinearGradientColor([color])
       Assert.resetTestAssertionFailureHandler()
@@ -142,7 +153,7 @@ class LinearGradientColorTests: XCTestCase {
       let locations: [CGFloat] = [0, 1, 2]
 
       Assert.setTestAssertionFailureHandler { message, metadata, file, line, column in
-        expect(message) == "locations should have the same count as colors"
+        expect(message) == "locations should have the same count as colors."
         expect(metadata["colors"]) == "\(colors)"
         expect(metadata["locations"]) == "\(locations)"
       }

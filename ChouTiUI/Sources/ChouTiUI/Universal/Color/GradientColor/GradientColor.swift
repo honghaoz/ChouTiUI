@@ -52,7 +52,7 @@ public enum GradientColor: GradientColorType, Equatable, Hashable {
   }
 
   public var colors: [Color] { gradientColor.colors }
-  public var locations: [CGFloat]? { gradientColor.locations }
+  public var locations: [CGFloat] { gradientColor.locations }
   public var startPoint: UnitPoint { gradientColor.startPoint }
   public var endPoint: UnitPoint { gradientColor.endPoint }
   public var gradientLayerType: CAGradientLayerType { gradientColor.gradientLayerType }
@@ -65,6 +65,26 @@ public enum GradientColor: GradientColorType, Equatable, Hashable {
       return .radialGradient(gradient.withComponents(colors: colors, locations: locations, startPoint: startPoint, endPoint: endPoint))
     case .angularGradient(let gradient):
       return .angularGradient(gradient.withComponents(colors: colors, locations: locations, startPoint: startPoint, endPoint: endPoint))
+    }
+  }
+
+  /// Returns the locations for a gradient with the given number of colors.
+  ///
+  /// - Parameters:
+  ///   - count: The number of colors in the gradient.
+  /// - Returns: The locations for the gradient.
+  static func locations(count: Int) -> [CGFloat] {
+    //  0 -> []
+    //  1 -> []
+    //  2 -> [0, 1]
+    //  3 -> [0, 0.5, 1]
+    //  5 -> [0, 0.25, 0.5, 0.75, 1]
+    guard count >= 2 else {
+      return []
+    }
+
+    return (0 ..< count).map { index in
+      CGFloat(index) / CGFloat(count - 1)
     }
   }
 }

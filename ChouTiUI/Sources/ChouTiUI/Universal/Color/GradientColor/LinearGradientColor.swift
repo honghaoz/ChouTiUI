@@ -48,7 +48,7 @@ public struct LinearGradientColor: GradientColorType, Equatable, Hashable {
   public static let clearGradientColor = LinearGradientColor([.clear, .clear])
 
   public let colors: [Color]
-  public let locations: [CGFloat]?
+  public let locations: [CGFloat]
   public let startPoint: UnitPoint
   public let endPoint: UnitPoint
 
@@ -140,10 +140,10 @@ public struct LinearGradientColor: GradientColorType, Equatable, Hashable {
     ChouTi.assert(colors.count >= 2, "gradient color should have at least 2 colors.", metadata: [
       "colors": "\(colors)",
     ])
-    // swiftlint:disable:next force_unwrapping
-    ChouTi.assert(locations == nil || locations!.count == colors.count, "locations should have the same count as colors", metadata: [
+    let locations: [CGFloat] = locations ?? GradientColor.locations(count: colors.count)
+    ChouTi.assert(locations.count == colors.count, "locations should have the same count as colors.", metadata: [
       "colors": "\(colors)",
-      "locations": "\(locations!)", // swiftlint:disable:this force_unwrapping
+      "locations": "\(locations)",
     ])
     self.colors = colors
     self.locations = locations

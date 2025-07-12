@@ -52,7 +52,7 @@ public protocol GradientColorType {
   var colors: [Color] { get }
 
   /// The locations of the gradient. Required.
-  var locations: [CGFloat]? { get }
+  var locations: [CGFloat] { get }
 
   /// The start point of the gradient. Required.
   var startPoint: UnitPoint { get }
@@ -64,7 +64,7 @@ public protocol GradientColorType {
   var cgColors: [CGColor] { get }
 
   /// The location `NSNumber`s of the gradient. Optional.
-  var locationNSNumbers: [NSNumber]? { get }
+  var locationNSNumbers: [NSNumber] { get }
 
   /// Whether the gradient is opaque. Optional.
   var isOpaque: Bool { get }
@@ -139,8 +139,8 @@ public extension GradientColorType {
     colors.map(\.cgColor)
   }
 
-  var locationNSNumbers: [NSNumber]? {
-    locations?.map { $0 as NSNumber }
+  var locationNSNumbers: [NSNumber] {
+    locations.map { $0 as NSNumber }
   }
 
   var isOpaque: Bool {
