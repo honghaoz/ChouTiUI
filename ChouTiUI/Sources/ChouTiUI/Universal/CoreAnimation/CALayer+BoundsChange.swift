@@ -110,26 +110,17 @@ public extension CALayer {
     boundsKVOObservation?.invalidate()
     boundsKVOObservation = nil
   }
-
-  // MARK: - Testing
-
-  #if DEBUG
-
-  var test: Test { Test(host: self) }
-
-  struct Test {
-
-    private let host: CALayer
-
-    fileprivate init(host: CALayer) {
-      ChouTi.assert(Thread.isRunningXCTest, "test namespace should only be used in test target.")
-      self.host = host
-    }
-
-    var boundsKVOObservation: NSKeyValueObservation? {
-      host.boundsKVOObservation
-    }
-  }
-
-  #endif
 }
+
+// MARK: - Testing
+
+#if DEBUG
+
+extension CALayer.Test {
+
+  var boundsKVOObservation: NSKeyValueObservation? {
+    host.boundsKVOObservation
+  }
+}
+
+#endif
