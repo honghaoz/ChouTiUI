@@ -49,7 +49,6 @@ import ChouTi
 private enum AssociateKey {
   static var background: UInt8 = 0
   static var backgroundGradientLayer: UInt8 = 0
-  static var boundsToken: UInt8 = 0
   static var animationGradientLayer: UInt8 = 0
   static var solidColorAnimation: UInt8 = 0
 }
@@ -79,11 +78,6 @@ public extension CALayer {
     }
   }
 
-  private var boundsToken: CancellableToken? {
-    get { getAssociatedObject(for: &AssociateKey.boundsToken) as? CancellableToken }
-    set { setAssociatedObject(newValue, for: &AssociateKey.boundsToken) }
-  }
-
   private func updateBackground(oldBackground: UnifiedColor?) {
     switch (oldBackground, background) {
     case (nil, nil):
@@ -104,8 +98,7 @@ public extension CALayer {
         // add gradient
         let gradientLayer = BaseCAGradientLayer()
         gradientLayer.setBackgroundGradientColor(gradient.gradientColor)
-        gradientLayer.frame = bounds
-        insertSublayer(gradientLayer, at: 0)
+        addFullSizeSublayer(gradientLayer, at: 0)
         backgroundGradientLayer = gradientLayer
 
       case .color(let color):
@@ -118,7 +111,7 @@ public extension CALayer {
       // remove background color
       backgroundColor = nil
       isOpaque = false
-      backgroundGradientLayer?.removeFromSuperlayer()
+      backgroundGradientLayer.map { self.removeFullSizeSublayer($0) }
       backgroundGradientLayer = nil
 
     case (.some(let oldBackgroundColor), .some(let newBackgroundColor)):
@@ -131,7 +124,6 @@ public extension CALayer {
         // reuse gradient
         ChouTi.assert(backgroundGradientLayer != nil)
         backgroundGradientLayer?.setBackgroundGradientColor(newGradient)
-        backgroundGradientLayer?.frame = bounds
 
       case (nil, .some(let newGradient)):
         // solid -> gradient
@@ -140,8 +132,7 @@ public extension CALayer {
 
         let gradientLayer = BaseCAGradientLayer()
         gradientLayer.setBackgroundGradientColor(newGradient)
-        gradientLayer.frame = bounds
-        insertSublayer(gradientLayer, at: 0)
+        addFullSizeSublayer(gradientLayer, at: 0)
         backgroundGradientLayer = gradientLayer
 
       case (.some, nil):
@@ -151,7 +142,7 @@ public extension CALayer {
 
         // remove gradient
         ChouTi.assert(backgroundGradientLayer != nil)
-        backgroundGradientLayer?.removeFromSuperlayer()
+        backgroundGradientLayer.map { self.removeFullSizeSublayer($0) }
         backgroundGradientLayer = nil
 
       case (nil, nil):
@@ -160,72 +151,6 @@ public extension CALayer {
         isOpaque = newBackgroundColor.solidColor!.isOpaque // swiftlint:disable:this force_unwrapping
 
         ChouTi.assert(backgroundGradientLayer == nil)
-      }
-    }
-
-    // listen to bounds change to keep gradient layer's frame updated
-    if boundsToken == nil {
-      boundsToken = onBoundsChange { [weak self] _, oldBounds, newBounds in
-        self?.boundsChanged(oldBounds, newBounds)
-      }
-    }
-  }
-
-  private func boundsChanged(_ oldBounds: CGRect, _ newBounds: CGRect) {
-    if let backgroundGradientLayer {
-      backgroundGradientLayer.frame = bounds
-      addSizeSynchronizationAnimation(to: backgroundGradientLayer, oldBounds: oldBounds, newBounds: newBounds)
-    }
-
-    if let animationGradientLayer {
-      animationGradientLayer.frame = bounds
-      addSizeSynchronizationAnimation(to: animationGradientLayer, oldBounds: oldBounds, newBounds: newBounds)
-    }
-  }
-
-  /// Add size synchronization animation to the layer so that the layer can always follow the host layer's size.
-  private func addSizeSynchronizationAnimation(to layer: CALayer, oldBounds: CGRect, newBounds: CGRect) {
-    RunLoop.main.perform { // schedule to the next run loop to make sure the animation added after the bounds change can be found
-      if let sizeAnimation = self.sizeAnimation() {
-
-        if let positionAnimationCopy = sizeAnimation.copy() as? CABasicAnimation,
-           let sizeAnimationCopy = sizeAnimation.copy() as? CABasicAnimation
-        {
-
-          positionAnimationCopy.keyPath = "position"
-          let positionAnimationKey: String
-          if positionAnimationCopy.isAdditive {
-            let oldPosition = layer.position(from: oldBounds)
-            let newPosition = layer.position(from: newBounds)
-            positionAnimationCopy.fromValue = CGPoint(x: oldPosition.x - newPosition.x, y: oldPosition.y - newPosition.y)
-            positionAnimationCopy.toValue = CGPoint.zero
-            positionAnimationKey = layer.uniqueAnimationKey(key: "position")
-          } else {
-            positionAnimationCopy.fromValue = (self.presentation()?.bounds ?? oldBounds).center
-            positionAnimationCopy.toValue = newBounds.center
-            positionAnimationKey = "position"
-          }
-
-          sizeAnimationCopy.keyPath = "bounds.size"
-          let sizeAnimationKey: String
-          if sizeAnimationCopy.isAdditive {
-            sizeAnimationCopy.fromValue = CGSize(width: oldBounds.size.width - newBounds.size.width, height: oldBounds.size.height - newBounds.size.height)
-            sizeAnimationCopy.toValue = CGSize.zero
-            sizeAnimationKey = layer.uniqueAnimationKey(key: "bounds.size")
-          } else {
-            sizeAnimationCopy.fromValue = (self.presentation()?.bounds ?? oldBounds).size
-            sizeAnimationCopy.toValue = newBounds.size
-            sizeAnimationKey = "bounds.size"
-          }
-
-          layer.add(positionAnimationCopy, forKey: positionAnimationKey)
-          layer.add(sizeAnimationCopy, forKey: sizeAnimationKey)
-
-        } else {
-          ChouTi.assertFailure("failed to copy size animation", metadata: [
-            "sizeAnimation": "\(sizeAnimation)",
-          ])
-        }
       }
     }
   }
@@ -490,14 +415,13 @@ public extension CALayer {
     }
 
     let gradientLayer = AnimatedGradientLayer()
-    gradientLayer.frame = bounds
-    addSublayer(gradientLayer)
+    addFullSizeSublayer(gradientLayer)
     self.animationGradientLayer = gradientLayer
     return gradientLayer
   }
 
   private func tearDownAnimationGradientLayer() {
-    animationGradientLayer?.removeFromSuperlayer()
+    animationGradientLayer.map { self.removeFullSizeSublayer($0) }
     animationGradientLayer = nil
   }
 }
