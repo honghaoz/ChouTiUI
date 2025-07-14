@@ -51,6 +51,13 @@ public extension ThemedUnifiedColor {
     self.init(.color(color))
   }
 
+  /// Creates a new themed unified color with the same color for both light and dark theme.
+  ///
+  /// - Parameter themedColor: The themed color.
+  init(_ themedColor: ThemedColor) {
+    self.init(light: .color(themedColor.light), dark: .color(themedColor.dark))
+  }
+
   /// Creates a new themed unified color with linear gradient colors.
   ///
   /// - Parameters:
@@ -78,11 +85,11 @@ public extension ThemedUnifiedColor {
     self.init(light: .angularGradient(light), dark: .angularGradient(dark))
   }
 
-  /// Creates a new themed unified color with the same color for both light and dark theme.
+  /// Creates a new themed unified color with gradient color.
   ///
-  /// - Parameter themedColor: The themed color.
-  init(_ themedColor: ThemedColor) {
-    self.init(light: .color(themedColor.light), dark: .color(themedColor.dark))
+  /// - Parameter gradientColor: The gradient color.
+  init(_ gradientColor: GradientColorType) {
+    self = gradientColor.themedUnifiedColor
   }
 }
 
