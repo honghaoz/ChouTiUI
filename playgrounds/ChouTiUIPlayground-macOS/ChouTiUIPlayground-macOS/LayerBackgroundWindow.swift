@@ -64,6 +64,7 @@ class LayerBackgroundWindow: NSWindow {
     self.contentView = contentView
 
     addLayerWithBackground()
+    addLayerWithBackground2()
   }
 
   // Show the window.
@@ -186,5 +187,28 @@ class LayerBackgroundWindow: NSWindow {
         to: { _ in targetFrame.size }
       )
     }
+  }
+
+  private func addLayerWithBackground2() {
+    // test that removing the animation gradient layer won't create animation artifact.
+
+    let layer = CALayer()
+    layer.borderColor = NSColor.black.cgColor
+    layer.borderWidth = 1
+    layer.background = .color(.orange)
+    layer.frame = CGRect(x: 200, y: 50, width: 50, height: 100)
+    contentView?.layer?.addSublayer(layer)
+
+    layer.animateBackground(
+      to: .angularGradient(AngularGradientColor(colors: [.red, .blue], centerPoint: .center, aimingPoint: .topRight)),
+      timing: .easeInEaseOut(duration: 1)
+    )
+
+    layer.animate(
+      keyPath: "bounds.size",
+      timing: .linear(duration: 2),
+      from: { layer in layer.bounds.size },
+      to: { _ in CGSize(width: 100, height: 20) }
+    )
   }
 }

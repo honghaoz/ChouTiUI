@@ -45,11 +45,13 @@ public extension CALayer {
   ///   - sublayer: The sublayer to add.
   ///   - index: The index to insert the sublayer at. If not provided, the sublayer will be added to the top.
   func addFullSizeSublayer(_ sublayer: CALayer, at index: UInt32? = nil) {
-    sublayer.frame = bounds
-    if let index {
-      insertSublayer(sublayer, at: index)
-    } else {
-      addSublayer(sublayer)
+    CATransaction.disableAnimations { // disable the implicit animation to avoid ghost layer
+      sublayer.frame = bounds
+      if let index {
+        insertSublayer(sublayer, at: index)
+      } else {
+        addSublayer(sublayer)
+      }
     }
 
     fullSizeSublayers[ObjectIdentifier(sublayer)] = sublayer
@@ -66,7 +68,9 @@ public extension CALayer {
   ///
   /// - Parameter sublayer: The sublayer to remove.
   func removeFullSizeSublayer(_ sublayer: CALayer) {
-    sublayer.removeFromSuperlayer()
+    CATransaction.disableAnimations { // disable the implicit animation to avoid animation artifact
+      sublayer.removeFromSuperlayer()
+    }
     fullSizeSublayers.removeValue(forKey: ObjectIdentifier(sublayer))
 
     if fullSizeSublayers.isEmpty {
