@@ -87,6 +87,67 @@ class LayerBackgroundWindow: NSWindow {
     contentView?.layer?.addSublayer(layer)
 
     onMainAsync(delay: 1) {
+      layer.animateBackground(from: nil, to: .color(.orange), timing: .easeInEaseOut(duration: 2))
+
+      // layer.animateBackground(from: .color(.red), to: .color(.blue), timing: .easeInEaseOut(duration: 2))
+
+      // layer.animateBackground(
+      //   from: .color(.red),
+      //   to: .linearGradient(LinearGradientColor([.red, .blue, .yellow], nil, UnitPoint(0.7, 0), UnitPoint(0.3, 1))),
+      //   timing: .easeInEaseOut(duration: 2)
+      // )
+
+      // layer.animateBackground(
+      //   from: .linearGradient(LinearGradientColor([.red, .blue, .yellow], nil, UnitPoint(0.7, 0), UnitPoint(0.3, 1))),
+      //   to: .color(.red),
+      //   timing: .easeInEaseOut(duration: 2)
+      // )
+
+      // layer.animateBackground(
+      //   from: .linearGradient(LinearGradientColor([.red, .blue, .yellow], nil, UnitPoint(0.7, 0), UnitPoint(0.3, 1))),
+      //   to: .linearGradient(LinearGradientColor([.blue, .yellow, .red], nil, UnitPoint(0.7, 0), UnitPoint(0.3, 1))),
+      //   timing: .easeInEaseOut(duration: 2)
+      // )
+
+      // layer.animateBackground(
+      //   from: .linearGradient(LinearGradientColor([.red, .blue], nil, UnitPoint(0.7, 0), UnitPoint(0.3, 1))),
+      //   to: .linearGradient(LinearGradientColor([.red, .yellow], nil, UnitPoint(0.7, 0), UnitPoint(0.3, 1))),
+      //   timing: .easeInEaseOut(duration: 3)
+      // )
+
+      // layer.animateBackground(
+      //   from: .linearGradient(LinearGradientColor([.red, .blue], nil, UnitPoint(0.7, 0), UnitPoint(0.3, 1))),
+      //   to: .linearGradient(LinearGradientColor([.red, .blue, .yellow], nil, UnitPoint(0.7, 0), UnitPoint(0.3, 1))),
+      //   timing: .easeInEaseOut(duration: 3)
+      // )
+
+      // layer.animateBackground(
+      //   from: .linearGradient(LinearGradientColor([.red, .orange, .yellow, .green], [0, 0.5, 1, 1], UnitPoint(0.7, 0), UnitPoint(0.3, 1))),
+      //   to: .linearGradient(LinearGradientColor([.red, .orange, .yellow, .green], [0, 0.25, 0.5, 1], UnitPoint(0.7, 0), UnitPoint(0.3, 1))),
+      //   timing: .easeInEaseOut(duration: 3)
+      // )
+
+      // layer.animateBackground(
+      //   from: .angularGradient(AngularGradientColor(colors: [.red, .blue], centerPoint: .center, aimingPoint: .topRight)),
+      //   to: nil,
+      //   timing: .easeInEaseOut(duration: 3)
+      // )
+
+      // layer.animateBackground(
+      //   from: .angularGradient(AngularGradientColor(colors: [.red, .blue], centerPoint: .center, aimingPoint: .topRight)),
+      //   to: .linearGradient(LinearGradientColor([.red, .yellow], nil, UnitPoint(0.7, 0), UnitPoint(0.3, 1))),
+      //   timing: .easeInEaseOut(duration: 3)
+      // )
+    }
+
+    onMainAsync(delay: 3.4) {
+      layer.animateBackground(
+        to: .angularGradient(AngularGradientColor(colors: [.red, .blue], centerPoint: .center, aimingPoint: .topRight)),
+        timing: .easeInEaseOut(duration: 2.5)
+      )
+    }
+
+    onMainAsync(delay: 1) {
       layer.animateFrame(to: CGRect(x: 100, y: 20, width: 100, height: 150), timing: .spring(response: 2))
     }
 

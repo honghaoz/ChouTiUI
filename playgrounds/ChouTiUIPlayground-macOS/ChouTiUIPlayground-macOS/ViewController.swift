@@ -80,10 +80,14 @@ class ViewController: NSViewController {
     // bottom toolbar
     let toolbarView = ComposeView {
       ZStack {
-        ColorNode(Themed(light: .white, dark: .controlBackgroundColor))
-          .dropShadow(color: .black, opacity: 0.3, radius: 1, offset: CGSize(width: 0, height: -1), path: { renderable in
-            return CGPath(rect: renderable.frame.insetBy(dx: -4, dy: 0), transform: nil)
-          })
+        UnifiedColorNode(
+          light: LinearGradientColor([.whiteRGB(0.98), .whiteRGB(0.8)]),
+          dark: LinearGradientColor([.blackRGB(0.65), .blackRGB(0.8)])
+        )
+        .animation(.easeInEaseOut(duration: 1))
+        .dropShadow(color: .black, opacity: 0.3, radius: 1, offset: CGSize(width: 0, height: -1), path: { renderable in
+          return CGPath(rect: renderable.frame.insetBy(dx: -4, dy: 0), transform: nil)
+        })
 
         ViewNode(make: { _ in
           let button = NSButton(title: "Layer Background", target: nil, action: nil)
