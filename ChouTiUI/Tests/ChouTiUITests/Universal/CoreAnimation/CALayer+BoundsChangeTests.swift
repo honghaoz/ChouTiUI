@@ -117,6 +117,77 @@ class CALayer_BoundsChangeTests: XCTestCase {
     expect(calledNewBounds2) == CGRect(x: 0, y: 0, width: 350, height: 480)
   }
 
+  func test_onBoundsChange_frame() {
+    let layer: CALayer = layer
+
+    // initial state
+    expect(layer.frame) == CGRect(x: -25, y: -40, width: 50, height: 80)
+    expect(layer.test.boundsKVOObservation) == nil
+
+    // add callback 1
+    var callCount1 = 0
+    var calledOldBounds1: CGRect?
+    var calledNewBounds1: CGRect?
+    weak var token1: CancellableToken?
+    token1 = layer.onBoundsChange(block: { layer, old, new in
+      callCount1 += 1
+      calledOldBounds1 = old
+      calledNewBounds1 = new
+    })
+
+    expect(layer.test.boundsKVOObservation) != nil
+
+    layer.frame = CGRect(x: 0, y: 0, width: 150, height: 280)
+    expect(callCount1) == 1
+    expect(calledOldBounds1) == CGRect(x: 0, y: 0, width: 50, height: 80)
+    expect(calledNewBounds1) == CGRect(x: 0, y: 0, width: 150, height: 280)
+
+    // add callback 2
+    var callCount2 = 0
+    var calledOldBounds2: CGRect?
+    var calledNewBounds2: CGRect?
+    weak var token2: CancellableToken?
+    token2 = layer.onBoundsChange(block: { layer, old, new in
+      callCount2 += 1
+      calledOldBounds2 = old
+      calledNewBounds2 = new
+    })
+
+    expect(layer.test.boundsKVOObservation) != nil
+
+    layer.frame = CGRect(x: 0, y: 0, width: 250, height: 380)
+    expect(callCount1) == 2
+    expect(calledOldBounds1) == CGRect(x: 0, y: 0, width: 150, height: 280)
+    expect(calledNewBounds1) == CGRect(x: 0, y: 0, width: 250, height: 380)
+    expect(callCount2) == 1
+    expect(calledOldBounds2) == CGRect(x: 0, y: 0, width: 150, height: 280)
+    expect(calledNewBounds2) == CGRect(x: 0, y: 0, width: 250, height: 380)
+
+    // cancel callback 1
+    token1?.cancel()
+    expect(layer.test.boundsKVOObservation) != nil // still observing because of callback 2
+
+    layer.frame = CGRect(x: 0, y: 0, width: 350, height: 480)
+    expect(callCount1) == 2
+    expect(calledOldBounds1) == CGRect(x: 0, y: 0, width: 150, height: 280)
+    expect(calledNewBounds1) == CGRect(x: 0, y: 0, width: 250, height: 380)
+    expect(callCount2) == 2
+    expect(calledOldBounds2) == CGRect(x: 0, y: 0, width: 250, height: 380)
+    expect(calledNewBounds2) == CGRect(x: 0, y: 0, width: 350, height: 480)
+
+    // cancel callback 2
+    token2?.cancel()
+    expect(layer.test.boundsKVOObservation) == nil // not observing anymore
+
+    layer.frame = CGRect(x: 0, y: 0, width: 450, height: 580)
+    expect(callCount1) == 2
+    expect(calledOldBounds1) == CGRect(x: 0, y: 0, width: 150, height: 280)
+    expect(calledNewBounds1) == CGRect(x: 0, y: 0, width: 250, height: 380)
+    expect(callCount2) == 2
+    expect(calledOldBounds2) == CGRect(x: 0, y: 0, width: 250, height: 380)
+    expect(calledNewBounds2) == CGRect(x: 0, y: 0, width: 350, height: 480)
+  }
+
   func test_releaseSelf() {
     var layer: CALayer? = CALayer()
     weak var weakLayer: CALayer? = layer
