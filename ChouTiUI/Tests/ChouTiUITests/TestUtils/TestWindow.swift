@@ -71,7 +71,7 @@ final class TestWindow: Window {
   #endif
 
   @available(*, unavailable)
-  public required init?(coder: NSCoder) {
+  required init?(coder: NSCoder) {
     fatalError("init(coder:) is unavailable") // swiftlint:disable:this fatal_error
   }
 
