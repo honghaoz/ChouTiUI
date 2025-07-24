@@ -25,6 +25,7 @@ declare -a scripts=(
   "scripts/git/git-hooks/pre-commit"
   "scripts/swift-package/build-workspace.sh"
   "scripts/swift-package/test-workspace.sh"
+  "scripts/swift-package/update-packages.sh"
   "scripts/xcodebuild/build-project.sh"
   "scripts/filter-lcov.sh"
   "scripts/format.sh"
