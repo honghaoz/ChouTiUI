@@ -33,6 +33,9 @@ jobs:
         run: make format
       - name: Lint
         run: make lint
+      - name: Revert Package.resolved changes # bootstrap may update Package.resolved, ignore the changes
+        run: |
+          git checkout HEAD -- "**/Package.resolved" || true
       - name: Create Pull Request
         if: success() || failure()
         uses: peter-evans/create-pull-request@v6
@@ -46,3 +49,5 @@ jobs:
           branch: "github-actions/format"
           draft: false
           delete-branch: true
+          add-paths: |
+            !**/Package.resolved
