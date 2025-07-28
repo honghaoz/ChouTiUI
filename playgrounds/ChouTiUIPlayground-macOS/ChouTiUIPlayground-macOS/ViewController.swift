@@ -84,26 +84,48 @@ class ViewController: NSViewController {
           light: LinearGradientColor([.whiteRGB(0.98), .whiteRGB(0.8)]),
           dark: LinearGradientColor([.blackRGB(0.65), .blackRGB(0.8)])
         )
+        .overlay(alignment: .top, content: {
+          UnifiedColorNode(light: .whiteRGB, dark: .whiteRGB(0.5))
+            .frame(width: .flexible, height: .halfPoint)
+        })
         .animation(.easeInEaseOut(duration: 1))
         .dropShadow(color: .black, opacity: 0.3, radius: 1, offset: CGSize(width: 0, height: -1), path: { renderable in
           return CGPath(rect: renderable.frame.insetBy(dx: -4, dy: 0), transform: nil)
         })
 
-        ViewNode(make: { _ in
-          let button = NSButton(title: "Layer Background", target: nil, action: nil)
-          let windowBox = WeakBox<LayerBackgroundWindow>(nil)
-          button.addAction {
-            windowBox.object?.close()
+        HStack {
+          ViewNode(make: { _ in
+            let button = NSButton(title: "Layer Background", target: nil, action: nil)
+            let windowBox = WeakBox<LayerBackgroundWindow>(nil)
+            button.addAction {
+              windowBox.object?.close()
 
-            let newWindow = LayerBackgroundWindow()
-            newWindow.show()
-            windowBox.object = newWindow
-          }
-          button.wantsLayer = true
-          button.sizeToFit()
-          return button
-        })
-        .fixedSize()
+              let newWindow = LayerBackgroundWindow()
+              newWindow.show()
+              windowBox.object = newWindow
+            }
+            button.wantsLayer = true
+            button.sizeToFit()
+            return button
+          })
+          .fixedSize()
+
+          ViewNode(make: { _ in
+            let button = NSButton(title: "Layer Border Offset", target: nil, action: nil)
+            let windowBox = WeakBox<LayerBorderOffsetWindow>(nil)
+            button.addAction {
+              windowBox.object?.close()
+
+              let newWindow = LayerBorderOffsetWindow()
+              newWindow.show()
+              windowBox.object = newWindow
+            }
+            button.wantsLayer = true
+            button.sizeToFit()
+            return button
+          })
+          .fixedSize()
+        }
       }
     }
 
