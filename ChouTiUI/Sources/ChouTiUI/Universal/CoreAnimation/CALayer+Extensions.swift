@@ -61,6 +61,18 @@ public extension CALayer {
       return superlayer?.presentingView
     }
   }
+
+  private static let borderOffsetKey = String("redrob".reversed() + "Offset")
+
+  /// The offset of the border of the layer.
+  var borderOffset: CGFloat {
+    get {
+      value(forKey: Self.borderOffsetKey).assert("missing value for key \(Self.borderOffsetKey)") as? CGFloat ?? 0
+    }
+    set {
+      setValue(newValue, forKey: Self.borderOffsetKey)
+    }
+  }
 }
 
 // MARK: - Strong

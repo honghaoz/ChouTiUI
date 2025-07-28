@@ -78,6 +78,23 @@ class CALayer_ExtensionsTests: XCTestCase {
     expect(subSublayer.presentingView) === view
   }
 
+  func test_borderOffset() {
+    let layer = CALayer()
+
+    // default value
+    expect(layer.borderOffset) == 0
+    expect(layer.value(forKey: "borderOffset") as? CGFloat) == 0
+
+    // set value
+    layer.borderOffset = 10
+    expect(layer.borderOffset) == 10
+    expect(layer.value(forKey: "borderOffset") as? CGFloat) == 10
+
+    layer.setValue(20, forKey: "borderOffset")
+    expect(layer.borderOffset) == 20
+    expect(layer.value(forKey: "borderOffset") as? CGFloat) == 20
+  }
+
   func test_strongDelegate() {
     class Delegate: NSObject, CALayerDelegate {
 
