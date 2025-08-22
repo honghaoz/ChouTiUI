@@ -92,15 +92,14 @@ class LayerBorderTests: XCTestCase {
   func test_description() throws {
     let layerBorder = LayerBorder(borderColor: Color.red.cgColor, borderWidth: 1)
 
-    #if os(macOS)
     // macOS
     // LayerBorder(borderColor: <CGColor 0x600002f81f20> [<CGColorSpace 0x600002f81e60> (kCGColorSpaceICCBased; kCGColorSpaceModelRGB; sRGB IEC61966-2.1)] ( 1 0 0 1 ), borderWidth: 1.0)
-    let regex = try NSRegularExpression(pattern: "LayerBorder\\(borderColor: \\<CGColor 0x[0-9a-f]+> \\[\\<CGColorSpace 0x[0-9a-f]+> \\(kCGColorSpaceICCBased; kCGColorSpaceModelRGB; sRGB IEC61966-2\\.1\\)] \\( 1 0 0 1 \\), borderWidth: 1.0\\)", options: [.dotMatchesLineSeparators])
-    #else
+
     // iOS
     // LayerBorder(borderColor: <CGColor 0x600002614a80> [<CGColorSpace 0x600002608c60> (kCGColorSpaceICCBased; kCGColorSpaceModelRGB; sRGB IEC61966-2.1; extended range)] ( 1 0 0 1 ), borderWidth: 1.0)
-    let regex = try NSRegularExpression(pattern: "LayerBorder\\(borderColor: \\<CGColor 0x[0-9a-f]+> \\[\\<CGColorSpace 0x[0-9a-f]+> \\(kCGColorSpaceICCBased; kCGColorSpaceModelRGB; sRGB IEC61966-2\\.1; extended range\\)] \\( 1 0 0 1 \\), borderWidth: 1.0\\)", options: [.dotMatchesLineSeparators])
-    #endif
+    // LayerBorder(borderColor: <CGColor 0x600002905960> [<CGColorSpace 0x600002608900> (kCGColorSpaceICCBased; kCGColorSpaceModelRGB; sRGB IEC61966-2.1; extended range)] headroom unknown ( 1 0 0 1 ), borderWidth: 1.0)
+    let regex = try NSRegularExpression(pattern: "LayerBorder\\(borderColor: .*? \\( 1 0 0 1 \\), borderWidth: 1.0\\)", options: [.dotMatchesLineSeparators])
+
     let range = NSRange(location: 0, length: layerBorder.description.utf16.count)
     let matches = regex.matches(in: layerBorder.description, options: [], range: range)
 
