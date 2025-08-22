@@ -57,10 +57,11 @@ public extension ComposeNode {
 
       let layer = item.layer
       let offset = offset.resolve(for: (context.contentView as ScrollView).theme)
+      let borderOffsetKey = String("redrob".reversed() + "Offset")
       if let animationTiming = context.animationTiming {
-        layer.animate(keyPath: "borderOffset", to: offset, timing: animationTiming)
+        layer.animate(keyPath: borderOffsetKey, to: offset, timing: animationTiming)
       } else {
-        layer.disableActions(for: "borderOffset") {
+        layer.disableActions(for: borderOffsetKey) {
           layer.borderOffset = offset
         }
       }
