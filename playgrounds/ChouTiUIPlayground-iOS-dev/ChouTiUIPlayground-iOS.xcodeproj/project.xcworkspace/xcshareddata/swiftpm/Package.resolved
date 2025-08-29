@@ -1,0 +1,24 @@
+{
+  "originHash" : "c2a2df7ab83168657572e45c43fa6c03e4b8001db29ce275d3a56139b4924758",
+  "pins" : [
+    {
+      "identity" : "chouti",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/honghaoz/ChouTi",
+      "state" : {
+        "branch" : "master",
+        "revision" : "cc4eba4e0cf809ffd0411914b468f72cfe2d2c48"
+      }
+    },
+    {
+      "identity" : "composeui",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/honghaoz/ComposeUI",
+      "state" : {
+        "branch" : "master",
+        "revision" : "25f966e65d9513ceca0d77cccb8f268bd6c551a4"
+      }
+    }
+  ],
+  "version" : 3
+}

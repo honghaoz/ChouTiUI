@@ -3,10 +3,11 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 60;
 	objects = {
 
 /* Begin PBXBuildFile section */
+		02A9FF662E6210A200A87EB0 /* ChouTiUI in Frameworks */ = {isa = PBXBuildFile; productRef = 02A9FF652E6210A200A87EB0 /* ChouTiUI */; };
 		E59D81202CA905E3006A6467 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E59D811F2CA905E3006A6467 /* AppDelegate.swift */; };
 		E59D81222CA905E3006A6467 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E59D81212CA905E3006A6467 /* SceneDelegate.swift */; };
 		E59D81242CA905E3006A6467 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E59D81232CA905E3006A6467 /* ViewController.swift */; };
@@ -14,7 +15,6 @@
 		E59D81292CA905E4006A6467 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E59D81282CA905E4006A6467 /* Assets.xcassets */; };
 		E59D812C2CA905E4006A6467 /* Base in Resources */ = {isa = PBXBuildFile; fileRef = E59D812B2CA905E4006A6467 /* Base */; };
 		E59D81352CA905FE006A6467 /* ChouTi in Frameworks */ = {isa = PBXBuildFile; productRef = E59D81342CA905FE006A6467 /* ChouTi */; };
-		E5D34C952CC5A5D2003CA842 /* ChouTiUI in Frameworks */ = {isa = PBXBuildFile; productRef = E5D34C942CC5A5D2003CA842 /* ChouTiUI */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -33,7 +33,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E5D34C952CC5A5D2003CA842 /* ChouTiUI in Frameworks */,
+				02A9FF662E6210A200A87EB0 /* ChouTiUI in Frameworks */,
 				E59D81352CA905FE006A6467 /* ChouTi in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -121,7 +121,7 @@
 			name = "ChouTiUIPlayground-iOS";
 			packageProductDependencies = (
 				E59D81342CA905FE006A6467 /* ChouTi */,
-				E5D34C942CC5A5D2003CA842 /* ChouTiUI */,
+				02A9FF652E6210A200A87EB0 /* ChouTiUI */,
 			);
 			productName = "ChouTiUIPlayground-iOS";
 			productReference = E59D811C2CA905E3006A6467 /* ChouTiUIPlayground-iOS.app */;
@@ -153,7 +153,7 @@
 			mainGroup = E59D81132CA905E3006A6467;
 			packageReferences = (
 				E59D81332CA905FE006A6467 /* XCRemoteSwiftPackageReference "ChouTi" */,
-				E5D34C932CC5A5D2003CA842 /* XCRemoteSwiftPackageReference "ChouTiUI" */,
+				02A9FF642E6210A200A87EB0 /* XCLocalSwiftPackageReference "../../ChouTiUI" */,
 			);
 			productRefGroup = E59D811D2CA905E3006A6467 /* Products */;
 			projectDirPath = "";
@@ -406,6 +406,13 @@
 		};
 /* End XCConfigurationList section */
 
+/* Begin XCLocalSwiftPackageReference section */
+		02A9FF642E6210A200A87EB0 /* XCLocalSwiftPackageReference "../../ChouTiUI" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../../ChouTiUI;
+		};
+/* End XCLocalSwiftPackageReference section */
+
 /* Begin XCRemoteSwiftPackageReference section */
 		E59D81332CA905FE006A6467 /* XCRemoteSwiftPackageReference "ChouTi" */ = {
 			isa = XCRemoteSwiftPackageReference;
@@ -415,26 +422,17 @@
 				minimumVersion = 0.0.1;
 			};
 		};
-		E5D34C932CC5A5D2003CA842 /* XCRemoteSwiftPackageReference "ChouTiUI" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/honghaoz/ChouTiUI";
-			requirement = {
-				branch = master;
-				kind = branch;
-			};
-		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		02A9FF652E6210A200A87EB0 /* ChouTiUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = ChouTiUI;
+		};
 		E59D81342CA905FE006A6467 /* ChouTi */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = E59D81332CA905FE006A6467 /* XCRemoteSwiftPackageReference "ChouTi" */;
 			productName = ChouTi;
-		};
-		E5D34C942CC5A5D2003CA842 /* ChouTiUI */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = E5D34C932CC5A5D2003CA842 /* XCRemoteSwiftPackageReference "ChouTiUI" */;
-			productName = ChouTiUI;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
