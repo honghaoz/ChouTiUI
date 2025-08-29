@@ -3,33 +3,33 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 60;
 	objects = {
 
 /* Begin PBXBuildFile section */
-		021EAA092E3735A90094431C /* LayerBorderOffsetWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 021EAA082E3735A90094431C /* LayerBorderOffsetWindow.swift */; };
-		021EAA0B2E37377E0094431C /* NSSlider+Action.swift in Sources */ = {isa = PBXBuildFile; fileRef = 021EAA0A2E37377E0094431C /* NSSlider+Action.swift */; };
-		02F741F22E1CD6BA00065D8D /* LayerBackgroundWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02F741F12E1CD6BA00065D8D /* LayerBackgroundWindow.swift */; };
-		02F741F42E1D8B0600065D8D /* NSButton+Action.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02F741F32E1D8B0600065D8D /* NSButton+Action.swift */; };
-		E59D808F2CA8DFD3006A6467 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E59D808E2CA8DFD3006A6467 /* AppDelegate.swift */; };
-		E59D80912CA8DFD3006A6467 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E59D80902CA8DFD3006A6467 /* ViewController.swift */; };
+		02A9FF3C2E6186FB00A87EB0 /* ChouTiUI in Frameworks */ = {isa = PBXBuildFile; productRef = 02A9FF3B2E6186FB00A87EB0 /* ChouTiUI */; };
+		02A9FF572E620C6200A87EB0 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02A9FF552E620C6200A87EB0 /* ViewController.swift */; };
+		02A9FF582E620C6200A87EB0 /* NSButton+Action.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02A9FF4F2E620C6200A87EB0 /* NSButton+Action.swift */; };
+		02A9FF592E620C6200A87EB0 /* NSSlider+Action.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02A9FF502E620C6200A87EB0 /* NSSlider+Action.swift */; };
+		02A9FF5A2E620C6200A87EB0 /* LayerBackgroundWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02A9FF532E620C6200A87EB0 /* LayerBackgroundWindow.swift */; };
+		02A9FF5B2E620C6200A87EB0 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02A9FF522E620C6200A87EB0 /* AppDelegate.swift */; };
+		02A9FF5C2E620C6200A87EB0 /* LayerBorderOffsetWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02A9FF542E620C6200A87EB0 /* LayerBorderOffsetWindow.swift */; };
 		E59D80932CA8DFD4006A6467 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E59D80922CA8DFD4006A6467 /* Assets.xcassets */; };
 		E59D80962CA8DFD4006A6467 /* Base in Resources */ = {isa = PBXBuildFile; fileRef = E59D80952CA8DFD4006A6467 /* Base */; };
 		E59D80D02CA8FD90006A6467 /* ChouTi in Frameworks */ = {isa = PBXBuildFile; productRef = E59D80CF2CA8FD90006A6467 /* ChouTi */; };
-		E5B886012CBA5281000E4A07 /* ChouTiUI in Frameworks */ = {isa = PBXBuildFile; productRef = E5B886002CBA5281000E4A07 /* ChouTiUI */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		021EAA082E3735A90094431C /* LayerBorderOffsetWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayerBorderOffsetWindow.swift; sourceTree = "<group>"; };
-		021EAA0A2E37377E0094431C /* NSSlider+Action.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSSlider+Action.swift"; sourceTree = "<group>"; };
-		02F741F12E1CD6BA00065D8D /* LayerBackgroundWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayerBackgroundWindow.swift; sourceTree = "<group>"; };
-		02F741F32E1D8B0600065D8D /* NSButton+Action.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSButton+Action.swift"; sourceTree = "<group>"; };
+		02A9FF4D2E620B9500A87EB0 /* ChouTiUIPlayground_macOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ChouTiUIPlayground_macOS.entitlements; sourceTree = "<group>"; };
+		02A9FF4F2E620C6200A87EB0 /* NSButton+Action.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSButton+Action.swift"; sourceTree = "<group>"; };
+		02A9FF502E620C6200A87EB0 /* NSSlider+Action.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSSlider+Action.swift"; sourceTree = "<group>"; };
+		02A9FF522E620C6200A87EB0 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		02A9FF532E620C6200A87EB0 /* LayerBackgroundWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayerBackgroundWindow.swift; sourceTree = "<group>"; };
+		02A9FF542E620C6200A87EB0 /* LayerBorderOffsetWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayerBorderOffsetWindow.swift; sourceTree = "<group>"; };
+		02A9FF552E620C6200A87EB0 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		E59D808B2CA8DFD3006A6467 /* ChouTiUIPlayground-macOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "ChouTiUIPlayground-macOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		E59D808E2CA8DFD3006A6467 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		E59D80902CA8DFD3006A6467 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		E59D80922CA8DFD4006A6467 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		E59D80952CA8DFD4006A6467 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
-		E59D80972CA8DFD4006A6467 /* ChouTiUIPlayground_macOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ChouTiUIPlayground_macOS.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -37,7 +37,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E5B886012CBA5281000E4A07 /* ChouTiUI in Frameworks */,
+				02A9FF3C2E6186FB00A87EB0 /* ChouTiUI in Frameworks */,
 				E59D80D02CA8FD90006A6467 /* ChouTi in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -45,25 +45,25 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		02A9FF4E2E620C3100A87EB0 /* Sources */ = {
+		02A9FF512E620C6200A87EB0 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
-				E59D808E2CA8DFD3006A6467 /* AppDelegate.swift */,
-				E59D80902CA8DFD3006A6467 /* ViewController.swift */,
-				02F741F12E1CD6BA00065D8D /* LayerBackgroundWindow.swift */,
-				021EAA082E3735A90094431C /* LayerBorderOffsetWindow.swift */,
-				02F741F52E1E237F00065D8D /* Extensions */,
-			);
-			path = Sources;
-			sourceTree = "<group>";
-		};
-		02F741F52E1E237F00065D8D /* Extensions */ = {
-			isa = PBXGroup;
-			children = (
-				02F741F32E1D8B0600065D8D /* NSButton+Action.swift */,
-				021EAA0A2E37377E0094431C /* NSSlider+Action.swift */,
+				02A9FF4F2E620C6200A87EB0 /* NSButton+Action.swift */,
+				02A9FF502E620C6200A87EB0 /* NSSlider+Action.swift */,
 			);
 			path = Extensions;
+			sourceTree = "<group>";
+		};
+		02A9FF562E620C6200A87EB0 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				02A9FF522E620C6200A87EB0 /* AppDelegate.swift */,
+				02A9FF552E620C6200A87EB0 /* ViewController.swift */,
+				02A9FF532E620C6200A87EB0 /* LayerBackgroundWindow.swift */,
+				02A9FF542E620C6200A87EB0 /* LayerBorderOffsetWindow.swift */,
+				02A9FF512E620C6200A87EB0 /* Extensions */,
+			);
+			path = Sources;
 			sourceTree = "<group>";
 		};
 		E59D80822CA8DFD3006A6467 = {
@@ -86,10 +86,10 @@
 		E59D808D2CA8DFD3006A6467 /* ChouTiUIPlayground-macOS */ = {
 			isa = PBXGroup;
 			children = (
-				02A9FF4E2E620C3100A87EB0 /* Sources */,
+				02A9FF562E620C6200A87EB0 /* Sources */,
 				E59D80922CA8DFD4006A6467 /* Assets.xcassets */,
 				E59D80942CA8DFD4006A6467 /* Main.storyboard */,
-				E59D80972CA8DFD4006A6467 /* ChouTiUIPlayground_macOS.entitlements */,
+				02A9FF4D2E620B9500A87EB0 /* ChouTiUIPlayground_macOS.entitlements */,
 			);
 			path = "ChouTiUIPlayground-macOS";
 			sourceTree = "<group>";
@@ -119,7 +119,7 @@
 			name = "ChouTiUIPlayground-macOS";
 			packageProductDependencies = (
 				E59D80CF2CA8FD90006A6467 /* ChouTi */,
-				E5B886002CBA5281000E4A07 /* ChouTiUI */,
+				02A9FF3B2E6186FB00A87EB0 /* ChouTiUI */,
 			);
 			productName = "ChouTiUIPlayground-macOS";
 			productReference = E59D808B2CA8DFD3006A6467 /* ChouTiUIPlayground-macOS.app */;
@@ -151,7 +151,7 @@
 			mainGroup = E59D80822CA8DFD3006A6467;
 			packageReferences = (
 				E59D80CE2CA8FD90006A6467 /* XCRemoteSwiftPackageReference "ChouTi" */,
-				E5B885FF2CBA5281000E4A07 /* XCRemoteSwiftPackageReference "ChouTiUI" */,
+				02A9FF3A2E6186FB00A87EB0 /* XCLocalSwiftPackageReference "../../ChouTiUI" */,
 			);
 			productRefGroup = E59D808C2CA8DFD3006A6467 /* Products */;
 			projectDirPath = "";
@@ -179,12 +179,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E59D80912CA8DFD3006A6467 /* ViewController.swift in Sources */,
-				021EAA0B2E37377E0094431C /* NSSlider+Action.swift in Sources */,
-				021EAA092E3735A90094431C /* LayerBorderOffsetWindow.swift in Sources */,
-				02F741F22E1CD6BA00065D8D /* LayerBackgroundWindow.swift in Sources */,
-				02F741F42E1D8B0600065D8D /* NSButton+Action.swift in Sources */,
-				E59D808F2CA8DFD3006A6467 /* AppDelegate.swift in Sources */,
+				02A9FF572E620C6200A87EB0 /* ViewController.swift in Sources */,
+				02A9FF582E620C6200A87EB0 /* NSButton+Action.swift in Sources */,
+				02A9FF592E620C6200A87EB0 /* NSSlider+Action.swift in Sources */,
+				02A9FF5A2E620C6200A87EB0 /* LayerBackgroundWindow.swift in Sources */,
+				02A9FF5B2E620C6200A87EB0 /* AppDelegate.swift in Sources */,
+				02A9FF5C2E620C6200A87EB0 /* LayerBorderOffsetWindow.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -393,6 +393,13 @@
 		};
 /* End XCConfigurationList section */
 
+/* Begin XCLocalSwiftPackageReference section */
+		02A9FF3A2E6186FB00A87EB0 /* XCLocalSwiftPackageReference "../../ChouTiUI" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../../ChouTiUI;
+		};
+/* End XCLocalSwiftPackageReference section */
+
 /* Begin XCRemoteSwiftPackageReference section */
 		E59D80CE2CA8FD90006A6467 /* XCRemoteSwiftPackageReference "ChouTi" */ = {
 			isa = XCRemoteSwiftPackageReference;
@@ -402,26 +409,17 @@
 				minimumVersion = 0.0.1;
 			};
 		};
-		E5B885FF2CBA5281000E4A07 /* XCRemoteSwiftPackageReference "ChouTiUI" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/honghaoz/ChouTiUI";
-			requirement = {
-				branch = master;
-				kind = branch;
-			};
-		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		02A9FF3B2E6186FB00A87EB0 /* ChouTiUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = ChouTiUI;
+		};
 		E59D80CF2CA8FD90006A6467 /* ChouTi */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = E59D80CE2CA8FD90006A6467 /* XCRemoteSwiftPackageReference "ChouTi" */;
 			productName = ChouTi;
-		};
-		E5B886002CBA5281000E4A07 /* ChouTiUI */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = E5B885FF2CBA5281000E4A07 /* XCRemoteSwiftPackageReference "ChouTiUI" */;
-			productName = ChouTiUI;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
