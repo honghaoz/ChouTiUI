@@ -3,34 +3,24 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
-		021EAA092E3735A90094431C /* LayerBorderOffsetWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 021EAA082E3735A90094431C /* LayerBorderOffsetWindow.swift */; };
-		021EAA0B2E37377E0094431C /* NSSlider+Action.swift in Sources */ = {isa = PBXBuildFile; fileRef = 021EAA0A2E37377E0094431C /* NSSlider+Action.swift */; };
-		02F741F22E1CD6BA00065D8D /* LayerBackgroundWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02F741F12E1CD6BA00065D8D /* LayerBackgroundWindow.swift */; };
-		02F741F42E1D8B0600065D8D /* NSButton+Action.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02F741F32E1D8B0600065D8D /* NSButton+Action.swift */; };
-		E59D808F2CA8DFD3006A6467 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E59D808E2CA8DFD3006A6467 /* AppDelegate.swift */; };
-		E59D80912CA8DFD3006A6467 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E59D80902CA8DFD3006A6467 /* ViewController.swift */; };
-		E59D80932CA8DFD4006A6467 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E59D80922CA8DFD4006A6467 /* Assets.xcassets */; };
-		E59D80962CA8DFD4006A6467 /* Base in Resources */ = {isa = PBXBuildFile; fileRef = E59D80952CA8DFD4006A6467 /* Base */; };
 		E59D80D02CA8FD90006A6467 /* ChouTi in Frameworks */ = {isa = PBXBuildFile; productRef = E59D80CF2CA8FD90006A6467 /* ChouTi */; };
 		E5B886012CBA5281000E4A07 /* ChouTiUI in Frameworks */ = {isa = PBXBuildFile; productRef = E5B886002CBA5281000E4A07 /* ChouTiUI */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		021EAA082E3735A90094431C /* LayerBorderOffsetWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayerBorderOffsetWindow.swift; sourceTree = "<group>"; };
-		021EAA0A2E37377E0094431C /* NSSlider+Action.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSSlider+Action.swift"; sourceTree = "<group>"; };
-		02F741F12E1CD6BA00065D8D /* LayerBackgroundWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayerBackgroundWindow.swift; sourceTree = "<group>"; };
-		02F741F32E1D8B0600065D8D /* NSButton+Action.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSButton+Action.swift"; sourceTree = "<group>"; };
 		E59D808B2CA8DFD3006A6467 /* ChouTiUIPlayground-macOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "ChouTiUIPlayground-macOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		E59D808E2CA8DFD3006A6467 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		E59D80902CA8DFD3006A6467 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
-		E59D80922CA8DFD4006A6467 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		E59D80952CA8DFD4006A6467 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
-		E59D80972CA8DFD4006A6467 /* ChouTiUIPlayground_macOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ChouTiUIPlayground_macOS.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		02A9FFD32E63F2BF00A87EB0 /* Resources */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Resources; sourceTree = "<group>"; };
+		02A9FFDC2E63F2BF00A87EB0 /* Sources */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Sources; sourceTree = "<group>"; };
+		02A9FFDF2E63F2BF00A87EB0 /* Storyboards */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Storyboards; sourceTree = "<group>"; };
+		02A9FFE12E63F2BF00A87EB0 /* Supporting Files */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = "Supporting Files"; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		E59D80882CA8DFD3006A6467 /* Frameworks */ = {
@@ -45,51 +35,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		02A9FF4E2E620C3100A87EB0 /* Sources */ = {
-			isa = PBXGroup;
-			children = (
-				E59D808E2CA8DFD3006A6467 /* AppDelegate.swift */,
-				E59D80902CA8DFD3006A6467 /* ViewController.swift */,
-				02F741F12E1CD6BA00065D8D /* LayerBackgroundWindow.swift */,
-				021EAA082E3735A90094431C /* LayerBorderOffsetWindow.swift */,
-				02F741F52E1E237F00065D8D /* Extensions */,
-			);
-			path = Sources;
-			sourceTree = "<group>";
-		};
-		02A9FF672E6210FC00A87EB0 /* Resources */ = {
-			isa = PBXGroup;
-			children = (
-				E59D80922CA8DFD4006A6467 /* Assets.xcassets */,
-			);
-			path = Resources;
-			sourceTree = "<group>";
-		};
-		02A9FF682E62111100A87EB0 /* Supporting Files */ = {
-			isa = PBXGroup;
-			children = (
-				E59D80972CA8DFD4006A6467 /* ChouTiUIPlayground_macOS.entitlements */,
-			);
-			path = "Supporting Files";
-			sourceTree = "<group>";
-		};
-		02A9FF692E62111D00A87EB0 /* Storyboards */ = {
-			isa = PBXGroup;
-			children = (
-				E59D80942CA8DFD4006A6467 /* Main.storyboard */,
-			);
-			path = Storyboards;
-			sourceTree = "<group>";
-		};
-		02F741F52E1E237F00065D8D /* Extensions */ = {
-			isa = PBXGroup;
-			children = (
-				02F741F32E1D8B0600065D8D /* NSButton+Action.swift */,
-				021EAA0A2E37377E0094431C /* NSSlider+Action.swift */,
-			);
-			path = Extensions;
-			sourceTree = "<group>";
-		};
 		E59D80822CA8DFD3006A6467 = {
 			isa = PBXGroup;
 			children = (
@@ -110,10 +55,10 @@
 		E59D808D2CA8DFD3006A6467 /* ChouTiUIPlayground-macOS */ = {
 			isa = PBXGroup;
 			children = (
-				02A9FF4E2E620C3100A87EB0 /* Sources */,
-				02A9FF672E6210FC00A87EB0 /* Resources */,
-				02A9FF692E62111D00A87EB0 /* Storyboards */,
-				02A9FF682E62111100A87EB0 /* Supporting Files */,
+				02A9FFDC2E63F2BF00A87EB0 /* Sources */,
+				02A9FFD32E63F2BF00A87EB0 /* Resources */,
+				02A9FFDF2E63F2BF00A87EB0 /* Storyboards */,
+				02A9FFE12E63F2BF00A87EB0 /* Supporting Files */,
 			);
 			path = "ChouTiUIPlayground-macOS";
 			sourceTree = "<group>";
@@ -139,6 +84,12 @@
 			buildRules = (
 			);
 			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				02A9FFD32E63F2BF00A87EB0 /* Resources */,
+				02A9FFDC2E63F2BF00A87EB0 /* Sources */,
+				02A9FFDF2E63F2BF00A87EB0 /* Storyboards */,
+				02A9FFE12E63F2BF00A87EB0 /* Supporting Files */,
 			);
 			name = "ChouTiUIPlayground-macOS";
 			packageProductDependencies = (
@@ -191,8 +142,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E59D80932CA8DFD4006A6467 /* Assets.xcassets in Resources */,
-				E59D80962CA8DFD4006A6467 /* Base in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -203,27 +152,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E59D80912CA8DFD3006A6467 /* ViewController.swift in Sources */,
-				021EAA0B2E37377E0094431C /* NSSlider+Action.swift in Sources */,
-				021EAA092E3735A90094431C /* LayerBorderOffsetWindow.swift in Sources */,
-				02F741F22E1CD6BA00065D8D /* LayerBackgroundWindow.swift in Sources */,
-				02F741F42E1D8B0600065D8D /* NSButton+Action.swift in Sources */,
-				E59D808F2CA8DFD3006A6467 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXVariantGroup section */
-		E59D80942CA8DFD4006A6467 /* Main.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				E59D80952CA8DFD4006A6467 /* Base */,
-			);
-			name = Main.storyboard;
-			sourceTree = "<group>";
-		};
-/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		E59D80982CA8DFD4006A6467 /* Debug */ = {
