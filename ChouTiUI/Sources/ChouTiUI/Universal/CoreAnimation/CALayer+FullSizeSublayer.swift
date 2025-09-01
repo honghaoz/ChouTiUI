@@ -55,6 +55,7 @@ public extension CALayer {
     }
 
     fullSizeSublayers[ObjectIdentifier(sublayer)] = sublayer
+    addFullSizeTrackingLayer(sublayer)
 
     // add the bounds change listener
     if boundsToken == nil {
@@ -71,7 +72,9 @@ public extension CALayer {
     CATransaction.disableAnimations { // disable the implicit animation to avoid animation artifact
       sublayer.removeFromSuperlayer()
     }
+
     fullSizeSublayers.removeValue(forKey: ObjectIdentifier(sublayer))
+    removeFullSizeTrackingLayer(sublayer)
 
     if fullSizeSublayers.isEmpty {
       boundsToken?.cancel()
@@ -81,66 +84,16 @@ public extension CALayer {
 
   private func boundsChanged(_ oldBounds: CGRect, _ newBounds: CGRect) {
     for (key, sublayer) in fullSizeSublayers {
-      if sublayer.superlayer === self {
-        sublayer.frame = newBounds
-        addSizeSynchronizationAnimation(to: sublayer, oldBounds: oldBounds, newBounds: newBounds)
-      } else {
+      if sublayer.superlayer !== self {
         // the sublayer is no longer a sublayer of the layer, remove it from the fullSizeSublayers
         fullSizeSublayers.removeValue(forKey: key)
+        removeFullSizeTrackingLayer(sublayer)
       }
     }
 
     if fullSizeSublayers.isEmpty {
       boundsToken?.cancel()
       boundsToken = nil
-    }
-  }
-
-  /// Add size synchronization animation to the layer so that the layer can always follow the host layer's size.
-  private func addSizeSynchronizationAnimation(to layer: CALayer, oldBounds: CGRect, newBounds: CGRect) {
-    RunLoop.main.perform { // schedule to the next run loop to make sure the animation added after the bounds change can be found
-      guard let sizeAnimation = self.sizeAnimation() else {
-        return
-      }
-
-      if let positionAnimationCopy = sizeAnimation.copy() as? CABasicAnimation,
-         let sizeAnimationCopy = sizeAnimation.copy() as? CABasicAnimation
-      {
-
-        positionAnimationCopy.keyPath = "position"
-        let positionAnimationKey: String
-        if positionAnimationCopy.isAdditive {
-          let oldPosition = layer.position(from: oldBounds)
-          let newPosition = layer.position(from: newBounds)
-          positionAnimationCopy.fromValue = CGPoint(x: oldPosition.x - newPosition.x, y: oldPosition.y - newPosition.y)
-          positionAnimationCopy.toValue = CGPoint.zero
-          positionAnimationKey = layer.uniqueAnimationKey(key: "position")
-        } else {
-          positionAnimationCopy.fromValue = (self.presentation()?.bounds ?? oldBounds).center
-          positionAnimationCopy.toValue = newBounds.center
-          positionAnimationKey = "position"
-        }
-
-        sizeAnimationCopy.keyPath = "bounds.size"
-        let sizeAnimationKey: String
-        if sizeAnimationCopy.isAdditive {
-          sizeAnimationCopy.fromValue = CGSize(width: oldBounds.size.width - newBounds.size.width, height: oldBounds.size.height - newBounds.size.height)
-          sizeAnimationCopy.toValue = CGSize.zero
-          sizeAnimationKey = layer.uniqueAnimationKey(key: "bounds.size")
-        } else {
-          sizeAnimationCopy.fromValue = (self.presentation()?.bounds ?? oldBounds).size
-          sizeAnimationCopy.toValue = newBounds.size
-          sizeAnimationKey = "bounds.size"
-        }
-
-        layer.add(positionAnimationCopy, forKey: positionAnimationKey)
-        layer.add(sizeAnimationCopy, forKey: sizeAnimationKey)
-
-      } else {
-        ChouTi.assertFailure("failed to copy size animation", metadata: [
-          "sizeAnimation": "\(sizeAnimation)",
-        ])
-      }
     }
   }
 }
@@ -171,7 +124,7 @@ private extension CALayer {
 
 extension CALayer.Test {
 
-  var boundsToken: CancellableToken? {
+  var fullSizeSublayerBoundsToken: CancellableToken? {
     host.boundsToken
   }
 

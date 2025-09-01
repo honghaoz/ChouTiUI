@@ -65,31 +65,31 @@ class CALayer_FullSizeSublayerTests: XCTestCase {
     let sublayer1 = CALayer()
     let sublayer2 = CALayer()
 
-    expect(layer.test.boundsToken) == nil
+    expect(layer.test.fullSizeSublayerBoundsToken) == nil
 
     layer.addFullSizeSublayer(sublayer1)
     expect(layer.test.fullSizeSublayers) == [ObjectIdentifier(sublayer1): sublayer1]
-    expect(layer.test.boundsToken) != nil
+    expect(layer.test.fullSizeSublayerBoundsToken) != nil
 
     layer.addFullSizeSublayer(sublayer2)
     expect(layer.test.fullSizeSublayers) == [ObjectIdentifier(sublayer1): sublayer1, ObjectIdentifier(sublayer2): sublayer2]
-    expect(layer.test.boundsToken) != nil
+    expect(layer.test.fullSizeSublayerBoundsToken) != nil
 
     layer.removeFullSizeSublayer(sublayer1)
     expect(layer.test.fullSizeSublayers) == [ObjectIdentifier(sublayer2): sublayer2]
-    expect(layer.test.boundsToken) != nil
+    expect(layer.test.fullSizeSublayerBoundsToken) != nil
 
     layer.addFullSizeSublayer(sublayer1)
     expect(layer.test.fullSizeSublayers) == [ObjectIdentifier(sublayer2): sublayer2, ObjectIdentifier(sublayer1): sublayer1]
-    expect(layer.test.boundsToken) != nil
+    expect(layer.test.fullSizeSublayerBoundsToken) != nil
 
     layer.removeFullSizeSublayer(sublayer2)
     expect(layer.test.fullSizeSublayers) == [ObjectIdentifier(sublayer1): sublayer1]
-    expect(layer.test.boundsToken) != nil
+    expect(layer.test.fullSizeSublayerBoundsToken) != nil
 
     layer.removeFullSizeSublayer(sublayer1)
     expect(layer.test.fullSizeSublayers) == [:]
-    expect(layer.test.boundsToken) == nil
+    expect(layer.test.fullSizeSublayerBoundsToken) == nil
   }
 
   func test_moveFullSizeSublayerAutomatically() throws {
@@ -101,27 +101,27 @@ class CALayer_FullSizeSublayerTests: XCTestCase {
 
     expect(layer.sublayers) == [sublayer1, sublayer2]
     expect(layer.test.fullSizeSublayers) == [ObjectIdentifier(sublayer1): sublayer1, ObjectIdentifier(sublayer2): sublayer2]
-    expect(layer.test.boundsToken) != nil
+    expect(layer.test.fullSizeSublayerBoundsToken) != nil
 
     sublayer2.removeFromSuperlayer() // remove the sublayer from the layer
     expect(layer.sublayers) == [sublayer1] // sublayers is updated
     expect(layer.test.fullSizeSublayers) == [ObjectIdentifier(sublayer1): sublayer1, ObjectIdentifier(sublayer2): sublayer2] // fullSizeSublayers is not updated
-    expect(layer.test.boundsToken) != nil
+    expect(layer.test.fullSizeSublayerBoundsToken) != nil
 
     layer.bounds = CGRect(x: 0, y: 0, width: 100, height: 100) // trigger the bounds change
     expect(layer.sublayers) == [sublayer1]
     expect(layer.test.fullSizeSublayers) == [ObjectIdentifier(sublayer1): sublayer1] // fullSizeSublayers is updated
-    expect(layer.test.boundsToken) != nil
+    expect(layer.test.fullSizeSublayerBoundsToken) != nil
 
     sublayer1.removeFromSuperlayer()
     expect(layer.sublayers) == nil
     expect(layer.test.fullSizeSublayers) == [ObjectIdentifier(sublayer1): sublayer1] // fullSizeSublayers is not updated
-    expect(layer.test.boundsToken) != nil
+    expect(layer.test.fullSizeSublayerBoundsToken) != nil
 
     layer.bounds = CGRect(x: 0, y: 0, width: 200, height: 100) // trigger the bounds change
     expect(layer.sublayers) == nil
     expect(layer.test.fullSizeSublayers) == [:] // fullSizeSublayers is updated
-    expect(layer.test.boundsToken) == nil // bounds listener is removed
+    expect(layer.test.fullSizeSublayerBoundsToken) == nil // bounds listener is removed
   }
 
   func test_nonAdditiveAnimation_beforeBoundsChange() throws {
@@ -230,6 +230,7 @@ class CALayer_FullSizeSublayerTests: XCTestCase {
     let waitExpectation = expectation(description: "wait")
 
     RunLoop.main.perform {
+      self.wait(timeout: 0.05)
       let animationKeys = sublayer.animationKeys()
       expect(animationKeys) == ["bounds", "position", "bounds.size"]
       waitExpectation.fulfill()
