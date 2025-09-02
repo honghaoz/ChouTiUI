@@ -35,6 +35,25 @@ import ChouTi
 
 public extension CALayer {
 
+  /// The context for the bounds change.
+  struct BoundsChangeContext {
+
+    /// The host layer that the tracking layer is tracking.
+    public let hostLayer: CALayer
+
+    /// The tracking layer that is tracking the host layer.
+    public let trackingLayer: CALayer
+
+    /// The old bounds of the host layer.
+    public let oldBounds: CGRect
+
+    /// The new bounds of the host layer.
+    public let newBounds: CGRect
+
+    /// The timestamp of the bounds change.
+    public let timestamp: TimeInterval
+  }
+
   /// Add a layer that follows the bounds of the layer.
   ///
   /// The layer's frame will always follow the bounds of the layer, including when the layer is animated.
@@ -45,20 +64,16 @@ public extension CALayer {
   ///
   /// - Parameters:
   ///   - layer: The layer to track.
-  ///   - onBoundsChange: The block to be called when the bounds change. It will be called with the host layer, the old bounds, and the new bounds.
+  ///   - onBoundsChange: The block to be called when the bounds change. It will be called with a context containing the host layer, the tracking layer, the old bounds, the new bounds, and the timestamp.
   func addFullSizeTrackingLayer(_ layer: CALayer,
-                                onBoundsChange: ((_ hostLayer: CALayer, _ oldBounds: CGRect, _ newBounds: CGRect) -> Void)? = nil)
+                                onBoundsChange: ((_ context: BoundsChangeContext) -> Void)? = nil)
   {
-    fullSizeTrackingLayers[ObjectIdentifier(layer)] = layer
+    fullSizeTrackingLayers[ObjectIdentifier(layer)] = LayerTrackingInfo(layer: layer, onBoundsChange: onBoundsChange)
 
     // add the bounds change listener
     if boundsToken == nil {
       boundsToken = self.onBoundsChange { [weak self] _, oldBounds, newBounds in
-        guard let self else {
-          return
-        }
-        self.boundsChanged(oldBounds, newBounds)
-        onBoundsChange?(self, oldBounds, newBounds)
+        self?.boundsChanged(oldBounds, newBounds)
       }
     }
   }
@@ -76,17 +91,19 @@ public extension CALayer {
   }
 
   private func boundsChanged(_ oldBounds: CGRect, _ newBounds: CGRect) {
-    for (_, layer) in fullSizeTrackingLayers {
+    let timestamp = CACurrentMediaTime()
+
+    for (_, layerTrackingInfo) in fullSizeTrackingLayers {
+      let layer = layerTrackingInfo.layer
+      let onBoundsChange = layerTrackingInfo.onBoundsChange
+
       layer.frame = newBounds
-      #if DEBUG
-      if Thread.isRunningXCTest {
-        RunLoop.main.perform { // schedule to the next run loop to make sure the animation added after the bounds change can be found
-          self.addSizeSynchronizationAnimation(to: layer, oldBounds: oldBounds, newBounds: newBounds)
-        }
+
+      RunLoop.main.perform { // schedule to the next run loop to make sure the animation added after the bounds change can be found
+        self.addSizeSynchronizationAnimation(to: layer, oldBounds: oldBounds, newBounds: newBounds)
       }
-      #else
-      addSizeSynchronizationAnimation(to: layer, oldBounds: oldBounds, newBounds: newBounds)
-      #endif
+
+      onBoundsChange?(BoundsChangeContext(hostLayer: self, trackingLayer: layer, oldBounds: oldBounds, newBounds: newBounds, timestamp: timestamp))
     }
   }
 
@@ -149,9 +166,14 @@ private extension CALayer {
     set { setAssociatedObject(newValue, for: &AssociateKey.boundsToken) }
   }
 
+  struct LayerTrackingInfo {
+    let layer: CALayer
+    let onBoundsChange: ((_ context: BoundsChangeContext) -> Void)?
+  }
+
   /// The layers that track the bounds of the layer.
-  var fullSizeTrackingLayers: OrderedDictionary<ObjectIdentifier, CALayer> {
-    get { getAssociatedObject(for: &AssociateKey.fullSizeTrackingLayers) as? OrderedDictionary<ObjectIdentifier, CALayer> ?? [:] }
+  var fullSizeTrackingLayers: OrderedDictionary<ObjectIdentifier, LayerTrackingInfo> {
+    get { getAssociatedObject(for: &AssociateKey.fullSizeTrackingLayers) as? OrderedDictionary<ObjectIdentifier, LayerTrackingInfo> ?? [:] }
     set { setAssociatedObject(newValue, for: &AssociateKey.fullSizeTrackingLayers) }
   }
 }
