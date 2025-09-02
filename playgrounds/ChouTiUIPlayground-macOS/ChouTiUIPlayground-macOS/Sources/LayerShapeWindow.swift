@@ -113,7 +113,15 @@ class LayerShapeWindow: NSWindow {
     }
 
     onMainAsync(delay: 3) {
-      layer.shape = Capsule()
+      layer.animateShape(to: SuperEllipse(cornerRadius: 64, roundingCorners: [.topLeft, .bottomRight, .topRight, .bottomLeft]), timing: .spring(response: 1))
+    }
+
+    onMainAsync(delay: 3.5) {
+      layer.animateShape(
+        from: SuperEllipse(cornerRadius: 0, roundingCorners: [.topLeft, .bottomRight, .topRight, .bottomLeft]),
+        to: SuperEllipse(cornerRadius: 64, roundingCorners: [.topLeft, .bottomRight, .topRight, .bottomLeft]),
+        timing: .spring(response: 1)
+      )
     }
   }
 }

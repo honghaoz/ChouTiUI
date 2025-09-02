@@ -124,4 +124,49 @@ public extension CALayer {
       maskLayer.add(animationCopy, forKey: "path")
     })
   }
+
+  /// Animate the shape of the layer.
+  ///
+  /// The layer's shape will be updated to the new shape.
+  ///
+  /// - Parameters:
+  ///   - fromShape: The from shape. If `nil`, the current shape will be used. Default is `nil`.
+  ///   - toShape: The to shape.
+  ///   - timing: The timing of the animation.
+  func animateShape(from fromShape: (any Shape)? = nil, to toShape: any Shape, timing: AnimationTiming) {
+    switch (shape, fromShape) {
+    case (nil, nil):
+      ChouTi.assertFailure("layer has no shape and no from shape")
+      return
+    case (.some, nil):
+      // use current shape
+      break
+    case (nil, .some(let fromShape)),
+         (.some, .some(let fromShape)):
+      // from shape is specified, set the shape
+      shape = fromShape
+    }
+
+    guard let currentShape = shape, let maskLayer = mask as? CAShapeLayer else {
+      ChouTi.assertFailure("no mask layer")
+      return
+    }
+
+    maskLayer.animate(
+      keyPath: "path",
+      timing: timing,
+      from: { maskLayer in
+        guard let maskLayer = maskLayer as? CAShapeLayer else {
+          return currentShape.path(in: maskLayer.bounds)
+        }
+        if fromShape == nil {
+          // no from shape, use the current in-flight shape
+          return maskLayer.presentation()?.path ?? currentShape.path(in: maskLayer.bounds)
+        } else {
+          return currentShape.path(in: maskLayer.bounds)
+        }
+      },
+      to: { maskLayer in toShape.path(in: maskLayer.bounds) }
+    )
+  }
 }
