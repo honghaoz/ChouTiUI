@@ -71,7 +71,7 @@ public extension CALayer {
       // remove shape
       mask = nil
 
-    case (nil, .some(let newShape)):
+    case (nil, .some):
       // none -> new shape
       setupMaskLayer()
 
@@ -103,9 +103,6 @@ public extension CALayer {
       }
 
       let layer = context.hostLayer
-      let oldBounds = context.oldBounds
-      let newBounds = context.newBounds
-      let timestamp = context.timestamp
 
       // update model
       maskLayer.path = shape.path(in: layer.bounds)
