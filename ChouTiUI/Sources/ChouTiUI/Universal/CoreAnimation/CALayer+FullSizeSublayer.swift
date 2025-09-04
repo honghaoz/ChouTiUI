@@ -106,13 +106,13 @@ private extension CALayer {
   }
 
   /// The token for the bounds change listener.
-  var boundsToken: CancellableToken? {
+  private var boundsToken: CancellableToken? {
     get { getAssociatedObject(for: &AssociateKey.boundsToken) as? CancellableToken }
     set { setAssociatedObject(newValue, for: &AssociateKey.boundsToken) }
   }
 
   /// The sublayers that fill the bounds of the layer.
-  var fullSizeSublayers: OrderedDictionary<ObjectIdentifier, CALayer> {
+  private var fullSizeSublayers: OrderedDictionary<ObjectIdentifier, CALayer> {
     get { getAssociatedObject(for: &AssociateKey.fullSizeSublayers) as? OrderedDictionary<ObjectIdentifier, CALayer> ?? [:] }
     set { setAssociatedObject(newValue, for: &AssociateKey.fullSizeSublayers) }
   }

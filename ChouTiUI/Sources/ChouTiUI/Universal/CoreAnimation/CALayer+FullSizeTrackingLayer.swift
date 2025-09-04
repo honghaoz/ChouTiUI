@@ -161,7 +161,7 @@ private extension CALayer {
   }
 
   /// The token for the bounds change listener.
-  var boundsToken: CancellableToken? {
+  private var boundsToken: CancellableToken? {
     get { getAssociatedObject(for: &AssociateKey.boundsToken) as? CancellableToken }
     set { setAssociatedObject(newValue, for: &AssociateKey.boundsToken) }
   }
@@ -172,7 +172,7 @@ private extension CALayer {
   }
 
   /// The layers that track the bounds of the layer.
-  var fullSizeTrackingLayers: OrderedDictionary<ObjectIdentifier, LayerTrackingInfo> {
+  private var fullSizeTrackingLayers: OrderedDictionary<ObjectIdentifier, LayerTrackingInfo> {
     get { getAssociatedObject(for: &AssociateKey.fullSizeTrackingLayers) as? OrderedDictionary<ObjectIdentifier, LayerTrackingInfo> ?? [:] }
     set { setAssociatedObject(newValue, for: &AssociateKey.fullSizeTrackingLayers) }
   }
