@@ -1,5 +1,5 @@
 //
-//  CABasicAnimation+ExtensionsTests.swift
+//  CAAnimation+Extensions.swift
 //  ChouTiUI
 //
 //  Created by Honghao Zhang on 9/1/25.
@@ -30,28 +30,18 @@
 
 import QuartzCore
 
-import ChouTiTest
+public extension CAAnimation {
 
-import ChouTiUI
-@_spi(Private) import ComposeUI
-
-class CABasicAnimation_ExtensionsTests: XCTestCase {
-
-  func test_progress_springAnimation() throws {
-    let animation = CABasicAnimation.makeAnimation(.spring(dampingRatio: 1, response: 1))
-    try expect(animation.progress(for: 0.0).unwrap()) == 0
-    try expect(animation.progress(for: 0.25).unwrap()) == 0.56196046
-    try expect(animation.progress(for: 0.5).unwrap()) == 0.89003396
-    try expect(animation.progress(for: 0.75).unwrap()) == 0.976705
-    try expect(animation.progress(for: 1.0).unwrap()) == 0.99546117
-  }
-
-  func test_progress_linearAnimation() throws {
-    let animation = CABasicAnimation.makeAnimation(.linear(duration: 1))
-    try expect(animation.progress(for: 0.0).unwrap()) == 0
-    try expect(animation.progress(for: 0.25).unwrap()) == 0.25
-    try expect(animation.progress(for: 0.5).unwrap()) == 0.5
-    try expect(animation.progress(for: 0.75).unwrap()) == 0.75
-    try expect(animation.progress(for: 1.0).unwrap()) == 1.0
+  /// Calculates the progress of the animation for the given progress by time.
+  ///
+  /// - Parameters:
+  ///   - t: The progress of the animation by time. The value should be between 0 and 1.
+  /// - Returns: The progress of the animation.
+  func progress(for t: Float) -> Float? {
+    if let springAnimation = self as? CASpringAnimation {
+      return springAnimation.solveForInput(t)
+    } else {
+      return timingFunction?.solveForInput(t)
+    }
   }
 }
