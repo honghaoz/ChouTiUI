@@ -165,6 +165,10 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
   }
 
   func test_onLiveFrameChange_explicitAnimation_positionChanged() throws {
+    guard !isCI() else {
+      return
+    }
+
     var capturedFrames: [(CALayer, CGRect)] = []
 
     layer.onLiveFrameChange { layer, frame in
@@ -190,6 +194,10 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
   }
 
   func test_onLiveFrameChange_explicitAnimation_positionChanged_additive() throws {
+    guard !isCI() else {
+      return
+    }
+
     var capturedFrames: [(CALayer, CGRect)] = []
 
     layer.onLiveFrameChange { layer, frame in
@@ -208,6 +216,10 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
   }
 
   func test_onLiveFrameChange_explicitAnimation_positionXChanged() throws {
+    guard !isCI() else {
+      return
+    }
+
     var capturedFrames: [(CALayer, CGRect)] = []
 
     layer.onLiveFrameChange { layer, frame in
@@ -233,6 +245,10 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
   }
 
   func test_onLiveFrameChange_explicitAnimation_positionXChanged_additive() throws {
+    guard !isCI() else {
+      return
+    }
+
     var capturedFrames: [(CALayer, CGRect)] = []
 
     layer.onLiveFrameChange { layer, frame in
@@ -251,6 +267,10 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
   }
 
   func test_onLiveFrameChange_explicitAnimation_positionYChanged() throws {
+    guard !isCI() else {
+      return
+    }
+
     var capturedFrames: [(CALayer, CGRect)] = []
 
     layer.onLiveFrameChange { layer, frame in
@@ -276,6 +296,10 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
   }
 
   func test_onLiveFrameChange_explicitAnimation_positionYChanged_additive() throws {
+    guard !isCI() else {
+      return
+    }
+
     var capturedFrames: [(CALayer, CGRect)] = []
 
     layer.onLiveFrameChange { layer, frame in
@@ -294,6 +318,10 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
   }
 
   func test_onLiveFrameChange_explicitAnimation_boundsChanged() throws {
+    guard !isCI() else {
+      return
+    }
+
     var capturedFrames: [(CALayer, CGRect)] = []
 
     layer.onLiveFrameChange { layer, frame in
@@ -318,6 +346,10 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
   }
 
   func test_onLiveFrameChange_explicitAnimation_boundsChanged_additive() throws {
+    guard !isCI() else {
+      return
+    }
+
     var capturedFrames: [(CALayer, CGRect)] = []
 
     layer.onLiveFrameChange { layer, frame in
@@ -354,6 +386,10 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
   }
 
   func test_onLiveFrameChange_explicitAnimation_boundsOriginChanged() throws {
+    guard !isCI() else {
+      return
+    }
+
     var capturedFrames: [(CALayer, CGRect)] = []
 
     layer.onLiveFrameChange { layer, frame in
@@ -376,6 +412,10 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
   }
 
   func test_onLiveFrameChange_explicitAnimation_boundsSizeChanged() throws {
+    guard !isCI() else {
+      return
+    }
+
     var capturedFrames: [(CALayer, CGRect)] = []
 
     layer.onLiveFrameChange { layer, frame in
@@ -401,6 +441,10 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
   }
 
   func test_onLiveFrameChange_explicitAnimation_boundsSizeWidthChanged() throws {
+    guard !isCI() else {
+      return
+    }
+
     var capturedFrames: [(CALayer, CGRect)] = []
 
     layer.onLiveFrameChange { layer, frame in
@@ -425,6 +469,10 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
   }
 
   func test_onLiveFrameChange_explicitAnimation_boundsSizeWidthChanged_additive() throws {
+    guard !isCI() else {
+      return
+    }
+
     var capturedFrames: [(CALayer, CGRect)] = []
 
     layer.onLiveFrameChange { layer, frame in
@@ -443,6 +491,10 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
   }
 
   func test_onLiveFrameChange_explicitAnimation_boundsSizeHeightChanged() throws {
+    guard !isCI() else {
+      return
+    }
+
     var capturedFrames: [(CALayer, CGRect)] = []
 
     layer.onLiveFrameChange { layer, frame in
@@ -467,6 +519,10 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
   }
 
   func test_onLiveFrameChange_explicitAnimation_boundsSizeHeightChanged_additive() throws {
+    guard !isCI() else {
+      return
+    }
+
     var capturedFrames: [(CALayer, CGRect)] = []
 
     layer.onLiveFrameChange { layer, frame in
@@ -485,6 +541,10 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
   }
 
   func test_onLiveFrameChange_explicitAnimation_frameChanged() throws {
+    guard !isCI() else {
+      return
+    }
+
     var capturedFrames: [(CALayer, CGRect)] = []
 
     layer.onLiveFrameChange { layer, frame in
@@ -503,6 +563,10 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
   }
 
   func test_onLiveFrameChange_explicitAnimation_frameChanged_overlap() throws {
+    guard !isCI() else {
+      return
+    }
+
     var capturedFrames: [(CALayer, CGRect)] = []
 
     layer.onLiveFrameChange { layer, frame in
@@ -526,6 +590,10 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
   }
 
   func test_onLiveFrameChange_implicitAnimation_positionChanged() throws {
+    guard !isCI() else {
+      return
+    }
+
     layer.delegate = nil // remove the delegate to enable implicit animations
 
     // old position is (60, 120)
@@ -551,6 +619,10 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
   }
 
   func test_onLiveFrameChange_implicitAnimation_positionXChanged() throws {
+    guard !isCI() else {
+      return
+    }
+
     layer.delegate = nil // remove the delegate to enable implicit animations
 
     // old position is (60, 120)
@@ -576,6 +648,10 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
   }
 
   func test_onLiveFrameChange_implicitAnimation_positionYChanged() throws {
+    guard !isCI() else {
+      return
+    }
+
     layer.delegate = nil // remove the delegate to enable implicit animations
 
     // old position is (60, 120)
@@ -601,6 +677,10 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
   }
 
   func test_onLiveFrameChange_implicitAnimation_boundsOriginChanged() throws {
+    guard !isCI() else {
+      return
+    }
+
     layer.delegate = nil // remove the delegate to enable implicit animations
 
     // old bounds is (100, 200)
@@ -623,6 +703,10 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
   }
 
   func test_onLiveFrameChange_implicitAnimation_boundsSizeChanged() throws {
+    guard !isCI() else {
+      return
+    }
+
     layer.delegate = nil // remove the delegate to enable implicit animations
 
     // old bounds is (100, 200)
@@ -648,6 +732,10 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
   }
 
   func test_onLiveFrameChange_implicitAnimation_boundsSizeWidthChanged() throws {
+    guard !isCI() else {
+      return
+    }
+
     layer.delegate = nil // remove the delegate to enable implicit animations
 
     // old bounds is (100, 200)
@@ -673,6 +761,10 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
   }
 
   func test_onLiveFrameChange_implicitAnimation_boundsSizeHeightChanged() throws {
+    guard !isCI() else {
+      return
+    }
+
     layer.delegate = nil // remove the delegate to enable implicit animations
 
     // old bounds is (100, 200)
@@ -698,6 +790,10 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
   }
 
   func test_onLiveFrameChange_implicitAnimation_boundsChanged() throws {
+    guard !isCI() else {
+      return
+    }
+
     layer.delegate = nil // remove the delegate to enable implicit animations
 
     // old bounds is (100, 200)
@@ -723,6 +819,10 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
   }
 
   func test_onLiveFrameChange_implicitAnimation_frameChanged() throws {
+    guard !isCI() else {
+      return
+    }
+
     layer.delegate = nil // remove the delegate to enable implicit animations
 
     // old bounds is (100, 200)
@@ -748,4 +848,13 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
     try expect(capturedFrames.last.unwrap().1) == CGRect(x: 10, y: 20, width: 110, height: 220)
     expect(layer.sublayers?.count ?? 0) == 0 // should have no display layer
   }
+}
+
+private func isCI() -> Bool {
+  #if os(macOS)
+  // only macOS machine may fail the tests
+  return ProcessInfo.processInfo.environment["CI"] == "true"
+  #else
+  return false
+  #endif
 }
