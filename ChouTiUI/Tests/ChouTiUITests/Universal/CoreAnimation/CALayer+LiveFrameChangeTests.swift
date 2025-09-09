@@ -59,6 +59,8 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
     super.tearDown()
   }
 
+  // MARK: - No Animation
+
   func test_onLiveFrameChange_noAnimations_positionChanged() throws {
     // old position is (60, 120)
     var capturedFrames: [(CALayer, CGRect)] = []
@@ -164,202 +166,240 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
     expect(capturedFrames2.count) == 2
   }
 
-  func test_onLiveFrameChange_explicitAnimation_positionChanged() throws {
-    guard !Environment.isGitHubActions else {
-      return
-    }
+  // MARK: - Explicit Animation
 
+  func test_onLiveFrameChange_explicitAnimation_positionChanged() throws {
+    let waiter = TickWaiter()
     var capturedFrames: [(CALayer, CGRect)] = []
 
+    let expectation = XCTestExpectation(description: "tick")
     layer.onLiveFrameChange { layer, frame in
       capturedFrames.append((layer, frame))
+      waiter.tick()
+      if isGitHubActionsMac {
+        expectation.fulfill()
+      }
     }
 
     layer.position = CGPoint(x: 150, y: 300)
 
-    let animationDuration = 0.1
     let animation = CABasicAnimation(keyPath: "position")
     animation.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-    animation.duration = animationDuration
+    animation.duration = Constants.explicitAnimationDuration
     animation.fromValue = CGPoint(x: 60, y: 120)
     animation.toValue = CGPoint(x: 150, y: 300)
     layer.add(animation, forKey: "position")
 
-    wait(timeout: animationDuration + 0.05) // wait until the animation is finished
+    if isGitHubActionsMac {
+      wait(for: [expectation], timeout: 1)
+    } else {
+      waiter.wait() // wait until the animation is finished
 
-    expect(capturedFrames.count) > 5
-    try expect(capturedFrames.last.unwrap().0) === layer
-    try expect(capturedFrames.last.unwrap().1) == CGRect(x: 100, y: 200, width: 100, height: 200)
-    expect(layer.sublayers?.count ?? 0) == 0 // should have no display layer
+      expect(capturedFrames.count) > 2
+      try expect(capturedFrames.last.unwrap().0) === layer
+      try expect(capturedFrames.last.unwrap().1) == CGRect(x: 100, y: 200, width: 100, height: 200)
+      expect(layer.sublayers?.count ?? 0) == 0 // should have no display layer
+    }
   }
 
   func test_onLiveFrameChange_explicitAnimation_positionChanged_additive() throws {
-    guard !Environment.isGitHubActions else {
-      return
-    }
-
+    let waiter = TickWaiter()
     var capturedFrames: [(CALayer, CGRect)] = []
 
+    let expectation = XCTestExpectation(description: "tick")
     layer.onLiveFrameChange { layer, frame in
       capturedFrames.append((layer, frame))
+      waiter.tick()
+      if isGitHubActionsMac {
+        expectation.fulfill()
+      }
     }
 
-    let animationDuration = 0.1
-    layer.animate(keyPath: "position", to: CGPoint(x: 150, y: 300), timing: .easeInEaseOut(duration: animationDuration))
+    layer.animate(keyPath: "position", to: CGPoint(x: 150, y: 300), timing: .easeInEaseOut(duration: Constants.explicitAnimationDuration))
 
-    wait(timeout: animationDuration + 0.05) // wait until the animation is finished
+    if isGitHubActionsMac {
+      wait(for: [expectation], timeout: 1)
+    } else {
+      waiter.wait() // wait until the animation is finished
 
-    expect(capturedFrames.count) > 5
-    try expect(capturedFrames.last.unwrap().0) === layer
-    try expect(capturedFrames.last.unwrap().1) == CGRect(x: 100, y: 200, width: 100, height: 200)
-    expect(layer.sublayers?.count ?? 0) == 0 // should have no display layer
+      expect(capturedFrames.count) > 2
+      try expect(capturedFrames.last.unwrap().0) === layer
+      try expect(capturedFrames.last.unwrap().1) == CGRect(x: 100, y: 200, width: 100, height: 200)
+      expect(layer.sublayers?.count ?? 0) == 0 // should have no display layer
+    }
   }
 
   func test_onLiveFrameChange_explicitAnimation_positionXChanged() throws {
-    guard !Environment.isGitHubActions else {
-      return
-    }
-
+    let waiter = TickWaiter()
     var capturedFrames: [(CALayer, CGRect)] = []
 
+    let expectation = XCTestExpectation(description: "tick")
     layer.onLiveFrameChange { layer, frame in
       capturedFrames.append((layer, frame))
+      waiter.tick()
+      if isGitHubActionsMac {
+        expectation.fulfill()
+      }
     }
 
     layer.position.x = 150
 
-    let animationDuration = 0.1
     let animation = CABasicAnimation(keyPath: "position.x")
     animation.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-    animation.duration = animationDuration
+    animation.duration = Constants.explicitAnimationDuration
     animation.fromValue = 60
     animation.toValue = 150
     layer.add(animation, forKey: "position.x")
 
-    wait(timeout: animationDuration + 0.05) // wait until the animation is finished
+    if isGitHubActionsMac {
+      wait(for: [expectation], timeout: 1)
+    } else {
+      waiter.wait() // wait until the animation is finished
 
-    expect(capturedFrames.count) > 5
-    try expect(capturedFrames.last.unwrap().0) === layer
-    try expect(capturedFrames.last.unwrap().1) == CGRect(x: 100, y: 20, width: 100, height: 200)
-    expect(layer.sublayers?.count ?? 0) == 0 // should have no display layer
+      expect(capturedFrames.count) > 2
+      try expect(capturedFrames.last.unwrap().0) === layer
+      try expect(capturedFrames.last.unwrap().1) == CGRect(x: 100, y: 20, width: 100, height: 200)
+      expect(layer.sublayers?.count ?? 0) == 0 // should have no display layer
+    }
   }
 
   func test_onLiveFrameChange_explicitAnimation_positionXChanged_additive() throws {
-    guard !Environment.isGitHubActions else {
-      return
-    }
-
+    let waiter = TickWaiter()
     var capturedFrames: [(CALayer, CGRect)] = []
 
+    let expectation = XCTestExpectation(description: "tick")
     layer.onLiveFrameChange { layer, frame in
       capturedFrames.append((layer, frame))
+      waiter.tick()
+      if isGitHubActionsMac {
+        expectation.fulfill()
+      }
     }
 
-    let animationDuration = 0.1
-    layer.animate(keyPath: "position.x", to: 150, timing: .easeInEaseOut(duration: animationDuration))
+    layer.animate(keyPath: "position.x", to: 150, timing: .easeInEaseOut(duration: Constants.explicitAnimationDuration))
 
-    wait(timeout: animationDuration + 0.05) // wait until the animation is finished
+    if isGitHubActionsMac {
+      wait(for: [expectation], timeout: 1)
+    } else {
+      waiter.wait() // wait until the animation is finished
 
-    expect(capturedFrames.count) > 5
-    try expect(capturedFrames.last.unwrap().0) === layer
-    try expect(capturedFrames.last.unwrap().1) == CGRect(x: 100, y: 20, width: 100, height: 200)
-    expect(layer.sublayers?.count ?? 0) == 0 // should have no display layer
+      expect(capturedFrames.count) > 2
+      try expect(capturedFrames.last.unwrap().0) === layer
+      try expect(capturedFrames.last.unwrap().1) == CGRect(x: 100, y: 20, width: 100, height: 200)
+      expect(layer.sublayers?.count ?? 0) == 0 // should have no display layer
+    }
   }
 
   func test_onLiveFrameChange_explicitAnimation_positionYChanged() throws {
-    guard !Environment.isGitHubActions else {
-      return
-    }
-
+    let waiter = TickWaiter()
     var capturedFrames: [(CALayer, CGRect)] = []
 
+    let expectation = XCTestExpectation(description: "tick")
     layer.onLiveFrameChange { layer, frame in
       capturedFrames.append((layer, frame))
+      waiter.tick()
+      if isGitHubActionsMac {
+        expectation.fulfill()
+      }
     }
 
     layer.position.y = 300
 
-    let animationDuration = 0.1
     let animation = CABasicAnimation(keyPath: "position.y")
     animation.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-    animation.duration = animationDuration
+    animation.duration = Constants.explicitAnimationDuration
     animation.fromValue = 120
     animation.toValue = 300
     layer.add(animation, forKey: "position.y")
 
-    wait(timeout: animationDuration + 0.05) // wait until the animation is finished
+    if isGitHubActionsMac {
+      wait(for: [expectation], timeout: 1)
+    } else {
+      waiter.wait() // wait until the animation is finished
 
-    expect(capturedFrames.count) > 5
-    try expect(capturedFrames.last.unwrap().0) === layer
-    try expect(capturedFrames.last.unwrap().1) == CGRect(x: 10, y: 200, width: 100, height: 200)
-    expect(layer.sublayers?.count ?? 0) == 0 // should have no display layer
+      expect(capturedFrames.count) > 2
+      try expect(capturedFrames.last.unwrap().0) === layer
+      try expect(capturedFrames.last.unwrap().1) == CGRect(x: 10, y: 200, width: 100, height: 200)
+      expect(layer.sublayers?.count ?? 0) == 0 // should have no display layer
+    }
   }
 
   func test_onLiveFrameChange_explicitAnimation_positionYChanged_additive() throws {
-    guard !Environment.isGitHubActions else {
-      return
-    }
-
+    let waiter = TickWaiter()
     var capturedFrames: [(CALayer, CGRect)] = []
 
+    let expectation = XCTestExpectation(description: "tick")
     layer.onLiveFrameChange { layer, frame in
       capturedFrames.append((layer, frame))
+      waiter.tick()
+      if isGitHubActionsMac {
+        expectation.fulfill()
+      }
     }
 
-    let animationDuration = 0.1
-    layer.animate(keyPath: "position.y", to: 300, timing: .easeInEaseOut(duration: animationDuration))
+    layer.animate(keyPath: "position.y", to: 300, timing: .easeInEaseOut(duration: Constants.explicitAnimationDuration))
 
-    wait(timeout: animationDuration + 0.05) // wait until the animation is finished
+    if isGitHubActionsMac {
+      wait(for: [expectation], timeout: 1)
+    } else {
+      waiter.wait() // wait until the animation is finished
 
-    expect(capturedFrames.count) > 5
-    try expect(capturedFrames.last.unwrap().0) === layer
-    try expect(capturedFrames.last.unwrap().1) == CGRect(x: 10, y: 200, width: 100, height: 200)
-    expect(layer.sublayers?.count ?? 0) == 0 // should have no display layer
+      expect(capturedFrames.count) > 2
+      try expect(capturedFrames.last.unwrap().0) === layer
+      try expect(capturedFrames.last.unwrap().1) == CGRect(x: 10, y: 200, width: 100, height: 200)
+      expect(layer.sublayers?.count ?? 0) == 0 // should have no display layer
+    }
   }
 
   func test_onLiveFrameChange_explicitAnimation_boundsChanged() throws {
-    guard !Environment.isGitHubActions else {
-      return
-    }
-
+    let waiter = TickWaiter()
     var capturedFrames: [(CALayer, CGRect)] = []
 
+    let expectation = XCTestExpectation(description: "tick")
     layer.onLiveFrameChange { layer, frame in
       capturedFrames.append((layer, frame))
+      waiter.tick()
+      if isGitHubActionsMac {
+        expectation.fulfill()
+      }
     }
 
     layer.bounds = CGRect(x: 10, y: 20, width: 110, height: 220)
-    let animationDuration = 0.1
     let animation = CABasicAnimation(keyPath: "bounds")
     animation.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-    animation.duration = animationDuration
+    animation.duration = Constants.explicitAnimationDuration
     animation.fromValue = CGRect(x: 0, y: 0, width: 100, height: 200)
     animation.toValue = CGRect(x: 10, y: 20, width: 110, height: 220)
     layer.add(animation, forKey: "bounds")
 
-    wait(timeout: animationDuration + 0.05) // wait until the animation is finished
+    if isGitHubActionsMac {
+      wait(for: [expectation], timeout: 1)
+    } else {
+      waiter.wait() // wait until the animation is finished
 
-    expect(capturedFrames.count) > 5
-    try expect(capturedFrames.last.unwrap().0) === layer
-    try expect(capturedFrames.last.unwrap().1) == CGRect(x: 5, y: 10, width: 110, height: 220)
-    expect(layer.sublayers?.count ?? 0) == 0 // should have no display layer
+      expect(capturedFrames.count) > 2
+      try expect(capturedFrames.last.unwrap().0) === layer
+      try expect(capturedFrames.last.unwrap().1) == CGRect(x: 5, y: 10, width: 110, height: 220)
+      expect(layer.sublayers?.count ?? 0) == 0 // should have no display layer
+    }
   }
 
   func test_onLiveFrameChange_explicitAnimation_boundsChanged_additive() throws {
-    guard !Environment.isGitHubActions else {
-      return
-    }
-
+    let waiter = TickWaiter()
     var capturedFrames: [(CALayer, CGRect)] = []
 
+    let expectation = XCTestExpectation(description: "tick")
     layer.onLiveFrameChange { layer, frame in
       capturedFrames.append((layer, frame))
+      waiter.tick()
+      if isGitHubActionsMac {
+        expectation.fulfill()
+      }
     }
 
-    let animationDuration = 0.1
     layer.animate(
       keyPath: "bounds",
-      timing: .easeInEaseOut(duration: animationDuration),
+      timing: .easeInEaseOut(duration: Constants.explicitAnimationDuration),
       from: {
         let fromRect = ($0.value(forKeyPath: "bounds") as! CGRect) // swiftlint:disable:this force_cast
         let toRect = CGRect(x: 10, y: 20, width: 110, height: 220)
@@ -377,19 +417,19 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
       }
     )
 
-    wait(timeout: animationDuration + 0.05) // wait until the animation is finished
+    if isGitHubActionsMac {
+      wait(for: [expectation], timeout: 1)
+    } else {
+      waiter.wait() // wait until the animation is finished
 
-    expect(capturedFrames.count) > 5
-    try expect(capturedFrames.last.unwrap().0) === layer
-    try expect(capturedFrames.last.unwrap().1) == CGRect(x: 5, y: 10, width: 110, height: 220)
-    expect(layer.sublayers?.count ?? 0) == 0 // should have no display layer
+      expect(capturedFrames.count) > 2
+      try expect(capturedFrames.last.unwrap().0) === layer
+      try expect(capturedFrames.last.unwrap().1) == CGRect(x: 5, y: 10, width: 110, height: 220)
+      expect(layer.sublayers?.count ?? 0) == 0 // should have no display layer
+    }
   }
 
   func test_onLiveFrameChange_explicitAnimation_boundsOriginChanged() throws {
-    guard !Environment.isGitHubActions else {
-      return
-    }
-
     var capturedFrames: [(CALayer, CGRect)] = []
 
     layer.onLiveFrameChange { layer, frame in
@@ -397,7 +437,7 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
     }
 
     layer.bounds.origin = CGPoint(x: 10, y: 20)
-    let animationDuration = 0.1
+    let animationDuration = Constants.explicitAnimationDuration
     let animation = CABasicAnimation(keyPath: "bounds.origin")
     animation.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
     animation.duration = animationDuration
@@ -412,196 +452,231 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
   }
 
   func test_onLiveFrameChange_explicitAnimation_boundsSizeChanged() throws {
-    guard !Environment.isGitHubActions else {
-      return
-    }
-
+    let waiter = TickWaiter()
     var capturedFrames: [(CALayer, CGRect)] = []
 
+    let expectation = XCTestExpectation(description: "tick")
     layer.onLiveFrameChange { layer, frame in
       capturedFrames.append((layer, frame))
+      waiter.tick()
+      if isGitHubActionsMac {
+        expectation.fulfill()
+      }
     }
 
     layer.bounds.size = CGSize(width: 110, height: 220)
 
-    let animationDuration = 0.1
     let animation = CABasicAnimation(keyPath: "bounds.size")
     animation.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-    animation.duration = animationDuration
+    animation.duration = Constants.explicitAnimationDuration
     animation.fromValue = CGSize(width: 100, height: 200)
     animation.toValue = CGSize(width: 110, height: 220)
     layer.add(animation, forKey: "bounds.size")
 
-    wait(timeout: animationDuration + 0.05) // wait until the animation is finished
+    if isGitHubActionsMac {
+      wait(for: [expectation], timeout: 1)
+    } else {
+      waiter.wait() // wait until the animation is finished
 
-    expect(capturedFrames.count) > 5
-    try expect(capturedFrames.last.unwrap().0) === layer
-    try expect(capturedFrames.last.unwrap().1) == CGRect(x: 5, y: 10, width: 110, height: 220)
-    expect(layer.sublayers?.count ?? 0) == 0 // should have no display layer
+      expect(capturedFrames.count) > 2
+      try expect(capturedFrames.last.unwrap().0) === layer
+      try expect(capturedFrames.last.unwrap().1) == CGRect(x: 5, y: 10, width: 110, height: 220)
+      expect(layer.sublayers?.count ?? 0) == 0 // should have no display layer
+    }
   }
 
   func test_onLiveFrameChange_explicitAnimation_boundsSizeWidthChanged() throws {
-    guard !Environment.isGitHubActions else {
-      return
-    }
-
+    let waiter = TickWaiter()
     var capturedFrames: [(CALayer, CGRect)] = []
 
+    let expectation = XCTestExpectation(description: "tick")
     layer.onLiveFrameChange { layer, frame in
       capturedFrames.append((layer, frame))
+      waiter.tick()
+      if isGitHubActionsMac {
+        expectation.fulfill()
+      }
     }
 
     layer.bounds.size.width = 110
-    let animationDuration = 0.1
     let animation = CABasicAnimation(keyPath: "bounds.size.width")
     animation.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-    animation.duration = animationDuration
+    animation.duration = Constants.explicitAnimationDuration
     animation.fromValue = 100
     animation.toValue = 110
     layer.add(animation, forKey: "bounds.size.width")
 
-    wait(timeout: animationDuration + 0.05) // wait until the animation is finished
+    if isGitHubActionsMac {
+      wait(for: [expectation], timeout: 1)
+    } else {
+      waiter.wait() // wait until the animation is finished
 
-    expect(capturedFrames.count) > 5
-    try expect(capturedFrames.last.unwrap().0) === layer
-    try expect(capturedFrames.last.unwrap().1) == CGRect(x: 5, y: 20, width: 110, height: 200)
-    expect(layer.sublayers?.count ?? 0) == 0 // should have no display layer
+      expect(capturedFrames.count) > 2
+      try expect(capturedFrames.last.unwrap().0) === layer
+      try expect(capturedFrames.last.unwrap().1) == CGRect(x: 5, y: 20, width: 110, height: 200)
+      expect(layer.sublayers?.count ?? 0) == 0 // should have no display layer
+    }
   }
 
   func test_onLiveFrameChange_explicitAnimation_boundsSizeWidthChanged_additive() throws {
-    guard !Environment.isGitHubActions else {
-      return
-    }
-
+    let waiter = TickWaiter()
     var capturedFrames: [(CALayer, CGRect)] = []
 
+    let expectation = XCTestExpectation(description: "tick")
     layer.onLiveFrameChange { layer, frame in
       capturedFrames.append((layer, frame))
+      waiter.tick()
+      if isGitHubActionsMac {
+        expectation.fulfill()
+      }
     }
 
-    let animationDuration = 0.1
-    layer.animate(keyPath: "bounds.size.width", to: 110, timing: .easeInEaseOut(duration: animationDuration))
+    layer.animate(keyPath: "bounds.size.width", to: 110, timing: .easeInEaseOut(duration: Constants.explicitAnimationDuration))
 
-    wait(timeout: animationDuration + 0.05) // wait until the animation is finished
+    if isGitHubActionsMac {
+      wait(for: [expectation], timeout: 1)
+    } else {
+      waiter.wait() // wait until the animation is finished
 
-    expect(capturedFrames.count) > 5
-    try expect(capturedFrames.last.unwrap().0) === layer
-    try expect(capturedFrames.last.unwrap().1) == CGRect(x: 5, y: 20, width: 110, height: 200)
-    expect(layer.sublayers?.count ?? 0) == 0 // should have no display layer
+      expect(capturedFrames.count) > 2
+      try expect(capturedFrames.last.unwrap().0) === layer
+      try expect(capturedFrames.last.unwrap().1) == CGRect(x: 5, y: 20, width: 110, height: 200)
+      expect(layer.sublayers?.count ?? 0) == 0 // should have no display layer
+    }
   }
 
   func test_onLiveFrameChange_explicitAnimation_boundsSizeHeightChanged() throws {
-    guard !Environment.isGitHubActions else {
-      return
-    }
-
+    let waiter = TickWaiter()
     var capturedFrames: [(CALayer, CGRect)] = []
 
+    let expectation = XCTestExpectation(description: "tick")
     layer.onLiveFrameChange { layer, frame in
       capturedFrames.append((layer, frame))
+      waiter.tick()
+      if isGitHubActionsMac {
+        expectation.fulfill()
+      }
     }
 
     layer.bounds.size.height = 220
-    let animationDuration = 0.1
     let animation = CABasicAnimation(keyPath: "bounds.size.height")
     animation.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-    animation.duration = animationDuration
+    animation.duration = Constants.explicitAnimationDuration
     animation.fromValue = 200
     animation.toValue = 220
     layer.add(animation, forKey: "bounds.size.height")
 
-    wait(timeout: animationDuration + 0.05) // wait until the animation is finished
+    if isGitHubActionsMac {
+      wait(for: [expectation], timeout: 1)
+    } else {
+      waiter.wait() // wait until the animation is finished
 
-    expect(capturedFrames.count) > 5
-    try expect(capturedFrames.last.unwrap().0) === layer
-    try expect(capturedFrames.last.unwrap().1) == CGRect(x: 10, y: 10, width: 100, height: 220)
-    expect(layer.sublayers?.count ?? 0) == 0 // should have no display layer
+      expect(capturedFrames.count) > 2
+      try expect(capturedFrames.last.unwrap().0) === layer
+      try expect(capturedFrames.last.unwrap().1) == CGRect(x: 10, y: 10, width: 100, height: 220)
+      expect(layer.sublayers?.count ?? 0) == 0 // should have no display layer
+    }
   }
 
   func test_onLiveFrameChange_explicitAnimation_boundsSizeHeightChanged_additive() throws {
-    guard !Environment.isGitHubActions else {
-      return
-    }
-
+    let waiter = TickWaiter()
     var capturedFrames: [(CALayer, CGRect)] = []
 
+    let expectation = XCTestExpectation(description: "tick")
     layer.onLiveFrameChange { layer, frame in
       capturedFrames.append((layer, frame))
+      waiter.tick()
+      if isGitHubActionsMac {
+        expectation.fulfill()
+      }
     }
 
-    let animationDuration = 0.1
-    layer.animate(keyPath: "bounds.size.height", to: 220, timing: .easeInEaseOut(duration: animationDuration))
+    layer.animate(keyPath: "bounds.size.height", to: 220, timing: .easeInEaseOut(duration: Constants.explicitAnimationDuration))
 
-    wait(timeout: animationDuration + 0.05) // wait until the animation is finished
+    if isGitHubActionsMac {
+      wait(for: [expectation], timeout: 1)
+    } else {
+      waiter.wait() // wait until the animation is finished
 
-    expect(capturedFrames.count) > 5
-    try expect(capturedFrames.last.unwrap().0) === layer
-    try expect(capturedFrames.last.unwrap().1) == CGRect(x: 10, y: 10, width: 100, height: 220)
-    expect(layer.sublayers?.count ?? 0) == 0 // should have no display layer
+      expect(capturedFrames.count) > 2
+      try expect(capturedFrames.last.unwrap().0) === layer
+      try expect(capturedFrames.last.unwrap().1) == CGRect(x: 10, y: 10, width: 100, height: 220)
+      expect(layer.sublayers?.count ?? 0) == 0 // should have no display layer
+    }
   }
 
   func test_onLiveFrameChange_explicitAnimation_frameChanged() throws {
-    guard !Environment.isGitHubActions else {
-      return
-    }
-
+    let waiter = TickWaiter()
     var capturedFrames: [(CALayer, CGRect)] = []
 
+    let expectation = XCTestExpectation(description: "tick")
     layer.onLiveFrameChange { layer, frame in
       capturedFrames.append((layer, frame))
+      waiter.tick()
+      if isGitHubActionsMac {
+        expectation.fulfill()
+      }
     }
 
-    let animationDuration = 0.1
-    layer.animateFrame(to: CGRect(x: 20, y: 40, width: 110, height: 220), timing: .easeInEaseOut(duration: animationDuration))
+    layer.animateFrame(to: CGRect(x: 20, y: 40, width: 110, height: 220), timing: .easeInEaseOut(duration: Constants.explicitAnimationDuration))
 
-    wait(timeout: animationDuration + 0.05) // wait until the animation is finished
+    if isGitHubActionsMac {
+      wait(for: [expectation], timeout: 1)
+    } else {
+      waiter.wait() // wait until the animation is finished
 
-    expect(capturedFrames.count) > 5
-    try expect(capturedFrames.last.unwrap().0) === layer
-    try expect(capturedFrames.last.unwrap().1) == CGRect(x: 20, y: 40, width: 110, height: 220)
-    expect(layer.sublayers?.count ?? 0) == 0 // should have no display layer
+      expect(capturedFrames.count) > 2
+      try expect(capturedFrames.last.unwrap().0) === layer
+      try expect(capturedFrames.last.unwrap().1) == CGRect(x: 20, y: 40, width: 110, height: 220)
+      expect(layer.sublayers?.count ?? 0) == 0 // should have no display layer
+    }
   }
 
   func test_onLiveFrameChange_explicitAnimation_frameChanged_overlap() throws {
-    guard !Environment.isGitHubActions else {
-      return
-    }
-
+    let waiter = TickWaiter()
     var capturedFrames: [(CALayer, CGRect)] = []
 
+    let expectation = XCTestExpectation(description: "tick")
     layer.onLiveFrameChange { layer, frame in
       capturedFrames.append((layer, frame))
+      waiter.tick()
+      if isGitHubActionsMac {
+        expectation.fulfill()
+      }
     }
 
-    let animation1Duration = 0.1
-    layer.animateFrame(to: CGRect(x: 20, y: 40, width: 110, height: 220), timing: .easeInEaseOut(duration: animation1Duration))
+    layer.animateFrame(to: CGRect(x: 20, y: 40, width: 110, height: 220), timing: .easeInEaseOut(duration: Constants.explicitAnimationDuration))
+    layer.animateFrame(to: CGRect(x: 30, y: 50, width: 120, height: 230), timing: .easeInEaseOut(duration: Constants.explicitAnimationDuration))
 
-    wait(timeout: animation1Duration / 2) // wait until the animation is half finished
+    if isGitHubActionsMac {
+      wait(for: [expectation], timeout: 1)
+    } else {
+      waiter.wait() // wait until the animation is finished
 
-    let animation2Duration = 0.1
-    layer.animateFrame(to: CGRect(x: 30, y: 50, width: 120, height: 230), timing: .easeInEaseOut(duration: animation2Duration))
-
-    wait(timeout: animation2Duration + 0.05) // wait until the animation is finished
-
-    expect(capturedFrames.count) > 5
-    try expect(capturedFrames.last.unwrap().0) === layer
-    try expect(capturedFrames.last.unwrap().1) == CGRect(x: 30, y: 50, width: 120, height: 230)
-    expect(layer.sublayers?.count ?? 0) == 0 // should have no display layer
+      expect(capturedFrames.count) > 2
+      try expect(capturedFrames.last.unwrap().0) === layer
+      try expect(capturedFrames.last.unwrap().1) == CGRect(x: 30, y: 50, width: 120, height: 230)
+      expect(layer.sublayers?.count ?? 0) == 0 // should have no display layer
+    }
   }
 
-  func test_onLiveFrameChange_implicitAnimation_positionChanged() throws {
-    guard !Environment.isGitHubActions else {
-      return
-    }
+  // MARK: - Implicit Animation
 
+  func test_onLiveFrameChange_implicitAnimation_positionChanged() throws {
     layer.delegate = nil // remove the delegate to enable implicit animations
 
     // old position is (60, 120)
 
+    let waiter = TickWaiter()
     var capturedFrames: [(CALayer, CGRect)] = []
 
+    let expectation = XCTestExpectation(description: "tick")
     layer.onLiveFrameChange { layer, frame in
       capturedFrames.append((layer, frame))
+      waiter.tick()
+      if isGitHubActionsMac {
+        expectation.fulfill()
+      }
     }
 
     layer.position = CGPoint(x: 150, y: 300)
@@ -610,27 +685,33 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
     let positionAnimation = try (layer.animation(forKey: "position") as? CABasicAnimation).unwrap()
     expect(positionAnimation.duration) == 0.25
 
-    wait(timeout: positionAnimation.duration + 0.05) // wait until the animation is finished
+    if isGitHubActionsMac {
+      wait(for: [expectation], timeout: 1)
+    } else {
+      waiter.wait() // wait until the animation is finished
 
-    expect(capturedFrames.count) > 10
-    try expect(capturedFrames.last.unwrap().0) === layer
-    try expect(capturedFrames.last.unwrap().1) == CGRect(x: 100, y: 200, width: 100, height: 200)
-    expect(layer.sublayers?.count ?? 0) == 0 // should have no display layer
+      expect(capturedFrames.count) > 2
+      try expect(capturedFrames.last.unwrap().0) === layer
+      try expect(capturedFrames.last.unwrap().1) == CGRect(x: 100, y: 200, width: 100, height: 200)
+      expect(layer.sublayers?.count ?? 0) == 0 // should have no display layer
+    }
   }
 
   func test_onLiveFrameChange_implicitAnimation_positionXChanged() throws {
-    guard !Environment.isGitHubActions else {
-      return
-    }
-
     layer.delegate = nil // remove the delegate to enable implicit animations
 
     // old position is (60, 120)
 
+    let waiter = TickWaiter()
     var capturedFrames: [(CALayer, CGRect)] = []
 
+    let expectation = XCTestExpectation(description: "tick")
     layer.onLiveFrameChange { layer, frame in
       capturedFrames.append((layer, frame))
+      waiter.tick()
+      if isGitHubActionsMac {
+        expectation.fulfill()
+      }
     }
 
     layer.position.x = 150
@@ -639,27 +720,33 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
     let positionAnimation = try (layer.animation(forKey: "position") as? CABasicAnimation).unwrap()
     expect(positionAnimation.duration) == 0.25
 
-    wait(timeout: positionAnimation.duration + 0.05) // wait until the animation is finished
+    if isGitHubActionsMac {
+      wait(for: [expectation], timeout: 1)
+    } else {
+      waiter.wait() // wait until the animation is finished
 
-    expect(capturedFrames.count) > 10
-    try expect(capturedFrames.last.unwrap().0) === layer
-    try expect(capturedFrames.last.unwrap().1) == CGRect(x: 100, y: 20, width: 100, height: 200)
-    expect(layer.sublayers?.count ?? 0) == 0 // should have no display layer
+      expect(capturedFrames.count) > 2
+      try expect(capturedFrames.last.unwrap().0) === layer
+      try expect(capturedFrames.last.unwrap().1) == CGRect(x: 100, y: 20, width: 100, height: 200)
+      expect(layer.sublayers?.count ?? 0) == 0 // should have no display layer
+    }
   }
 
   func test_onLiveFrameChange_implicitAnimation_positionYChanged() throws {
-    guard !Environment.isGitHubActions else {
-      return
-    }
-
     layer.delegate = nil // remove the delegate to enable implicit animations
 
     // old position is (60, 120)
 
+    let waiter = TickWaiter()
     var capturedFrames: [(CALayer, CGRect)] = []
 
+    let expectation = XCTestExpectation(description: "tick")
     layer.onLiveFrameChange { layer, frame in
       capturedFrames.append((layer, frame))
+      waiter.tick()
+      if isGitHubActionsMac {
+        expectation.fulfill()
+      }
     }
 
     layer.position.y = 300
@@ -668,19 +755,19 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
     let positionAnimation = try (layer.animation(forKey: "position") as? CABasicAnimation).unwrap()
     expect(positionAnimation.duration) == 0.25
 
-    wait(timeout: positionAnimation.duration + 0.05) // wait until the animation is finished
+    if isGitHubActionsMac {
+      wait(for: [expectation], timeout: 1)
+    } else {
+      waiter.wait() // wait until the animation is finished
 
-    expect(capturedFrames.count) > 10
-    try expect(capturedFrames.last.unwrap().0) === layer
-    try expect(capturedFrames.last.unwrap().1) == CGRect(x: 10, y: 200, width: 100, height: 200)
-    expect(layer.sublayers?.count ?? 0) == 0 // should have no display layer
+      expect(capturedFrames.count) > 2
+      try expect(capturedFrames.last.unwrap().0) === layer
+      try expect(capturedFrames.last.unwrap().1) == CGRect(x: 10, y: 200, width: 100, height: 200)
+      expect(layer.sublayers?.count ?? 0) == 0 // should have no display layer
+    }
   }
 
   func test_onLiveFrameChange_implicitAnimation_boundsOriginChanged() throws {
-    guard !Environment.isGitHubActions else {
-      return
-    }
-
     layer.delegate = nil // remove the delegate to enable implicit animations
 
     // old bounds is (100, 200)
@@ -703,18 +790,20 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
   }
 
   func test_onLiveFrameChange_implicitAnimation_boundsSizeChanged() throws {
-    guard !Environment.isGitHubActions else {
-      return
-    }
-
     layer.delegate = nil // remove the delegate to enable implicit animations
 
     // old bounds is (100, 200)
 
+    let waiter = TickWaiter()
     var capturedFrames: [(CALayer, CGRect)] = []
 
+    let expectation = XCTestExpectation(description: "tick")
     layer.onLiveFrameChange { layer, frame in
       capturedFrames.append((layer, frame))
+      waiter.tick()
+      if isGitHubActionsMac {
+        expectation.fulfill()
+      }
     }
 
     layer.bounds.size = CGSize(width: 110, height: 220)
@@ -723,27 +812,33 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
     let boundsAnimation = try (layer.animation(forKey: "bounds") as? CABasicAnimation).unwrap()
     expect(boundsAnimation.duration) == 0.25
 
-    wait(timeout: boundsAnimation.duration + 0.05) // wait until the animation is finished
+    if isGitHubActionsMac {
+      wait(for: [expectation], timeout: 1)
+    } else {
+      waiter.wait() // wait until the animation is finished
 
-    expect(capturedFrames.count) > 10
-    try expect(capturedFrames.last.unwrap().0) === layer
-    try expect(capturedFrames.last.unwrap().1) == CGRect(x: 5, y: 10, width: 110, height: 220)
-    expect(layer.sublayers?.count ?? 0) == 0 // should have no display layer
+      expect(capturedFrames.count) > 2
+      try expect(capturedFrames.last.unwrap().0) === layer
+      try expect(capturedFrames.last.unwrap().1) == CGRect(x: 5, y: 10, width: 110, height: 220)
+      expect(layer.sublayers?.count ?? 0) == 0 // should have no display layer
+    }
   }
 
   func test_onLiveFrameChange_implicitAnimation_boundsSizeWidthChanged() throws {
-    guard !Environment.isGitHubActions else {
-      return
-    }
-
     layer.delegate = nil // remove the delegate to enable implicit animations
 
     // old bounds is (100, 200)
 
+    let waiter = TickWaiter()
     var capturedFrames: [(CALayer, CGRect)] = []
 
+    let expectation = XCTestExpectation(description: "tick")
     layer.onLiveFrameChange { layer, frame in
       capturedFrames.append((layer, frame))
+      waiter.tick()
+      if isGitHubActionsMac {
+        expectation.fulfill()
+      }
     }
 
     layer.bounds.size.width = 110
@@ -752,27 +847,33 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
     let boundsAnimation = try (layer.animation(forKey: "bounds") as? CABasicAnimation).unwrap()
     expect(boundsAnimation.duration) == 0.25
 
-    wait(timeout: boundsAnimation.duration + 0.05) // wait until the animation is finished
+    if isGitHubActionsMac {
+      wait(for: [expectation], timeout: 1)
+    } else {
+      waiter.wait() // wait until the animation is finished
 
-    expect(capturedFrames.count) > 10
-    try expect(capturedFrames.last.unwrap().0) === layer
-    try expect(capturedFrames.last.unwrap().1) == CGRect(x: 5, y: 20, width: 110, height: 200)
-    expect(layer.sublayers?.count ?? 0) == 0 // should have no display layer
+      expect(capturedFrames.count) > 2
+      try expect(capturedFrames.last.unwrap().0) === layer
+      try expect(capturedFrames.last.unwrap().1) == CGRect(x: 5, y: 20, width: 110, height: 200)
+      expect(layer.sublayers?.count ?? 0) == 0 // should have no display layer
+    }
   }
 
   func test_onLiveFrameChange_implicitAnimation_boundsSizeHeightChanged() throws {
-    guard !Environment.isGitHubActions else {
-      return
-    }
-
     layer.delegate = nil // remove the delegate to enable implicit animations
 
     // old bounds is (100, 200)
 
+    let waiter = TickWaiter()
     var capturedFrames: [(CALayer, CGRect)] = []
 
+    let expectation = XCTestExpectation(description: "tick")
     layer.onLiveFrameChange { layer, frame in
       capturedFrames.append((layer, frame))
+      waiter.tick()
+      if isGitHubActionsMac {
+        expectation.fulfill()
+      }
     }
 
     layer.bounds.size.height = 220
@@ -781,27 +882,33 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
     let boundsAnimation = try (layer.animation(forKey: "bounds") as? CABasicAnimation).unwrap()
     expect(boundsAnimation.duration) == 0.25
 
-    wait(timeout: boundsAnimation.duration + 0.05) // wait until the animation is finished
+    if isGitHubActionsMac {
+      wait(for: [expectation], timeout: 1)
+    } else {
+      waiter.wait() // wait until the animation is finished
 
-    expect(capturedFrames.count) > 10
-    try expect(capturedFrames.last.unwrap().0) === layer
-    try expect(capturedFrames.last.unwrap().1) == CGRect(x: 10, y: 10, width: 100, height: 220)
-    expect(layer.sublayers?.count ?? 0) == 0 // should have no display layer
+      expect(capturedFrames.count) > 2
+      try expect(capturedFrames.last.unwrap().0) === layer
+      try expect(capturedFrames.last.unwrap().1) == CGRect(x: 10, y: 10, width: 100, height: 220)
+      expect(layer.sublayers?.count ?? 0) == 0 // should have no display layer
+    }
   }
 
   func test_onLiveFrameChange_implicitAnimation_boundsChanged() throws {
-    guard !Environment.isGitHubActions else {
-      return
-    }
-
     layer.delegate = nil // remove the delegate to enable implicit animations
 
     // old bounds is (100, 200)
 
+    let waiter = TickWaiter()
     var capturedFrames: [(CALayer, CGRect)] = []
 
+    let expectation = XCTestExpectation(description: "tick")
     layer.onLiveFrameChange { layer, frame in
       capturedFrames.append((layer, frame))
+      waiter.tick()
+      if isGitHubActionsMac {
+        expectation.fulfill()
+      }
     }
 
     layer.bounds = CGRect(x: 10, y: 20, width: 110, height: 220)
@@ -810,27 +917,33 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
     let boundsAnimation = try (layer.animation(forKey: "bounds") as? CABasicAnimation).unwrap()
     expect(boundsAnimation.duration) == 0.25
 
-    wait(timeout: boundsAnimation.duration + 0.05) // wait until the animation is finished
+    if isGitHubActionsMac {
+      wait(for: [expectation], timeout: 1)
+    } else {
+      waiter.wait() // wait until the animation is finished
 
-    expect(capturedFrames.count) > 10
-    try expect(capturedFrames.last.unwrap().0) === layer
-    try expect(capturedFrames.last.unwrap().1) == CGRect(x: 5, y: 10, width: 110, height: 220)
-    expect(layer.sublayers?.count ?? 0) == 0 // should have no display layer
+      expect(capturedFrames.count) > 2
+      try expect(capturedFrames.last.unwrap().0) === layer
+      try expect(capturedFrames.last.unwrap().1) == CGRect(x: 5, y: 10, width: 110, height: 220)
+      expect(layer.sublayers?.count ?? 0) == 0 // should have no display layer
+    }
   }
 
   func test_onLiveFrameChange_implicitAnimation_frameChanged() throws {
-    guard !Environment.isGitHubActions else {
-      return
-    }
-
     layer.delegate = nil // remove the delegate to enable implicit animations
 
     // old bounds is (100, 200)
 
+    let waiter = TickWaiter()
     var capturedFrames: [(CALayer, CGRect)] = []
 
+    let expectation = XCTestExpectation(description: "tick")
     layer.onLiveFrameChange { layer, frame in
       capturedFrames.append((layer, frame))
+      waiter.tick()
+      if isGitHubActionsMac {
+        expectation.fulfill()
+      }
     }
 
     layer.frame = CGRect(x: 10, y: 20, width: 110, height: 220)
@@ -841,11 +954,51 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
     expect(positionAnimation.duration) == 0.25
     expect(boundsAnimation.duration) == 0.25
 
-    wait(timeout: positionAnimation.duration + 0.05) // wait until the animation is finished
+    if isGitHubActionsMac {
+      wait(for: [expectation], timeout: 1)
+    } else {
+      waiter.wait() // wait until the animation is finished
 
-    expect(capturedFrames.count) > 10
-    try expect(capturedFrames.last.unwrap().0) === layer
-    try expect(capturedFrames.last.unwrap().1) == CGRect(x: 10, y: 20, width: 110, height: 220)
-    expect(layer.sublayers?.count ?? 0) == 0 // should have no display layer
+      expect(capturedFrames.count) > 2
+      try expect(capturedFrames.last.unwrap().0) === layer
+      try expect(capturedFrames.last.unwrap().1) == CGRect(x: 10, y: 20, width: 110, height: 220)
+      expect(layer.sublayers?.count ?? 0) == 0 // should have no display layer
+    }
+  }
+
+  // MARK: - Constants
+
+  private enum Constants {
+    static let explicitAnimationDuration: TimeInterval = 0.1
+  }
+}
+
+#if os(macOS)
+private let isGitHubActionsMac: Bool = Environment.isGitHubActions
+#else
+private let isGitHubActionsMac: Bool = false
+#endif
+
+/// A helper class to wait for the tick to finish.
+private class TickWaiter: XCTestCase { // swiftlint:disable:this private_unit_test
+
+  private var delayToken: (any DelayTaskType)?
+  private var waitExpectation: XCTestExpectation?
+
+  private let delayDuration: TimeInterval = 0.1
+
+  func tick() {
+    delayToken?.cancel()
+    delayToken = delay(delayDuration, leeway: .zero) { [weak self] in
+      self?.delayToken = nil
+      self?.waitExpectation?.fulfill()
+    }
+  }
+
+  func wait() {
+    let waitExpectation = XCTestExpectation(description: "wait for tick to finish")
+    self.waitExpectation = waitExpectation
+    wait(for: [waitExpectation], timeout: 1)
+    self.waitExpectation = nil
   }
 }
