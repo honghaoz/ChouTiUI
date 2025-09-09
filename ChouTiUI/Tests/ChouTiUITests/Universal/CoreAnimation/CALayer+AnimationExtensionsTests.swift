@@ -36,6 +36,8 @@ import ChouTiUI
 
 class CALayer_AnimationExtensionsTests: XCTestCase {
 
+  // MARK: - Animations
+
   func test_animations() throws {
     let layer = CALayer()
     layer.bounds = CGRect(x: 0, y: 0, width: 100, height: 100)
@@ -81,23 +83,14 @@ class CALayer_AnimationExtensionsTests: XCTestCase {
     }
   }
 
+  // MARK: - Size Animation
+
   func test_sizeAnimation_implicitAnimation() throws {
     let layer = CALayer()
     layer.bounds = CGRect(x: 0, y: 0, width: 100, height: 100)
 
-    #if canImport(AppKit)
-    let window = NSWindow(
-      contentRect: CGRect(x: 0, y: 0, width: 500, height: 500),
-      styleMask: [.titled, .closable, .miniaturizable, .resizable],
-      backing: .buffered,
-      defer: false
-    )
-    window.contentView?.wantsLayer = true
-    window.contentView?.layer?.addSublayer(layer)
-    #else
-    let window = UIWindow()
+    let window = TestWindow()
     window.layer.addSublayer(layer)
-    #endif
 
     // wait for the layer to have a presentation layer
     wait(timeout: 0.05)
@@ -109,7 +102,55 @@ class CALayer_AnimationExtensionsTests: XCTestCase {
     expect(sizeAnimation.keyPath) == "bounds"
   }
 
-  func test_sizeAnimation_bounds_size() throws {
+  func test_sizeAnimation_implicitAnimation_withExplicitAnimation() throws {
+    let layer = CALayer()
+    layer.bounds = CGRect(x: 0, y: 0, width: 100, height: 100)
+
+    let window = TestWindow()
+    window.layer.addSublayer(layer)
+
+    // wait for the layer to have a presentation layer
+    wait(timeout: 0.05)
+
+    layer.bounds.size = CGSize(width: 200, height: 200)
+
+    layer.add(
+      {
+        let animation = CABasicAnimation(keyPath: "bounds.size")
+        animation.fromValue = CGSize(width: 100, height: 100)
+        animation.toValue = CGSize(width: 200, height: 200)
+        return animation
+      }(),
+      forKey: "bounds.size"
+    )
+
+    expect(layer.animationKeys()?.count) == 2
+
+    let sizeAnimation = try layer.sizeAnimation().unwrap()
+
+    expect(sizeAnimation.keyPath) == "bounds.size"
+  }
+
+  func test_sizeAnimation_bounds() throws {
+    let layer = CALayer()
+    layer.bounds = CGRect(x: 0, y: 0, width: 100, height: 100)
+
+    layer.add(
+      {
+        let animation = CABasicAnimation(keyPath: "bounds")
+        animation.fromValue = CGRect(x: 0, y: 0, width: 100, height: 100)
+        animation.toValue = CGRect(x: 0, y: 0, width: 200, height: 200)
+        return animation
+      }(),
+      forKey: "bounds"
+    )
+
+    let sizeAnimation = try layer.sizeAnimation().unwrap()
+
+    expect(sizeAnimation.keyPath) == "bounds"
+  }
+
+  func test_sizeAnimation_boundsSize() throws {
     let layer = CALayer()
     layer.bounds = CGRect(x: 0, y: 0, width: 100, height: 100)
 
@@ -128,7 +169,7 @@ class CALayer_AnimationExtensionsTests: XCTestCase {
     expect(sizeAnimation.keyPath) == "bounds.size"
   }
 
-  func test_sizeAnimation_bounds_size_width() throws {
+  func test_sizeAnimation_boundsSizeWidth() throws {
     let layer = CALayer()
     layer.bounds = CGRect(x: 0, y: 0, width: 100, height: 100)
 
@@ -147,7 +188,7 @@ class CALayer_AnimationExtensionsTests: XCTestCase {
     expect(sizeAnimation.keyPath) == "bounds.size.width"
   }
 
-  func test_sizeAnimation_bounds_size_height() throws {
+  func test_sizeAnimation_boundsSizeHeight() throws {
     let layer = CALayer()
     layer.bounds = CGRect(x: 0, y: 0, width: 100, height: 100)
 
@@ -164,5 +205,44 @@ class CALayer_AnimationExtensionsTests: XCTestCase {
     let sizeAnimation = try layer.sizeAnimation().unwrap()
 
     expect(sizeAnimation.keyPath) == "bounds.size.height"
+  }
+
+  func test_sizeAnimation_multipleAnimations() throws {
+    let layer = CALayer()
+    layer.bounds = CGRect(x: 0, y: 0, width: 100, height: 100)
+
+    layer.add(
+      {
+        let animation = CABasicAnimation(keyPath: "bounds.size")
+        animation.fromValue = CGSize(width: 100, height: 100)
+        animation.toValue = CGSize(width: 200, height: 200)
+        return animation
+      }(),
+      forKey: "bounds.size"
+    )
+
+    layer.add(
+      {
+        let animation = CABasicAnimation(keyPath: "bounds.size.width")
+        animation.fromValue = 100
+        animation.toValue = 200
+        return animation
+      }(),
+      forKey: "bounds.size.width"
+    )
+
+    layer.add(
+      {
+        let animation = CABasicAnimation(keyPath: "bounds.size.height")
+        animation.fromValue = 100
+        animation.toValue = 200
+        return animation
+      }(),
+      forKey: "bounds.size.height"
+    )
+
+    let sizeAnimation = try layer.sizeAnimation().unwrap()
+
+    expect(sizeAnimation.keyPath) == "bounds.size.width"
   }
 }

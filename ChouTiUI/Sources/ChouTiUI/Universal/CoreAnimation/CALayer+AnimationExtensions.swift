@@ -48,18 +48,26 @@ public extension CALayer {
 
   /// Get layer's size change animation.
   ///
-  /// This is a convenience method that returns the first animation that changes the layer's size.
-  /// It checks for key paths related to bounds and size changes.
+  /// This method returns the most granular animation that affects the layer's size.
+  /// It looks for the first animation with key paths: "bounds.size.width", "bounds.size.height", "bounds.size", "bounds" in order.
   ///
   /// This is useful for adding a size synchronization animation to sublayers when the parent layer's size changes with an animation.
   ///
-  /// - Returns: Size change animation.
+  /// - Returns: The most granular size change animation.
   func sizeAnimation() -> CABasicAnimation? {
-    animations().first(where: { animation in
-      (animation as? CABasicAnimation)?.keyPath == "bounds" ||
-        (animation as? CABasicAnimation)?.keyPath == "bounds.size" ||
-        (animation as? CABasicAnimation)?.keyPath == "bounds.size.width" ||
-        (animation as? CABasicAnimation)?.keyPath == "bounds.size.height"
-    }) as? CABasicAnimation
+    animations()
+      .min(by: { animation1, animation2 in
+        guard let animation1KeyPath = (animation1 as? CAPropertyAnimation)?.keyPath, let animation2KeyPath = (animation2 as? CAPropertyAnimation)?.keyPath else {
+          return false
+        }
+        return Self.boundsSizeAnimationKeyPathOrder[animation1KeyPath] ?? Int.max < Self.boundsSizeAnimationKeyPathOrder[animation2KeyPath] ?? Int.max
+      }) as? CABasicAnimation
   }
+
+  private static let boundsSizeAnimationKeyPathOrder: [String: Int] = [
+    "bounds.size.width": 0,
+    "bounds.size.height": 1,
+    "bounds.size": 2,
+    "bounds": 3,
+  ]
 }

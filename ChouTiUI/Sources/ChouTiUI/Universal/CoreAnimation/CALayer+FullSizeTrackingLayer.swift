@@ -49,9 +49,6 @@ public extension CALayer {
 
     /// The new bounds of the host layer.
     public let newBounds: CGRect
-
-    /// The timestamp of the bounds change.
-    public let timestamp: TimeInterval
   }
 
   /// Add a layer that follows the bounds of the layer.
@@ -91,8 +88,6 @@ public extension CALayer {
   }
 
   private func boundsChanged(_ oldBounds: CGRect, _ newBounds: CGRect) {
-    let timestamp = CACurrentMediaTime()
-
     for (_, layerTrackingInfo) in fullSizeTrackingLayers {
       let layer = layerTrackingInfo.layer
       let onBoundsChange = layerTrackingInfo.onBoundsChange
@@ -101,9 +96,8 @@ public extension CALayer {
 
       RunLoop.main.perform { // schedule to the next run loop to make sure the animation added after the bounds change can be found
         self.addSizeSynchronizationAnimation(to: layer, oldBounds: oldBounds, newBounds: newBounds)
+        onBoundsChange?(BoundsChangeContext(hostLayer: self, trackingLayer: layer, oldBounds: oldBounds, newBounds: newBounds))
       }
-
-      onBoundsChange?(BoundsChangeContext(hostLayer: self, trackingLayer: layer, oldBounds: oldBounds, newBounds: newBounds, timestamp: timestamp))
     }
   }
 

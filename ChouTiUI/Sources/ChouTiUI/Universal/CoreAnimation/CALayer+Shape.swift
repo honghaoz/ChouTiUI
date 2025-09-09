@@ -76,14 +76,14 @@ public extension CALayer {
       setupMaskLayer()
 
     case (.some(let oldShape), .some(let newShape)):
-      // only update shape if shape changes
-      if !oldShape.isEqual(to: newShape) {
-        if let existingMaskLayer = (mask as? CAShapeLayer).assert("should have mask layer") {
-          // reuse
+      if let existingMaskLayer = (mask as? CAShapeLayer).assert("should have mask layer") {
+        if !oldShape.isEqual(to: newShape) {
+          // if shape changes, update the mask layer
           existingMaskLayer.path = newShape.path(in: bounds)
-        } else {
-          setupMaskLayer()
         }
+      } else {
+        // if no mask layer, create a new one
+        setupMaskLayer()
       }
     }
   }
@@ -94,6 +94,7 @@ public extension CALayer {
     }
 
     let maskLayer = BaseCAShapeLayer()
+    maskLayer.frame = bounds
     maskLayer.path = shape.path(in: bounds)
     mask = maskLayer
 
@@ -107,10 +108,8 @@ public extension CALayer {
       // update model
       maskLayer.path = shape.path(in: layer.bounds)
 
-      // add animation
-      guard let animationCopy = layer.animations()
-        .first(where: { ($0 as? CAPropertyAnimation)?.keyPath == "bounds.size" })?.copy() as? CABasicAnimation
-      else {
+      // add animation if bounds changes
+      guard let animationCopy = layer.sizeAnimation()?.copy() as? CABasicAnimation else {
         return
       }
 
@@ -131,20 +130,23 @@ public extension CALayer {
   ///   - toShape: The to shape.
   ///   - timing: The timing of the animation.
   func animateShape(from fromShape: (any Shape)? = nil, to toShape: any Shape, timing: AnimationTiming) {
+    let currentShape: any Shape
     switch (shape, fromShape) {
     case (nil, nil):
       ChouTi.assertFailure("layer has no shape and no from shape")
       return
-    case (.some, nil):
+    case (.some(let shape), nil):
       // use current shape
-      break
-    case (nil, .some(let fromShape)),
-         (.some, .some(let fromShape)):
-      // from shape is specified, set the shape
+      currentShape = shape
+    case (nil, .some(let fromShape)):
+      // no shape, set from shape
       shape = fromShape
+      currentShape = fromShape
+    case (.some, .some(let fromShape)):
+      currentShape = fromShape
     }
 
-    guard let currentShape = shape, let maskLayer = mask as? CAShapeLayer else {
+    guard let maskLayer = mask as? CAShapeLayer else {
       ChouTi.assertFailure("no mask layer")
       return
     }
@@ -165,5 +167,7 @@ public extension CALayer {
       },
       to: { maskLayer in toShape.path(in: maskLayer.bounds) }
     )
+
+    shape = toShape
   }
 }
