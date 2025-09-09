@@ -310,6 +310,7 @@ public extension CALayer {
         timing: timing,
         from: { layer in
           guard let colors = (layer as? CAGradientLayer)?.colors else {
+            ChouTi.assertFailure("unexpected missing gradient colors")
             return nil
           }
           return Array(repeating: fromSolidColor.cgColor, count: colors.count)
@@ -342,6 +343,7 @@ public extension CALayer {
         from: { layer in (layer as? CAGradientLayer)?.colors },
         to: { layer in
           guard let colors = (layer as? CAGradientLayer)?.colors else {
+            ChouTi.assertFailure("unexpected missing gradient colors")
             return nil
           }
           return Array(repeating: toSolidColor.cgColor, count: colors.count)

@@ -641,11 +641,14 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
       capturedFrames.append((layer, frame))
       waiter.tick()
       if isGitHubActionsMac {
-        expectation.fulfill()
+        if layer.animationKeys()?.contains("bounds.size-1") == true {
+          expectation.fulfill()
+        }
       }
     }
 
-    layer.animateFrame(to: CGRect(x: 20, y: 40, width: 110, height: 220), timing: .easeInEaseOut(duration: Constants.explicitAnimationDuration))
+    layer.animateFrame(to: CGRect(x: 20, y: 40, width: 110, height: 220), timing: .easeInEaseOut(duration: 0.5))
+    wait(timeout: 0.1)
     layer.animateFrame(to: CGRect(x: 30, y: 50, width: 120, height: 230), timing: .easeInEaseOut(duration: Constants.explicitAnimationDuration))
 
     if isGitHubActionsMac {

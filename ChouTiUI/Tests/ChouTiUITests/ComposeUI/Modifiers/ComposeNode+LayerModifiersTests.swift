@@ -123,5 +123,38 @@ class ComposeNode_LayerModifiersTests: XCTestCase {
       expect(layer?.borderOffset) == 6.0
       expect(layer?.animationKeys()?.contains("borderOffset")) == true
     }
+
+    // early return when requiresFullUpdate is false
+    do {
+      var layer: CALayer?
+      var borderOffset: CGFloat = 2
+
+      let contentView = ComposeView {
+        LayerNode()
+          .borderOffset(borderOffset)
+          .onUpdate { renderable, context in
+            layer = renderable.layer
+          }
+      }
+
+      contentView.frame = CGRect(x: 0, y: 0, width: 100, height: 50)
+      contentView.refresh() // initial refresh
+
+      expect(layer?.borderOffset) == 2
+
+      // bounds change should not set new border offset
+      borderOffset = 5
+      contentView.frame = CGRect(x: 0, y: 0, width: 100, height: 60)
+      contentView.setNeedsLayout()
+      contentView.layoutIfNeeded()
+
+      expect(layer?.borderOffset) == 2
+
+      // refresh should set new border offset
+      borderOffset = 5
+      contentView.refresh()
+
+      expect(layer?.borderOffset) == 5
+    }
   }
 }
