@@ -170,9 +170,9 @@ private class MetalPresenter {
   let queue: MTLCommandQueue
   let ciContext: CIContext
 
-  init(device: MTLDevice = MTLCreateSystemDefaultDevice()!) {
+  init(device: MTLDevice = MTLCreateSystemDefaultDevice()!) { // swiftlint:disable:this force_unwrapping
     self.device = device
-    self.queue = device.makeCommandQueue()!
+    self.queue = device.makeCommandQueue()! // swiftlint:disable:this force_unwrapping
     self.ciContext = CIContext(mtlDevice: device)
   }
 }

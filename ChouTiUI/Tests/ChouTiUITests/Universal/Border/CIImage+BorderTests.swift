@@ -29,6 +29,7 @@
 //
 
 import CoreGraphics
+import CoreImage
 
 import ChouTiTest
 
@@ -62,7 +63,13 @@ class CIImage_BorderTests: XCTestCase {
   func test_makeBorderImage_image() {
     let borderImage = CIImage.makeBorderImage(
       width: 2,
-      content: .image { extent in CIImage(color: .red).cropped(to: extent) },
+      content: .image { extent in
+        let filter = CIFilter.checkerboardGenerator()
+        filter.color0 = CIColor(red: 1, green: 0, blue: 1, alpha: 1) // Magenta
+        filter.color1 = CIColor(red: 1, green: 1, blue: 0, alpha: 1) // Yellow
+        filter.width = 10
+        return filter.outputImage!.cropped(to: extent) // swiftlint:disable:this force_unwrapping
+      },
       shape: Circle(),
       size: CGSize(width: 100, height: 50),
       scale: 2

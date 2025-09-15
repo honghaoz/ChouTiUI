@@ -30,7 +30,7 @@
 
 import Foundation
 import CoreImage
-import CoreImage.CIFilterBuiltins
+import CoreImage.CIFilterBuiltins // swiftlint:disable:this duplicate_imports
 
 import ChouTi
 
@@ -99,7 +99,7 @@ private func makeBorderImage(width: CGFloat, scale: CGFloat, offset: BorderOffse
   // func d(_ radius: CGFloat) -> CIImage {
   //   dilate.inputImage = mask
   //   dilate.radius = Float(radius)
-  //   return dilate.outputImage!.cropped(to: extent) // swiftlint:disable:this force_unwrapping
+  //   return dilate.outputImage!.cropped(to: extent)
   // }
 
   func e(_ radius: CGFloat) -> CIImage {
