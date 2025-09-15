@@ -38,7 +38,22 @@ class ViewController: NSViewController {
 
   private var appearanceObserver: KVOObserverType?
 
-  private var textField: NSTextField!
+  private class State {
+
+    var title: String = "ChouTiUI"
+  }
+
+  private lazy var state = State()
+
+  private lazy var contentView = ComposeView { [unowned self, state] in // swiftlint:disable:this unowned_variable
+    ZStack {
+      LabelNode(state.title)
+        .numberOfLines(2)
+        .alignment(.center)
+
+      self.makeToolbar().alignment(.bottom)
+    }
+  }
 
   override func viewDidLoad() {
     super.viewDidLoad()
@@ -52,138 +67,115 @@ class ViewController: NSViewController {
       )
     )
 
-    self.view.layer?.onBoundsChange { [weak self] layer, _, _ in
-      print("layer bounds changed: \(layer.bounds)")
-      self?.updateTextField()
-    }
+    self.view.addSubview(contentView)
+    contentView.makeFullSizeInSuperView()
 
-    appearanceObserver = view.observe("effectiveAppearance") { [weak self] (object, old: NSAppearance, new: NSAppearance) in
-      print("view appearance changed: \(old) -> \(new)")
-      self?.updateTextField()
-    }
-
-    textField = NSTextField()
-    textField.stringValue = "Hello, World!"
-    textField.isEditable = false
-    textField.isBordered = false
-    textField.drawsBackground = false
-    textField.alignment = .center
-
-    textField.translatesAutoresizingMaskIntoConstraints = false
-    self.view.addSubview(textField)
-
-    NSLayoutConstraint.activate([
-      textField.centerXAnchor.constraint(equalTo: self.view.centerXAnchor),
-      textField.centerYAnchor.constraint(equalTo: self.view.centerYAnchor),
-    ])
-
-    // bottom toolbar
-    let toolbarView = ComposeView {
-      ZStack {
-        UnifiedColorNode(
-          light: LinearGradientColor([.whiteRGB(0.98), .whiteRGB(0.8)]),
-          dark: LinearGradientColor([.blackRGB(0.65), .blackRGB(0.8)])
-        )
-        .overlay(alignment: .top, content: {
-          UnifiedColorNode(light: .whiteRGB, dark: .whiteRGB(0.5))
-            .frame(width: .flexible, height: .halfPoint)
-        })
-        .animation(.easeInEaseOut(duration: 1))
-        .dropShadow(color: .black, opacity: 0.3, radius: 1, offset: CGSize(width: 0, height: -1), path: { renderable in
-          return CGPath(rect: renderable.frame.insetBy(dx: -4, dy: 0), transform: nil)
-        })
-
-        HStack {
-          ViewNode(make: { _ in
-            let button = NSButton(title: "Layer Background", target: nil, action: nil)
-            let windowBox = WeakBox<LayerBackgroundWindow>(nil)
-            button.addAction {
-              windowBox.object?.close()
-
-              let newWindow = LayerBackgroundWindow()
-              newWindow.show()
-              windowBox.object = newWindow
-            }
-            button.wantsLayer = true
-            button.sizeToFit()
-            return button
-          })
-          .fixedSize()
-
-          ViewNode(make: { _ in
-            let button = NSButton(title: "Layer Shape", target: nil, action: nil)
-            let windowBox = WeakBox<LayerShapeWindow>(nil)
-            button.addAction {
-              windowBox.object?.close()
-
-              let newWindow = LayerShapeWindow()
-              newWindow.show()
-              windowBox.object = newWindow
-            }
-            button.wantsLayer = true
-            button.sizeToFit()
-            return button
-          })
-          .fixedSize()
-
-          ViewNode(make: { _ in
-            let button = NSButton(title: "Layer Border", target: nil, action: nil)
-            let windowBox = WeakBox<LayerBorderWindow>(nil)
-            button.addAction {
-              windowBox.object?.close()
-
-              let newWindow = LayerBorderWindow()
-              newWindow.show()
-              windowBox.object = newWindow
-            }
-            button.wantsLayer = true
-            button.sizeToFit()
-            return button
-          })
-          .fixedSize()
-
-          ViewNode(make: { _ in
-            let button = NSButton(title: "Layer Border Offset", target: nil, action: nil)
-            let windowBox = WeakBox<LayerBorderOffsetWindow>(nil)
-            button.addAction {
-              windowBox.object?.close()
-
-              let newWindow = LayerBorderOffsetWindow()
-              newWindow.show()
-              windowBox.object = newWindow
-            }
-            button.wantsLayer = true
-            button.sizeToFit()
-            return button
-          })
-          .fixedSize()
-        }
-      }
-    }
-
-    toolbarView.translatesAutoresizingMaskIntoConstraints = false
-    self.view.addSubview(toolbarView)
-    NSLayoutConstraint.activate([
-      toolbarView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
-      toolbarView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
-      toolbarView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor),
-      toolbarView.heightAnchor.constraint(equalToConstant: 38),
-    ])
+    setupObservations()
   }
 
   deinit {
     appearanceObserver = nil
   }
 
-  private func updateTextField() {
-    textField.stringValue = "Bounds: \(view.layer?.bounds ?? .zero)\n"
-      + "Appearance: \(view.effectiveAppearance.isDarkMode ? "Dark" : "Light")\n"
+  private func setupObservations() {
+    self.view.layer?.onBoundsChange { [weak self] layer, _, _ in
+      print("layer bounds changed: \(layer.bounds)")
+      self?.updateTitle()
+    }
+
+    appearanceObserver = view.observe("effectiveAppearance") { [weak self] (object, old: NSAppearance, new: NSAppearance) in
+      print("view appearance changed: \(old) -> \(new)")
+      self?.updateTitle()
+    }
   }
-}
 
-private extension NSAppearance {
+  private func updateTitle() {
+    state.title = "Bounds: \(view.layer?.bounds ?? .zero)\n"
+      + "Appearance: \(view.theme.isDark ? "Dark" : "Light")"
+    contentView.setNeedsRefresh(animated: false)
+  }
 
-  var isDarkMode: Bool {
-    return self.name == .darkAqua || self.name == .vibrantDark
+  private func makeToolbar() -> ComposeNode {
+    ZStack {
+      UnifiedColorNode(
+        light: LinearGradientColor([.whiteRGB(0.98), .whiteRGB(0.8)]),
+        dark: LinearGradientColor([.blackRGB(0.65), .blackRGB(0.8)])
+      )
+      .overlay(alignment: .top, content: {
+        UnifiedColorNode(light: .whiteRGB, dark: .whiteRGB(0.5))
+          .frame(width: .flexible, height: .halfPoint)
+      })
+      .dropShadow(color: .black, opacity: 0.3, radius: 1, offset: CGSize(width: 0, height: -1), path: { renderable in
+        CGPath(rect: renderable.bounds.insetBy(dx: -4, dy: 0), transform: nil)
+      })
+      .animation(.easeInEaseOut(duration: 1))
+
+      HStack {
+        ViewNode(make: { _ in
+          let button = NSButton(title: "Layer Background", target: nil, action: nil)
+          let windowBox = WeakBox<LayerBackgroundWindow>(nil)
+          button.addAction {
+            windowBox.object?.close()
+
+            let newWindow = LayerBackgroundWindow()
+            newWindow.show()
+            windowBox.object = newWindow
+          }
+          button.wantsLayer = true
+          button.sizeToFit()
+          return button
+        })
+        .fixedSize()
+
+        ViewNode(make: { _ in
+          let button = NSButton(title: "Layer Shape", target: nil, action: nil)
+          let windowBox = WeakBox<LayerShapeWindow>(nil)
+          button.addAction {
+            windowBox.object?.close()
+
+            let newWindow = LayerShapeWindow()
+            newWindow.show()
+            windowBox.object = newWindow
+          }
+          button.wantsLayer = true
+          button.sizeToFit()
+          return button
+        })
+        .fixedSize()
+
+        ViewNode(make: { _ in
+          let button = NSButton(title: "Layer Border", target: nil, action: nil)
+          let windowBox = WeakBox<LayerBorderWindow>(nil)
+          button.addAction {
+            windowBox.object?.close()
+
+            let newWindow = LayerBorderWindow()
+            newWindow.show()
+            windowBox.object = newWindow
+          }
+          button.wantsLayer = true
+          button.sizeToFit()
+          return button
+        })
+        .fixedSize()
+
+        ViewNode(make: { _ in
+          let button = NSButton(title: "Layer Border Offset", target: nil, action: nil)
+          let windowBox = WeakBox<LayerBorderOffsetWindow>(nil)
+          button.addAction {
+            windowBox.object?.close()
+
+            let newWindow = LayerBorderOffsetWindow()
+            newWindow.show()
+            windowBox.object = newWindow
+          }
+          button.wantsLayer = true
+          button.sizeToFit()
+          return button
+        })
+        .fixedSize()
+      }
+    }
+    .frame(width: .flexible, height: 38)
   }
 }
