@@ -59,6 +59,7 @@ class ViewController: UIViewController {
     }.store(in: bindingObservationStorage)
 
     addLayerWithShape()
+    testBorderMetalLayer()
   }
 
   private func addLayerWithShape() {
@@ -99,5 +100,58 @@ class ViewController: UIViewController {
       layer.animateFrame(to: CGRect(x: 50, y: 200, width: 100, height: 200), timing: .easeInEaseOut(duration: 0.5))
       layer2.animateFrame(to: CGRect(x: 50, y: 200, width: 100, height: 200), timing: .easeInEaseOut(duration: 0.5))
     }
+  }
+
+  func testBorderMetalLayer() {
+    let metalLayer = BorderMetalLayer()
+    metalLayer.frame = CGRect(x: 10, y: 100, width: 250, height: 150)
+    view.layer.addSublayer(metalLayer)
+
+    let shape = CombinedShape(
+      mainShape: CombinedShape(
+        mainShape: SuperEllipse(cornerRadius: 50, roundingCorners: [.topLeft, .bottomRight]),
+        subShape: Circle().inset(by: 20),
+        mode: .difference
+      ),
+      subShape: Circle().inset(by: 40),
+      mode: .difference
+    )
+
+    metalLayer.updateBorder(
+      width: 10,
+      content: .linearGradient(
+        startColor: .red,
+        endColor: .blue,
+        startPoint: .left,
+        endPoint: .right
+      ),
+      shape: shape
+    )
+
+    delay(2) {
+      metalLayer.animateFrame(
+        to: CGRect(x: 20, y: 120, width: 200, height: 200),
+        timing: .spring(response: 2)
+      )
+    }
+
+    metalLayer.onLiveFrameChange { layer, rect in
+      let metalLayer = layer as! BorderMetalLayer // swiftlint:disable:this force_cast
+
+      metalLayer.updateBorder(
+        width: 10,
+        content: .linearGradient(
+          startColor: .red,
+          endColor: .blue,
+          startPoint: .left,
+          endPoint: .right
+        ),
+        shape: shape,
+        bounds: CGRect(origin: .zero, size: rect.size),
+        scale: rect.size == layer.bounds.size ? nil : 1
+      )
+    }
+
+    metalLayer.backgroundColor = Color.yellow.cgColor
   }
 }

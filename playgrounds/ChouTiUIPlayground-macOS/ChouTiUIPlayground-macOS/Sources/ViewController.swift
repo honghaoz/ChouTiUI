@@ -127,6 +127,22 @@ class ViewController: NSViewController {
           .fixedSize()
 
           ViewNode(make: { _ in
+            let button = NSButton(title: "Layer Border", target: nil, action: nil)
+            let windowBox = WeakBox<LayerBorderWindow>(nil)
+            button.addAction {
+              windowBox.object?.close()
+
+              let newWindow = LayerBorderWindow()
+              newWindow.show()
+              windowBox.object = newWindow
+            }
+            button.wantsLayer = true
+            button.sizeToFit()
+            return button
+          })
+          .fixedSize()
+
+          ViewNode(make: { _ in
             let button = NSButton(title: "Layer Border Offset", target: nil, action: nil)
             let windowBox = WeakBox<LayerBorderOffsetWindow>(nil)
             button.addAction {
