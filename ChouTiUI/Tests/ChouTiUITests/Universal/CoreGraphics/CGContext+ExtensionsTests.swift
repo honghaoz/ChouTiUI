@@ -44,6 +44,30 @@ import ChouTiUI
 
 class CGContext_ExtensionsTests: XCTestCase {
 
+  func test_makeContext() {
+    // default color space
+    do {
+      let context = CGContext.makeContext(size: CGSize(width: 100, height: 100))
+      expect(context?.width) == 100
+      expect(context?.height) == 100
+      expect(context?.bitsPerComponent) == 8
+      expect(context?.bytesPerRow) == 416
+      expect(context?.colorSpace) == CGColorSpace.displayP3()
+      expect(context?.bitmapInfo.rawValue) == CGImageAlphaInfo.premultipliedLast.rawValue
+    }
+
+    // custom color space
+    do {
+      let context = CGContext.makeContext(size: CGSize(width: 150, height: 200), colorSpace: CGColorSpace.sRGB())
+      expect(context?.width) == 150
+      expect(context?.height) == 200
+      expect(context?.bitsPerComponent) == 8
+      expect(context?.bytesPerRow) == 608
+      expect(context?.colorSpace) == CGColorSpace.sRGB()
+      expect(context?.bitmapInfo.rawValue) == CGImageAlphaInfo.premultipliedLast.rawValue
+    }
+  }
+
   func testFlipCoordinatesVertically() throws {
     // matching height
     do {

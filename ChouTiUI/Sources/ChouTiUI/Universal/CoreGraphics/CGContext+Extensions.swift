@@ -40,6 +40,30 @@ import CoreGraphics
 
 public extension CGContext {
 
+  /// Makes a context with the given size and color space.
+  ///
+  /// The context is configured with:
+  /// - 8 bits per color component (RGBA)
+  /// - Premultiplied alpha in RGBA format for optimal blending performance
+  /// - Automatic byte row calculation
+  ///
+  /// - Parameters:
+  ///   - size: The size of the context in pixels. For size in points, you should multiply the size by the scale.
+  ///           The width and height will be rounded down to the nearest integer.
+  ///   - colorSpace: The color space of the context. Default is displayP3.
+  /// - Returns: A context configured for modern graphics rendering with transparency support.
+  static func makeContext(size: CGSize, colorSpace: CGColorSpace = CGColorSpace.displayP3()) -> CGContext? {
+    Self(
+      data: nil,
+      width: Int(size.width),
+      height: Int(size.height),
+      bitsPerComponent: 8,
+      bytesPerRow: 0,
+      space: colorSpace,
+      bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+    )
+  }
+
   /// Returns the current drawing context.
   @inlinable
   @inline(__always)
