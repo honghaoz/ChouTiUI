@@ -53,7 +53,7 @@ class LayerBackgroundWindow: NSWindow {
   }
 
   private func setupWindow() {
-    title = "Layer Background Window"
+    title = "Layer Background"
     isReleasedWhenClosed = false
     center()
 
@@ -65,6 +65,7 @@ class LayerBackgroundWindow: NSWindow {
 
     addLayerWithBackground()
     addLayerWithBackground2()
+    addLayerWithBackground3()
   }
 
   // Show the window.
@@ -87,76 +88,25 @@ class LayerBackgroundWindow: NSWindow {
     layer.frame = CGRect(x: 25, y: 50, width: 50, height: 100)
     contentView?.layer?.addSublayer(layer)
 
-    onMainAsync(delay: 1) {
+    delay(1) {
+      // gradient -> solid
+      // animate frame additively
       layer.animateBackground(from: nil, to: .color(.orange), timing: .easeInEaseOut(duration: 2))
-
-      // layer.animateBackground(from: .color(.red), to: .color(.blue), timing: .easeInEaseOut(duration: 2))
-
-      // layer.animateBackground(
-      //   from: .color(.red),
-      //   to: .linearGradient(LinearGradientColor([.red, .blue, .yellow], nil, UnitPoint(0.7, 0), UnitPoint(0.3, 1))),
-      //   timing: .easeInEaseOut(duration: 2)
-      // )
-
-      // layer.animateBackground(
-      //   from: .linearGradient(LinearGradientColor([.red, .blue, .yellow], nil, UnitPoint(0.7, 0), UnitPoint(0.3, 1))),
-      //   to: .color(.red),
-      //   timing: .easeInEaseOut(duration: 2)
-      // )
-
-      // layer.animateBackground(
-      //   from: .linearGradient(LinearGradientColor([.red, .blue, .yellow], nil, UnitPoint(0.7, 0), UnitPoint(0.3, 1))),
-      //   to: .linearGradient(LinearGradientColor([.blue, .yellow, .red], nil, UnitPoint(0.7, 0), UnitPoint(0.3, 1))),
-      //   timing: .easeInEaseOut(duration: 2)
-      // )
-
-      // layer.animateBackground(
-      //   from: .linearGradient(LinearGradientColor([.red, .blue], nil, UnitPoint(0.7, 0), UnitPoint(0.3, 1))),
-      //   to: .linearGradient(LinearGradientColor([.red, .yellow], nil, UnitPoint(0.7, 0), UnitPoint(0.3, 1))),
-      //   timing: .easeInEaseOut(duration: 3)
-      // )
-
-      // layer.animateBackground(
-      //   from: .linearGradient(LinearGradientColor([.red, .blue], nil, UnitPoint(0.7, 0), UnitPoint(0.3, 1))),
-      //   to: .linearGradient(LinearGradientColor([.red, .blue, .yellow], nil, UnitPoint(0.7, 0), UnitPoint(0.3, 1))),
-      //   timing: .easeInEaseOut(duration: 3)
-      // )
-
-      // layer.animateBackground(
-      //   from: .linearGradient(LinearGradientColor([.red, .orange, .yellow, .green], [0, 0.5, 1, 1], UnitPoint(0.7, 0), UnitPoint(0.3, 1))),
-      //   to: .linearGradient(LinearGradientColor([.red, .orange, .yellow, .green], [0, 0.25, 0.5, 1], UnitPoint(0.7, 0), UnitPoint(0.3, 1))),
-      //   timing: .easeInEaseOut(duration: 3)
-      // )
-
-      // layer.animateBackground(
-      //   from: .angularGradient(AngularGradientColor(colors: [.red, .blue], centerPoint: .center, aimingPoint: .topRight)),
-      //   to: nil,
-      //   timing: .easeInEaseOut(duration: 3)
-      // )
-
-      // layer.animateBackground(
-      //   from: .angularGradient(AngularGradientColor(colors: [.red, .blue], centerPoint: .center, aimingPoint: .topRight)),
-      //   to: .linearGradient(LinearGradientColor([.red, .yellow], nil, UnitPoint(0.7, 0), UnitPoint(0.3, 1))),
-      //   timing: .easeInEaseOut(duration: 3)
-      // )
+      layer.animateFrame(to: CGRect(x: 100, y: 20, width: 100, height: 150), timing: .spring(response: 2))
     }
-
-    onMainAsync(delay: 3.4) {
+    .then(delay: 0.5) {
+      // animate frame additively again
+      layer.animateFrame(to: CGRect(x: 25, y: 100, width: 50, height: 100), timing: .spring(response: 2))
+    }
+    .then(delay: 3) {
+      // animation from solid to gradient
       layer.animateBackground(
         to: .angularGradient(AngularGradientColor(colors: [.red, .blue], centerPoint: .center, aimingPoint: .topRight)),
         timing: .easeInEaseOut(duration: 2.5)
       )
     }
-
-    onMainAsync(delay: 1) {
-      layer.animateFrame(to: CGRect(x: 100, y: 20, width: 100, height: 150), timing: .spring(response: 2))
-    }
-
-    onMainAsync(delay: 1.5) {
-      layer.animateFrame(to: CGRect(x: 25, y: 100, width: 50, height: 100), timing: .spring(response: 2))
-    }
-
-    onMainAsync(delay: 5) {
+    .then(delay: 0.5) {
+      // animate frame non-additively
       let targetFrame = CGRect(x: 50, y: 20, width: 100, height: 50)
       layer.animate(
         keyPath: "position",
@@ -171,8 +121,8 @@ class LayerBackgroundWindow: NSWindow {
         to: { _ in targetFrame.size }
       )
     }
-
-    onMainAsync(delay: 5.5) {
+    .then(delay: 0.5) {
+      // animate frame non-additively again, which interrupts the previous animation
       let targetFrame = CGRect(x: 100, y: 60, width: 50, height: 100)
       layer.animate(
         keyPath: "position",
@@ -190,25 +140,51 @@ class LayerBackgroundWindow: NSWindow {
   }
 
   private func addLayerWithBackground2() {
-    // test that removing the animation gradient layer won't create animation artifact.
-
     let layer = CALayer()
     layer.borderColor = NSColor.black.cgColor
     layer.borderWidth = 1
     layer.background = .color(.orange)
-    layer.frame = CGRect(x: 200, y: 50, width: 50, height: 100)
+    layer.frame = CGRect(x: 200, y: 20, width: 50, height: 100)
     contentView?.layer?.addSublayer(layer)
 
+    // animate to gradient color with 1 second duration
     layer.animateBackground(
       to: .angularGradient(AngularGradientColor(colors: [.red, .blue], centerPoint: .center, aimingPoint: .topRight)),
       timing: .easeInEaseOut(duration: 1)
     )
 
+    // animate frame with 2 seconds duration
+    // test that when the underlying animation gradient layer is removed while the frame animation is in progress, no animation artifact is created
     layer.animate(
       keyPath: "bounds.size",
       timing: .linear(duration: 2),
       from: { layer in layer.bounds.size },
       to: { _ in CGSize(width: 100, height: 20) }
     )
+  }
+
+  private func addLayerWithBackground3() {
+    let layer = CALayer()
+    layer.borderColor = NSColor.black.cgColor
+    layer.borderWidth = 1
+    layer.background = .color(.orange)
+    layer.frame = CGRect(x: 200, y: 150, width: 100, height: 50)
+    contentView?.layer?.addSublayer(layer)
+
+    delay(1) {
+      // solid to gradient
+      layer.animateBackground(from: .color(.orange), to: .angularGradient(AngularGradientColor(colors: [.green, .red, .blue], centerPoint: .center, aimingPoint: .topRight)), timing: .easeInEaseOut(duration: 2))
+      layer.animateFrame(to: CGRect(x: 250, y: 200, width: 150, height: 75), timing: .spring(response: 2))
+    }
+    .then(delay: 2) {
+      // gradient to gradient
+      layer.animateBackground(to: .angularGradient(AngularGradientColor(colors: [.red, .blue, .yellow], centerPoint: .center, aimingPoint: .topRight)), timing: .easeInEaseOut(duration: 2))
+      layer.animateFrame(to: CGRect(x: 200, y: 150, width: 100, height: 50), timing: .spring(response: 2))
+    }
+    .then(delay: 1) {
+      // gradient to solid
+      layer.animateBackground(to: .color(.orange), timing: .easeInEaseOut(duration: 2))
+      layer.animateFrame(to: CGRect(x: 200, y: 150, width: 100, height: 50), timing: .spring(response: 2))
+    }
   }
 }
