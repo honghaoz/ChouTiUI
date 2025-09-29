@@ -30,7 +30,7 @@
 
 import Foundation
 import CoreImage
-import CoreImage.CIFilterBuiltins // swiftlint:disable:this duplicate_imports
+import CoreImage.CIFilterBuiltins
 
 import ChouTi
 
