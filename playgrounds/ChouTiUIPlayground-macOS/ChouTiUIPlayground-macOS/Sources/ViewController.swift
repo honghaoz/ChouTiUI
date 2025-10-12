@@ -97,18 +97,32 @@ class ViewController: NSViewController {
 
   private func makeToolbar() -> ComposeNode {
     ZStack {
-      UnifiedColorNode(
-        light: LinearGradientColor([.whiteRGB(0.98), .whiteRGB(0.8)]),
-        dark: LinearGradientColor([.blackRGB(0.65), .blackRGB(0.8)])
-      )
-      .overlay(alignment: .top, content: {
-        UnifiedColorNode(light: .whiteRGB, dark: .whiteRGB(0.5))
-          .frame(width: .flexible, height: .halfPoint)
-      })
-      .dropShadow(color: .black, opacity: 0.3, radius: 1, offset: CGSize(width: 0, height: -1), path: { renderable in
-        CGPath(rect: renderable.bounds.insetBy(dx: -4, dy: 0), transform: nil)
-      })
-      .animation(.easeInEaseOut(duration: 1))
+      ComposeViewNode {
+        UnifiedColorNode(
+          light: LinearGradientColor([.whiteRGB(0.98), .whiteRGB(0.8)]),
+          dark: LinearGradientColor([.blackRGB(0.65), .blackRGB(0.8)])
+        )
+        .overlay(alignment: .top, content: {
+          UnifiedColorNode(light: .whiteRGB, dark: .whiteRGB(0.5))
+            .frame(width: .flexible, height: .halfPoint)
+        })
+        .dropShadow(color: .black, opacity: 0.3, radius: 1, offset: CGSize(width: 0, height: -1), path: { renderable in
+          CGPath(rect: renderable.bounds.insetBy(dx: -4, dy: 0), transform: nil)
+        })
+        .animation(.easeInEaseOut(duration: 5))
+      }
+      .willInsert { renderable, context in
+        (renderable.view as? ComposeView)?.animationBehavior = .dynamic { _, renderType in
+          switch renderType {
+          case .refresh(isAnimated: let isAnimated):
+            return isAnimated
+          case .scroll:
+            return false
+          case .boundsChange:
+            return false
+          }
+        }
+      }
 
       HStack {
         ViewNode(make: { _ in
@@ -177,5 +191,44 @@ class ViewController: NSViewController {
       }
     }
     .frame(width: .flexible, height: 38)
+  }
+}
+
+struct ComposeViewNode: ComposeNode {
+
+  private var node: ComposeNode
+  private var viewNode: ViewNode<ComposeView>?
+
+  init(@ComposeContentBuilder content: () -> ComposeContent) {
+    self.node = content().asVStack()
+  }
+
+  var id: ComposeUI.ComposeNodeId = .custom("compose-view")
+
+  var size: CGSize { node.size }
+
+  mutating func layout(containerSize: CGSize, context: ComposeUI.ComposeNodeLayoutContext) -> ComposeUI.ComposeNodeSizing {
+    let sizing = node.layout(containerSize: containerSize, context: context)
+
+    if viewNode == nil {
+      viewNode = ViewNode(
+        make: {
+          ComposeView(frame: $0.initialFrame ?? .zero)
+        },
+        willInsert: { [node] view, _ in
+          view.setContent { node }
+        }
+      )
+    }
+    _ = viewNode?.layout(containerSize: node.size, context: context)
+
+    return sizing
+  }
+
+  func renderableItems(in visibleBounds: CGRect) -> [ComposeUI.RenderableItem] {
+    guard let viewNode else {
+      return []
+    }
+    return viewNode.renderableItems(in: visibleBounds)
   }
 }
