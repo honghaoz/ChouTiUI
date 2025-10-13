@@ -45,7 +45,9 @@ case "$OS" in
     "$REPO_ROOT/scripts/swift-package/update-packages.sh" ./
     "$REPO_ROOT/scripts/swift-package/update-packages.sh" ./ChouTiUI
     "$REPO_ROOT/scripts/swift-package/update-packages.sh" ./playgrounds/ChouTiUIPlayground-macOS/ChouTiUIPlayground-macOS.xcodeproj
+    "$REPO_ROOT/scripts/swift-package/update-packages.sh" ./playgrounds/ChouTiUIPlayground-macOS-dev/ChouTiUIPlayground-macOS.xcodeproj
     "$REPO_ROOT/scripts/swift-package/update-packages.sh" ./playgrounds/ChouTiUIPlayground-iOS/ChouTiUIPlayground-iOS.xcodeproj
+    "$REPO_ROOT/scripts/swift-package/update-packages.sh" ./playgrounds/ChouTiUIPlayground-iOS-dev/ChouTiUIPlayground-iOS.xcodeproj
 
     echo ""
     echo "🎉 Done."
