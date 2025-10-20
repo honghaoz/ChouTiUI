@@ -65,6 +65,8 @@ public extension CALayer {
   private static let borderOffsetKey = String("redrob".reversed() + "Offset")
 
   /// The offset of the border of the layer.
+  ///
+  /// Positive value makes the border move outward, negative value makes the border move inward.
   var borderOffset: CGFloat {
     get {
       value(forKey: Self.borderOffsetKey).assert("missing value for key \(Self.borderOffsetKey)") as? CGFloat ?? 0

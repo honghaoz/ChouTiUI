@@ -84,7 +84,7 @@ public final class BorderMetalLayer: CAMetalLayer {
   ///   - scale: The scale of the border image. If not provided, the layer's `contentsScale` will be used.
   public func updateBorder(width: CGFloat,
                            content: CIImage.BorderContent,
-                           shape: some Shape,
+                           shape: some ChouTiUI.Shape,
                            bounds: CGRect? = nil,
                            scale: CGFloat? = nil)
   {
