@@ -32,6 +32,7 @@ import Foundation
 import QuartzCore
 import ChouTi
 
+/// A layer that can render a border.
 public final class BorderLayer: CALayer {
 
   override public var borderWidth: CGFloat {
@@ -49,6 +50,15 @@ public final class BorderLayer: CALayer {
     }
     set { // swiftlint:disable:this unused_setter_value
       ChouTi.assertFailure("borderColor is not supported on BorderLayer, use borderContent instead.")
+    }
+  }
+
+  override public var cornerRadius: CGFloat {
+    get {
+      return super.cornerRadius
+    }
+    set { // swiftlint:disable:this unused_setter_value
+      ChouTi.assertFailure("cornerRadius is not supported on BorderLayer, use borderContent instead.")
     }
   }
 
@@ -73,8 +83,16 @@ public final class BorderLayer: CALayer {
   /// The content of the border. The default value is a solid black color border.
   public var borderContent: BorderContent = .color(.black)
 
-  /// The content layer. For color and gradient only.
-  private var borderContentLayer: CAGradientLayer?
+  // TODO: support color with shape border
+  //
+  // /// The layer for `BorderContent.color`.
+  // private var borderContentColorLayer: CALayer?
+
+  /// The layer for `BorderContent.gradient`.
+  private var borderContentGradientLayer: CAGradientLayer?
+
+  /// The layer for `BorderContent.layer`.
+  private var borderContentExternalLayer: CALayer?
 
   // MARK: - Border Mask
 
@@ -104,20 +122,15 @@ public final class BorderLayer: CALayer {
   public var borderMask: BorderMask = .cornerRadius(0, borderWidth: 1, offset: 0)
 
   /// The mask layer.
-  private let borderMaskLayer: CALayer
+  private var borderMaskLayer: CALayer?
 
   // MARK: - Initialization
 
   override public init() {
-    self.borderMaskLayer = CALayer()
-
     super.init()
-
-    self.borderMaskLayer.borderColor = Color.black.cgColor
 
     // turn off implicit animations
     self.strongDelegate = CALayer.DisableImplicitAnimationDelegate.shared
-    self.borderMaskLayer.strongDelegate = CALayer.DisableImplicitAnimationDelegate.shared
   }
 
   override public init(layer: Any) {
@@ -125,13 +138,7 @@ public final class BorderLayer: CALayer {
       fatalError("expect the `layer` to be the same type during a ca animation.") // swiftlint:disable:this fatal_error
     }
 
-    self.borderContentLayer = layer.borderContentLayer
-    self.borderMaskLayer = layer.borderMaskLayer
-
     super.init(layer: layer)
-
-    self.borderContent = layer.borderContent
-    self.borderMask = layer.borderMask
   }
 
   @available(*, unavailable)
@@ -144,63 +151,109 @@ public final class BorderLayer: CALayer {
   override public func layoutSublayers() {
     super.layoutSublayers()
 
-    // set up border content layer
-    switch borderContent {
-    case .color(let color):
-      let borderContentLayer = setupBorderContentLayerIfNeeded()
-      borderContentLayer.frame = bounds.expanded(by: borderMask.boundsExtendedOffset)
+    switch (borderContent, borderMask) {
+    case (.color(let color), .cornerRadius(let cornerRadius, let borderWidth, let cornerCurve, let offset)):
+      // reset border content layer
+      self.borderContentGradientLayer?.removeFromSuperlayer()
+      self.borderContentGradientLayer = nil
+      self.borderContentExternalLayer?.removeFromSuperlayer()
+      self.borderContentExternalLayer = nil
 
-      borderContentLayer.background = .color(color)
+      // reset border mask layer
+      self.borderMaskLayer = nil
+      self.mask = nil
 
-    case .gradient(let gradient):
-      let borderContentLayer = setupBorderContentLayerIfNeeded()
-      borderContentLayer.frame = bounds.expanded(by: borderMask.boundsExtendedOffset)
+      // use layer's border directly
+      super.borderColor = color.cgColor
+      super.borderWidth = borderWidth
+      super.cornerRadius = cornerRadius
+      self.cornerCurve = cornerCurve
+      self.borderOffset = offset
 
-      borderContentLayer.background = .gradient(gradient)
+    case (.color(let color), .shape(let shape)):
+      resetBorderStyle()
+      // TODO: support color with shape border
 
-    case .layer(let contentLayer):
-      if contentLayer.superlayer != self {
-        contentLayer.removeFromSuperlayer()
-        addSublayer(contentLayer)
+    case (.gradient, _),
+         (.layer, _):
+      resetBorderStyle()
+
+      // 1) set up border content layer
+      switch borderContent {
+      case .color:
+        break // not applicable
+      case .gradient(let gradient):
+        self.borderContentExternalLayer?.removeFromSuperlayer()
+        self.borderContentExternalLayer = nil
+
+        let borderContentGradientLayer = self.borderContentGradientLayer ?? {
+          let gradientLayer = CAGradientLayer()
+          gradientLayer.strongDelegate = CALayer.DisableImplicitAnimationDelegate.shared
+          self.borderContentGradientLayer = gradientLayer
+          return gradientLayer
+        }()
+
+        borderContentGradientLayer.background = .gradient(gradient)
+        addSublayer(borderContentGradientLayer)
+
+        // extend the content layer's bounds by the border mask's offset so that the border with offset can have effect on it.
+        borderContentGradientLayer.frame = bounds.expanded(by: borderMask.boundsExtendedOffset)
+
+      case .layer(let contentLayer):
+        self.borderContentGradientLayer?.removeFromSuperlayer()
+        self.borderContentGradientLayer = nil
+
+        if contentLayer.superlayer !== self {
+          contentLayer.removeFromSuperlayer()
+          addSublayer(contentLayer)
+        }
+        self.borderContentExternalLayer = contentLayer
+
+        // turn off implicit animations
+        if contentLayer.delegate == nil {
+          contentLayer.strongDelegate = CALayer.DisableImplicitAnimationDelegate.shared
+        } else if contentLayer.strongDelegate !== CALayer.DisableImplicitAnimationDelegate.shared {
+          ChouTi.assertFailure("border content layer's delegate should be nil", metadata: [
+            "layer": "\(contentLayer)",
+            "layer.delegate": "\(contentLayer.delegate)",
+          ])
+        }
+
+        // extend the content layer's bounds by the border mask's offset so that the border with offset can have effect on it.
+        contentLayer.frame = bounds.expanded(by: borderMask.boundsExtendedOffset)
       }
 
-      // turn off implicit animations
-      contentLayer.strongDelegate = CALayer.DisableImplicitAnimationDelegate.shared
+      // 2) set up border mask layer
+      let borderMaskLayer = self.borderMaskLayer ?? {
+        let borderMaskLayer = CALayer()
+        borderMaskLayer.strongDelegate = CALayer.DisableImplicitAnimationDelegate.shared
+        self.borderMaskLayer = borderMaskLayer
+        return borderMaskLayer
+      }()
 
-      // extend the content layer's bounds by the border mask's offset so that the border with offset can have effect on it.
-      contentLayer.frame = bounds.expanded(by: borderMask.boundsExtendedOffset)
-    }
+      if mask !== borderMaskLayer {
+        mask = borderMaskLayer
+      }
+      borderMaskLayer.frame = bounds
 
-    // set up border mask layer
-    if mask !== borderMaskLayer {
-      mask = borderMaskLayer
-    }
-    borderMaskLayer.frame = bounds
-
-    switch borderMask {
-    case .cornerRadius(let cornerRadius, let borderWidth, let cornerCurve, let offset):
-      borderMaskLayer.cornerRadius = cornerRadius
-      borderMaskLayer.borderWidth = borderWidth
-      borderMaskLayer.cornerCurve = cornerCurve
-      borderMaskLayer.borderOffset = offset
-    case .shape(let shape):
-      break // TODO: support shape in border mask
+      switch borderMask {
+      case .cornerRadius(let cornerRadius, let borderWidth, let cornerCurve, let offset):
+        borderMaskLayer.cornerRadius = cornerRadius
+        borderMaskLayer.borderWidth = borderWidth
+        borderMaskLayer.cornerCurve = cornerCurve
+        borderMaskLayer.borderOffset = offset
+      case .shape(let shape):
+        break // TODO: support shape in border mask
+      }
     }
   }
 
-  /// Sets up the border content layer if the layer is not set up yet.
-  /// - Returns: The border content layer.
-  private func setupBorderContentLayerIfNeeded() -> CAGradientLayer {
-    if let borderContentLayer = self.borderContentLayer {
-      return borderContentLayer
-    }
-
-    let borderContentLayer = CAGradientLayer()
-    borderContentLayer.strongDelegate = CALayer.DisableImplicitAnimationDelegate.shared
-    addSublayer(borderContentLayer)
-    self.borderContentLayer = borderContentLayer
-
-    return borderContentLayer
+  private func resetBorderStyle() {
+    super.borderColor = Color.black.cgColor
+    super.borderWidth = 0
+    super.cornerRadius = 0
+    self.cornerCurve = .continuous
+    self.borderOffset = 0
   }
 
   // TODO: support animations

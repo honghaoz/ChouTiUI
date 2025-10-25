@@ -73,51 +73,97 @@ class LayerBorderWindow: NSWindow {
         .frame(width: .flexible, height: 300)
 
         LayerNode(make: { _ in
+          BorderLayerDemoLayer(borderContent: .gradient(.linearGradient(LinearGradientColor([.yellow, .cyan]))), offset: 0)
+        })
+        .frame(width: .flexible, height: 200)
+        .overlay {
+          LabelNode("Gradient, offset: 0")
+            .textColor(.white)
+        }
+
+        LayerNode(make: { context in
+          let layer = CALayer()
+          layer.background = .linearGradient(LinearGradientColor([.yellow, .orange]))
+          return BorderLayerDemoLayer(borderContent: .layer(layer), offset: 0)
+        })
+        .frame(width: .flexible, height: 200)
+        .overlay {
+          LabelNode("Custom layer, offset: 0")
+            .textColor(.white)
+        }
+
+        LayerNode(make: { context in
+          let layer = ComposeViewContentLayer()
+          return BorderLayerDemoLayer(borderContent: .layer(layer), offset: 10)
+        })
+        .frame(width: .flexible, height: 200)
+        .overlay {
+          LabelNode("Custom layer, offset: 0")
+            .textColor(.white)
+        }
+
+        LayerNode(make: { _ in
           BorderLayerDemoLayer(borderContent: .color(.yellow), offset: 0)
         })
         .frame(width: .flexible, height: 200)
-
-        LayerNode(make: { _ in
-          BorderLayerDemoLayer(borderContent: .gradient(.linearGradient(LinearGradientColor([.yellow, .green]))), offset: 0)
-        })
-        .frame(width: .flexible, height: 200)
-
-        LayerNode(make: { _ in
-          let borderContentLayer = BaseCALayer()
-          borderContentLayer.backgroundColor = Color.yellow.cgColor
-          return BorderLayerDemoLayer(borderContent: .layer(borderContentLayer), offset: 0)
-        })
-        .frame(width: .flexible, height: 200)
+        .overlay {
+          LabelNode("Solid color, offset: 0")
+            .textColor(.white)
+        }
 
         LayerNode(make: { _ in
           BorderLayerDemoLayer(borderContent: .color(.yellow), offset: .pixel)
         })
         .frame(width: .flexible, height: 200)
+        .overlay {
+          LabelNode("Solid color, offset: .pixel")
+            .textColor(.white)
+        }
 
         LayerNode(make: { _ in
           BorderLayerDemoLayer(borderContent: .color(.yellow), offset: 1)
         })
         .frame(width: .flexible, height: 200)
+        .overlay {
+          LabelNode("Solid color, offset: 1")
+            .textColor(.white)
+        }
 
         LayerNode(make: { _ in
           BorderLayerDemoLayer(borderContent: .color(.yellow), offset: 10)
         })
         .frame(width: .flexible, height: 200)
+        .overlay {
+          LabelNode("Solid color, offset: 10")
+            .textColor(.white)
+        }
 
         LayerNode(make: { _ in
           BorderLayerDemoLayer(borderContent: .color(.yellow), offset: 20)
         })
         .frame(width: .flexible, height: 200)
+        .overlay {
+          LabelNode("Solid color, offset: 20")
+            .textColor(.white)
+        }
 
         LayerNode(make: { _ in
           BorderLayerDemoLayer(borderContent: .color(.yellow), offset: -10)
         })
         .frame(width: .flexible, height: 200)
+        .overlay {
+          LabelNode("Solid color, offset: -10")
+            .textColor(.white)
+        }
 
         LayerNode(make: { _ in
           BorderLayerDemoLayer(borderContent: .color(.yellow), offset: -20)
         })
         .frame(width: .flexible, height: 200)
+        .overlay {
+          LabelNode("Solid color, offset: -20")
+            .textColor(.white)
+        }
       }
       .padding(horizontal: 50)
     }
@@ -227,5 +273,46 @@ private class BorderLayerDemoLayer: CALayer {
     super.layoutSublayers()
     contentLayer.frame = bounds.inset(by: 20)
     borderLayer.frame = contentLayer.frame
+  }
+}
+
+private class ComposeViewContentLayer: CALayer {
+
+  private let view: ComposeView
+
+  override init() {
+
+    view = ComposeView {
+      HStack {
+        VStack {
+          ColorNode(.yellow)
+          ColorNode(.blue)
+          ColorNode(.green)
+          ColorNode(.cyan)
+        }
+        VStack {
+          ColorNode(.orange)
+          ColorNode(.yellow)
+          ColorNode(.purple)
+        }
+      }
+    }
+
+    super.init()
+
+    addSublayer(view.contentView().unsafeLayer)
+  }
+
+  @available(*, unavailable)
+  required init?(coder: NSCoder) {
+    fatalError("init(coder:) is unavailable") // swiftlint:disable:this fatal_error
+  }
+
+  override func layoutSublayers() {
+    super.layoutSublayers()
+
+    view.frame = bounds
+    view.setNeedsLayout()
+    view.layoutIfNeeded()
   }
 }
