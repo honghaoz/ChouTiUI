@@ -203,152 +203,332 @@ class LayerBorderWindow: NSWindow {
         }
 
         ///
-        /// Shape
+        /// Offsetable Shape
         ///
 
-        LabelNode("Color + Offsetable Shape")
+        LabelNode("Offsetable Shape")
           .font(.systemFont(ofSize: 16, weight: .bold))
 
-        LayerNode(make: { _ in
-          BorderLayerDemoLayer(borderContent: .color(.yellow), shape: Capsule(), offset: 0)
-        })
-        .frame(width: .flexible, height: 200)
-        .overlay {
-          LabelNode("Solid color, Capsule, offset: 0")
-            .textColor(.white)
+        HStack(spacing: 10) {
+
+          LayerNode(make: { _ in
+            BorderLayerDemoLayer(borderContent: .color(.yellow), shape: Capsule(), offset: 0)
+          })
+          .frame(width: .flexible, height: 200)
+          .overlay {
+            LabelNode("Solid color, Capsule, offset: 0")
+              .textColor(.white)
+          }
+
+          LayerNode(make: { _ in
+            BorderLayerDemoLayer(borderContent: .gradient(.linearGradient(LinearGradientColor([.yellow, .cyan]))), shape: Capsule(), offset: 0)
+          })
+          .frame(width: .flexible, height: 200)
+          .overlay {
+            LabelNode("Gradient, Capsule, offset: 0")
+              .textColor(.white)
+          }
         }
 
-        LayerNode(make: { _ in
-          BorderLayerDemoLayer(borderContent: .color(.yellow), shape: Capsule(), offset: .pixel)
-        })
-        .frame(width: .flexible, height: 200)
-        .overlay {
-          LabelNode("Solid color, Capsule, offset: .pixel")
-            .textColor(.white)
+        HStack(spacing: 10) {
+
+          LayerNode(make: { _ in
+            BorderLayerDemoLayer(borderContent: .color(.yellow), shape: Capsule(), offset: .pixel)
+          })
+          .frame(width: .flexible, height: 200)
+          .overlay {
+            LabelNode("Solid color, Capsule, offset: .pixel")
+              .textColor(.white)
+          }
+
+          LayerNode(make: { _ in
+            BorderLayerDemoLayer(borderContent: .gradient(.linearGradient(LinearGradientColor([.yellow, .cyan]))), shape: Capsule(), offset: .pixel)
+          })
+          .frame(width: .flexible, height: 200)
+          .overlay {
+            LabelNode("Gradient, Capsule, offset: .pixel")
+              .textColor(.white)
+          }
         }
 
-        LayerNode(make: { _ in
-          BorderLayerDemoLayer(borderContent: .color(.yellow), shape: Capsule(), offset: 20)
-        })
-        .frame(width: .flexible, height: 200)
-        .overlay {
-          LabelNode("Solid color, Capsule, offset: 20")
-            .textColor(.white)
+        HStack(spacing: 10) {
+
+          LayerNode(make: { _ in
+            BorderLayerDemoLayer(borderContent: .color(.yellow), shape: Capsule(), offset: 20)
+          })
+          .frame(width: .flexible, height: 200)
+          .overlay {
+            LabelNode("Solid color, Capsule, offset: 20")
+              .textColor(.white)
+          }
+
+          LayerNode(make: { _ in
+            BorderLayerDemoLayer(borderContent: .gradient(.linearGradient(LinearGradientColor([.yellow, .cyan]))), shape: Capsule(), offset: 20)
+          })
+          .frame(width: .flexible, height: 200)
+          .overlay {
+            LabelNode("Gradient, Capsule, offset: 20")
+              .textColor(.white)
+          }
         }
 
-        LayerNode(make: { _ in
-          BorderLayerDemoLayer(borderContent: .color(.yellow), shape: Ellipse(), offset: 20)
-        })
-        .frame(width: .flexible, height: 200)
-        .overlay {
-          LabelNode("Solid color, Ellipse, offset: 20")
-            .textColor(.white)
+        HStack(spacing: 10) {
+
+          LayerNode(make: { _ in
+            BorderLayerDemoLayer(borderContent: .color(.yellow), shape: Ellipse(), offset: 20)
+          })
+          .frame(width: .flexible, height: 200)
+          .overlay {
+            LabelNode("Solid color, Ellipse, offset: 20")
+              .textColor(.white)
+          }
+
+          LayerNode(make: { _ in
+            BorderLayerDemoLayer(borderContent: .gradient(.linearGradient(LinearGradientColor([.yellow, .cyan]))), shape: Ellipse(), offset: 20)
+          })
+          .frame(width: .flexible, height: 200)
+          .overlay {
+            LabelNode("Gradient, Ellipse, offset: 20")
+              .textColor(.white)
+          }
         }
 
-        LayerNode(make: { _ in
-          BorderLayerDemoLayer(borderContent: .color(.yellow), shape: Circle(), offset: 20)
-        })
-        .frame(width: .flexible, height: 200)
-        .overlay {
-          LabelNode("Solid color, Circle, offset: 20")
-            .textColor(.white)
+        HStack(spacing: 10) {
+
+          LayerNode(make: { _ in
+            BorderLayerDemoLayer(borderContent: .color(.yellow), shape: Circle(), offset: 20)
+          })
+          .frame(width: .flexible, height: 200)
+          .overlay {
+            LabelNode("Solid color, Circle, offset: 20")
+              .textColor(.white)
+          }
+
+          LayerNode(make: { _ in
+            BorderLayerDemoLayer(borderContent: .gradient(.linearGradient(LinearGradientColor([.yellow, .cyan]))), shape: Circle(), offset: 20)
+          })
+          .frame(width: .flexible, height: 200)
+          .overlay {
+            LabelNode("Gradient, Circle, offset: 20")
+              .textColor(.white)
+          }
         }
 
-        LayerNode(make: { _ in
-          BorderLayerDemoLayer(borderContent: .color(.yellow), shape: Rectangle(cornerRadius: 20), offset: 20)
-        })
-        .frame(width: .flexible, height: 200)
-        .overlay {
-          LabelNode("Solid color, Rectangle, offset: 20")
-            .textColor(.white)
+        HStack(spacing: 10) {
+
+          LayerNode(make: { _ in
+            BorderLayerDemoLayer(borderContent: .color(.yellow), shape: Rectangle(cornerRadius: 20), offset: 20)
+          })
+          .frame(width: .flexible, height: 200)
+          .overlay {
+            LabelNode("Solid color, Rectangle, offset: 20")
+              .textColor(.white)
+          }
+
+          LayerNode(make: { _ in
+            BorderLayerDemoLayer(borderContent: .gradient(.linearGradient(LinearGradientColor([.yellow, .cyan]))), shape: Rectangle(cornerRadius: 20), offset: 20)
+          })
+          .frame(width: .flexible, height: 200)
+          .overlay {
+            LabelNode("Gradient, Rectangle, offset: 20")
+              .textColor(.white)
+          }
         }
 
-        LayerNode(make: { _ in
-          BorderLayerDemoLayer(borderContent: .color(.yellow), shape: SuperEllipse(cornerRadius: 50, roundingCorners: [.topLeft, .bottomRight]), offset: 20)
-        })
-        .frame(width: .flexible, height: 200)
-        .overlay {
-          LabelNode("Solid color, SuperEllipse, offset: 20")
-            .textColor(.white)
+        HStack(spacing: 10) {
+
+          LayerNode(make: { _ in
+            BorderLayerDemoLayer(borderContent: .color(.yellow), shape: SuperEllipse(cornerRadius: 50, roundingCorners: [.topLeft, .bottomRight]), offset: 20)
+          })
+          .frame(width: .flexible, height: 200)
+          .overlay {
+            LabelNode("Solid color, SuperEllipse, offset: 20")
+              .textColor(.white)
+          }
+
+          LayerNode(make: { _ in
+            BorderLayerDemoLayer(borderContent: .gradient(.linearGradient(LinearGradientColor([.yellow, .cyan]))), shape: SuperEllipse(cornerRadius: 50, roundingCorners: [.topLeft, .bottomRight]), offset: 20)
+          })
+          .frame(width: .flexible, height: 200)
+          .overlay {
+            LabelNode("Gradient, SuperEllipse, offset: 20")
+              .textColor(.white)
+          }
         }
 
-        LayerNode(make: { _ in
-          BorderLayerDemoLayer(borderContent: .color(.yellow), shape: Capsule(), offset: -20)
-        })
-        .frame(width: .flexible, height: 200)
-        .overlay {
-          LabelNode("Solid color, Capsule, offset: -20")
-            .textColor(.white)
+        HStack(spacing: 10) {
+
+          LayerNode(make: { _ in
+            BorderLayerDemoLayer(borderContent: .color(.yellow), shape: Capsule(), offset: -20)
+          })
+          .frame(width: .flexible, height: 200)
+          .overlay {
+            LabelNode("Solid color, Capsule, offset: -20")
+              .textColor(.white)
+          }
+
+          LayerNode(make: { _ in
+            BorderLayerDemoLayer(borderContent: .gradient(.linearGradient(LinearGradientColor([.yellow, .cyan]))), shape: Capsule(), offset: -20)
+          })
+          .frame(width: .flexible, height: 200)
+          .overlay {
+            LabelNode("Gradient, Capsule, offset: -20")
+              .textColor(.white)
+          }
         }
 
-        LayerNode(make: { _ in
-          BorderLayerDemoLayer(borderContent: .color(.yellow), shape: Ellipse(), offset: -20)
-        })
-        .frame(width: .flexible, height: 200)
-        .overlay {
-          LabelNode("Solid color, Ellipse, offset: -20")
-            .textColor(.white)
+        HStack(spacing: 10) {
+
+          LayerNode(make: { _ in
+            BorderLayerDemoLayer(borderContent: .color(.yellow), shape: Ellipse(), offset: -20)
+          })
+          .frame(width: .flexible, height: 200)
+          .overlay {
+            LabelNode("Solid color, Ellipse, offset: -20")
+              .textColor(.white)
+          }
+
+          LayerNode(make: { _ in
+            BorderLayerDemoLayer(borderContent: .gradient(.linearGradient(LinearGradientColor([.yellow, .cyan]))), shape: Ellipse(), offset: -20)
+          })
+          .frame(width: .flexible, height: 200)
+          .overlay {
+            LabelNode("Gradient, Ellipse, offset: -20")
+              .textColor(.white)
+          }
         }
 
-        LayerNode(make: { _ in
-          BorderLayerDemoLayer(borderContent: .color(.yellow), shape: Circle(), offset: -20)
-        })
-        .frame(width: .flexible, height: 200)
-        .overlay {
-          LabelNode("Solid color, Circle, offset: -20")
-            .textColor(.white)
+        HStack(spacing: 10) {
+
+          LayerNode(make: { _ in
+            BorderLayerDemoLayer(borderContent: .color(.yellow), shape: Circle(), offset: -20)
+          })
+          .frame(width: .flexible, height: 200)
+          .overlay {
+            LabelNode("Solid color, Circle, offset: -20")
+              .textColor(.white)
+          }
+
+          LayerNode(make: { _ in
+            BorderLayerDemoLayer(borderContent: .gradient(.linearGradient(LinearGradientColor([.yellow, .cyan]))), shape: Circle(), offset: -20)
+          })
+          .frame(width: .flexible, height: 200)
+          .overlay {
+            LabelNode("Gradient, Circle, offset: -20")
+              .textColor(.white)
+          }
         }
 
-        LayerNode(make: { _ in
-          BorderLayerDemoLayer(borderContent: .color(.yellow), shape: Rectangle(cornerRadius: 20), offset: -20)
-        })
-        .frame(width: .flexible, height: 200)
-        .overlay {
-          LabelNode("Solid color, Rectangle, offset: -20")
-            .textColor(.white)
+        HStack(spacing: 10) {
+
+          LayerNode(make: { _ in
+            BorderLayerDemoLayer(borderContent: .color(.yellow), shape: Rectangle(cornerRadius: 20), offset: -20)
+          })
+          .frame(width: .flexible, height: 200)
+          .overlay {
+            LabelNode("Solid color, Rectangle, offset: -20")
+              .textColor(.white)
+          }
+
+          LayerNode(make: { _ in
+            BorderLayerDemoLayer(borderContent: .gradient(.linearGradient(LinearGradientColor([.yellow, .cyan]))), shape: Rectangle(cornerRadius: 20), offset: -20)
+          })
+          .frame(width: .flexible, height: 200)
+          .overlay {
+            LabelNode("Gradient, Rectangle, offset: -20")
+              .textColor(.white)
+          }
         }
 
-        LayerNode(make: { _ in
-          BorderLayerDemoLayer(borderContent: .color(.yellow), shape: SuperEllipse(cornerRadius: 50, roundingCorners: [.topLeft, .bottomRight]), offset: -20)
-        })
-        .frame(width: .flexible, height: 200)
-        .overlay {
-          LabelNode("Solid color, SuperEllipse, offset: -20")
-            .textColor(.white)
+        HStack(spacing: 10) {
+
+          LayerNode(make: { _ in
+            BorderLayerDemoLayer(borderContent: .color(.yellow), shape: SuperEllipse(cornerRadius: 50, roundingCorners: [.topLeft, .bottomRight]), offset: -20)
+          })
+          .frame(width: .flexible, height: 200)
+          .overlay {
+            LabelNode("Solid color, SuperEllipse, offset: -20")
+              .textColor(.white)
+          }
+
+          LayerNode(make: { _ in
+            BorderLayerDemoLayer(borderContent: .gradient(.linearGradient(LinearGradientColor([.yellow, .cyan]))), shape: SuperEllipse(cornerRadius: 50, roundingCorners: [.topLeft, .bottomRight]), offset: -20)
+          })
+          .frame(width: .flexible, height: 200)
+          .overlay {
+            LabelNode("Gradient, SuperEllipse, offset: -20")
+              .textColor(.white)
+          }
         }
 
         ///
         /// Non-offsetable shape
         ///
 
-        LabelNode("Solid color + Non-offsetable Shape")
+        LabelNode("Non-offsetable Shape")
           .font(.systemFont(ofSize: 16, weight: .bold))
 
-        LayerNode(make: { _ in
-          BorderLayerDemoLayer(borderContent: .color(.yellow), shape: NonOffsetableRectangle(cornerRadius: 20), offset: 0)
-        })
-        .frame(width: .flexible, height: 200)
-        .overlay {
-          LabelNode("Solid color, NonOffsetableRectangle, offset: 0")
-            .textColor(.white)
+        HStack(spacing: 10) {
+
+          LayerNode(make: { _ in
+            BorderLayerDemoLayer(borderContent: .color(.yellow), shape: NonOffsetableRectangle(cornerRadius: 20), offset: 0)
+          })
+          .frame(width: .flexible, height: 200)
+          .overlay {
+            LabelNode("Solid color, NonOffsetableRectangle, offset: 0")
+              .textColor(.white)
+          }
+
+          LayerNode(make: { _ in
+            BorderLayerDemoLayer(borderContent: .gradient(.linearGradient(LinearGradientColor([.yellow, .cyan]))), shape: NonOffsetableRectangle(cornerRadius: 20), offset: 0)
+          })
+          .frame(width: .flexible, height: 200)
+          .overlay {
+            LabelNode("Gradient, NonOffsetableRectangle, offset: 0")
+              .textColor(.white)
+          }
         }
 
-        LayerNode(make: { _ in
-          BorderLayerDemoLayer(borderContent: .color(.yellow), shape: NonOffsetableRectangle(cornerRadius: 20), offset: 20)
-        })
-        .frame(width: .flexible, height: 200)
-        .overlay {
-          LabelNode("Solid color, NonOffsetableRectangle, offset: 20")
-            .textColor(.white)
+        HStack(spacing: 10) {
+
+          LayerNode(make: { _ in
+            BorderLayerDemoLayer(borderContent: .color(.yellow), shape: NonOffsetableRectangle(cornerRadius: 20), offset: 20)
+          })
+          .frame(width: .flexible, height: 200)
+          .overlay {
+            LabelNode("Solid color, NonOffsetableRectangle, offset: 20")
+              .textColor(.white)
+          }
+
+          LayerNode(make: { _ in
+            BorderLayerDemoLayer(borderContent: .gradient(.linearGradient(LinearGradientColor([.yellow, .cyan]))), shape: NonOffsetableRectangle(cornerRadius: 20), offset: 20)
+          })
+          .frame(width: .flexible, height: 200)
+          .overlay {
+            LabelNode("Gradient, NonOffsetableRectangle, offset: 20")
+              .textColor(.white)
+          }
         }
 
-        LayerNode(make: { _ in
-          BorderLayerDemoLayer(borderContent: .color(.yellow), shape: NonOffsetableRectangle(cornerRadius: 20), offset: -20)
-        })
-        .frame(width: .flexible, height: 200)
-        .overlay {
-          LabelNode("Solid color, NonOffsetableRectangle, offset: -20")
-            .textColor(.white)
+        HStack(spacing: 10) {
+
+          LayerNode(make: { _ in
+            BorderLayerDemoLayer(borderContent: .color(.yellow), shape: NonOffsetableRectangle(cornerRadius: 20), offset: -20)
+          })
+          .frame(width: .flexible, height: 200)
+          .overlay {
+            LabelNode("Solid color, NonOffsetableRectangle, offset: -20")
+              .textColor(.white)
+          }
+
+          LayerNode(make: { _ in
+            BorderLayerDemoLayer(borderContent: .gradient(.linearGradient(LinearGradientColor([.yellow, .cyan]))), shape: NonOffsetableRectangle(cornerRadius: 20), offset: -20)
+          })
+          .frame(width: .flexible, height: 200)
+          .overlay {
+            LabelNode("Gradient, NonOffsetableRectangle, offset: -20")
+              .textColor(.white)
+          }
         }
       }
       .padding(horizontal: 50)

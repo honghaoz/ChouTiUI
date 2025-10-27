@@ -192,8 +192,6 @@ public final class BorderLayer: CALayer {
       // solid color + shape
       // use a color layer as the border content and a shape layer as the border mask
 
-      resetBorderStyle()
-
       // reset unused border content layers
       self.borderContentGradientLayer?.removeFromSuperlayer()
       self.borderContentGradientLayer = nil
@@ -210,77 +208,23 @@ public final class BorderLayer: CALayer {
 
       borderContentColorLayer.background = .color(color)
       addSublayer(borderContentColorLayer)
+      // extend the content layer's bounds by the border mask's offset so that the border with offset can have effect on it.
       borderContentColorLayer.frame = bounds.expanded(by: borderMask.boundsExtendedOffset)
 
       // 2) set up border mask layer with shape
-      let borderMaskLayer: MaskShapeLayer
-      if let existingMaskLayer = self.borderMaskLayer as? MaskShapeLayer {
-        borderMaskLayer = existingMaskLayer
-      } else {
-        borderMaskLayer = MaskShapeLayer()
-        borderMaskLayer.fillColor = nil // no fill, only stroke
-        borderMaskLayer.strokeColor = Color.black.cgColor // stroke to create border ring
-        borderMaskLayer.fillRule = .nonZero
-        self.borderMaskLayer = borderMaskLayer
-      }
-
-      if mask !== borderMaskLayer {
-        mask = borderMaskLayer
-      }
-      borderMaskLayer.frame = borderContentColorLayer.frame
-
-      if let offsetableShape = shape as? (any OffsetableShape) {
-        // Expanded logic:
-        // ```
-        // if offset > 0 {
-        //   // border mask layer is expanded, should use the original bounds in the expanded bounds's coordinate system
-        //   borderMaskLayer.path = offsetableShape.path(in: bounds.offsetBy(dx: offset, dy: offset), offset: offset)
-        // } else {
-        //   // border mask layer doesn't shrink, can just use the bounds directly
-        //   borderMaskLayer.path = offsetableShape.path(in: bounds, offset: offset)
-        // }
-        // ```
-
-        // Simple logic:
-        let boundsExtendedOffset = borderMask.boundsExtendedOffset
-        borderMaskLayer.path = offsetableShape.path(in: bounds.offsetBy(dx: boundsExtendedOffset, dy: boundsExtendedOffset), offset: offset)
-
-        borderMaskLayer.maskPath = { bounds in
-          // Expanded logic:
-          // ```
-          // if offset > 0 {
-          //   // border mask layer is expanded, should use the original bounds
-          //   offsetableShape.path(in: bounds.expanded(by: -offset), offset: offset)
-          // } else {
-          //   // border mask layer doesn't shrink, can just use the bounds directly
-          //   offsetableShape.path(in: bounds, offset: offset)
-          // }
-          // ```
-
-          // Simple logic:
-          offsetableShape.path(in: bounds.expanded(by: -boundsExtendedOffset), offset: offset)
-        }
-      } else {
-        // not offsetable shape
-        if offset >= 0 {
-          // the border mask layer is expanded, use the expanded bounds
-          borderMaskLayer.path = shape.path(in: borderMaskLayer.bounds)
-          borderMaskLayer.maskPath = shape.path(in:)
-        } else {
-          // the border mask layer doesn't shrink, should use the shrunk bounds
-          borderMaskLayer.path = shape.path(in: bounds.expanded(by: offset))
-          borderMaskLayer.maskPath = { bounds in shape.path(in: bounds.expanded(by: offset)) }
-        }
-      }
-      borderMaskLayer.lineWidth = 2 * borderWidth // double width so half is inside, half is outside
+      resetBorderStyle()
+      updateMaskLayer(for: shape, borderWidth: borderWidth, offset: offset, borderContentFrame: borderContentColorLayer.frame)
 
       // TODO: support content scale
 
     case (.gradient, _),
          (.layer, _):
-      resetBorderStyle()
 
       // 1) set up border content layer
+
+      // extend the content layer's bounds by the border mask's offset so that the border with offset can have effect on it.
+      let borderContentFrame = bounds.expanded(by: borderMask.boundsExtendedOffset)
+
       switch borderContent {
       case .color:
         break // not applicable
@@ -300,8 +244,7 @@ public final class BorderLayer: CALayer {
         borderContentGradientLayer.background = .gradient(gradient)
         addSublayer(borderContentGradientLayer)
 
-        // extend the content layer's bounds by the border mask's offset so that the border with offset can have effect on it.
-        borderContentGradientLayer.frame = bounds.expanded(by: borderMask.boundsExtendedOffset)
+        borderContentGradientLayer.frame = borderContentFrame
 
       case .layer(let contentLayer):
         self.borderContentColorLayer?.removeFromSuperlayer()
@@ -325,33 +268,97 @@ public final class BorderLayer: CALayer {
           ])
         }
 
-        // extend the content layer's bounds by the border mask's offset so that the border with offset can have effect on it.
-        contentLayer.frame = bounds.expanded(by: borderMask.boundsExtendedOffset)
+        contentLayer.frame = borderContentFrame
       }
 
       // 2) set up border mask layer
-      let borderMaskLayer = self.borderMaskLayer ?? {
-        let borderMaskLayer = CALayer()
-        borderMaskLayer.strongDelegate = CALayer.DisableImplicitAnimationDelegate.shared
-        self.borderMaskLayer = borderMaskLayer
-        return borderMaskLayer
-      }()
-
-      if mask !== borderMaskLayer {
-        mask = borderMaskLayer
-      }
-      borderMaskLayer.frame = bounds
+      resetBorderStyle()
 
       switch borderMask {
       case .cornerRadius(let cornerRadius, let borderWidth, let cornerCurve, let offset):
+        let borderMaskLayer = self.borderMaskLayer ?? {
+          let borderMaskLayer = CALayer()
+          borderMaskLayer.strongDelegate = CALayer.DisableImplicitAnimationDelegate.shared
+          self.borderMaskLayer = borderMaskLayer
+          return borderMaskLayer
+        }()
+
+        if mask !== borderMaskLayer {
+          mask = borderMaskLayer
+        }
+        borderMaskLayer.frame = bounds
+
         borderMaskLayer.cornerRadius = cornerRadius
         borderMaskLayer.borderWidth = borderWidth
         borderMaskLayer.cornerCurve = cornerCurve
         borderMaskLayer.borderOffset = offset
-      case .shape:
-        break // TODO: support shape in border mask
+      case .shape(let shape, let borderWidth, let offset):
+        updateMaskLayer(for: shape, borderWidth: borderWidth, offset: offset, borderContentFrame: borderContentFrame)
       }
     }
+  }
+
+  private func updateMaskLayer(for shape: Shape, borderWidth: CGFloat, offset: CGFloat, borderContentFrame: CGRect) {
+    let borderMaskLayer: MaskShapeLayer
+    if let existingMaskLayer = self.borderMaskLayer as? MaskShapeLayer {
+      borderMaskLayer = existingMaskLayer
+    } else {
+      borderMaskLayer = MaskShapeLayer()
+      borderMaskLayer.fillColor = nil // no fill, only stroke
+      borderMaskLayer.strokeColor = Color.black.cgColor // stroke to create border ring
+      borderMaskLayer.fillRule = .nonZero
+      self.borderMaskLayer = borderMaskLayer
+    }
+
+    if mask !== borderMaskLayer {
+      mask = borderMaskLayer
+    }
+    borderMaskLayer.frame = borderContentFrame
+
+    if let offsetableShape = shape as? (any OffsetableShape) {
+      // Expanded logic:
+      // ```
+      // if offset > 0 {
+      //   // border mask layer is expanded, should use the original bounds in the expanded bounds's coordinate system
+      //   borderMaskLayer.path = offsetableShape.path(in: bounds.offsetBy(dx: offset, dy: offset), offset: offset)
+      // } else {
+      //   // border mask layer doesn't shrink, can just use the bounds directly
+      //   borderMaskLayer.path = offsetableShape.path(in: bounds, offset: offset)
+      // }
+      // ```
+
+      // Simple logic:
+      let boundsExtendedOffset = borderMask.boundsExtendedOffset
+      borderMaskLayer.path = offsetableShape.path(in: bounds.offsetBy(dx: boundsExtendedOffset, dy: boundsExtendedOffset), offset: offset)
+
+      borderMaskLayer.maskPath = { borderMaskLayerBounds in
+        // Expanded logic:
+        // ```
+        // if offset > 0 {
+        //   // border mask layer is expanded, should use the original bounds
+        //   offsetableShape.path(in: borderMaskLayerBounds.expanded(by: -offset), offset: offset)
+        // } else {
+        //   // border mask layer doesn't shrink, can just use the bounds directly
+        //   offsetableShape.path(in: borderMaskLayerBounds, offset: offset)
+        // }
+        // ```
+
+        // Simple logic:
+        offsetableShape.path(in: borderMaskLayerBounds.expanded(by: -boundsExtendedOffset), offset: offset)
+      }
+    } else {
+      // not offsetable shape
+      if offset >= 0 {
+        // the border mask layer is expanded, use the expanded bounds directly
+        borderMaskLayer.path = shape.path(in: borderMaskLayer.bounds)
+        borderMaskLayer.maskPath = shape.path(in:)
+      } else {
+        // the border mask layer doesn't shrink, should use the shrunk bounds
+        borderMaskLayer.path = shape.path(in: bounds.expanded(by: offset))
+        borderMaskLayer.maskPath = { bounds in shape.path(in: bounds.expanded(by: offset)) }
+      }
+    }
+    borderMaskLayer.lineWidth = 2 * borderWidth // double width so half is inside, half is outside
   }
 
   private func resetBorderStyle() {
@@ -380,6 +387,8 @@ private class MaskShapeLayer: CAShapeLayer {
 
   override init() {
     super.init()
+
+    strongDelegate = CALayer.DisableImplicitAnimationDelegate.shared
 
     let maskLayer = CAShapeLayer()
     maskLayer.strongDelegate = CALayer.DisableImplicitAnimationDelegate.shared
