@@ -210,12 +210,11 @@ public final class BorderLayer: CALayer {
       addSublayer(borderContentColorLayer)
       // extend the content layer's bounds by the border mask's offset so that the border with offset can have effect on it.
       borderContentColorLayer.frame = bounds.expanded(by: borderMask.boundsExtendedOffset)
+      borderContentColorLayer.contentsScale = contentsScale
 
       // 2) set up border mask layer with shape
       resetBorderStyle()
       updateMaskLayer(for: shape, borderWidth: borderWidth, offset: offset, borderContentFrame: borderContentColorLayer.frame)
-
-      // TODO: support content scale
 
     case (.gradient, _),
          (.layer, _):
@@ -245,6 +244,7 @@ public final class BorderLayer: CALayer {
         addSublayer(borderContentGradientLayer)
 
         borderContentGradientLayer.frame = borderContentFrame
+        borderContentGradientLayer.contentsScale = contentsScale
 
       case .layer(let contentLayer):
         self.borderContentColorLayer?.removeFromSuperlayer()
@@ -269,6 +269,7 @@ public final class BorderLayer: CALayer {
         }
 
         contentLayer.frame = borderContentFrame
+        contentLayer.contentsScale = contentsScale
       }
 
       // 2) set up border mask layer
@@ -287,6 +288,7 @@ public final class BorderLayer: CALayer {
           mask = borderMaskLayer
         }
         borderMaskLayer.frame = bounds
+        borderMaskLayer.contentsScale = contentsScale
 
         borderMaskLayer.cornerRadius = cornerRadius
         borderMaskLayer.borderWidth = borderWidth
@@ -314,6 +316,7 @@ public final class BorderLayer: CALayer {
       mask = borderMaskLayer
     }
     borderMaskLayer.frame = borderContentFrame
+    borderMaskLayer.contentsScale = contentsScale
 
     if let offsetableShape = shape as? (any OffsetableShape) {
       // Expanded logic:
@@ -384,6 +387,16 @@ private class MaskShapeLayer: CAShapeLayer {
   /// - Parameter bounds: The bounds of the layer.
   /// - Returns: The path of the mask.
   var maskPath: ((CGRect) -> CGPath) = { CGPath(rect: $0, transform: nil) }
+
+  override var contentsScale: CGFloat {
+    get {
+      return super.contentsScale
+    }
+    set {
+      super.contentsScale = newValue
+      mask?.contentsScale = newValue
+    }
+  }
 
   override init() {
     super.init()

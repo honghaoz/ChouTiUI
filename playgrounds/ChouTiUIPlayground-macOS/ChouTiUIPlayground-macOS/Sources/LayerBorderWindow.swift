@@ -530,6 +530,38 @@ class LayerBorderWindow: NSWindow {
               .textColor(.white)
           }
         }
+
+        ///
+        /// Contents Scale
+        ///
+
+        LabelNode("Contents Scale")
+          .font(.systemFont(ofSize: 16, weight: .bold))
+
+        HStack(spacing: 10) {
+
+          LayerNode(make: { _ in
+            let layer = BorderLayerDemoLayer(borderContent: .color(.yellow), offset: 0)
+            layer.contentsScale = 1
+            return layer
+          })
+          .frame(width: .flexible, height: 60)
+          .overlay {
+            LabelNode("Contents Scale: 1")
+              .textColor(.white)
+          }
+
+          LayerNode(make: { _ in
+            let layer = BorderLayerDemoLayer(borderContent: .color(.yellow), offset: 0)
+            layer.contentsScale = 2
+            return layer
+          })
+          .frame(width: .flexible, height: 60)
+          .overlay {
+            LabelNode("Contents Scale: 2")
+              .textColor(.white)
+          }
+        }
       }
       .padding(horizontal: 50)
     }
@@ -620,6 +652,17 @@ private class BorderLayerDemoLayer: CALayer {
 
   private lazy var contentLayer = BaseCAShapeLayer()
   private lazy var borderLayer = BorderLayer()
+
+  override var contentsScale: CGFloat {
+    get {
+      return super.contentsScale
+    }
+    set {
+      super.contentsScale = newValue
+      contentLayer.contentsScale = newValue
+      borderLayer.contentsScale = newValue
+    }
+  }
 
   init(borderContent: BorderLayer.BorderContent, offset: CGFloat) {
     super.init()
