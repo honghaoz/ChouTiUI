@@ -46,15 +46,19 @@ class NSBezierPath_RoundedRectTests: XCTestCase {
   func test_invalidRect() {
     let rect = CGRect(x: 0, y: 0, width: 0, height: 0)
 
+    let expectation = XCTestExpectation(description: "assertion failure")
     Assert.setTestAssertionFailureHandler { message, metadata, file, line, column in
       expect(message) == "bounding rect area should be positive"
       expect(metadata["rect"]) == "\(rect)"
+      expectation.fulfill()
     }
 
     let path = BezierPath(roundedRect: rect, cornerRadius: 10)
     expect(path.cgPath.pathElements()).to(beEmpty())
 
     Assert.resetTestAssertionFailureHandler()
+
+    wait(for: [expectation], timeout: 1)
   }
   #endif
 
