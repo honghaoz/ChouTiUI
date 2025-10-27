@@ -53,7 +53,6 @@ public struct Ellipse: Shape, OffsetableShape {
   // MARK: - OffsetableShape
 
   public func path(in rect: CGRect, offset: CGFloat) -> CGPath {
-    let insetRect = rect.inset(by: offset)
-    return CGPath(ellipseIn: insetRect, transform: nil)
+    path(in: rect.expanded(by: offset))
   }
 }

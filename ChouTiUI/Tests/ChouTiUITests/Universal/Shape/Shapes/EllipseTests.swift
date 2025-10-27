@@ -88,6 +88,6 @@ class EllipseTests: XCTestCase {
     let shape = Ellipse()
     let rect = CGRect(x: 0, y: 0, width: 100, height: 100)
     let path = shape.path(in: rect, offset: 10)
-    expect(path) == CGPath(ellipseIn: rect.inset(by: 10), transform: nil)
+    expect(path) == CGPath(ellipseIn: rect.expanded(by: 10), transform: nil)
   }
 }
