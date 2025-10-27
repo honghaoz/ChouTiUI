@@ -77,16 +77,16 @@ public final class BorderLayer: CALayer {
     ///
     /// The layer's frame will be set to the border layer's bounds by default.
     /// If the border mask has an offset that is greater than 0, the layer's frame will be set to the border layer's bounds extended by the offset.
+    ///
+    /// The layer's delegate should be nil. If you want to use a view as the border content, you should wrap the view's layer in a CALayer and use the wrapper layer as the border content.
     case layer(_ layer: CALayer)
   }
 
   /// The content of the border. The default value is a solid black color border.
   public var borderContent: BorderContent = .color(.black)
 
-  // TODO: support color with shape border
-  //
-  // /// The layer for `BorderContent.color`.
-  // private var borderContentColorLayer: CALayer?
+  /// The layer for `BorderContent.color` when the border mask uses shape.
+  private var borderContentColorLayer: CALayer?
 
   /// The layer for `BorderContent.gradient`.
   private var borderContentGradientLayer: CAGradientLayer?
@@ -100,20 +100,33 @@ public final class BorderLayer: CALayer {
   public enum BorderMask {
 
     /// A corner radius border.
+    ///
+    /// - Parameters:
+    ///   - cornerRadius: The corner radius in points.
+    ///   - borderWidth: The width of the border in points.
+    ///   - cornerCurve: The corner curve of the border. The default value is `continuous`.
+    ///   - offset: The offset of the border in points. Positive value to make the border outward/bigger, negative value to make the border inward/smaller. The default value is 0.
     case cornerRadius(_ cornerRadius: CGFloat, borderWidth: CGFloat, cornerCurve: CALayerCornerCurve = .continuous, offset: CGFloat = 0)
 
     // case cornerRadii(_ cornerRadii: CACornerRadii, borderWidth: CGFloat, cornerCurve: CALayerCornerCurve = .continuous, offset: CGFloat = 0) // TODO: support CACornerRadii in border
 
     /// A shape border.
-    case shape(_ shape: any Shape, borderWidth: CGFloat)
+    ///
+    /// - Parameters:
+    ///   - shape: The shape of the border. If the offset is not 0, the shape should be preferably an `OffsetableShape`.
+    ///   - borderWidth: The width of the border in points.
+    ///   - offset: The offset of the border in points. Positive value to make the border outward/bigger, negative value to make the border inward/smaller. The default value is 0.
+    case shape(_ shape: any Shape, borderWidth: CGFloat, offset: CGFloat = 0)
 
-    /// The offset to be added to the bounds of the border layer, for the content layer.
-    var boundsExtendedOffset: CGFloat {
+    /// The offset to be added to the bounds of the border layer (host layer) bounds, for the content layer and border mask layer.
+    ///
+    /// - When the offset is positive, the bounds of the content/mask layer will be extended by the offset.
+    /// - When the offset is negative, the bounds of the content/mask layer won't be changed.
+    fileprivate var boundsExtendedOffset: CGFloat {
       switch self {
-      case .cornerRadius(_, _, _, let offset):
+      case .cornerRadius(_, _, _, let offset),
+           .shape(_, _, let offset):
         return offset > 0 ? offset : 0
-      case .shape:
-        return 0
       }
     }
   }
@@ -153,7 +166,12 @@ public final class BorderLayer: CALayer {
 
     switch (borderContent, borderMask) {
     case (.color(let color), .cornerRadius(let cornerRadius, let borderWidth, let cornerCurve, let offset)):
+      // solid color + corner radius
+      // just use layer's border directly
+
       // reset border content layer
+      self.borderContentColorLayer?.removeFromSuperlayer()
+      self.borderContentColorLayer = nil
       self.borderContentGradientLayer?.removeFromSuperlayer()
       self.borderContentGradientLayer = nil
       self.borderContentExternalLayer?.removeFromSuperlayer()
@@ -170,9 +188,93 @@ public final class BorderLayer: CALayer {
       self.cornerCurve = cornerCurve
       self.borderOffset = offset
 
-    case (.color(let color), .shape(let shape)):
+    case (.color(let color), .shape(let shape, let borderWidth, let offset)):
+      // solid color + shape
+      // use a color layer as the border content and a shape layer as the border mask
+
       resetBorderStyle()
-      // TODO: support color with shape border
+
+      // reset unused border content layers
+      self.borderContentGradientLayer?.removeFromSuperlayer()
+      self.borderContentGradientLayer = nil
+      self.borderContentExternalLayer?.removeFromSuperlayer()
+      self.borderContentExternalLayer = nil
+
+      // 1) set up border content color layer
+      let borderContentColorLayer = self.borderContentColorLayer ?? {
+        let colorLayer = CALayer()
+        colorLayer.strongDelegate = CALayer.DisableImplicitAnimationDelegate.shared
+        self.borderContentColorLayer = colorLayer
+        return colorLayer
+      }()
+
+      borderContentColorLayer.background = .color(color)
+      addSublayer(borderContentColorLayer)
+      borderContentColorLayer.frame = bounds.expanded(by: borderMask.boundsExtendedOffset)
+
+      // 2) set up border mask layer with shape
+      let borderMaskLayer: MaskShapeLayer
+      if let existingMaskLayer = self.borderMaskLayer as? MaskShapeLayer {
+        borderMaskLayer = existingMaskLayer
+      } else {
+        borderMaskLayer = MaskShapeLayer()
+        borderMaskLayer.fillColor = nil // no fill, only stroke
+        borderMaskLayer.strokeColor = Color.black.cgColor // stroke to create border ring
+        borderMaskLayer.fillRule = .nonZero
+        self.borderMaskLayer = borderMaskLayer
+      }
+
+      if mask !== borderMaskLayer {
+        mask = borderMaskLayer
+      }
+      borderMaskLayer.frame = borderContentColorLayer.frame
+
+      if let offsetableShape = shape as? (any OffsetableShape) {
+        // Expanded logic:
+        // ```
+        // if offset > 0 {
+        //   // border mask layer is expanded, should use the original bounds in the expanded bounds's coordinate system
+        //   borderMaskLayer.path = offsetableShape.path(in: bounds.offsetBy(dx: offset, dy: offset), offset: offset)
+        // } else {
+        //   // border mask layer doesn't shrink, can just use the bounds directly
+        //   borderMaskLayer.path = offsetableShape.path(in: bounds, offset: offset)
+        // }
+        // ```
+
+        // Simple logic:
+        let boundsExtendedOffset = borderMask.boundsExtendedOffset
+        borderMaskLayer.path = offsetableShape.path(in: bounds.offsetBy(dx: boundsExtendedOffset, dy: boundsExtendedOffset), offset: offset)
+
+        borderMaskLayer.maskPath = { bounds in
+          // Expanded logic:
+          // ```
+          // if offset > 0 {
+          //   // border mask layer is expanded, should use the original bounds
+          //   offsetableShape.path(in: bounds.expanded(by: -offset), offset: offset)
+          // } else {
+          //   // border mask layer doesn't shrink, can just use the bounds directly
+          //   offsetableShape.path(in: bounds, offset: offset)
+          // }
+          // ```
+
+          // Simple logic:
+          offsetableShape.path(in: bounds.expanded(by: -boundsExtendedOffset), offset: offset)
+        }
+      } else {
+        // not offsetable shape
+        if offset >= 0 {
+          // the border mask layer is expanded, use the expanded bounds
+          borderMaskLayer.path = shape.path(in: borderMaskLayer.bounds)
+          borderMaskLayer.maskPath = shape.path(in:)
+        } else {
+          // the border mask layer doesn't shrink, should use the shrunk bounds
+          borderMaskLayer.path = shape.path(in: bounds.expanded(by: offset))
+          borderMaskLayer.maskPath = { bounds in shape.path(in: bounds.expanded(by: offset)) }
+        }
+      }
+      borderMaskLayer.lineWidth = 2 * borderWidth // double width so half is inside, half is outside
+
+      // TODO: support content scale
 
     case (.gradient, _),
          (.layer, _):
@@ -183,6 +285,8 @@ public final class BorderLayer: CALayer {
       case .color:
         break // not applicable
       case .gradient(let gradient):
+        self.borderContentColorLayer?.removeFromSuperlayer()
+        self.borderContentColorLayer = nil
         self.borderContentExternalLayer?.removeFromSuperlayer()
         self.borderContentExternalLayer = nil
 
@@ -200,6 +304,8 @@ public final class BorderLayer: CALayer {
         borderContentGradientLayer.frame = bounds.expanded(by: borderMask.boundsExtendedOffset)
 
       case .layer(let contentLayer):
+        self.borderContentColorLayer?.removeFromSuperlayer()
+        self.borderContentColorLayer = nil
         self.borderContentGradientLayer?.removeFromSuperlayer()
         self.borderContentGradientLayer = nil
 
@@ -215,7 +321,7 @@ public final class BorderLayer: CALayer {
         } else if contentLayer.strongDelegate !== CALayer.DisableImplicitAnimationDelegate.shared {
           ChouTi.assertFailure("border content layer's delegate should be nil", metadata: [
             "layer": "\(contentLayer)",
-            "layer.delegate": "\(contentLayer.delegate)",
+            "layer.delegate": String(describing: contentLayer.delegate),
           ])
         }
 
@@ -242,7 +348,7 @@ public final class BorderLayer: CALayer {
         borderMaskLayer.borderWidth = borderWidth
         borderMaskLayer.cornerCurve = cornerCurve
         borderMaskLayer.borderOffset = offset
-      case .shape(let shape):
+      case .shape:
         break // TODO: support shape in border mask
       }
     }
@@ -258,4 +364,71 @@ public final class BorderLayer: CALayer {
 
   // TODO: support animations
   // public func animate() {}
+}
+
+/// A masked shape layer.
+///
+/// - The layer has a mask that clips the layer's content with a path.
+/// - The layer is a shape layer, it can set stroke, fill, etc.
+private class MaskShapeLayer: CAShapeLayer {
+
+  /// The path of the mask.
+  ///
+  /// - Parameter bounds: The bounds of the layer.
+  /// - Returns: The path of the mask.
+  var maskPath: ((CGRect) -> CGPath) = { CGPath(rect: $0, transform: nil) }
+
+  override init() {
+    super.init()
+
+    let maskLayer = CAShapeLayer()
+    maskLayer.strongDelegate = CALayer.DisableImplicitAnimationDelegate.shared
+    maskLayer.frame = bounds
+    maskLayer.path = maskPath(bounds)
+    mask = maskLayer
+
+    addFullSizeTrackingLayer(maskLayer, onBoundsChange: { [weak self, weak maskLayer] context in
+      guard let self, let maskLayer = maskLayer else {
+        return
+      }
+
+      let layer = context.hostLayer
+
+      // update model
+      maskLayer.path = self.maskPath(layer.bounds)
+
+      // add animation if bounds changes
+      guard let animationCopy = layer.sizeAnimation()?.copy() as? CABasicAnimation else {
+        return
+      }
+
+      animationCopy.keyPath = "path"
+      animationCopy.isAdditive = false
+      animationCopy.fromValue = maskLayer.presentation()?.path
+      animationCopy.toValue = maskLayer.path
+      maskLayer.add(animationCopy, forKey: "path")
+    })
+  }
+
+  @available(*, unavailable)
+  required init?(coder: NSCoder) {
+    // swiftlint:disable:next fatal_error
+    fatalError("init(coder:) is unavailable")
+  }
+
+  override init(layer: Any) {
+    super.init(layer: layer)
+  }
+
+  override func layoutSublayers() {
+    super.layoutSublayers()
+
+    guard let maskLayer = mask as? CAShapeLayer else {
+      return
+    }
+
+    // on macOS, when window is resized, the above `onBoundsChange` won't be called, so we need to update the mask layer's frame and path manually.
+    maskLayer.frame = bounds
+    maskLayer.path = maskPath(bounds)
+  }
 }

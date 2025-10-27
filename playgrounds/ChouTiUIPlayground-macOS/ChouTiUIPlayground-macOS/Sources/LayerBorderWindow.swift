@@ -67,10 +67,24 @@ class LayerBorderWindow: NSWindow {
 
     let contentView = ComposeView {
       VStack(spacing: 10) {
+        ///
+        /// Metal
+        ///
+
+        LabelNode("Metal")
+          .font(.systemFont(ofSize: 16, weight: .bold))
+
         LayerNode(make: { _ in
           BorderMetalLayerDemoLayer()
         })
         .frame(width: .flexible, height: 300)
+
+        ///
+        /// Gradient
+        ///
+
+        LabelNode("Gradient")
+          .font(.systemFont(ofSize: 16, weight: .bold))
 
         LayerNode(make: { _ in
           BorderLayerDemoLayer(borderContent: .gradient(.linearGradient(LinearGradientColor([.yellow, .cyan]))), offset: 0)
@@ -80,6 +94,13 @@ class LayerBorderWindow: NSWindow {
           LabelNode("Gradient, offset: 0")
             .textColor(.white)
         }
+
+        ///
+        /// Custom layer
+        ///
+
+        LabelNode("Custom layer")
+          .font(.systemFont(ofSize: 16, weight: .bold))
 
         LayerNode(make: { context in
           let layer = CALayer()
@@ -101,6 +122,13 @@ class LayerBorderWindow: NSWindow {
           LabelNode("Custom layer, offset: 0")
             .textColor(.white)
         }
+
+        ///
+        /// Solid color
+        ///
+
+        LabelNode("Solid color")
+          .font(.systemFont(ofSize: 16, weight: .bold))
 
         LayerNode(make: { _ in
           BorderLayerDemoLayer(borderContent: .color(.yellow), offset: 0)
@@ -164,6 +192,164 @@ class LayerBorderWindow: NSWindow {
           LabelNode("Solid color, offset: -20")
             .textColor(.white)
         }
+
+        LayerNode(make: { _ in
+          BorderLayerDemoLayer(borderContent: .color(.yellow), offset: -20)
+        })
+        .frame(width: .flexible, height: 200)
+        .overlay {
+          LabelNode("Solid color, offset: -20")
+            .textColor(.white)
+        }
+
+        ///
+        /// Shape
+        ///
+
+        LabelNode("Color + Offsetable Shape")
+          .font(.systemFont(ofSize: 16, weight: .bold))
+
+        LayerNode(make: { _ in
+          BorderLayerDemoLayer(borderContent: .color(.yellow), shape: Capsule(), offset: 0)
+        })
+        .frame(width: .flexible, height: 200)
+        .overlay {
+          LabelNode("Solid color, Capsule, offset: 0")
+            .textColor(.white)
+        }
+
+        LayerNode(make: { _ in
+          BorderLayerDemoLayer(borderContent: .color(.yellow), shape: Capsule(), offset: .pixel)
+        })
+        .frame(width: .flexible, height: 200)
+        .overlay {
+          LabelNode("Solid color, Capsule, offset: .pixel")
+            .textColor(.white)
+        }
+
+        LayerNode(make: { _ in
+          BorderLayerDemoLayer(borderContent: .color(.yellow), shape: Capsule(), offset: 20)
+        })
+        .frame(width: .flexible, height: 200)
+        .overlay {
+          LabelNode("Solid color, Capsule, offset: 20")
+            .textColor(.white)
+        }
+
+        LayerNode(make: { _ in
+          BorderLayerDemoLayer(borderContent: .color(.yellow), shape: Ellipse(), offset: 20)
+        })
+        .frame(width: .flexible, height: 200)
+        .overlay {
+          LabelNode("Solid color, Ellipse, offset: 20")
+            .textColor(.white)
+        }
+
+        LayerNode(make: { _ in
+          BorderLayerDemoLayer(borderContent: .color(.yellow), shape: Circle(), offset: 20)
+        })
+        .frame(width: .flexible, height: 200)
+        .overlay {
+          LabelNode("Solid color, Circle, offset: 20")
+            .textColor(.white)
+        }
+
+        LayerNode(make: { _ in
+          BorderLayerDemoLayer(borderContent: .color(.yellow), shape: Rectangle(cornerRadius: 20), offset: 20)
+        })
+        .frame(width: .flexible, height: 200)
+        .overlay {
+          LabelNode("Solid color, Rectangle, offset: 20")
+            .textColor(.white)
+        }
+
+        LayerNode(make: { _ in
+          BorderLayerDemoLayer(borderContent: .color(.yellow), shape: SuperEllipse(cornerRadius: 50, roundingCorners: [.topLeft, .bottomRight]), offset: 20)
+        })
+        .frame(width: .flexible, height: 200)
+        .overlay {
+          LabelNode("Solid color, SuperEllipse, offset: 20")
+            .textColor(.white)
+        }
+
+        LayerNode(make: { _ in
+          BorderLayerDemoLayer(borderContent: .color(.yellow), shape: Capsule(), offset: -20)
+        })
+        .frame(width: .flexible, height: 200)
+        .overlay {
+          LabelNode("Solid color, Capsule, offset: -20")
+            .textColor(.white)
+        }
+
+        LayerNode(make: { _ in
+          BorderLayerDemoLayer(borderContent: .color(.yellow), shape: Ellipse(), offset: -20)
+        })
+        .frame(width: .flexible, height: 200)
+        .overlay {
+          LabelNode("Solid color, Ellipse, offset: -20")
+            .textColor(.white)
+        }
+
+        LayerNode(make: { _ in
+          BorderLayerDemoLayer(borderContent: .color(.yellow), shape: Circle(), offset: -20)
+        })
+        .frame(width: .flexible, height: 200)
+        .overlay {
+          LabelNode("Solid color, Circle, offset: -20")
+            .textColor(.white)
+        }
+
+        LayerNode(make: { _ in
+          BorderLayerDemoLayer(borderContent: .color(.yellow), shape: Rectangle(cornerRadius: 20), offset: -20)
+        })
+        .frame(width: .flexible, height: 200)
+        .overlay {
+          LabelNode("Solid color, Rectangle, offset: -20")
+            .textColor(.white)
+        }
+
+        LayerNode(make: { _ in
+          BorderLayerDemoLayer(borderContent: .color(.yellow), shape: SuperEllipse(cornerRadius: 50, roundingCorners: [.topLeft, .bottomRight]), offset: -20)
+        })
+        .frame(width: .flexible, height: 200)
+        .overlay {
+          LabelNode("Solid color, SuperEllipse, offset: -20")
+            .textColor(.white)
+        }
+
+        ///
+        /// Non-offsetable shape
+        ///
+
+        LabelNode("Solid color + Non-offsetable Shape")
+          .font(.systemFont(ofSize: 16, weight: .bold))
+
+        LayerNode(make: { _ in
+          BorderLayerDemoLayer(borderContent: .color(.yellow), shape: NonOffsetableRectangle(cornerRadius: 20), offset: 0)
+        })
+        .frame(width: .flexible, height: 200)
+        .overlay {
+          LabelNode("Solid color, NonOffsetableRectangle, offset: 0")
+            .textColor(.white)
+        }
+
+        LayerNode(make: { _ in
+          BorderLayerDemoLayer(borderContent: .color(.yellow), shape: NonOffsetableRectangle(cornerRadius: 20), offset: 20)
+        })
+        .frame(width: .flexible, height: 200)
+        .overlay {
+          LabelNode("Solid color, NonOffsetableRectangle, offset: 20")
+            .textColor(.white)
+        }
+
+        LayerNode(make: { _ in
+          BorderLayerDemoLayer(borderContent: .color(.yellow), shape: NonOffsetableRectangle(cornerRadius: 20), offset: -20)
+        })
+        .frame(width: .flexible, height: 200)
+        .overlay {
+          LabelNode("Solid color, NonOffsetableRectangle, offset: -20")
+            .textColor(.white)
+        }
       }
       .padding(horizontal: 50)
     }
@@ -182,6 +368,8 @@ class LayerBorderWindow: NSWindow {
     orderOut(nil)
   }
 }
+
+// MARK: - BorderMetalLayerDemoLayer
 
 private class BorderMetalLayerDemoLayer: CALayer {
 
@@ -246,9 +434,11 @@ private class BorderMetalLayerDemoLayer: CALayer {
   }
 }
 
+// MARK: - BorderLayerDemoLayer
+
 private class BorderLayerDemoLayer: CALayer {
 
-  private lazy var contentLayer = BaseCALayer()
+  private lazy var contentLayer = BaseCAShapeLayer()
   private lazy var borderLayer = BorderLayer()
 
   init(borderContent: BorderLayer.BorderContent, offset: CGFloat) {
@@ -264,6 +454,21 @@ private class BorderLayerDemoLayer: CALayer {
     addSublayer(borderLayer)
   }
 
+  init(borderContent: BorderLayer.BorderContent, shape: some Shape, offset: CGFloat) {
+    super.init()
+
+    contentLayer.backgroundColor = Color.red.cgColor
+    contentLayer.shape = shape
+    contentLayer.strongDelegate = BoundsChangeDelegate(layoutSublayers: { layer in
+      layer.shape = shape
+    })
+    addSublayer(contentLayer)
+
+    borderLayer.borderContent = borderContent
+    borderLayer.borderMask = .shape(shape, borderWidth: 10, offset: offset)
+    addSublayer(borderLayer)
+  }
+
   @available(*, unavailable)
   required init?(coder: NSCoder) {
     fatalError("init(coder:) is unavailable") // swiftlint:disable:this fatal_error
@@ -275,6 +480,8 @@ private class BorderLayerDemoLayer: CALayer {
     borderLayer.frame = contentLayer.frame
   }
 }
+
+// MARK: - ComposeViewContentLayer
 
 private class ComposeViewContentLayer: CALayer {
 
@@ -314,5 +521,37 @@ private class ComposeViewContentLayer: CALayer {
     view.frame = bounds
     view.setNeedsLayout()
     view.layoutIfNeeded()
+  }
+}
+
+// MARK: - BoundsChangeDelegate
+
+private class BoundsChangeDelegate: NSObject, CALayerDelegate {
+
+  private var layoutSublayersBlock: (CALayer) -> Void
+
+  init(layoutSublayers: @escaping (CALayer) -> Void) {
+    self.layoutSublayersBlock = layoutSublayers
+  }
+
+  func layoutSublayers(of layer: CALayer) {
+    layoutSublayersBlock(layer)
+  }
+
+  private let null = NSNull()
+
+  func action(for layer: CALayer, forKey event: String) -> CAAction? {
+    null
+  }
+}
+
+// MARK: - NonOffsetableRectangle
+
+private struct NonOffsetableRectangle: Shape {
+
+  let cornerRadius: CGFloat
+
+  func path(in rect: CGRect) -> CGPath {
+    BezierPath(roundedRect: rect, cornerRadius: cornerRadius).cgPath
   }
 }
