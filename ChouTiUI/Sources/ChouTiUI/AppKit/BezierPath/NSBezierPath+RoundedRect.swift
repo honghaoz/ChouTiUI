@@ -180,7 +180,6 @@ public extension NSBezierPath {
     self.init()
 
     guard rect.size.area > 0 else {
-      ChouTi.assertFailure("bounding rect area should be positive", metadata: ["rect": "\(rect)"])
       return
     }
 
