@@ -60,7 +60,7 @@ public extension CALayer {
 
   /// Adds a block to be called when the layer's bounds change.
   ///
-  /// This method should be called on the main thread.
+  /// This method should be called on the main thread. This method may not be called immediately when the bounds change is caused by a window resize or other system-level changes.
   ///
   /// - Parameters:
   ///   - block: The block to be called when the bounds change. It will be called with the layer, the old bounds, and the new bounds.
