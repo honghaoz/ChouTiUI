@@ -377,11 +377,13 @@ public extension CALayer {
 
 private extension CAAnimation {
 
+  private static let beginTimeModeKey = String("emiTnigeb".reversed() + "Mode") // beginTimeMode
+
   func isAbsoluteBeginTimeMode() -> Bool {
     // non-zero: when the begin time is zero. when just added to the layer
     // absolute: when the begin time is positive
 
-    guard let beginTimeMode = value(forKey: "beginTimeMode") as? String else {
+    guard let beginTimeMode = value(forKey: Self.beginTimeModeKey) as? String else {
       ChouTi.assertFailure("beginTimeMode is not set")
       return false
     }

@@ -108,8 +108,6 @@ public final class BorderLayer: CALayer {
     ///   - offset: The offset of the border in points. Positive value to make the border outward/bigger, negative value to make the border inward/smaller. The default value is 0.
     case cornerRadius(_ cornerRadius: CGFloat, borderWidth: CGFloat, cornerCurve: CALayerCornerCurve = .continuous, offset: CGFloat = 0)
 
-    // case cornerRadii(_ cornerRadii: CACornerRadii, borderWidth: CGFloat, cornerCurve: CALayerCornerCurve = .continuous, offset: CGFloat = 0) // TODO: support CACornerRadii in border
-
     /// A shape border.
     ///
     /// - Parameters:
@@ -183,8 +181,8 @@ public final class BorderLayer: CALayer {
 
       // use layer's border directly
       super.borderColor = color.cgColor
-      super.borderWidth = borderWidth
       super.cornerRadius = cornerRadius
+      super.borderWidth = borderWidth
       self.cornerCurve = cornerCurve
       self.borderOffset = offset
 
@@ -300,7 +298,7 @@ public final class BorderLayer: CALayer {
     }
   }
 
-  private func updateMaskLayer(for shape: Shape, borderWidth: CGFloat, offset: CGFloat, borderContentFrame: CGRect) {
+  private func updateMaskLayer(for shape: any Shape, borderWidth: CGFloat, offset: CGFloat, borderContentFrame: CGRect) {
     let borderMaskLayer: MaskShapeLayer
     if let existingMaskLayer = self.borderMaskLayer as? MaskShapeLayer {
       borderMaskLayer = existingMaskLayer
