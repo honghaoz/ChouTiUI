@@ -107,43 +107,12 @@ public extension CALayer {
       return
     }
 
-    if let positionAnimationCopy = sizeAnimation.copy() as? CABasicAnimation,
-       let sizeAnimationCopy = sizeAnimation.copy() as? CABasicAnimation
-    {
-
-      positionAnimationCopy.keyPath = "position"
-      let positionAnimationKey: String
-      if positionAnimationCopy.isAdditive {
-        let oldPosition = layer.position(from: oldBounds)
-        let newPosition = layer.position(from: newBounds)
-        positionAnimationCopy.fromValue = CGPoint(x: oldPosition.x - newPosition.x, y: oldPosition.y - newPosition.y)
-        positionAnimationCopy.toValue = CGPoint.zero
-        positionAnimationKey = layer.uniqueAnimationKey(key: "position")
-      } else {
-        positionAnimationCopy.fromValue = (self.presentation()?.bounds ?? oldBounds).center
-        positionAnimationCopy.toValue = newBounds.center
-        positionAnimationKey = "position"
-      }
-
-      sizeAnimationCopy.keyPath = "bounds.size"
-      let sizeAnimationKey: String
-      if sizeAnimationCopy.isAdditive {
-        sizeAnimationCopy.fromValue = CGSize(width: oldBounds.size.width - newBounds.size.width, height: oldBounds.size.height - newBounds.size.height)
-        sizeAnimationCopy.toValue = CGSize.zero
-        sizeAnimationKey = layer.uniqueAnimationKey(key: "bounds.size")
-      } else {
-        sizeAnimationCopy.fromValue = (self.presentation()?.bounds ?? oldBounds).size
-        sizeAnimationCopy.toValue = newBounds.size
-        sizeAnimationKey = "bounds.size"
-      }
-
-      layer.add(positionAnimationCopy, forKey: positionAnimationKey)
-      layer.add(sizeAnimationCopy, forKey: sizeAnimationKey)
-    } else {
-      ChouTi.assertFailure("failed to copy size animation", metadata: [
-        "sizeAnimation": "\(sizeAnimation)",
-      ])
-    }
+    layer.addFrameAnimation(
+      from: oldBounds,
+      to: newBounds,
+      presentationBounds: self.presentation()?.bounds,
+      with: sizeAnimation
+    )
   }
 }
 

@@ -205,10 +205,24 @@ public final class BorderLayer: CALayer {
       }()
 
       borderContentColorLayer.background = .color(color)
+      borderContentColorLayer.contentsScale = contentsScale
+
       addSublayer(borderContentColorLayer)
+
+      let borderContentColorLayerOldFrame = borderContentColorLayer.frame
+
       // extend the content layer's bounds by the border mask's offset so that the border with offset can have effect on it.
       borderContentColorLayer.frame = bounds.expanded(by: borderMask.boundsExtendedOffset)
-      borderContentColorLayer.contentsScale = contentsScale
+
+      // add size sync animation so that the border content layer can follow the bounds change
+      if let sizeAnimation = self.sizeAnimation() {
+        borderContentColorLayer.addFrameAnimation(
+          from: borderContentColorLayerOldFrame,
+          to: borderContentColorLayer.frame,
+          presentationBounds: borderContentColorLayer.presentation()?.frame,
+          with: sizeAnimation
+        )
+      }
 
       // 2) set up border mask layer with shape
       resetBorderStyle()
@@ -239,10 +253,22 @@ public final class BorderLayer: CALayer {
         }()
 
         borderContentGradientLayer.background = .gradient(gradient)
+        borderContentGradientLayer.contentsScale = contentsScale
+
         addSublayer(borderContentGradientLayer)
 
+        let borderContentGradientLayerOldFrame = borderContentGradientLayer.frame
         borderContentGradientLayer.frame = borderContentFrame
-        borderContentGradientLayer.contentsScale = contentsScale
+
+        // add size sync animation so that the border content layer can follow the bounds change
+        if let sizeAnimation = self.sizeAnimation() {
+          borderContentGradientLayer.addFrameAnimation(
+            from: borderContentGradientLayerOldFrame,
+            to: borderContentGradientLayer.frame,
+            presentationBounds: borderContentGradientLayer.presentation()?.frame,
+            with: sizeAnimation
+          )
+        }
 
       case .layer(let contentLayer):
         self.borderContentColorLayer?.removeFromSuperlayer()
@@ -266,8 +292,20 @@ public final class BorderLayer: CALayer {
           ])
         }
 
-        contentLayer.frame = borderContentFrame
         contentLayer.contentsScale = contentsScale
+
+        let contentLayerOldFrame = contentLayer.frame
+        contentLayer.frame = borderContentFrame
+
+        // add size sync animation so that the border content layer can follow the bounds change
+        if let sizeAnimation = self.sizeAnimation() {
+          contentLayer.addFrameAnimation(
+            from: contentLayerOldFrame,
+            to: contentLayer.frame,
+            presentationBounds: contentLayer.presentation()?.frame,
+            with: sizeAnimation
+          )
+        }
       }
 
       // 2) set up border mask layer
@@ -285,8 +323,21 @@ public final class BorderLayer: CALayer {
         if mask !== borderMaskLayer {
           mask = borderMaskLayer
         }
-        borderMaskLayer.frame = bounds
+
         borderMaskLayer.contentsScale = contentsScale
+
+        let borderMaskLayerOldFrame = borderMaskLayer.frame
+        borderMaskLayer.frame = bounds
+
+        // add size sync animation so that the border mask layer can follow the bounds change
+        if let sizeAnimation = self.sizeAnimation() {
+          borderMaskLayer.addFrameAnimation(
+            from: borderMaskLayerOldFrame,
+            to: borderMaskLayer.frame,
+            presentationBounds: borderMaskLayer.presentation()?.frame,
+            with: sizeAnimation
+          )
+        }
 
         borderMaskLayer.cornerRadius = cornerRadius
         borderMaskLayer.borderWidth = borderWidth
@@ -313,8 +364,21 @@ public final class BorderLayer: CALayer {
     if mask !== borderMaskLayer {
       mask = borderMaskLayer
     }
-    borderMaskLayer.frame = borderContentFrame
     borderMaskLayer.contentsScale = contentsScale
+
+    let borderMaskLayerOldFrame = borderMaskLayer.frame
+
+    borderMaskLayer.frame = borderContentFrame
+
+    // add size sync animation so that the border mask layer can follow the bounds change
+    if let sizeAnimation = self.sizeAnimation() {
+      borderMaskLayer.addFrameAnimation(
+        from: borderMaskLayerOldFrame,
+        to: borderMaskLayer.frame,
+        presentationBounds: borderMaskLayer.presentation()?.frame,
+        with: sizeAnimation
+      )
+    }
 
     if let offsetableShape = shape as? (any OffsetableShape) {
       // Expanded logic:
@@ -331,6 +395,15 @@ public final class BorderLayer: CALayer {
       // Simple logic:
       let boundsExtendedOffset = borderMask.boundsExtendedOffset
       borderMaskLayer.path = offsetableShape.path(in: bounds.offsetBy(dx: boundsExtendedOffset, dy: boundsExtendedOffset), offset: offset)
+
+      // add path animation so that the border mask layer can follow the bounds change
+      if let pathAnimation = self.sizeAnimation()?.copy() as? CABasicAnimation {
+        pathAnimation.keyPath = "path"
+        pathAnimation.isAdditive = false
+        pathAnimation.fromValue = borderMaskLayer.presentation()?.path
+        pathAnimation.toValue = borderMaskLayer.path
+        borderMaskLayer.add(pathAnimation, forKey: "path")
+      }
 
       borderMaskLayer.maskPath = { borderMaskLayerBounds in
         // Expanded logic:
@@ -357,6 +430,15 @@ public final class BorderLayer: CALayer {
         // the border mask layer doesn't shrink, should use the shrunk bounds
         borderMaskLayer.path = shape.path(in: bounds.expanded(by: offset))
         borderMaskLayer.maskPath = { bounds in shape.path(in: bounds.expanded(by: offset)) }
+      }
+
+      // add path animation so that the border mask layer can follow the bounds change
+      if let pathAnimation = self.sizeAnimation()?.copy() as? CABasicAnimation {
+        pathAnimation.keyPath = "path"
+        pathAnimation.isAdditive = false
+        pathAnimation.fromValue = borderMaskLayer.presentation()?.path
+        pathAnimation.toValue = borderMaskLayer.path
+        borderMaskLayer.add(pathAnimation, forKey: "path")
       }
     }
     borderMaskLayer.lineWidth = 2 * borderWidth // double width so half is inside, half is outside
@@ -403,31 +485,7 @@ private class MaskShapeLayer: CAShapeLayer {
 
     let maskLayer = CAShapeLayer()
     maskLayer.strongDelegate = CALayer.DisableImplicitAnimationDelegate.shared
-    maskLayer.frame = bounds
-    maskLayer.path = maskPath(bounds)
     mask = maskLayer
-
-    addFullSizeTrackingLayer(maskLayer, onBoundsChange: { [weak self, weak maskLayer] context in
-      guard let self, let maskLayer = maskLayer else {
-        return
-      }
-
-      let layer = context.hostLayer
-
-      // update model
-      maskLayer.path = self.maskPath(layer.bounds)
-
-      // add animation if bounds changes
-      guard let animationCopy = layer.sizeAnimation()?.copy() as? CABasicAnimation else {
-        return
-      }
-
-      animationCopy.keyPath = "path"
-      animationCopy.isAdditive = false
-      animationCopy.fromValue = maskLayer.presentation()?.path
-      animationCopy.toValue = maskLayer.path
-      maskLayer.add(animationCopy, forKey: "path")
-    })
   }
 
   @available(*, unavailable)
@@ -447,8 +505,25 @@ private class MaskShapeLayer: CAShapeLayer {
       return
     }
 
-    // on macOS, when window is resized, the above `onBoundsChange` won't be called, so we need to update the mask layer's frame and path manually.
+    let maskLayerOldBounds = maskLayer.frame
     maskLayer.frame = bounds
     maskLayer.path = maskPath(bounds)
+
+    if let sizeAnimation = self.sizeAnimation() {
+      maskLayer.addFrameAnimation(
+        from: maskLayerOldBounds,
+        to: maskLayer.frame,
+        presentationBounds: self.presentation()?.bounds,
+        with: sizeAnimation
+      )
+
+      if let pathAnimation = sizeAnimation.copy() as? CABasicAnimation {
+        pathAnimation.keyPath = "path"
+        pathAnimation.isAdditive = false
+        pathAnimation.fromValue = maskLayer.presentation()?.path
+        pathAnimation.toValue = maskLayer.path
+        maskLayer.add(pathAnimation, forKey: "path")
+      }
+    }
   }
 }
