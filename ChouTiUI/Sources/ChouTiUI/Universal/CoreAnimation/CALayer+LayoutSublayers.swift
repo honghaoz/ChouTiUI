@@ -119,7 +119,7 @@ public extension CALayer {
       setAssociatedObject(originalClass, for: &AssociateKey.originalClass)
     }
 
-    let subclassName = "\(NSStringFromClass(originalClass))_ChouTiUI_LayoutSublayers"
+    let subclassName = "ChouTiUI_\(NSStringFromClass(originalClass))"
 
     // check if we already have a swizzled class
     if let existingClass = NSClassFromString(subclassName) {
@@ -180,7 +180,7 @@ public extension CALayer {
 
     // clean up the stored original class
     setAssociatedObject(nil as AnyClass?, for: &AssociateKey.originalClass)
-    
+
     #if canImport(AppKit)
     unhookViewLayout()
     #endif
@@ -192,18 +192,18 @@ public extension CALayer {
     guard let view = self.delegate as? View else {
       return
     }
-    
+
     // check if we've already hooked this view
     if getAssociatedObject(for: &AssociateKey.viewLayoutToken) != nil {
       return
     }
-    
+
     // Hook into the view's layout
     let token = view.onLayoutSubviews { view in
       view.layer?.setNeedsLayout()
       view.layer?.layoutIfNeeded()
     }
-    
+
     setAssociatedObject(token, for: &AssociateKey.viewLayoutToken)
   }
 
@@ -211,7 +211,7 @@ public extension CALayer {
     guard let token = getAssociatedObject(for: &AssociateKey.viewLayoutToken) as? CancellableToken else {
       return
     }
-    
+
     token.cancel()
     removeAssociatedObject(for: &AssociateKey.viewLayoutToken)
   }

@@ -61,7 +61,7 @@ class View_onLayoutSubviewsTests: XCTestCase {
       calledView = view
     }
 
-    expect(getClassName(view)) == "\(viewClassName)_ChouTiUI_LayoutSubviews"
+    expect(getClassName(view)) == "ChouTiUI_\(viewClassName)"
 
     // trigger layout
     view.setNeedsLayout()
@@ -100,7 +100,7 @@ class View_onLayoutSubviewsTests: XCTestCase {
       calledView1 = view
     }
 
-    expect(getClassName(view)) == "\(viewClassName)_ChouTiUI_LayoutSubviews"
+    expect(getClassName(view)) == "ChouTiUI_\(viewClassName)"
 
     // trigger layout
     view.setNeedsLayout()
@@ -117,7 +117,7 @@ class View_onLayoutSubviewsTests: XCTestCase {
       calledView2 = view
     }
 
-    expect(getClassName(view)) == "\(viewClassName)_ChouTiUI_LayoutSubviews"
+    expect(getClassName(view)) == "ChouTiUI_\(viewClassName)"
 
     // trigger layout
     view.setNeedsLayout()
@@ -135,8 +135,8 @@ class View_onLayoutSubviewsTests: XCTestCase {
       callCount3 += 1
       calledView3 = view
     }
-    
-    expect(getClassName(view)) == "\(viewClassName)_ChouTiUI_LayoutSubviews"
+
+    expect(getClassName(view)) == "ChouTiUI_\(viewClassName)"
 
     // trigger layout
     view.setNeedsLayout()
@@ -150,7 +150,7 @@ class View_onLayoutSubviewsTests: XCTestCase {
 
     // cancel callback 2
     token2?.cancel()
-    expect(getClassName(view)) == "\(viewClassName)_ChouTiUI_LayoutSubviews" // still swizzled because of callbacks 1 and 3
+    expect(getClassName(view)) == "ChouTiUI_\(viewClassName)" // still swizzled because of callbacks 1 and 3
 
     // trigger layout
     view.setNeedsLayout()
@@ -161,7 +161,7 @@ class View_onLayoutSubviewsTests: XCTestCase {
 
     // cancel callback 1
     token1?.cancel()
-    expect(getClassName(view)) == "\(viewClassName)_ChouTiUI_LayoutSubviews" // still swizzled because of callback 3
+    expect(getClassName(view)) == "ChouTiUI_\(viewClassName)" // still swizzled because of callback 3
 
     // trigger layout
     view.setNeedsLayout()
@@ -182,75 +182,75 @@ class View_onLayoutSubviewsTests: XCTestCase {
     expect(callCount3) == 3 // not called
   }
 
- func test_onLayoutSubviews_executionOrder() {
-   let view = View(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
-   #if os(macOS)
-   view.wantsLayer = true
-   #endif
-
-   var executionOrder: [Int] = []
-
-   view.onLayoutSubviews { _ in
-     executionOrder.append(1)
-   }
-
-   view.onLayoutSubviews { _ in
-     executionOrder.append(2)
-   }
-
-   view.onLayoutSubviews { _ in
-     executionOrder.append(3)
-   }
-
-   // trigger layout
-   view.setNeedsLayout()
-   view.layoutIfNeeded()
-   expect(executionOrder) == [1, 2, 3]
-
-   executionOrder = []
-   view.setNeedsLayout()
-   view.layoutIfNeeded()
-   expect(executionOrder) == [1, 2, 3]
- }
-
- func test_onLayoutSubviews_callSuperFirst() {
-  class CustomView: View {
-
-    static var callOrders: [Int] = []
-
+  func test_onLayoutSubviews_executionOrder() {
+    let view = View(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
     #if os(macOS)
-    override func layout() {
-      super.layout()
-      CustomView.callOrders.append(1)
-    }
-    #else
-    override func layoutSubviews() {
-      super.layoutSubviews()
-      CustomView.callOrders.append(1)
-    }
+    view.wantsLayer = true
     #endif
+
+    var executionOrder: [Int] = []
+
+    view.onLayoutSubviews { _ in
+      executionOrder.append(1)
+    }
+
+    view.onLayoutSubviews { _ in
+      executionOrder.append(2)
+    }
+
+    view.onLayoutSubviews { _ in
+      executionOrder.append(3)
+    }
+
+    // trigger layout
+    view.setNeedsLayout()
+    view.layoutIfNeeded()
+    expect(executionOrder) == [1, 2, 3]
+
+    executionOrder = []
+    view.setNeedsLayout()
+    view.layoutIfNeeded()
+    expect(executionOrder) == [1, 2, 3]
   }
 
-  let customView = CustomView(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
-  customView.onLayoutSubviews { _ in
-    CustomView.callOrders.append(2)
-  }
+  func test_onLayoutSubviews_callSuperFirst() {
+    class CustomView: View {
 
-  customView.setNeedsLayout()
-  customView.layoutIfNeeded()
-  expect(CustomView.callOrders) == [1, 2]
- }
+      static var callOrders: [Int] = []
+
+      #if os(macOS)
+      override func layout() {
+        super.layout()
+        CustomView.callOrders.append(1)
+      }
+      #else
+      override func layoutSubviews() {
+        super.layoutSubviews()
+        CustomView.callOrders.append(1)
+      }
+      #endif
+    }
+
+    let customView = CustomView(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
+    customView.onLayoutSubviews { _ in
+      CustomView.callOrders.append(2)
+    }
+
+    customView.setNeedsLayout()
+    customView.layoutIfNeeded()
+    expect(CustomView.callOrders) == [1, 2]
+  }
 
   func test_onLayoutSubviews_calledOnBoundsChange_plainView() {
     // on macOS, NSView won't set `needsLayout` to true when the bounds change, which means the `layout()` method will not be called.
     // on iOS, UIView will set "needs layout" flag to true when the bounds change, which means the `layoutSubviews()` method will be called.
     class CustomView: View {
       #if os(macOS)
-      override func layout() {
+      override func layout() { // swiftlint:disable:this unneeded_override
         super.layout()
       }
       #else
-      override func layoutSubviews() {
+      override func layoutSubviews() { // swiftlint:disable:this unneeded_override
         super.layoutSubviews()
       }
       #endif
@@ -291,11 +291,11 @@ class View_onLayoutSubviewsTests: XCTestCase {
     // on iOS, UIView will set "needs layout" flag to true when the bounds change, which means the `layoutSubviews()` method will be called.
     class CustomView: View {
       #if os(macOS)
-      override func layout() {
+      override func layout() { // swiftlint:disable:this unneeded_override
         super.layout()
       }
       #else
-      override func layoutSubviews() {
+      override func layoutSubviews() { // swiftlint:disable:this unneeded_override
         super.layoutSubviews()
       }
       #endif
@@ -374,11 +374,11 @@ class View_onLayoutSubviewsTests: XCTestCase {
 
     class CustomView: View {
       #if os(macOS)
-      override func layout() {
+      override func layout() { // swiftlint:disable:this unneeded_override
         super.layout()
       }
       #else
-      override func layoutSubviews() {
+      override func layoutSubviews() { // swiftlint:disable:this unneeded_override
         super.layoutSubviews()
       }
       #endif
@@ -414,45 +414,45 @@ class View_onLayoutSubviewsTests: XCTestCase {
     expect(callCount) == 2
   }
 
- func test_onLayoutSubviews_subclass() {
-   #if os(macOS)
-   class CustomView: NSView {
-     var customLayoutCalled = false
+  func test_onLayoutSubviews_subclass() {
+    #if os(macOS)
+    class CustomView: NSView {
+      var customLayoutCalled = false
 
-     override func layout() {
-       super.layout()
-       customLayoutCalled = true
-     }
-   }
-   #else
-   class CustomView: UIView {
-     var customLayoutCalled = false
+      override func layout() {
+        super.layout()
+        customLayoutCalled = true
+      }
+    }
+    #else
+    class CustomView: UIView {
+      var customLayoutCalled = false
 
-     override func layoutSubviews() {
-       super.layoutSubviews()
-       customLayoutCalled = true
-     }
-   }
-   #endif
+      override func layoutSubviews() {
+        super.layoutSubviews()
+        customLayoutCalled = true
+      }
+    }
+    #endif
 
-   let customView = CustomView(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
-   #if os(macOS)
-   customView.wantsLayer = true
-   #endif
+    let customView = CustomView(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
+    #if os(macOS)
+    customView.wantsLayer = true
+    #endif
 
-   var blockCalled = false
-   customView.onLayoutSubviews { _ in
-     blockCalled = true
-   }
+    var blockCalled = false
+    customView.onLayoutSubviews { _ in
+      blockCalled = true
+    }
 
-   // trigger layout
-   customView.setNeedsLayout()
-   customView.layoutIfNeeded()
+    // trigger layout
+    customView.setNeedsLayout()
+    customView.layoutIfNeeded()
 
-   // both the original layout and the block should be called
-   expect(customView.customLayoutCalled) == true
-   expect(blockCalled) == true
- }
+    // both the original layout and the block should be called
+    expect(customView.customLayoutCalled) == true
+    expect(blockCalled) == true
+  }
 
   func test_onLayoutSubviews_fromBackgroundThread() {
     let view = View(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
@@ -489,7 +489,7 @@ class View_onLayoutSubviewsTests: XCTestCase {
       token?.cancel()
     }
 
-    expect(getClassName(view)) == "\(viewClassName)_ChouTiUI_LayoutSubviews"
+    expect(getClassName(view)) == "ChouTiUI_\(viewClassName)"
 
     // trigger layout
     view.setNeedsLayout()
@@ -516,7 +516,7 @@ class View_onLayoutSubviewsTests: XCTestCase {
       }
       _ = token // use token to prevent warning
 
-      expect(getClassName(view)) == "\(viewClassName)_ChouTiUI_LayoutSubviews"
+      expect(getClassName(view)) == "ChouTiUI_\(viewClassName)"
 
       view.setNeedsLayout()
       view.layoutIfNeeded()
@@ -525,7 +525,7 @@ class View_onLayoutSubviewsTests: XCTestCase {
 
     // token is deallocated, but the block should still be there
     // because the token is stored in the layoutSubviewsBlocks dictionary
-    expect(getClassName(view)) == "\(viewClassName)_ChouTiUI_LayoutSubviews"
+    expect(getClassName(view)) == "ChouTiUI_\(viewClassName)"
 
     view.setNeedsLayout()
     view.layoutIfNeeded()
@@ -539,8 +539,8 @@ class View_onLayoutSubviewsTests: XCTestCase {
     view1.onLayoutSubviews { _ in }
     view2.onLayoutSubviews { _ in }
 
-    expect(getClassName(view1)) == "\(viewClassName)_ChouTiUI_LayoutSubviews"
-    expect(getClassName(view2)) == "\(viewClassName)_ChouTiUI_LayoutSubviews"
+    expect(getClassName(view1)) == "ChouTiUI_\(viewClassName)"
+    expect(getClassName(view2)) == "ChouTiUI_\(viewClassName)"
   }
 
   func test_onLayoutSubviews_multipleSubclasses() {
@@ -560,7 +560,7 @@ class View_onLayoutSubviewsTests: XCTestCase {
     view2.onLayoutSubviews { _ in }
 
     // each subclass should have its own swizzled class
-    expect(getClassName(view1)) == "_TtCFC13ChouTiUITests26View_onLayoutSubviewsTests40test_onLayoutSubviews_multipleSubclassesFT_T_L_11CustomView1_ChouTiUI_LayoutSubviews"
-    expect(getClassName(view2)) == "_TtCFC13ChouTiUITests26View_onLayoutSubviewsTests40test_onLayoutSubviews_multipleSubclassesFT_T_L_11CustomView2_ChouTiUI_LayoutSubviews"
+    expect(getClassName(view1)) == "ChouTiUI__TtCFC13ChouTiUITests26View_onLayoutSubviewsTests40test_onLayoutSubviews_multipleSubclassesFT_T_L_11CustomView1"
+    expect(getClassName(view2)) == "ChouTiUI__TtCFC13ChouTiUITests26View_onLayoutSubviewsTests40test_onLayoutSubviews_multipleSubclassesFT_T_L_11CustomView2"
   }
 }

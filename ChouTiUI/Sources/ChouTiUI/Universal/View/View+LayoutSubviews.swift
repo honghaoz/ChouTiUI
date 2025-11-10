@@ -117,7 +117,7 @@ public extension View {
       setAssociatedObject(originalClass, for: &AssociateKey.originalClass)
     }
 
-    let subclassName = "\(NSStringFromClass(originalClass))_ChouTiUI_LayoutSubviews"
+    let subclassName = "ChouTiUI_\(NSStringFromClass(originalClass))"
 
     // check if we already have a swizzled class
     if let existingClass = NSClassFromString(subclassName) {

@@ -61,7 +61,7 @@ class CALayer_LayoutSublayersTests: XCTestCase {
       calledLayer = layer
     }
 
-    expect(getClassName(layer)) == "CALayer_ChouTiUI_LayoutSublayers"
+    expect(getClassName(layer)) == "ChouTiUI_CALayer"
 
     // trigger layoutSublayers
     layer.setNeedsLayout()
@@ -99,7 +99,7 @@ class CALayer_LayoutSublayersTests: XCTestCase {
       calledLayer1 = layer
     }
 
-    expect(getClassName(layer)) == "CALayer_ChouTiUI_LayoutSublayers"
+    expect(getClassName(layer)) == "ChouTiUI_CALayer"
 
     // trigger layoutSublayers
     layer.setNeedsLayout()
@@ -116,7 +116,7 @@ class CALayer_LayoutSublayersTests: XCTestCase {
       calledLayer2 = layer
     }
 
-    expect(getClassName(layer)) == "CALayer_ChouTiUI_LayoutSublayers"
+    expect(getClassName(layer)) == "ChouTiUI_CALayer"
 
     // trigger layoutSublayers
     layer.setNeedsLayout()
@@ -135,7 +135,7 @@ class CALayer_LayoutSublayersTests: XCTestCase {
       calledLayer3 = layer
     }
 
-    expect(getClassName(layer)) == "CALayer_ChouTiUI_LayoutSublayers"
+    expect(getClassName(layer)) == "ChouTiUI_CALayer"
 
     // trigger layoutSublayers
     layer.setNeedsLayout()
@@ -149,7 +149,7 @@ class CALayer_LayoutSublayersTests: XCTestCase {
 
     // cancel callback 2
     token2?.cancel()
-    expect(getClassName(layer)) == "CALayer_ChouTiUI_LayoutSublayers" // still swizzled because of callbacks 1 and 3
+    expect(getClassName(layer)) == "ChouTiUI_CALayer" // still swizzled because of callbacks 1 and 3
 
     // trigger layoutSublayers
     layer.setNeedsLayout()
@@ -160,7 +160,7 @@ class CALayer_LayoutSublayersTests: XCTestCase {
 
     // cancel callback 1
     token1?.cancel()
-    expect(getClassName(layer)) == "CALayer_ChouTiUI_LayoutSublayers" // still swizzled because of callback 3
+    expect(getClassName(layer)) == "ChouTiUI_CALayer" // still swizzled because of callback 3
 
     // trigger layoutSublayers
     layer.setNeedsLayout()
@@ -330,7 +330,7 @@ class CALayer_LayoutSublayersTests: XCTestCase {
       token?.cancel()
     }
 
-    expect(getClassName(layer)) == "CALayer_ChouTiUI_LayoutSublayers"
+    expect(getClassName(layer)) == "ChouTiUI_CALayer"
 
     // trigger layoutSublayers
     layer.setNeedsLayout()
@@ -355,7 +355,7 @@ class CALayer_LayoutSublayersTests: XCTestCase {
       }
       _ = token // use token to prevent warning
 
-      expect(getClassName(layer)) == "CALayer_ChouTiUI_LayoutSublayers"
+      expect(getClassName(layer)) == "ChouTiUI_CALayer"
 
       layer.setNeedsLayout()
       layer.layoutIfNeeded()
@@ -364,7 +364,7 @@ class CALayer_LayoutSublayersTests: XCTestCase {
 
     // token is deallocated, but the block should still be there
     // because the token is stored in the layoutSublayersBlocks dictionary
-    expect(getClassName(layer)) == "CALayer_ChouTiUI_LayoutSublayers"
+    expect(getClassName(layer)) == "ChouTiUI_CALayer"
 
     layer.setNeedsLayout()
     layer.layoutIfNeeded()
@@ -381,8 +381,8 @@ class CALayer_LayoutSublayersTests: XCTestCase {
     layer2.onLayoutSublayers { _ in }
 
     // both layers should have the same swizzled class
-    expect(getClassName(layer1)) == "CALayer_ChouTiUI_LayoutSublayers"
-    expect(getClassName(layer2)) == "CALayer_ChouTiUI_LayoutSublayers"
+    expect(getClassName(layer1)) == "ChouTiUI_CALayer"
+    expect(getClassName(layer2)) == "ChouTiUI_CALayer"
   }
 
   func test_onLayoutSublayers_multipleSubclasses() {
@@ -398,8 +398,8 @@ class CALayer_LayoutSublayersTests: XCTestCase {
     layer2.onLayoutSublayers { _ in }
 
     // each subclass should have its own swizzled class
-    expect(getClassName(layer1)) == "_TtCFC13ChouTiUITests28CALayer_LayoutSublayersTests41test_onLayoutSublayers_multipleSubclassesFT_T_L_12CustomLayer1_ChouTiUI_LayoutSublayers"
-    expect(getClassName(layer2)) == "_TtCFC13ChouTiUITests28CALayer_LayoutSublayersTests41test_onLayoutSublayers_multipleSubclassesFT_T_L_12CustomLayer2_ChouTiUI_LayoutSublayers"
+    expect(getClassName(layer1)) == "ChouTiUI__TtCFC13ChouTiUITests28CALayer_LayoutSublayersTests41test_onLayoutSublayers_multipleSubclassesFT_T_L_12CustomLayer1"
+    expect(getClassName(layer2)) == "ChouTiUI__TtCFC13ChouTiUITests28CALayer_LayoutSublayersTests41test_onLayoutSublayers_multipleSubclassesFT_T_L_12CustomLayer2"
   }
 
   func test_onLayoutSublayers_viewLayer() {
@@ -421,21 +421,21 @@ class CALayer_LayoutSublayersTests: XCTestCase {
     let token = layer.onLayoutSublayers { _ in
       callCount += 1
     }
-    
+
     // view and layer (optionally) should be swizzled
     #if os(macOS)
-    expect(getClassName(view)) == "NSView_ChouTiUI_LayoutSubviews"
-    expect(getClassName(layer)) == "NSViewBackingLayer_ChouTiUI_LayoutSublayers"
+    expect(getClassName(view)) == "ChouTiUI_NSView"
+    expect(getClassName(layer)) == "ChouTiUI_NSViewBackingLayer"
     #else
     expect(getClassName(view)) == "UIView"
-    expect(getClassName(layer)) == "CALayer_ChouTiUI_LayoutSublayers"
+    expect(getClassName(layer)) == "ChouTiUI_CALayer"
     #endif
 
     // view's layout cycle should trigger layoutSublayers
     view.setNeedsLayout()
     view.layoutIfNeeded()
     expect(callCount) == 1
-    
+
     // Second call should also work
     view.setNeedsLayout()
     view.layoutIfNeeded()
