@@ -36,6 +36,7 @@ import ChouTi
 private enum AssociateKey {
   static var layoutSublayersBlocks: UInt8 = 0
   static var originalClass: UInt8 = 0
+  static var viewLayoutToken: UInt8 = 0
 }
 
 public extension CALayer {
@@ -57,6 +58,10 @@ public extension CALayer {
   ///
   /// Calling this method will dynamically swizzle the layer's class to override `layoutSublayers()`.
   /// The custom block will be called after the original `layoutSublayers()` implementation.
+  ///
+  /// on macOS, if the layer is a view's backing layer, this method will automatically hook into the view's
+  /// layout cycle to ensure `layoutSublayers()` is called when the view performs layout, providing
+  /// consistent behavior across macOS and iOS.
   ///
   /// The block will be called in the order of the blocks being added.
   ///
@@ -96,6 +101,10 @@ public extension CALayer {
     token.store(in: &layoutSublayersBlocks)
 
     swizzleLayoutSublayers()
+
+    #if canImport(AppKit)
+    hookViewLayout()
+    #endif
 
     return token
   }
@@ -143,7 +152,7 @@ public extension CALayer {
       // call super implementation
       originalImplementation(layer, layoutSublayersSelector)
 
-      // call the custom block if it exists
+      // call the custom blocks
       for token in layer.layoutSublayersBlocks.values {
         token.value(layer)
       }
@@ -171,5 +180,40 @@ public extension CALayer {
 
     // clean up the stored original class
     setAssociatedObject(nil as AnyClass?, for: &AssociateKey.originalClass)
+    
+    #if canImport(AppKit)
+    unhookViewLayout()
+    #endif
   }
+
+  #if canImport(AppKit)
+  private func hookViewLayout() {
+    // check if this layer has a view (is a backing layer)
+    guard let view = self.delegate as? View else {
+      return
+    }
+    
+    // check if we've already hooked this view
+    if getAssociatedObject(for: &AssociateKey.viewLayoutToken) != nil {
+      return
+    }
+    
+    // Hook into the view's layout
+    let token = view.onLayoutSubviews { view in
+      view.layer?.setNeedsLayout()
+      view.layer?.layoutIfNeeded()
+    }
+    
+    setAssociatedObject(token, for: &AssociateKey.viewLayoutToken)
+  }
+
+  private func unhookViewLayout() {
+    guard let token = getAssociatedObject(for: &AssociateKey.viewLayoutToken) as? CancellableToken else {
+      return
+    }
+    
+    token.cancel()
+    removeAssociatedObject(for: &AssociateKey.viewLayoutToken)
+  }
+  #endif
 }

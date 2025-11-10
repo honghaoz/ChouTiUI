@@ -220,7 +220,7 @@ class CALayer_LayoutSublayersTests: XCTestCase {
       }
     }
 
-    let customLayer = CustomLayer()
+    let customLayer = CustomLayer(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
     customLayer.onLayoutSublayers { _ in
       CustomLayer.callOrders.append(2)
     }
@@ -248,6 +248,28 @@ class CALayer_LayoutSublayersTests: XCTestCase {
     expect(callCount) == 1
 
     layer.bounds = CGRect(x: 0, y: 0, width: 300, height: 300)
+    layer.layoutIfNeeded()
+    expect(callCount) == 2
+  }
+
+  func test_onLayoutSublayers_calledOnFrameChange() {
+    let testWindow = TestWindow()
+
+    let layer: CALayer = layer
+
+    testWindow.layer.addSublayer(layer)
+
+    var callCount = 0
+    layer.onLayoutSublayers { _ in
+      callCount += 1
+    }
+
+    // changing frame should trigger layoutSublayers
+    layer.frame = CGRect(x: 0, y: 0, width: 200, height: 200)
+    layer.layoutIfNeeded()
+    expect(callCount) == 1
+
+    layer.frame = CGRect(x: 0, y: 0, width: 300, height: 300)
     layer.layoutIfNeeded()
     expect(callCount) == 2
   }
@@ -378,5 +400,59 @@ class CALayer_LayoutSublayersTests: XCTestCase {
     // each subclass should have its own swizzled class
     expect(getClassName(layer1)) == "_TtCFC13ChouTiUITests28CALayer_LayoutSublayersTests41test_onLayoutSublayers_multipleSubclassesFT_T_L_12CustomLayer1_ChouTiUI_LayoutSublayers"
     expect(getClassName(layer2)) == "_TtCFC13ChouTiUITests28CALayer_LayoutSublayersTests41test_onLayoutSublayers_multipleSubclassesFT_T_L_12CustomLayer2_ChouTiUI_LayoutSublayers"
+  }
+
+  func test_onLayoutSublayers_viewLayer() {
+    let view = View(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
+    #if os(macOS)
+    view.wantsLayer = true
+    #endif
+    let layer = view.unsafeLayer
+
+    #if os(macOS)
+    expect(getClassName(layer)) == "NSViewBackingLayer"
+    expect(getClassName(view)) == "NSView"
+    #else
+    expect(getClassName(layer)) == "CALayer"
+    expect(getClassName(view)) == "UIView"
+    #endif
+
+    var callCount = 0
+    let token = layer.onLayoutSublayers { _ in
+      callCount += 1
+    }
+    
+    // view and layer (optionally) should be swizzled
+    #if os(macOS)
+    expect(getClassName(view)) == "NSView_ChouTiUI_LayoutSubviews"
+    expect(getClassName(layer)) == "NSViewBackingLayer_ChouTiUI_LayoutSublayers"
+    #else
+    expect(getClassName(view)) == "UIView"
+    expect(getClassName(layer)) == "CALayer_ChouTiUI_LayoutSublayers"
+    #endif
+
+    // view's layout cycle should trigger layoutSublayers
+    view.setNeedsLayout()
+    view.layoutIfNeeded()
+    expect(callCount) == 1
+    
+    // Second call should also work
+    view.setNeedsLayout()
+    view.layoutIfNeeded()
+    expect(callCount) == 2
+
+    token.cancel()
+    #if os(macOS)
+    expect(getClassName(view)) == "NSView"
+    expect(getClassName(layer)) == "NSViewBackingLayer"
+    #else
+    expect(getClassName(view)) == "UIView"
+    expect(getClassName(layer)) == "CALayer"
+    #endif
+
+    // trigger layoutSublayers
+    layer.setNeedsLayout()
+    layer.layoutIfNeeded()
+    expect(callCount) == 2 // should not call the block again
   }
 }
