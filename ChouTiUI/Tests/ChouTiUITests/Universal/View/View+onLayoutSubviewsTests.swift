@@ -563,4 +563,592 @@ class View_onLayoutSubviewsTests: XCTestCase {
     expect(getClassName(view1)) == "ChouTiUI__TtCFC13ChouTiUITests26View_onLayoutSubviewsTests40test_onLayoutSubviews_multipleSubclassesFT_T_L_11CustomView1"
     expect(getClassName(view2)) == "ChouTiUI__TtCFC13ChouTiUITests26View_onLayoutSubviewsTests40test_onLayoutSubviews_multipleSubclassesFT_T_L_11CustomView2"
   }
+
+  // MARK: - KVO Interaction Tests
+
+  func test_onLayoutSubviews_swizzle_then_KVO() {
+    // swizzle, KVO, unKVO, unswizzle
+    let view = View(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
+    #if os(macOS)
+    view.wantsLayer = true
+    #endif
+
+    expect(getClassName(view)) == viewClassName
+
+    // add our swizzle
+    var layoutCount = 0
+    let token = view.onLayoutSubviews { _ in
+      layoutCount += 1
+    }
+
+    expect(getClassName(view)) == "ChouTiUI_\(viewClassName)"
+
+    // add KVO - it should create NSKVONotifying class
+    var kvoCallCount = 0
+    let observation = view.observe(\.frame, options: [.new]) { _, _ in
+      kvoCallCount += 1
+    }
+
+    expect(getClassName(view)) == "NSKVONotifying_ChouTiUI_\(viewClassName)"
+
+    // both callbacks should work
+    view.setNeedsLayout()
+    view.layoutIfNeeded()
+    expect(layoutCount) == 1
+
+    view.frame = CGRect(x: 0, y: 0, width: 200, height: 200)
+    expect(kvoCallCount) == 1
+
+    // cancel KVO
+    observation.invalidate()
+    expect(getClassName(view)) == "ChouTiUI_\(viewClassName)"
+
+    // cancel our swizzle
+    token.cancel()
+    expect(getClassName(view)) == viewClassName // the class is reverted to the original class
+
+    view.setNeedsLayout()
+    view.layoutIfNeeded()
+    expect(layoutCount) == 1 // should not be called
+  }
+
+  func test_onLayoutSubviews_swizzle_then_KVO2() {
+    // swizzle, KVO, unswizzle, unKVO
+    let view = View(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
+    #if os(macOS)
+    view.wantsLayer = true
+    #endif
+
+    expect(getClassName(view)) == viewClassName
+
+    // add our swizzle
+    var layoutCount1 = 0
+    let token1 = view.onLayoutSubviews { _ in
+      layoutCount1 += 1
+    }
+
+    expect(getClassName(view)) == "ChouTiUI_\(viewClassName)"
+
+    // add KVO - it should create NSKVONotifying class
+    var kvoCallCount = 0
+    let observation = view.observe(\.frame, options: [.new]) { _, _ in
+      kvoCallCount += 1
+    }
+
+    expect(getClassName(view)) == "NSKVONotifying_ChouTiUI_\(viewClassName)"
+
+    // both callbacks should work
+    view.setNeedsLayout()
+    view.layoutIfNeeded()
+    expect(layoutCount1) == 1
+
+    view.frame = CGRect(x: 0, y: 0, width: 200, height: 200)
+    expect(kvoCallCount) == 1
+
+    // cancel our swizzle first
+    token1.cancel()
+
+    // should stay as NSKVONotifying class
+    expect(getClassName(view)) == "NSKVONotifying_ChouTiUI_\(viewClassName)"
+
+    // KVO should still work
+    view.frame = CGRect(x: 0, y: 0, width: 300, height: 300)
+    expect(kvoCallCount) == 2
+
+    // clean up KVO
+    observation.invalidate()
+    expect(getClassName(view)) == "ChouTiUI_\(viewClassName)" // the class is left with our swizzled class
+
+    // add our swizzle again
+    var layoutCount2 = 0
+    let token2 = view.onLayoutSubviews { _ in
+      layoutCount2 += 1
+    }
+
+    expect(getClassName(view)) == "ChouTiUI_\(viewClassName)"
+
+    view.setNeedsLayout()
+    view.layoutIfNeeded()
+    expect(layoutCount1) == 1 // should not be called
+    expect(layoutCount2) == 1
+
+    // cancel our swizzle again
+    token2.cancel()
+    expect(getClassName(view)) == viewClassName // the class is reverted to the original class
+  }
+
+  func test_onLayoutSubviews_swizzle_then_KVO_then_swizzle() {
+    let view = View(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
+    #if os(macOS)
+    view.wantsLayer = true
+    #endif
+
+    // add first swizzle callback
+    var layoutCount1 = 0
+    let token1 = view.onLayoutSubviews { _ in
+      layoutCount1 += 1
+    }
+
+    expect(getClassName(view)) == "ChouTiUI_\(viewClassName)"
+
+    // add KVO
+    var kvoCallCount = 0
+    let observation = view.observe(\.frame, options: [.new]) { _, _ in
+      kvoCallCount += 1
+    }
+
+    expect(getClassName(view)) == "NSKVONotifying_ChouTiUI_\(viewClassName)"
+
+    // add second swizzle callback
+    var layoutCount2 = 0
+    let token2 = view.onLayoutSubviews { _ in
+      layoutCount2 += 1
+    }
+
+    expect(getClassName(view)) == "NSKVONotifying_ChouTiUI_\(viewClassName)" // should still be the same KVO class
+
+    // test all callbacks work
+    view.setNeedsLayout()
+    view.layoutIfNeeded()
+    expect(layoutCount1) == 1
+    expect(layoutCount2) == 1
+
+    view.frame = CGRect(x: 0, y: 0, width: 200, height: 200)
+    expect(kvoCallCount) == 1
+
+    // remove first layout callback
+    token1.cancel()
+    expect(getClassName(view)) == "NSKVONotifying_ChouTiUI_\(viewClassName)" // should still be the same KVO class
+
+    // second callback should still work
+    view.setNeedsLayout()
+    view.layoutIfNeeded()
+    expect(layoutCount1) == 1 // should not be called
+    expect(layoutCount2) == 2
+
+    // Remove second layout callback
+    token2.cancel()
+    expect(getClassName(view)) == "NSKVONotifying_ChouTiUI_\(viewClassName)" // should still be the same KVO class
+
+    // KVO should still work
+    view.frame = CGRect(x: 0, y: 0, width: 300, height: 300)
+    expect(kvoCallCount) == 2 // should still be called
+
+    // clean up
+    observation.invalidate()
+
+    expect(getClassName(view)) == "ChouTiUI_\(viewClassName)"
+  }
+
+  func test_onLayoutSubviews_KVO_then_swizzle() {
+    // KVO, swizzle, unswizzle, unKVO
+    let view = View(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
+    #if os(macOS)
+    view.wantsLayer = true
+    #endif
+
+    // add KVO first
+    var kvoCallCount = 0
+    let observation = view.observe(\.frame, options: [.new]) { _, _ in
+      kvoCallCount += 1
+    }
+
+    expect(getClassName(view)) == "NSKVONotifying_\(viewClassName)"
+
+    // add our swizzle
+    var layoutCount = 0
+    let token = view.onLayoutSubviews { _ in
+      layoutCount += 1
+    }
+
+    // class should remain as KVO class
+    expect(getClassName(view)) == "NSKVONotifying_\(viewClassName)"
+
+    // both callbacks should work
+    view.setNeedsLayout()
+    view.layoutIfNeeded()
+    expect(layoutCount) == 1
+
+    view.frame = CGRect(x: 0, y: 0, width: 200, height: 200)
+    expect(kvoCallCount) == 1
+
+    // cancel our swizzle
+    token.cancel()
+
+    // class should still be KVO class
+    expect(getClassName(view)) == "NSKVONotifying_\(viewClassName)"
+
+    // KVO should still work
+    view.frame = CGRect(x: 0, y: 0, width: 300, height: 300)
+    expect(kvoCallCount) == 2 // should still be called
+
+    // layout callback should not be called
+    view.setNeedsLayout()
+    view.layoutIfNeeded()
+    expect(layoutCount) == 1 // should not be called
+
+    // clean up KVO
+    observation.invalidate()
+    expect(getClassName(view)) == viewClassName // the class is reverted to the original class
+  }
+
+  func test_onLayoutSubviews_KVO_then_swizzle2() {
+    // KVO, swizzle, unKVO, unswizzle
+    let view = View(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
+    #if os(macOS)
+    view.wantsLayer = true
+    #endif
+
+    // add KVO first
+    var kvoCallCount = 0
+    let observation = view.observe(\.frame, options: [.new]) { _, _ in
+      kvoCallCount += 1
+    }
+
+    expect(getClassName(view)) == "NSKVONotifying_\(viewClassName)"
+
+    // add our swizzle
+    var layoutCount = 0
+    let token = view.onLayoutSubviews { _ in
+      layoutCount += 1
+    }
+
+    // class should remain as KVO class
+    expect(getClassName(view)) == "NSKVONotifying_\(viewClassName)"
+
+    // both callbacks should work
+    view.setNeedsLayout()
+    view.layoutIfNeeded()
+    expect(layoutCount) == 1
+
+    view.frame = CGRect(x: 0, y: 0, width: 200, height: 200)
+    expect(kvoCallCount) == 1
+
+    // cancel KVO
+    observation.invalidate()
+    expect(getClassName(view)) == viewClassName // the class is reverted to the original class
+
+    // cancel our swizzle
+    token.cancel()
+    expect(getClassName(view)) == viewClassName
+
+    view.setNeedsLayout()
+    view.layoutIfNeeded()
+    expect(layoutCount) == 1 // should not be called
+  }
+
+  func test_onLayoutSubviews_KVO_then_swizzle_then_KVO() {
+    let view = View(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
+    #if os(macOS)
+    view.wantsLayer = true
+    #endif
+
+    // add first KVO
+    var kvo1CallCount = 0
+    let observation1 = view.observe(\.frame, options: [.new]) { _, _ in
+      kvo1CallCount += 1
+    }
+
+    expect(getClassName(view)) == "NSKVONotifying_\(viewClassName)"
+
+    // add our swizzle
+    var layoutCount = 0
+    let token = view.onLayoutSubviews { _ in
+      layoutCount += 1
+    }
+
+    expect(getClassName(view)) == "NSKVONotifying_\(viewClassName)"
+
+    // add second KVO (should reuse the same KVO class)
+    var kvo2CallCount = 0
+    let observation2 = view.observe(\.frame, options: [.new]) { _, _ in
+      kvo2CallCount += 1
+    }
+
+    expect(getClassName(view)) == "NSKVONotifying_\(viewClassName)" // should still be the same KVO class
+
+    // test all callbacks work
+    view.setNeedsLayout()
+    view.layoutIfNeeded()
+    expect(layoutCount) == 1
+
+    view.frame = CGRect(x: 0, y: 0, width: 200, height: 200)
+    expect(kvo1CallCount) == 1
+    expect(kvo2CallCount) == 1
+
+    // remove first KVO
+    observation1.invalidate()
+    expect(getClassName(view)) == "NSKVONotifying_\(viewClassName)" // should still be the same KVO class
+
+    // test all callbacks work
+    view.setNeedsLayout()
+    view.layoutIfNeeded()
+    expect(layoutCount) == 2
+
+    // Directly change bounds to ensure KVO fires
+    let previousKvo2Count = kvo2CallCount
+    view.frame = CGRect(x: 0, y: 0, width: 300, height: 300)
+    expect(kvo1CallCount) == 1 // Not incremented (observation removed)
+    expect(kvo2CallCount) > previousKvo2Count // Should increment
+
+    // Clean up
+    token.cancel()
+    observation2.invalidate()
+  }
+
+//  func test_onLayoutSubviews_kvoMethodRestoration() {
+//    // This test verifies that when KVO is active and we add callbacks, the original method
+//    // is restored when all callbacks are removed
+//
+//    let view1 = View(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
+//    let view2 = View(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
+  // #if os(macOS)
+//    view1.wantsLayer = true
+//    view2.wantsLayer = true
+  // #endif
+//
+//    // Add KVO to view1
+//    var observations: [NSKeyValueObservation] = []
+//    let observation1 = view1.observe(\.frame, options: [.new]) { _, _ in }
+//    observations.append(observation1)
+//
+//    let kvoClassName1 = getClassName(view1)
+//    expect(kvoClassName1.hasPrefix("NSKVONotifying_") || kvoClassName1.hasPrefix("..NSKVONotifying_")) == true
+//
+//    // Add KVO to view2
+//    let observation2 = view2.observe(\.frame, options: [.new]) { _, _ in }
+//    observations.append(observation2)
+//
+//    // Add callbacks to both views
+//    var callCount1 = 0
+//    var callCount2 = 0
+//
+//    let token1 = view1.onLayoutSubviews { _ in
+//      callCount1 += 1
+//    }
+//
+//    let token2 = view2.onLayoutSubviews { _ in
+//      callCount2 += 1
+//    }
+//
+//    // Trigger layout
+//    view1.setNeedsLayout()
+//    view1.layoutIfNeeded()
+//    expect(callCount1) == 1
+//
+//    view2.setNeedsLayout()
+//    view2.layoutIfNeeded()
+//    expect(callCount2) == 1
+//
+//    // Remove callback from view1 (but view2 still has callback)
+//    token1.cancel()
+//
+//    // view2 should still work
+//    view2.setNeedsLayout()
+//    view2.layoutIfNeeded()
+//    expect(callCount2) == 2
+//
+//    // Remove callback from view2 (now all callbacks are gone)
+//    token2.cancel()
+//
+//    // At this point, the original method should be restored
+//    // We can't directly test if the method is restored, but we can verify
+//    // that new views of the same class don't execute callbacks
+//    let view3 = View(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
+  // #if os(macOS)
+//    view3.wantsLayer = true
+  // #endif
+//
+//    var callCount3 = 0
+//    let shouldNotBeCalled: (View) -> Void = { _ in
+//      callCount3 += 1
+//    }
+//
+//    // Trigger layout on view3 WITHOUT adding a callback
+//    // If the method wasn't restored, this might still execute callbacks (which would be wrong)
+//    view3.setNeedsLayout()
+//    view3.layoutIfNeeded()
+//    expect(callCount3) == 0  // Should be 0 because we didn't add a callback
+//
+//    // Clean up
+//    observations.removeAll()
+//  }
+
+//  func test_composeView() {
+//    let testWindow = TestWindow()
+//    let composeView = ComposeView {
+//      ColorNode(.red)
+//    }
+//    composeView.frame = CGRect(x: 0, y: 0, width: 100, height: 100)
+//
+//    testWindow.contentView?.addSubview(composeView)
+//    composeView.setNeedsLayout()
+//    composeView.layoutIfNeeded()
+//    composeView.refresh()
+//
+//    var callCount = 0
+//    composeView.onLayoutSubviews { _ in
+//      callCount += 1
+//    }
+//
+//    composeView.frame = CGRect(x: 0, y: 0, width: 200, height: 200)
+//    composeView.layoutIfNeeded()
+//    expect(callCount) == 1
+//  }
+
+  func test_onLayoutSubviews_KVO_then_swizzle_unswizzle_then_swizzle() {
+    class CustomView: View {
+
+      static var callOrders: [Int] = []
+
+      #if os(macOS)
+      override func layout() {
+        super.layout()
+        CustomView.callOrders.append(1)
+      }
+      #else
+      override func layoutSubviews() {
+        super.layoutSubviews()
+        CustomView.callOrders.append(1)
+      }
+      #endif
+    }
+
+    let view = CustomView(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
+
+    #if os(macOS)
+    view.wantsLayer = true
+    #endif
+
+    let customViewClassName = NSStringFromClass(CustomView.self)
+    expect(getClassName(view)) == customViewClassName
+
+    // add KVO
+    let observation = view.observe(\.frame, options: [.new]) { _, _ in }
+    expect(getClassName(view)) == "NSKVONotifying_\(customViewClassName)"
+
+    // add swizzle
+    var layoutCount1 = 0
+    let token1 = view.onLayoutSubviews { _ in
+      layoutCount1 += 1
+    }
+    expect(getClassName(view)) == "NSKVONotifying_\(customViewClassName)" // the original class method is swizzled, class doesn't change
+
+    view.setNeedsLayout()
+    view.layoutIfNeeded()
+    expect(layoutCount1) == 1 // should trigger layout callback
+
+    // remove swizzle
+    token1.cancel()
+    expect(getClassName(view)) == "NSKVONotifying_\(customViewClassName)"
+
+    view.setNeedsLayout()
+    view.layoutIfNeeded()
+    expect(layoutCount1) == 1 // no swizzle, no callback
+
+    // add swizzle again
+    var layoutCount2 = 0
+    _ = view.onLayoutSubviews { _ in
+      layoutCount2 += 1
+    }
+    expect(getClassName(view)) == "NSKVONotifying_\(customViewClassName)"
+
+    view.setNeedsLayout()
+    view.layoutIfNeeded()
+    expect(layoutCount1) == 1 // should not be called
+    expect(layoutCount2) == 1 // second swizzle, trigger layout callback
+
+    // remove KVO
+    observation.invalidate()
+    expect(getClassName(view)) == customViewClassName // the class is reverted to the original class
+  }
+
+  func test_onLayoutSubviews_KVO_with_swizzle_together() {
+    // test one instance with KVO and swizzle and another instance with swizzle only
+    // the second instance should not trigger redundant layout callback
+    let view1 = View(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
+    #if os(macOS)
+    view1.wantsLayer = true
+    #endif
+
+    // add KVO
+    let observation1 = view1.observe(\.frame, options: [.new]) { _, _ in }
+
+    var layoutCount1 = 0
+    let token1 = view1.onLayoutSubviews { _ in
+      layoutCount1 += 1
+    }
+
+    let view2 = View(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
+    #if os(macOS)
+    view2.wantsLayer = true
+    #endif
+
+    var layoutCount2 = 0
+    let token2 = view2.onLayoutSubviews { _ in
+      layoutCount2 += 1
+    }
+
+    view1.setNeedsLayout()
+    view1.layoutIfNeeded()
+    expect(layoutCount1) == 1
+    expect(layoutCount2) == 0
+
+    view2.setNeedsLayout()
+    view2.layoutIfNeeded()
+    expect(layoutCount1) == 1
+    expect(layoutCount2) == 1
+
+    // clean up
+    observation1.invalidate()
+    token1.cancel()
+    token2.cancel()
+  }
+
+  func test_onLayoutSubviews_KVO_swizzle_dealloc() {
+    var view1: View! = View(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
+    #if os(macOS)
+    view1?.wantsLayer = true
+    #endif
+
+    expect(getClassName(view1)) == viewClassName
+
+    // add KVO
+    let observation = view1.observe(\.frame, options: [.new]) { _, _ in }
+    expect(getClassName(view1)) == "NSKVONotifying_\(viewClassName)"
+
+    // add swizzle
+    var layoutCount1 = 0
+    view1.onLayoutSubviews { _ in
+      layoutCount1 += 1
+    }
+    expect(getClassName(view1)) == "NSKVONotifying_\(viewClassName)"
+
+    view1.setNeedsLayout()
+    view1.layoutIfNeeded()
+    expect(layoutCount1) == 1
+
+    // deallocate view, should reset the original class's method implementation
+    view1 = nil
+
+    // create a new view
+    let view2 = View(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
+    #if os(macOS)
+    view2.wantsLayer = true
+    #endif
+
+    // add swizzle
+    var layoutCount2 = 0
+    view2.onLayoutSubviews { _ in
+      layoutCount2 += 1
+    }
+
+    // it should trigger layout callback correctly
+    view2.setNeedsLayout()
+    view2.layoutIfNeeded()
+    expect(layoutCount2) == 1
+
+    // clean up
+    observation.invalidate()
+  }
 }

@@ -60,6 +60,10 @@ class ViewController: UIViewController {
 
     addLayerWithShape()
     testBorderMetalLayer()
+
+    view.onLayoutSubviews { view in
+      print("view layout subviews")
+    }
   }
 
   private func addLayerWithShape() {
@@ -85,7 +89,6 @@ class ViewController: UIViewController {
     // layer.addFullSizeTrackingLayer(layer2)
 
     onMainAsync(delay: 1) {
-      NSLog("zhh☄️: change frame: \(CACurrentMediaTime())")
 //      layer.animateFrame(to: CGRect(x: 100, y: 150, width: 250, height: 150), timing: .spring(response: 3))
 //      layer2.animateFrame(to: CGRect(x: 100, y: 150, width: 250, height: 150), timing: .spring(response: 3))
 

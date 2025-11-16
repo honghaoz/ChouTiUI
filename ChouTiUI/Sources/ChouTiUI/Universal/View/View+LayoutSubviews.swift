@@ -38,14 +38,50 @@ import UIKit
 
 import ChouTi
 
-private enum AssociateKey {
-  static var layoutSubviewsBlocks: UInt8 = 0
-  static var originalClass: UInt8 = 0
-}
+// MARK: - KVO Interaction
 
-public extension View {
+//
+// This implementation uses isa-swizzling to intercept layout calls. It's important to understand
+// how this interacts with KVO (Key-Value Observing), which also uses isa-swizzling.
+//
+// Ideal pattern:
+// 1. Call onLayoutSubviews() first. The class becomes: ChouTiUI_NSView
+// 2. Setup KVO observation later. The class becomes: NSKVONotifying_ChouTiUI_NSView
+// 3. Remove KVO observation later. The class becomes: ChouTiUI_NSView
+// 4. Cancel onLayoutSubviews() later. The class reverts to the original class: NSView
+//
+// Other patterns are also supported, but may not be as clean.
+// - Pattern 1: Our Swizzle First, Then KVO
+//   - Timeline:
+//     - Call onLayoutSubviews() -> class becomes: ChouTiUI_NSView
+//     - Setup KVO observation -> class becomes: NSKVONotifying_ChouTiUI_NSView
+//     - Cancel onLayoutSubviews() -> class stays: NSKVONotifying_ChouTiUI_NSView
+//     - Remove KVO observation -> class becomes: ChouTiUI_NSView (won't revert to the original class)
+//
+//   This pattern ended up with a subclass of the original class. To revert to the original class, you can call
+//    onLayoutSubviews() again then cancel it.
+//
+// - Pattern 2: KVO First, Then Our Swizzle
+//   - Timeline:
+//     - Setup KVO observation -> class becomes: NSKVONotifying_NSView
+//     - Call onLayoutSubviews() -> class stays: NSKVONotifying_NSView, the method is swizzled on the original class
+//     - Cancel onLayoutSubviews() -> class stays: NSKVONotifying_NSView, the method is restored to the original implementation
+//     - Remove KVO observation -> class becomes: NSView
+//
+//   This pattern could be ended up with a clean state. However, during the process, the original class method is modified,
+//   which may break other mechanisms that also modify the original class method.
 
-  typealias LayoutSubviewsBlocks = OrderedDictionary<ObjectIdentifier, ValueCancellableToken<(View) -> Void>>
+private extension View {
+
+  private enum AssociateKey {
+    static var layoutSubviewsBlocks: UInt8 = 0
+    static var originalClass: UInt8 = 0
+    static var isSwizzlingOriginalMethod: UInt8 = 0
+    static var hasExecutedLayoutCallbacks: UInt8 = 0
+    static var kvoDeallocationToken: UInt8 = 0
+  }
+
+  private typealias LayoutSubviewsBlocks = OrderedDictionary<ObjectIdentifier, ValueCancellableToken<(View) -> Void>>
 
   private var layoutSubviewsBlocks: LayoutSubviewsBlocks {
     get {
@@ -55,6 +91,67 @@ public extension View {
       setAssociatedObject(newValue, for: &AssociateKey.layoutSubviewsBlocks)
     }
   }
+
+  /// The original class of the view.
+  private var originalClass: AnyClass? {
+    get {
+      getAssociatedObject(for: &AssociateKey.originalClass) as? AnyClass
+    }
+    set {
+      if let newValue {
+        setAssociatedObject(newValue, for: &AssociateKey.originalClass)
+      } else {
+        removeAssociatedObject(for: &AssociateKey.originalClass)
+      }
+    }
+  }
+
+  /// Tracks if the view is swizzling the original method.
+  private var isSwizzlingOriginalMethod: Bool {
+    get {
+      getAssociatedObject(for: &AssociateKey.isSwizzlingOriginalMethod) as? Bool ?? false
+    }
+    set {
+      if newValue == true {
+        setAssociatedObject(newValue, for: &AssociateKey.isSwizzlingOriginalMethod)
+      } else {
+        removeAssociatedObject(for: &AssociateKey.isSwizzlingOriginalMethod)
+      }
+    }
+  }
+
+  /// Tracks if the view has executed layout callbacks.
+  ///
+  /// This is used to avoid double execution when both original class method AND subclass method are swizzled.
+  private var hasExecutedLayoutCallbacks: Bool {
+    get {
+      getAssociatedObject(for: &AssociateKey.hasExecutedLayoutCallbacks) as? Bool ?? false
+    }
+    set {
+      if newValue == true {
+        setAssociatedObject(newValue, for: &AssociateKey.hasExecutedLayoutCallbacks)
+      } else {
+        removeAssociatedObject(for: &AssociateKey.hasExecutedLayoutCallbacks)
+      }
+    }
+  }
+
+  /// Tracks if the view has added deallocation cleanup for resetting the original method implementation.
+  private var kvoDeallocationToken: CancellableToken? {
+    get {
+      getAssociatedObject(for: &AssociateKey.kvoDeallocationToken) as? CancellableToken
+    }
+    set {
+      if let newValue {
+        setAssociatedObject(newValue, for: &AssociateKey.kvoDeallocationToken)
+      } else {
+        removeAssociatedObject(for: &AssociateKey.kvoDeallocationToken)
+      }
+    }
+  }
+}
+
+public extension View {
 
   /// Adds a block to be called when the view performs layout.
   ///
@@ -97,7 +194,11 @@ public extension View {
       token.remove(from: &self.layoutSubviewsBlocks)
 
       if layoutSubviewsBlocks.isEmpty {
-        revertLayoutSubviews()
+        if isSwizzlingOriginalMethod {
+          restoreOriginalMethod()
+        } else {
+          revertToOriginClass()
+        }
       }
     }
     token.store(in: &layoutSubviewsBlocks)
@@ -107,80 +208,375 @@ public extension View {
     return token
   }
 
+  // MARK: - Swizzle
+
+  #if canImport(AppKit)
+  private static let layoutSubviewsSelector = #selector(NSView.layout)
+  #else
+  private static let layoutSubviewsSelector = #selector(UIView.layoutSubviews)
+  #endif
+
+  private typealias LayoutSubviewsFunction = @convention(c) (AnyObject, Selector) -> Void
+
   private func swizzleLayoutSubviews() {
-    guard let originalClass: AnyClass = getAssociatedObject(for: &AssociateKey.originalClass) as? AnyClass ?? object_getClass(self) else {
-      ChouTi.assertFailure("Failed to get original class")
+    /// Case 1: Our swizzling first then KVO
+    ///
+    /// If the instance was swizzled by our swizzling first then KVO, a KVO class (NSKVONotifying_ChouTiUI_*) is created on top of our swizzled class (ChouTiUI_*).
+    ///
+    /// In this case:
+    /// - If we swizzle again, no new swizzling will be done.
+    /// - If we KVO again, no new KVO class will be created.
+    ///
+    /// If we cancel the swizzling before KVO, since the KVO class is inherited from our swizzled class, we can't revert the class.
+    /// Then if we cancel the KVO, the class will revert to their recorded original class, which is our swizzled class (ChouTiUI_*). At this point, the instance is left with our swizzled class.
+    /// The instance can be reverted to the original class if we swizzle again and cancel the swizzling.
+    ///
+    /// If we cancel the KVO before swizzling, KVO will clean up its class and revert to their recorded original class, which is our swizzled class (ChouTiUI_*).
+    /// Then if we cancel the swizzling, the class will revert to the original class.
+
+    /// Case 2: KVO first then our swizzling
+    ///
+    /// If the instance was swizzled by KVO first then our swizzling, a KVO class (NSKVONotifying_*) is created on top of the original class. Our swizzling doesn't create a new class.
+    /// Instead, our swizzling will modify the method on the original class. This will swizzle the method on all instances of the original class. This maybe not clean as we don't know if the original class has been swizzled by other mechanisms.
+    /// However, we have to accept this potential risk as 1) we can't create a new subclass on top of a KVO class as KVO cleanup may break our swizzling and 2) we can't swizzle the method on the KVO class as KVO cleanup may remove the class and remove our swizzling.
+    /// Therefore, the preferred pattern is to swizzle first then KVO.
+    ///
+    /// In this case:
+    /// - If we swizzle again, we will swizzle the method directly on the original class.
+    /// - If we KVO again, no new KVO class will be created.
+    ///
+    /// If we cancel the swizzling before KVO, we revert the method on the original class. At this point, the instance is clean.
+    /// It possible that we swizzle again. To help clean up the swizzled method on the original class, we track how many instances of the original class have callbacks. When the count reaches zero, we restore the original method implementation.
+    ///
+    /// If we cancel the KVO before swizzling, KVO will clean up its class and revert to their recorded original class, which is the original class.
+    /// At this point, the instance is with the original class with the method swizzled. Then if we cancel the swizzling, the class will revert its method to the original implementation. At this point, the instance is clean.
+
+    guard let currentClass: AnyClass = object_getClass(self) else {
+      ChouTi.assertFailure("Failed to get current class")
       return
     }
 
-    if getAssociatedObject(for: &AssociateKey.originalClass) == nil {
-      setAssociatedObject(originalClass, for: &AssociateKey.originalClass)
+    let currentClassName = NSStringFromClass(currentClass)
+
+    // Check if current class is a KVO class
+    // KVO creates classes with names like "NSKVONotifying_OriginalClass" or "..NSKVONotifying_Module.Class"
+    let isKVOClass = currentClassName.contains("NSKVONotifying_")
+
+    // Determine the original class:
+    // - If we have a stored original class, use that (instance was already swizzled)
+    // - If KVO is active, use the KVO class's superclass
+    // - Otherwise, use the current class
+    let storedOriginalClass: AnyClass? = self.originalClass
+
+    let originalClass: AnyClass
+    let needsSwizzling: Bool
+
+    if let storedOriginalClass {
+      // already swizzled this instance
+      originalClass = storedOriginalClass
+      needsSwizzling = false
+    } else if isKVOClass {
+      // KVO was added first, get the real original class from KVO's superclass
+      guard let superClass = class_getSuperclass(currentClass) else {
+        ChouTi.assertFailure("Failed to get original class from KVO's superclass")
+        return
+      }
+      originalClass = superClass
+      needsSwizzling = true
+    } else {
+      // No KVO on this instance, current class is the original
+      // Note: Even if the class might be in swizzledKVOClasses (other KVO instances modified the original class),
+      // we still create a subclass for this instance to keep isa swizzling (no KVO) and method swizzling (KVO) two separate mechanisms.
+      // a `hasExecutedLayoutCallbacks` flag is used to avoid double execution caused by this.
+      originalClass = currentClass
+      needsSwizzling = true
     }
 
+    // If we don't need swizzling (already swizzled), just return
+    guard needsSwizzling else {
+      return
+    }
+
+    // store the original class if not already stored
+    if storedOriginalClass == nil {
+      self.originalClass = originalClass
+    }
+
+    if isKVOClass {
+      // this is a KVO class, swizzle the method on the original class
+      swizzleOriginalMethod(originalClass: originalClass, selector: View.layoutSubviewsSelector)
+    } else {
+      // this is a non-KVO class, create a subclass
+      swizzleToSubclass(originalClass: originalClass, selector: View.layoutSubviewsSelector)
+    }
+  }
+
+  // MARK: - Non-KVO Classes
+
+  private func swizzleToSubclass(originalClass: AnyClass, selector: Selector) {
     let subclassName = "ChouTiUI_\(NSStringFromClass(originalClass))"
 
-    // check if we already have a swizzled class
     if let existingClass = NSClassFromString(subclassName) {
+      // we already have the subclass defined, use it
       object_setClass(self, existingClass)
+    } else {
+      // create a new subclass
+      guard let subclass = objc_allocateClassPair(originalClass, subclassName, 0) else {
+        ChouTi.assertFailure("Failed to create subclass for View isa swizzling")
+        return
+      }
+
+      guard let originalMethod = class_getInstanceMethod(originalClass, selector) else {
+        ChouTi.assertFailure("Failed to get layout method")
+        return
+      }
+
+      // get the original implementation
+      let originalImplementation = unsafeBitCast(
+        class_getMethodImplementation(originalClass, selector),
+        to: LayoutSubviewsFunction.self
+      )
+
+      // create the new implementation
+      let newImplementation: @convention(block) (View) -> Void = { view in
+        // call super implementation
+        view.hasExecutedLayoutCallbacks = false
+        originalImplementation(view, selector)
+
+        // call the custom blocks if needed
+        if view.hasExecutedLayoutCallbacks == false {
+          for token in view.layoutSubviewsBlocks.values {
+            token.value(view)
+          }
+        }
+      }
+
+      // add the method to the subclass
+      let methodTypeEncoding = method_getTypeEncoding(originalMethod)
+      let newIMP = imp_implementationWithBlock(newImplementation)
+      class_addMethod(subclass, selector, newIMP, methodTypeEncoding)
+
+      // register the new class
+      objc_registerClassPair(subclass)
+
+      // change the instance's class
+      object_setClass(self, subclass)
+    }
+  }
+
+  private func revertToOriginClass() {
+    guard let originalClass else {
+      ChouTi.assertFailure("Cannot revert: original class not found")
       return
     }
 
-    // create a new subclass
-    guard let subclass = objc_allocateClassPair(originalClass, subclassName, 0) else {
-      ChouTi.assertFailure("Failed to create subclass for View isa swizzling")
+    guard let currentClass = object_getClass(self) else {
+      ChouTi.assertFailure("Cannot revert: failed to get current class")
       return
     }
 
-    #if canImport(AppKit)
-    let layoutSubviewsSelector = #selector(NSView.layout)
-    #else
-    let layoutSubviewsSelector = #selector(UIView.layoutSubviews)
-    #endif
-
-    guard let originalMethod = class_getInstanceMethod(originalClass, layoutSubviewsSelector) else {
-      ChouTi.assertFailure("Failed to get layout method")
+    // check if we're already on the original class
+    guard currentClass != originalClass else {
+      // already reverted, just clean up
+      self.originalClass = nil
       return
     }
 
-    // get the original implementation
-    typealias LayoutSubviewsFunction = @convention(c) (AnyObject, Selector) -> Void
+    let currentClassName = NSStringFromClass(currentClass)
+    let expectedClassName = "ChouTiUI_\(NSStringFromClass(originalClass))"
+
+    // Safety check: only revert if the current class is our swizzled class
+    // If KVO or other mechanisms changed the class, we should NOT revert
+    // to avoid breaking KVO or other isa-swizzling mechanisms
+    guard currentClassName == expectedClassName else {
+      // The class has been changed (likely by KVO: NSKVONotifying_ChouTiUI_OriginalClass)
+      // We should NOT revert to the original class as it would break KVO.
+      //
+      // For this case, we will not revert to the original class and leave the class as is.
+      return
+    }
+
+    object_setClass(self, originalClass)
+    self.originalClass = nil
+  }
+
+  // MARK: - KVO Classes
+
+  /// Tracks which original classes have been swizzled when KVO is active.
+  private static var swizzledClasses: Set<String> = []
+  private static let swizzledClassesLock = NSLock()
+
+  /// Stores IMPs for swizzled methods to keep them alive
+  /// Keys:
+  /// - "\(originalClassName)": The new swizzled IMP
+  /// - "original_\(originalClassName)": The original IMP (for restoration)
+  private static var swizzledMethodIMPs: [String: IMP] = [:]
+  private static let swizzledMethodIMPsLock = NSLock()
+
+  /// Tracks how many instances of each original class have callbacks (for KVO case cleanup).
+  /// Key is the original class name, value is the count of instances with callbacks.
+  private static var kvoInstanceCallbackCounts: [String: Int] = [:]
+  private static let kvoInstanceCallbackCountsLock = NSLock()
+
+  /// Swizzles the layout method directly on the original class when KVO is active.
+  ///
+  /// This is used when KVO was set up before our swizzling. Instead of creating a new subclass,
+  /// we modify the method on the original class. The KVO class will inherit this modification.
+  ///
+  /// Why we modify the original class:
+  /// - We can't create a new subclass on top of a KVO class as KVO cleanup may break our subclassing.
+  /// - We can't swizzle the method on the KVO class as KVO cleanup may remove the class and remove our swizzling.
+  ///
+  /// This is safe because:
+  /// - The method implementation checks for per-instance callbacks using associated objects.
+  /// - The swizzled method is on the original class, shared by all instances (KVO or not).
+  /// - Only instances with callbacks will execute them (per-instance check via associated objects).
+  private func swizzleOriginalMethod(originalClass: AnyClass, selector: Selector) {
+    // mark this instance as using method swizzling
+    self.isSwizzlingOriginalMethod = true
+
+    let originalClassName = NSStringFromClass(originalClass)
+
+    // increment the callback count for this original class
+    View.incrementKVOCallbackCount(for: originalClassName)
+
+    // observe deallocation to handle deallocation before token cancellation
+    //
+    // it's possible that the instance may deallocate directly without cancelling the cancellable token explicitly,
+    // in this case, even though the cancellable token callback is still triggered, but the self is nil, hence the
+    // decrement logic will not be executed.
+    // to avoid this, we observe deallocation and decrement the callback count.
+    if self.kvoDeallocationToken == nil {
+      let token = self.onDeallocate {
+        View.decrementKVOCallbackCount(for: originalClass)
+      }
+      self.kvoDeallocationToken = token
+    }
+
+    // check if we've already swizzled this original class
+    //
+    // note: we track by original class name, not KVO class name, because we're modifying the original class.
+    View.swizzledClassesLock.lock()
+    let alreadySwizzled = View.swizzledClasses.contains(originalClassName)
+    if !alreadySwizzled {
+      View.swizzledClasses.insert(originalClassName)
+    }
+    View.swizzledClassesLock.unlock()
+
+    if alreadySwizzled {
+      // already swizzled, nothing to do
+      return
+    }
+
+    guard let originalMethod = class_getInstanceMethod(originalClass, selector) else {
+      ChouTi.assertFailure("Failed to get layout method from original class")
+      return
+    }
+
+    // store the original IMP before modifying (so we can restore it later)
+    let originalIMP = method_getImplementation(originalMethod)
+
+    // get the original implementation from the original class
     let originalImplementation = unsafeBitCast(
-      class_getMethodImplementation(originalClass, layoutSubviewsSelector),
+      class_getMethodImplementation(originalClass, selector),
       to: LayoutSubviewsFunction.self
     )
 
     // create the new implementation
     let newImplementation: @convention(block) (View) -> Void = { view in
       // call super implementation
-      originalImplementation(view, layoutSubviewsSelector)
+      originalImplementation(view, selector)
 
       // call the custom blocks
       for token in view.layoutSubviewsBlocks.values {
         token.value(view)
       }
+
+      view.hasExecutedLayoutCallbacks = true
     }
 
-    // add the method to the subclass
-    let methodTypeEncoding = method_getTypeEncoding(originalMethod)
+    // modify the method on the original class
     let newIMP = imp_implementationWithBlock(newImplementation)
-    class_addMethod(subclass, layoutSubviewsSelector, newIMP, methodTypeEncoding)
+    method_setImplementation(originalMethod, newIMP)
 
-    // register the new class
-    objc_registerClassPair(subclass)
-
-    // change the instance's class
-    object_setClass(self, subclass)
+    // store both IMPs to keep them alive and allow restoration
+    View.swizzledMethodIMPsLock.lock()
+    View.swizzledMethodIMPs["original_\(originalClassName)"] = originalIMP // for restoration
+    View.swizzledMethodIMPs[originalClassName] = newIMP // to keep it alive
+    View.swizzledMethodIMPsLock.unlock()
   }
 
-  private func revertLayoutSubviews() {
-    guard let originalClass = getAssociatedObject(for: &AssociateKey.originalClass) as? AnyClass else {
-      ChouTi.assertFailure("Cannot revert: original class not found")
+  private func restoreOriginalMethod() {
+    // if this instance was using KVO swizzling, decrement the callback count
+    guard let originalClass else {
       return
     }
 
-    object_setClass(self, originalClass)
+    View.decrementKVOCallbackCount(for: originalClass)
 
-    // clean up the stored original class
-    setAssociatedObject(nil as AnyClass?, for: &AssociateKey.originalClass)
+    self.kvoDeallocationToken?.cancel()
+    self.kvoDeallocationToken = nil
+    self.originalClass = nil
+    self.isSwizzlingOriginalMethod = false
+  }
+
+  private static func incrementKVOCallbackCount(for originalClassName: String) {
+    kvoInstanceCallbackCountsLock.lock()
+    kvoInstanceCallbackCounts[originalClassName, default: 0] += 1
+    kvoInstanceCallbackCountsLock.unlock()
+  }
+
+  private static func decrementKVOCallbackCount(for originalClass: AnyClass) {
+    let originalClassName = NSStringFromClass(originalClass)
+
+    kvoInstanceCallbackCountsLock.lock()
+    let count = kvoInstanceCallbackCounts[originalClassName, default: 0] - 1
+    kvoInstanceCallbackCountsLock.unlock()
+
+    if count <= 0 {
+      ChouTi.assert(count == 0, "over decrementing callback count", metadata: [
+        "originalClassName": originalClassName,
+        "count": "\(count)",
+      ])
+
+      // no more instances with callbacks - restore the original method!
+      if let originalMethod = class_getInstanceMethod(originalClass, View.layoutSubviewsSelector) {
+        swizzledMethodIMPsLock.lock()
+        let originalIMP = swizzledMethodIMPs["original_\(originalClassName)"]
+        swizzledMethodIMPsLock.unlock()
+
+        if let originalIMP = originalIMP {
+          // restore the original implementation
+          method_setImplementation(originalMethod, originalIMP)
+        } else {
+          ChouTi.assertFailure("Failed to find original IMP for restoration")
+        }
+
+        // NOTE: We intentionally DO NOT call imp_removeBlock on the new IMP
+        // Calling imp_removeBlock can cause crashes if the IMP is still referenced anywhere
+        // The IMP will be cleaned up when the program exits
+        // This is a minor memory leak but safer than crashing
+      } else {
+        ChouTi.assertFailure("Failed to get layout method from original class for restoration")
+      }
+
+      // clean up tracking data
+      swizzledClassesLock.lock()
+      swizzledClasses.remove(originalClassName)
+      swizzledClassesLock.unlock()
+
+      swizzledMethodIMPsLock.lock()
+      swizzledMethodIMPs.removeValue(forKey: "original_\(originalClassName)")
+      swizzledMethodIMPs.removeValue(forKey: originalClassName)
+      swizzledMethodIMPsLock.unlock()
+
+      kvoInstanceCallbackCountsLock.lock()
+      kvoInstanceCallbackCounts.removeValue(forKey: originalClassName)
+      kvoInstanceCallbackCountsLock.unlock()
+    } else {
+      kvoInstanceCallbackCountsLock.lock()
+      kvoInstanceCallbackCounts[originalClassName] = count
+      kvoInstanceCallbackCountsLock.unlock()
+    }
   }
 }
