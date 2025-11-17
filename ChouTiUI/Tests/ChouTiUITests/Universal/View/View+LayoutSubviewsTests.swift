@@ -1,5 +1,5 @@
 //
-//  View+onLayoutSubviewsTests.swift
+//  View+LayoutSubviewsTests.swift
 //  ChouTiUI
 //
 //  Created by Honghao Zhang on 11/8/25.
@@ -244,18 +244,6 @@ class View_onLayoutSubviewsTests: XCTestCase {
   func test_onLayoutSubviews_calledOnBoundsChange_plainView() {
     // on macOS, NSView won't set `needsLayout` to true when the bounds change, which means the `layout()` method will not be called.
     // on iOS, UIView will set "needs layout" flag to true when the bounds change, which means the `layoutSubviews()` method will be called.
-    class CustomView: View {
-      #if os(macOS)
-      override func layout() { // swiftlint:disable:this unneeded_override
-        super.layout()
-      }
-      #else
-      override func layoutSubviews() { // swiftlint:disable:this unneeded_override
-        super.layoutSubviews()
-      }
-      #endif
-    }
-
     let testWindow = TestWindow()
 
     let view = View(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
@@ -277,13 +265,40 @@ class View_onLayoutSubviewsTests: XCTestCase {
       callCount += 1
     }
 
-    view.bounds = CGRect(x: 0, y: 0, width: 200, height: 200)
+    // change bounds.x
+    view.bounds = CGRect(x: 100, y: 0, width: 100, height: 100)
     view.layoutIfNeeded()
     expect(callCount) == 1
 
-    view.bounds = CGRect(x: 0, y: 0, width: 300, height: 300)
+    // change bounds.y
+    view.bounds = CGRect(x: 100, y: 100, width: 100, height: 100)
     view.layoutIfNeeded()
     expect(callCount) == 2
+
+    // change bounds.width
+    view.bounds = CGRect(x: 100, y: 100, width: 200, height: 100)
+    view.layoutIfNeeded()
+    expect(callCount) == 3
+
+    // change bounds.height
+    view.bounds = CGRect(x: 100, y: 100, width: 200, height: 200)
+    view.layoutIfNeeded()
+    expect(callCount) == 4
+
+    // change bounds.origin
+    view.bounds = CGRect(x: 200, y: 200, width: 200, height: 200)
+    view.layoutIfNeeded()
+    expect(callCount) == 5
+
+    // change bounds.size
+    view.bounds = CGRect(x: 200, y: 200, width: 300, height: 300)
+    view.layoutIfNeeded()
+    expect(callCount) == 6
+
+    // no bounds change
+    view.bounds = CGRect(x: 200, y: 200, width: 300, height: 300)
+    view.layoutIfNeeded()
+    expect(callCount) == 6 // no bounds change, should not be called again
   }
 
   func test_onLayoutSubviews_calledOnBoundsChange_customView() {
@@ -322,13 +337,40 @@ class View_onLayoutSubviewsTests: XCTestCase {
       callCount += 1
     }
 
-    view.bounds = CGRect(x: 0, y: 0, width: 200, height: 200)
+    // change bounds.x
+    view.bounds = CGRect(x: 100, y: 0, width: 100, height: 100)
     view.layoutIfNeeded()
     expect(callCount) == 1
 
-    view.bounds = CGRect(x: 0, y: 0, width: 300, height: 300)
+    // change bounds.y
+    view.bounds = CGRect(x: 100, y: 100, width: 100, height: 100)
     view.layoutIfNeeded()
     expect(callCount) == 2
+
+    // change bounds.width
+    view.bounds = CGRect(x: 100, y: 100, width: 200, height: 100)
+    view.layoutIfNeeded()
+    expect(callCount) == 3
+
+    // change bounds.height
+    view.bounds = CGRect(x: 100, y: 100, width: 200, height: 200)
+    view.layoutIfNeeded()
+    expect(callCount) == 4
+
+    // change bounds.origin
+    view.bounds = CGRect(x: 200, y: 200, width: 200, height: 200)
+    view.layoutIfNeeded()
+    expect(callCount) == 5
+
+    // change bounds.size
+    view.bounds = CGRect(x: 200, y: 200, width: 300, height: 300)
+    view.layoutIfNeeded()
+    expect(callCount) == 6
+
+    // no bounds change
+    view.bounds = CGRect(x: 200, y: 200, width: 300, height: 300)
+    view.layoutIfNeeded()
+    expect(callCount) == 6 // no bounds change, should not be called again
   }
 
   func test_onLayoutSubviews_calledOnFrameChange_plainView() {
@@ -357,13 +399,30 @@ class View_onLayoutSubviewsTests: XCTestCase {
       callCount += 1
     }
 
-    view.frame = CGRect(x: 0, y: 0, width: 200, height: 200)
+    // change width
+    view.frame = CGRect(x: 0, y: 0, width: 300, height: 100)
     view.layoutIfNeeded()
     expect(callCount) == 1
 
+    // change height
     view.frame = CGRect(x: 0, y: 0, width: 300, height: 300)
     view.layoutIfNeeded()
     expect(callCount) == 2
+
+    // change frame size
+    view.frame = CGRect(x: 0, y: 0, width: 200, height: 200)
+    view.layoutIfNeeded()
+    expect(callCount) == 3
+
+    // change frame origin
+    view.frame = CGRect(x: 100, y: 100, width: 200, height: 200)
+    view.layoutIfNeeded()
+    expect(callCount) == 3 // origin change doesn't trigger layout
+
+    // no frame change
+    view.frame = CGRect(x: 100, y: 100, width: 200, height: 200)
+    view.layoutIfNeeded()
+    expect(callCount) == 3 // no frame change, should not be called again
   }
 
   func test_onLayoutSubviews_calledOnFrameChange_customView() {
@@ -405,13 +464,30 @@ class View_onLayoutSubviewsTests: XCTestCase {
       callCount += 1
     }
 
-    view.frame = CGRect(x: 0, y: 0, width: 200, height: 200)
+    // change width
+    view.frame = CGRect(x: 0, y: 0, width: 300, height: 100)
     view.layoutIfNeeded()
     expect(callCount) == 1
 
+    // change height
     view.frame = CGRect(x: 0, y: 0, width: 300, height: 300)
     view.layoutIfNeeded()
     expect(callCount) == 2
+
+    // change frame size
+    view.frame = CGRect(x: 0, y: 0, width: 200, height: 200)
+    view.layoutIfNeeded()
+    expect(callCount) == 3
+
+    // change frame origin
+    view.frame = CGRect(x: 100, y: 100, width: 200, height: 200)
+    view.layoutIfNeeded()
+    expect(callCount) == 3 // origin change doesn't trigger layout
+
+    // no frame change
+    view.frame = CGRect(x: 100, y: 100, width: 200, height: 200)
+    view.layoutIfNeeded()
+    expect(callCount) == 3 // no frame change, should not be called again
   }
 
   func test_onLayoutSubviews_subclass() {
@@ -1150,5 +1226,270 @@ class View_onLayoutSubviewsTests: XCTestCase {
 
     // clean up
     observation.invalidate()
+  }
+
+  func test_onLayoutSubviews_calledOnBoundsChange_plainView_KVO() {
+    // on macOS, NSView won't set `needsLayout` to true when the bounds change, which means the `layout()` method will not be called.
+    // on iOS, UIView will set "needs layout" flag to true when the bounds change, which means the `layoutSubviews()` method will be called.
+    let testWindow = TestWindow()
+
+    let view = View(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
+    #if os(macOS)
+    view.wantsLayer = true
+    #endif
+
+    #if os(macOS)
+    testWindow.contentView?.addSubview(view)
+    #else
+    testWindow.rootViewController?.view.addSubview(view)
+    #endif
+
+    view.setNeedsLayout()
+    view.layoutIfNeeded()
+
+    // add KVO
+    let observation = view.observe(\.bounds, options: [.new]) { _, _ in }
+    _ = observation
+
+    var callCount = 0
+    view.onLayoutSubviews { _ in
+      callCount += 1
+    }
+
+    // change bounds.x
+    view.bounds = CGRect(x: 100, y: 0, width: 100, height: 100)
+    view.layoutIfNeeded()
+    expect(callCount) == 1
+
+    // change bounds.y
+    view.bounds = CGRect(x: 100, y: 100, width: 100, height: 100)
+    view.layoutIfNeeded()
+    expect(callCount) == 2
+
+    // change bounds.width
+    view.bounds = CGRect(x: 100, y: 100, width: 200, height: 100)
+    view.layoutIfNeeded()
+    expect(callCount) == 3
+
+    // change bounds.height
+    view.bounds = CGRect(x: 100, y: 100, width: 200, height: 200)
+    view.layoutIfNeeded()
+    expect(callCount) == 4
+
+    // change bounds.origin
+    view.bounds = CGRect(x: 200, y: 200, width: 200, height: 200)
+    view.layoutIfNeeded()
+    expect(callCount) == 5
+
+    // change bounds.size
+    view.bounds = CGRect(x: 200, y: 200, width: 300, height: 300)
+    view.layoutIfNeeded()
+    expect(callCount) == 6
+
+    // no bounds change
+    view.bounds = CGRect(x: 200, y: 200, width: 300, height: 300)
+    view.layoutIfNeeded()
+    expect(callCount) == 6 // no bounds change, should not be called again
+  }
+
+  func test_onLayoutSubviews_calledOnBoundsChange_customView_KVO() {
+    // on macOS, NSView won't set `needsLayout` to true when the bounds change, which means the `layout()` method will not be called.
+    // on iOS, UIView will set "needs layout" flag to true when the bounds change, which means the `layoutSubviews()` method will be called.
+    class CustomView: View {
+      #if os(macOS)
+      override func layout() { // swiftlint:disable:this unneeded_override
+        super.layout()
+      }
+      #else
+      override func layoutSubviews() { // swiftlint:disable:this unneeded_override
+        super.layoutSubviews()
+      }
+      #endif
+    }
+
+    let testWindow = TestWindow()
+
+    let view = CustomView(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
+    #if os(macOS)
+    view.wantsLayer = true
+    #endif
+
+    #if os(macOS)
+    testWindow.contentView?.addSubview(view)
+    #else
+    testWindow.rootViewController?.view.addSubview(view)
+    #endif
+
+    view.setNeedsLayout()
+    view.layoutIfNeeded()
+
+    // add KVO
+    let observation = view.observe(\.bounds, options: [.new]) { _, _ in }
+    _ = observation
+
+    var callCount = 0
+    view.onLayoutSubviews { _ in
+      callCount += 1
+    }
+
+    // change bounds.x
+    view.bounds = CGRect(x: 100, y: 0, width: 100, height: 100)
+    view.layoutIfNeeded()
+    expect(callCount) == 1
+
+    // change bounds.y
+    view.bounds = CGRect(x: 100, y: 100, width: 100, height: 100)
+    view.layoutIfNeeded()
+    expect(callCount) == 2
+
+    // change bounds.width
+    view.bounds = CGRect(x: 100, y: 100, width: 200, height: 100)
+    view.layoutIfNeeded()
+    expect(callCount) == 3
+
+    // change bounds.height
+    view.bounds = CGRect(x: 100, y: 100, width: 200, height: 200)
+    view.layoutIfNeeded()
+    expect(callCount) == 4
+
+    // change bounds.origin
+    view.bounds = CGRect(x: 200, y: 200, width: 200, height: 200)
+    view.layoutIfNeeded()
+    expect(callCount) == 5
+
+    // change bounds.size
+    view.bounds = CGRect(x: 200, y: 200, width: 300, height: 300)
+    view.layoutIfNeeded()
+    expect(callCount) == 6
+
+    // no bounds change
+    view.bounds = CGRect(x: 200, y: 200, width: 300, height: 300)
+    view.layoutIfNeeded()
+    expect(callCount) == 6 // no bounds change, should not be called again
+  }
+
+  func test_onLayoutSubviews_calledOnFrameChange_plainView_KVO() {
+    // on macOS, a custom NSView subclass that overrides layout() will have `needsLayout` set to true when the frame change, then trigger `layout()` to layout the view.
+    // however, a plain NSView will not have `needsLayout` set to true when the frame change, which means the `layout()` method will not be called.
+    //
+    // on iOS, any UIView will have "needs layout" flag set to true when the frame change and trigger `layoutSubviews()` to layout the view.
+    let testWindow = TestWindow()
+
+    let view = View(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
+    #if os(macOS)
+    view.wantsLayer = true
+    #endif
+
+    #if os(macOS)
+    testWindow.contentView?.addSubview(view)
+    #else
+    testWindow.rootViewController?.view.addSubview(view)
+    #endif
+
+    view.setNeedsLayout()
+    view.layoutIfNeeded()
+
+    // add KVO
+    let observation = view.observe(\.frame, options: [.new]) { _, _ in }
+    _ = observation
+
+    var callCount = 0
+    view.onLayoutSubviews { _ in
+      callCount += 1
+    }
+
+    // change width
+    view.frame = CGRect(x: 0, y: 0, width: 300, height: 100)
+    view.layoutIfNeeded()
+    expect(callCount) == 1
+
+    // change height
+    view.frame = CGRect(x: 0, y: 0, width: 300, height: 300)
+    view.layoutIfNeeded()
+    expect(callCount) == 2
+
+    // change frame size
+    view.frame = CGRect(x: 0, y: 0, width: 200, height: 200)
+    view.layoutIfNeeded()
+    expect(callCount) == 3
+
+    // change frame origin
+    view.frame = CGRect(x: 100, y: 100, width: 200, height: 200)
+    view.layoutIfNeeded()
+    expect(callCount) == 3 // origin change doesn't trigger layout
+
+    // no frame change
+    view.frame = CGRect(x: 100, y: 100, width: 200, height: 200)
+    view.layoutIfNeeded()
+    expect(callCount) == 3 // no frame change, should not be called again
+  }
+
+  func test_onLayoutSubviews_calledOnFrameChange_customView_KVO() {
+    // on macOS, a custom NSView subclass that overrides layout() will have `needsLayout` set to true when the frame change, then trigger `layout()` to layout the view.
+    // however, a plain NSView will not have `needsLayout` set to true when the frame change, which means the `layout()` method will not be called.
+    //
+    // on iOS, any UIView will have "needs layout" flag set to true when the frame change and trigger `layoutSubviews()` to layout the view.
+
+    class CustomView: View {
+      #if os(macOS)
+      override func layout() { // swiftlint:disable:this unneeded_override
+        super.layout()
+      }
+      #else
+      override func layoutSubviews() { // swiftlint:disable:this unneeded_override
+        super.layoutSubviews()
+      }
+      #endif
+    }
+
+    let testWindow = TestWindow()
+
+    let view = CustomView(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
+    #if os(macOS)
+    view.wantsLayer = true
+    #endif
+
+    #if os(macOS)
+    testWindow.contentView?.addSubview(view)
+    #else
+    testWindow.rootViewController?.view.addSubview(view)
+    #endif
+
+    view.setNeedsLayout()
+    view.layoutIfNeeded()
+
+    // add KVO
+    let observation = view.observe(\.frame, options: [.new]) { _, _ in }
+    _ = observation
+
+    var callCount = 0
+    view.onLayoutSubviews { _ in
+      callCount += 1
+    }
+
+    // change width
+    view.frame = CGRect(x: 0, y: 0, width: 300, height: 100)
+    view.layoutIfNeeded()
+    expect(callCount) == 1
+
+    // change height
+    view.frame = CGRect(x: 0, y: 0, width: 300, height: 300)
+    view.layoutIfNeeded()
+    expect(callCount) == 2
+
+    // change frame size
+    view.frame = CGRect(x: 0, y: 0, width: 200, height: 200)
+    view.layoutIfNeeded()
+    expect(callCount) == 3
+
+    // change frame origin
+    view.frame = CGRect(x: 100, y: 100, width: 200, height: 200)
+    view.layoutIfNeeded()
+    expect(callCount) == 3 // origin change doesn't trigger layout
+
+    // no frame change
+    view.frame = CGRect(x: 100, y: 100, width: 200, height: 200)
+    view.layoutIfNeeded()
+    expect(callCount) == 3 // no frame change, should not be called again
   }
 }

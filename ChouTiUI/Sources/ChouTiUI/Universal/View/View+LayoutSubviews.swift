@@ -356,6 +356,13 @@ public extension View {
       let newIMP = imp_implementationWithBlock(newImplementation)
       class_addMethod(subclass, selector, newIMP, methodTypeEncoding)
 
+      #if canImport(AppKit)
+      // On macOS, override setFrameSize: and setBounds: to call setNeedsLayout: when they change
+      // This ensures that layout() is called when frame/bounds change, matching UIKit behavior
+      addSetFrameSizeOverride(to: subclass, originalClass: originalClass)
+      addSetBoundsOverride(to: subclass, originalClass: originalClass)
+      #endif
+
       // register the new class
       objc_registerClassPair(subclass)
 
@@ -363,6 +370,80 @@ public extension View {
       object_setClass(self, subclass)
     }
   }
+
+  #if canImport(AppKit)
+  /// Adds setFrameSize: override to the subclass to ensure needsLayout is set when frame size changes
+  private func addSetFrameSizeOverride(to subclass: AnyClass, originalClass: AnyClass) {
+    let setFrameSizeSelector = #selector(NSView.setFrameSize(_:))
+
+    guard let originalMethod = class_getInstanceMethod(originalClass, setFrameSizeSelector) else {
+      ChouTi.assertFailure("Failed to get setFrameSize: method")
+      return
+    }
+
+    // Get the original setFrameSize: implementation
+    typealias SetFrameSizeFunction = @convention(c) (AnyObject, Selector, NSSize) -> Void
+    let originalSetFrameSize = unsafeBitCast(
+      class_getMethodImplementation(originalClass, setFrameSizeSelector),
+      to: SetFrameSizeFunction.self
+    )
+
+    // Create new setFrameSize: implementation that calls setNeedsLayout:
+    let newSetFrameSize: @convention(block) (NSView, NSSize) -> Void = { view, newSize in
+      let oldSize = view.frame.size
+
+      // Call original setFrameSize:
+      originalSetFrameSize(view, setFrameSizeSelector, newSize)
+
+      // Check if size actually changed by reading the new value after setting
+      // This avoids floating point precision issues with direct comparison
+      let actualNewSize = view.frame.size
+      if !oldSize.equalTo(actualNewSize) {
+        view.needsLayout = true
+      }
+    }
+
+    let methodTypeEncoding = method_getTypeEncoding(originalMethod)
+    let newIMP = imp_implementationWithBlock(newSetFrameSize)
+    class_addMethod(subclass, setFrameSizeSelector, newIMP, methodTypeEncoding)
+  }
+
+  /// Adds setBounds: override to the subclass to ensure needsLayout is set when bounds change
+  private func addSetBoundsOverride(to subclass: AnyClass, originalClass: AnyClass) {
+    let setBoundsSelector = #selector(setter: NSView.bounds)
+
+    guard let originalMethod = class_getInstanceMethod(originalClass, setBoundsSelector) else {
+      ChouTi.assertFailure("Failed to get setBounds: method")
+      return
+    }
+
+    // Get the original setBounds: implementation
+    typealias SetBoundsFunction = @convention(c) (AnyObject, Selector, CGRect) -> Void
+    let originalSetBounds = unsafeBitCast(
+      class_getMethodImplementation(originalClass, setBoundsSelector),
+      to: SetBoundsFunction.self
+    )
+
+    // Create new setBounds: implementation that calls setNeedsLayout:
+    let newSetBounds: @convention(block) (NSView, CGRect) -> Void = { view, newBounds in
+      let oldBounds = view.bounds
+
+      // Call original setBounds:
+      originalSetBounds(view, setBoundsSelector, newBounds)
+
+      // Check if bounds actually changed by reading the new value after setting
+      // This avoids floating point precision issues with direct comparison
+      let actualNewBounds = view.bounds
+      if !oldBounds.equalTo(actualNewBounds) {
+        view.needsLayout = true
+      }
+    }
+
+    let methodTypeEncoding = method_getTypeEncoding(originalMethod)
+    let newIMP = imp_implementationWithBlock(newSetBounds)
+    class_addMethod(subclass, setBoundsSelector, newIMP, methodTypeEncoding)
+  }
+  #endif
 
   private func revertToOriginClass() {
     guard let originalClass else {
@@ -410,6 +491,10 @@ public extension View {
   /// Keys:
   /// - "\(originalClassName)": The new swizzled IMP
   /// - "original_\(originalClassName)": The original IMP (for restoration)
+  /// - "setFrameSize_\(originalClassName)": The new swizzled IMP for setFrameSize:
+  /// - "original_setFrameSize_\(originalClassName)": The original IMP for setFrameSize:
+  /// - "setBounds_\(originalClassName)": The new swizzled IMP for setBounds:
+  /// - "original_setBounds_\(originalClassName)": The original IMP for setBounds:
   private static var swizzledMethodIMPs: [String: IMP] = [:]
   private static let swizzledMethodIMPsLock = NSLock()
 
@@ -504,7 +589,94 @@ public extension View {
     View.swizzledMethodIMPs["original_\(originalClassName)"] = originalIMP // for restoration
     View.swizzledMethodIMPs[originalClassName] = newIMP // to keep it alive
     View.swizzledMethodIMPsLock.unlock()
+
+    #if canImport(AppKit)
+    // Also add frame/bounds setters to the original class
+    // This ensures needsLayout is set when frame/bounds change on macOS
+    addSetFrameSizeOverrideToOriginalClass(originalClass: originalClass, originalClassName: originalClassName)
+    addSetBoundsOverrideToOriginalClass(originalClass: originalClass, originalClassName: originalClassName)
+    #endif
   }
+
+  #if canImport(AppKit)
+  /// Adds setFrameSize: override to the original class (for KVO case)
+  private func addSetFrameSizeOverrideToOriginalClass(originalClass: AnyClass, originalClassName: String) {
+    let setFrameSizeSelector = #selector(NSView.setFrameSize(_:))
+
+    guard let originalMethod = class_getInstanceMethod(originalClass, setFrameSizeSelector) else {
+      ChouTi.assertFailure("Failed to get setFrameSize: method")
+      return
+    }
+
+    // Store the original IMP before modifying
+    let originalIMP = method_getImplementation(originalMethod)
+
+    View.swizzledMethodIMPsLock.lock()
+    View.swizzledMethodIMPs["original_setFrameSize_\(originalClassName)"] = originalIMP
+    View.swizzledMethodIMPsLock.unlock()
+
+    // Get the original setFrameSize: implementation
+    typealias SetFrameSizeFunction = @convention(c) (AnyObject, Selector, NSSize) -> Void
+    let originalSetFrameSize = unsafeBitCast(originalIMP, to: SetFrameSizeFunction.self)
+
+    // Create new setFrameSize: implementation
+    let newSetFrameSize: @convention(block) (NSView, NSSize) -> Void = { view, newSize in
+      let oldSize = view.frame.size
+      originalSetFrameSize(view, setFrameSizeSelector, newSize)
+      let actualNewSize = view.frame.size
+      if !oldSize.equalTo(actualNewSize) {
+        view.needsLayout = true
+      }
+    }
+
+    let newIMP = imp_implementationWithBlock(newSetFrameSize)
+    method_setImplementation(originalMethod, newIMP)
+
+    // Store the new IMP to keep it alive
+    View.swizzledMethodIMPsLock.lock()
+    View.swizzledMethodIMPs["setFrameSize_\(originalClassName)"] = newIMP
+    View.swizzledMethodIMPsLock.unlock()
+  }
+
+  /// Adds setBounds: override to the original class (for KVO case)
+  private func addSetBoundsOverrideToOriginalClass(originalClass: AnyClass, originalClassName: String) {
+    let setBoundsSelector = #selector(setter: NSView.bounds)
+
+    guard let originalMethod = class_getInstanceMethod(originalClass, setBoundsSelector) else {
+      ChouTi.assertFailure("Failed to get setBounds: method")
+      return
+    }
+
+    // Store the original IMP before modifying
+    let originalIMP = method_getImplementation(originalMethod)
+
+    View.swizzledMethodIMPsLock.lock()
+    View.swizzledMethodIMPs["original_setBounds_\(originalClassName)"] = originalIMP
+    View.swizzledMethodIMPsLock.unlock()
+
+    // Get the original setBounds: implementation
+    typealias SetBoundsFunction = @convention(c) (AnyObject, Selector, CGRect) -> Void
+    let originalSetBounds = unsafeBitCast(originalIMP, to: SetBoundsFunction.self)
+
+    // Create new setBounds: implementation
+    let newSetBounds: @convention(block) (NSView, CGRect) -> Void = { view, newBounds in
+      let oldBounds = view.bounds
+      originalSetBounds(view, setBoundsSelector, newBounds)
+      let actualNewBounds = view.bounds
+      if !oldBounds.equalTo(actualNewBounds) {
+        view.needsLayout = true
+      }
+    }
+
+    let newIMP = imp_implementationWithBlock(newSetBounds)
+    method_setImplementation(originalMethod, newIMP)
+
+    // Store the new IMP to keep it alive
+    View.swizzledMethodIMPsLock.lock()
+    View.swizzledMethodIMPs["setBounds_\(originalClassName)"] = newIMP
+    View.swizzledMethodIMPsLock.unlock()
+  }
+  #endif
 
   private func restoreOriginalMethod() {
     // if this instance was using KVO swizzling, decrement the callback count
