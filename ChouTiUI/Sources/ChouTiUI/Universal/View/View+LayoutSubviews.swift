@@ -40,7 +40,6 @@ import ChouTi
 
 // MARK: - KVO Interaction
 
-//
 // This implementation uses isa-swizzling to intercept layout calls. It's important to understand
 // how this interacts with KVO (Key-Value Observing), which also uses isa-swizzling.
 //
@@ -570,14 +569,17 @@ public extension View {
     // create the new implementation
     let newImplementation: @convention(block) (View) -> Void = { view in
       // call super implementation
+      view.hasExecutedLayoutCallbacks = false
       originalImplementation(view, selector)
 
-      // call the custom blocks
-      for token in view.layoutSubviewsBlocks.values {
-        token.value(view)
-      }
+      // call the custom blocks if needed
+      if view.hasExecutedLayoutCallbacks == false {
+        for token in view.layoutSubviewsBlocks.values {
+          token.value(view)
+        }
 
-      view.hasExecutedLayoutCallbacks = true
+        view.hasExecutedLayoutCallbacks = true
+      }
     }
 
     // modify the method on the original class

@@ -1392,4 +1392,74 @@ class View_onLayoutSubviewsTests: XCTestCase {
     view.layoutIfNeeded()
     expect(callCount) == 3 // no frame change, should not be called again
   }
+
+  func test_onLayoutSubviews_duplicatedSwizzleOnSameViewClass() {
+    // when a KVO UIView is swizzled, it will swizzle the original class's method implementation to call the custom blocks.
+    // if another KVO UIView subclass is created, it will also swizzle the subclass's method implementation to call the custom blocks.
+    // this may create duplicated swizzles on the same view class hierarchy.
+    // this test is to ensure that the duplicated swizzles are handled correctly.
+
+    class CustomView: View {
+      #if os(macOS)
+      override func layout() { // swiftlint:disable:this unneeded_override
+        super.layout()
+      }
+      #else
+      override func layoutSubviews() { // swiftlint:disable:this unneeded_override
+        super.layoutSubviews()
+      }
+      #endif
+    }
+
+    let view1 = View(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
+    #if os(macOS)
+    view1.wantsLayer = true
+    #endif
+
+    let view2 = CustomView(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
+    #if os(macOS)
+    view2.wantsLayer = true
+    #endif
+
+    // add KVO to view1
+    let observation1 = view1.observe(\.frame, options: [.new]) { _, _ in }
+    _ = observation1
+
+    // add KVO to view2
+    let observation2 = view2.observe(\.frame, options: [.new]) { _, _ in }
+    _ = observation2
+
+    // add swizzle to view1
+    var layoutCount1 = 0
+    let token1 = view1.onLayoutSubviews { _ in
+      layoutCount1 += 1
+    }
+
+    // add swizzle to view2
+    var layoutCount2 = 0
+    let token2 = view2.onLayoutSubviews { _ in
+      layoutCount2 += 1
+    }
+
+    // now both View and CustomView's layout method are swizzled
+
+    // trigger layout
+    view1.setNeedsLayout()
+    view1.layoutIfNeeded()
+    expect(layoutCount1) == 1
+    expect(layoutCount2) == 0
+
+    view2.setNeedsLayout()
+    view2.layoutIfNeeded()
+    expect(layoutCount1) == 1
+    expect(layoutCount2) == 1
+
+    // clean up
+    observation1.invalidate()
+    observation2.invalidate()
+    token1.cancel()
+    token2.cancel()
+    expect(getClassName(view1)) == viewClassName
+    expect(getClassName(view2)) == "_TtCFC13ChouTiUITests26View_onLayoutSubviewsTests54test_onLayoutSubviews_duplicatedSwizzleOnSameViewClassFT_T_L_10CustomView"
+  }
 }
