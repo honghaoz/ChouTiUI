@@ -683,6 +683,7 @@ public extension View {
   private func restoreOriginalMethod() {
     // if this instance was using KVO swizzling, decrement the callback count
     guard let originalClass else {
+      ChouTi.assertFailure("Cannot restore: original class not found")
       return
     }
 
