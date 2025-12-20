@@ -155,6 +155,8 @@ public extension CALayer {
   /// token.cancel()
   /// ```
   ///
+  /// Note: Whenever possible, it's recommended to use layer delegate's `CALayerDelegate.layoutSublayers(of:)` method instead of this method.
+  ///
   /// - Parameters:
   ///   - block: The block to be called when the layer calls `layoutSublayers()`. It will be called with the layer.
   /// - Returns: A cancellable token that can be used to remove the block.

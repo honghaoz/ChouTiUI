@@ -749,23 +749,9 @@ private class BorderLayerDemoLayer: CALayer {
   init(borderContent: BorderLayer.BorderContent, shape: some Shape, offset: CGFloat) {
     super.init()
 
+    contentLayer.strongDelegate = DisableImplicitAnimationDelegate.shared
     contentLayer.backgroundColor = Color.red.cgColor
     contentLayer.shape = shape
-    contentLayer.strongDelegate = BoundsChangeDelegate(layoutSublayers: { layer in
-      // TODO: update CALayer+BoundsChange.swift to use isa swizzling instead of KVO bounds change
-
-      layer.shape = shape // to fix stale shape during window resizing
-
-      guard let maskLayer = layer.mask as? CAShapeLayer, let animationCopy = layer.sizeAnimation()?.copy() as? CABasicAnimation else {
-        return
-      }
-
-      animationCopy.keyPath = "path"
-      animationCopy.isAdditive = false
-      animationCopy.fromValue = maskLayer.presentation()?.path
-      animationCopy.toValue = maskLayer.path
-      maskLayer.add(animationCopy, forKey: "path")
-    })
     addSublayer(contentLayer)
 
     borderLayer.borderContent = borderContent

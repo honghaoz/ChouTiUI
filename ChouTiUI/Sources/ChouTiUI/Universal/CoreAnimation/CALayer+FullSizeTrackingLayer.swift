@@ -94,9 +94,12 @@ public extension CALayer {
 
       layer.frame = newBounds
 
+      // call the onBoundsChange block here instead of in the `RunLoop.main.perform` block so that
+      // the onBoundsChange block can be triggered during event tracking run loop mode (e.g. window resizing).
+      onBoundsChange?(BoundsChangeContext(hostLayer: self, trackingLayer: layer, oldBounds: oldBounds, newBounds: newBounds))
+
       RunLoop.main.perform { // schedule to the next run loop to make sure the animation added after the bounds change can be found
         self.addSizeSynchronizationAnimation(to: layer, oldBounds: oldBounds, newBounds: newBounds)
-        onBoundsChange?(BoundsChangeContext(hostLayer: self, trackingLayer: layer, oldBounds: oldBounds, newBounds: newBounds))
       }
     }
   }
