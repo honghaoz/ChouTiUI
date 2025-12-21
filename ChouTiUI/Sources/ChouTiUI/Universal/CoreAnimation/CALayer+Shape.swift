@@ -98,25 +98,27 @@ public extension CALayer {
     mask = maskLayer
 
     addFullSizeTrackingLayer(maskLayer, onBoundsChange: { [weak self, weak maskLayer] context in
-      guard let shape = self?.shape, let maskLayer = maskLayer else {
-        return
+      RunLoop.main.perform { // schedule to the next run loop to make sure the animation added after the bounds change can be found
+        guard let shape = self?.shape, let maskLayer = maskLayer else {
+          return
+        }
+
+        let layer = context.hostLayer
+
+        // update model
+        maskLayer.path = shape.path(in: layer.bounds)
+
+        // add animation if bounds changes
+        guard let animationCopy = layer.sizeAnimation()?.copy() as? CABasicAnimation else {
+          return
+        }
+
+        animationCopy.keyPath = "path"
+        animationCopy.isAdditive = false
+        animationCopy.fromValue = maskLayer.presentation()?.path
+        animationCopy.toValue = maskLayer.path
+        maskLayer.add(animationCopy, forKey: "path")
       }
-
-      let layer = context.hostLayer
-
-      // update model
-      maskLayer.path = shape.path(in: layer.bounds)
-
-      // add animation if bounds changes
-      guard let animationCopy = layer.sizeAnimation()?.copy() as? CABasicAnimation else {
-        return
-      }
-
-      animationCopy.keyPath = "path"
-      animationCopy.isAdditive = false
-      animationCopy.fromValue = maskLayer.presentation()?.path
-      animationCopy.toValue = maskLayer.path
-      maskLayer.add(animationCopy, forKey: "path")
     })
   }
 
