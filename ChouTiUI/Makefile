@@ -45,7 +45,7 @@ test-tvOS: # Run tests on tvOS.
 
 .PHONY: test-visionOS
 test-visionOS: # Run tests on visionOS.
-	@$(REPO_ROOT)/scripts/swift-package/test-workspace.sh --workspace-path "Project.xcworkspace" --scheme "ChouTiUI" --os "visionOS"
+	@$(REPO_ROOT)/scripts/swift-package/test-workspace.sh --workspace-path "Project.xcworkspace" --scheme "ChouTiUI" --os "visionOS" --beautify false
 
 .PHONY: test-codecov
 test-codecov: # Run tests with code coverage.
