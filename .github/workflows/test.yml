@@ -1,4 +1,4 @@
-name: build
+name: test
 on:
   push:
     branches-ignore:
@@ -21,23 +21,32 @@ env:
   DEVELOPER_DIR: /Applications/Xcode_${{ vars.XCODE_VERSION }}.app/Contents/Developer
 
 jobs:
-  build-root:
-    name: Build root package
+  test-codecov:
+    name: Test (macOS)
     runs-on: ${{ vars.MACOS }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
       - name: Bootstrap
         uses: ./.github/actions/bootstrap
-      - name: Build root package
-        run: make build
+      - name: Test with Codecov
+        run: make test-codecov -C ChouTiUI
+      - name: Upload code coverage
+        uses: codecov/codecov-action@v4.5.0
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: ChouTiUI/.build/debug/codecov/coverage.lcov
+          disable_search: true
+          flags: ChouTiUI
+          name: ChouTiUI
+          fail_ci_if_error: true
 
-  build:
-    name: Build
+  test:
+    name: Test
     strategy:
       fail-fast: false
       matrix:
-        platform: [macOS, iOS, tvOS, visionOS]
+        platform: [iOS, tvOS] # disable `visionOS` for now as it hangs on GitHub Actions
     timeout-minutes: 30
     runs-on: ${{ vars.MACOS }}
     steps:
@@ -48,5 +57,5 @@ jobs:
       # - name: Download visionOS simulator
       #   if: matrix.platform == 'visionOS'
       #   run: xcodebuild -downloadPlatform visionOS
-      - name: Build
-        run: make build-release-${{ matrix.platform }} -C ChouTiUI
+      - name: Test
+        run: make test-${{ matrix.platform }} -C ChouTiUI
