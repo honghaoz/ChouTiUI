@@ -97,19 +97,21 @@ public extension CALayer {
     maskLayer.path = shape.path(in: bounds)
     mask = maskLayer
 
-    addFullSizeTrackingLayer(maskLayer, onBoundsChange: { [weak self, weak maskLayer] context in
-      RunLoop.main.perform { // schedule to the next run loop to make sure the animation added after the bounds change can be found
-        guard let shape = self?.shape, let maskLayer = maskLayer else {
+    addFullSizeTrackingLayer(
+      maskLayer,
+      onBoundsChange: { [weak self, weak maskLayer] context in
+        guard let shape = self?.shape,
+              let maskLayer = maskLayer
+        else {
           return
         }
 
         let layer = context.hostLayer
-
-        // update model
         maskLayer.path = shape.path(in: layer.bounds)
-
-        // add animation if bounds changes
-        guard let animationCopy = layer.sizeAnimation()?.copy() as? CABasicAnimation else {
+      },
+      onAddSizeChangeAnimation: { context, sizeAnimation in
+        // add path animation if bounds changes
+        guard let animationCopy = sizeAnimation.copy() as? CABasicAnimation else {
           return
         }
 
@@ -119,7 +121,7 @@ public extension CALayer {
         animationCopy.toValue = maskLayer.path
         maskLayer.add(animationCopy, forKey: "path")
       }
-    })
+    )
   }
 
   /// Animate the shape of the layer.

@@ -55,17 +55,51 @@ public extension CALayer {
   ///
   /// The layer's frame will always follow the bounds of the layer, including when the layer is animated.
   ///
-  /// This is useful to make a layer's mask layer follow the bounds of the layer.
+  /// This is useful to make a layer's mask layer follow the bounds of the layer, including when the layer is animated.
   ///
   /// Be sure to call `removeFullSizeTrackingLayer` when the layer is no longer need to track.
   ///
+  /// Example:
+  /// ```swift
+  /// let layer = CALayer() // the host layer
+  ///
+  /// let maskLayer = CAShapeLayer() // the tracking layer
+  /// maskLayer.frame = layer.bounds
+  /// maskLayer.path = shape.path(in: layer.bounds)
+  /// layer.mask = maskLayer
+  ///
+  /// layer.addFullSizeTrackingLayer(
+  ///   maskLayer,
+  ///   onBoundsChange: { context in
+  ///     // update the mask layer path's model value
+  ///     maskLayer.path = shape.path(in: context.newBounds)
+  ///   },
+  ///   onAddSizeChangeAnimation: { context, sizeAnimation in
+  ///     // add a mask layer path animation if the host layer animates its size change
+  ///     guard let animationCopy = sizeAnimation.copy() as? CABasicAnimation else {
+  ///       return
+  ///     }
+  ///
+  ///     animationCopy.keyPath = "path"
+  ///     animationCopy.isAdditive = false
+  ///     animationCopy.fromValue = maskLayer.presentation()?.path
+  ///     animationCopy.toValue = maskLayer.path
+  ///     maskLayer.add(animationCopy, forKey: "path")
+  ///   }
+  /// )
+  /// ```
+  ///
   /// - Parameters:
   ///   - layer: The layer to track.
-  ///   - onBoundsChange: The block to be called when the bounds change. It will be called with a context containing the host layer, the tracking layer, the old bounds, the new bounds, and the timestamp.
+  ///   - onBoundsChange: The block to be called when the bounds change.
+  ///                     The block will be called with a context containing the host layer, the tracking layer, the old bounds and the new bounds.
+  ///   - onAddSizeChangeAnimation: The block to be called when the tracking layer adds a size change animation based on the host layer's size change animation.
+  ///                     The block will be called with a context containing the host layer, the tracking layer, the old bounds and the new bounds, and the host layer's size change animation. Don't modify the size animation, try to make a copy of it if needed.
   func addFullSizeTrackingLayer(_ layer: CALayer,
-                                onBoundsChange: ((_ context: BoundsChangeContext) -> Void)? = nil)
+                                onBoundsChange: ((_ context: BoundsChangeContext) -> Void)? = nil,
+                                onAddSizeChangeAnimation: ((_ context: BoundsChangeContext, _ sizeAnimation: CABasicAnimation) -> Void)? = nil)
   {
-    fullSizeTrackingLayers[ObjectIdentifier(layer)] = LayerTrackingInfo(layer: layer, onBoundsChange: onBoundsChange)
+    fullSizeTrackingLayers[ObjectIdentifier(layer)] = LayerTrackingInfo(layer: layer, onBoundsChange: onBoundsChange, onAddSizeChangeAnimation: onAddSizeChangeAnimation)
 
     // add the bounds change listener
     if boundsToken == nil {
@@ -91,6 +125,7 @@ public extension CALayer {
     for (_, layerTrackingInfo) in fullSizeTrackingLayers {
       let layer = layerTrackingInfo.layer
       let onBoundsChange = layerTrackingInfo.onBoundsChange
+      let onAddSizeChangeAnimation = layerTrackingInfo.onAddSizeChangeAnimation
 
       layer.frame = newBounds
 
@@ -98,15 +133,36 @@ public extension CALayer {
       // the onBoundsChange block can be triggered during event tracking run loop mode (e.g. window resizing).
       onBoundsChange?(BoundsChangeContext(hostLayer: self, trackingLayer: layer, oldBounds: oldBounds, newBounds: newBounds))
 
-      RunLoop.main.perform { // schedule to the next run loop to make sure the animation added after the bounds change can be found
-        self.addSizeSynchronizationAnimation(to: layer, oldBounds: oldBounds, newBounds: newBounds)
-      }
+      self.addSizeSynchronizationAnimation(
+        to: layer,
+        oldBounds: oldBounds,
+        newBounds: newBounds,
+        onAddSizeChangeAnimation: onAddSizeChangeAnimation
+      )
     }
   }
 
   /// Add size synchronization animation to the layer so that the layer can always follow the host layer's size.
-  private func addSizeSynchronizationAnimation(to layer: CALayer, oldBounds: CGRect, newBounds: CGRect) {
+  private func addSizeSynchronizationAnimation(to layer: CALayer,
+                                               oldBounds: CGRect,
+                                               newBounds: CGRect,
+                                               onAddSizeChangeAnimation: ((_ context: BoundsChangeContext, _ sizeAnimation: CABasicAnimation) -> Void)?,
+                                               shouldSchedule: Bool = true)
+  {
     guard let sizeAnimation = self.sizeAnimation() else {
+      // no size animation found
+      if shouldSchedule {
+        // schedule to the next run loop to make sure the animation added after the bounds change can be found
+        RunLoop.main.perform {
+          self.addSizeSynchronizationAnimation(
+            to: layer,
+            oldBounds: oldBounds,
+            newBounds: newBounds,
+            onAddSizeChangeAnimation: onAddSizeChangeAnimation,
+            shouldSchedule: false
+          )
+        }
+      }
       return
     }
 
@@ -116,6 +172,8 @@ public extension CALayer {
       presentationBounds: self.presentation()?.bounds,
       with: sizeAnimation
     )
+
+    onAddSizeChangeAnimation?(BoundsChangeContext(hostLayer: self, trackingLayer: layer, oldBounds: oldBounds, newBounds: newBounds), sizeAnimation)
   }
 }
 
@@ -135,6 +193,7 @@ private extension CALayer {
   struct LayerTrackingInfo {
     let layer: CALayer
     let onBoundsChange: ((_ context: BoundsChangeContext) -> Void)?
+    let onAddSizeChangeAnimation: ((_ context: BoundsChangeContext, _ sizeAnimation: CABasicAnimation) -> Void)?
   }
 
   /// The layers that track the bounds of the layer.
