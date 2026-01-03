@@ -45,7 +45,7 @@ class ViewController: NSViewController {
 
   private lazy var state = State()
 
-  private lazy var contentView = ComposeView { [unowned self, state] in // swiftlint:disable:this unowned_variable
+  private lazy var contentView = ComposeView { [unowned self, state] in // swiftlint:disable:this unowned_variable_capture
     ZStack {
       LabelNode(state.title)
         .numberOfLines(2)

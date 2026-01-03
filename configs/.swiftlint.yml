@@ -29,19 +29,15 @@ opt_in_rules:
   - return_value_from_void_function
   - sorted_first_last
   - toggle_bool
+  - unowned_variable_capture
   - vertical_parameter_alignment_on_call
   # already tried
   # - multiline_arguments
   # - switch_case_on_newline
 
 disabled_rules:
-  - accessibility_label_for_image
   - closure_parameter_position # occasionally needs to have multiline capture variables
   - cyclomatic_complexity
-  - discarded_notification_center_observer
-  - empty_count
-  - explicit_enum_raw_value
-  - fallthrough
   - file_length
   - for_where
   - function_body_length
@@ -50,12 +46,9 @@ disabled_rules:
   - inclusive_language
   - large_tuple
   - line_length
-  - mark
-  - multiple_closures_with_trailing_closure
   - nesting
   - opening_brace
   - orphaned_doc_comment
-  - prefer_self_in_static_references # needs to have explicit class name to ease searching
   - redundant_string_enum_value
   - todo
   - trailing_comma
@@ -95,16 +88,6 @@ custom_rules:
     match_kinds:
       - identifier
     severity: error
-
-  unowned_variable:
-    name: "Unowned Variable"
-    message: "unowned variables can cause crashes if not used properly. Use `weak` if possible."
-    included: ".*.swift"
-    regex: "unowned "
-    match_kinds:
-      - identifier
-      - attribute.builtin
-    severity: warning
 
   assert_in_tests:
     name: "Assertion in Tests"

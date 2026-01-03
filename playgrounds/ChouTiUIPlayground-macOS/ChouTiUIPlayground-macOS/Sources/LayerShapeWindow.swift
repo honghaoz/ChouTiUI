@@ -66,9 +66,9 @@ class LayerShapeWindow: NSWindow {
       return contentView
     }()
 
-    let contentView = ComposeView { [unowned self] in // swiftlint:disable:this unowned_variable
+    let contentView = ComposeView { [unowned self] in // swiftlint:disable:this unowned_variable_capture
       ZStack {
-        ComposeViewNode { [unowned self] in // swiftlint:disable:this unowned_variable
+        ComposeViewNode { [unowned self] in // swiftlint:disable:this unowned_variable_capture
           self.makeMainContent()
         }
         .flexibleSize()
