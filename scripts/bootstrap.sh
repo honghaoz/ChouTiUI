@@ -10,7 +10,7 @@ REPO_ROOT=$(git rev-parse --show-toplevel)
 cd "$REPO_ROOT" || exit 1
 
 echo "🚀 Bootstrap development environment..."
-git submodule update --init --recursive
+git submodule update --init --recursive --remote
 
 OS=$(uname -s)
 case "$OS" in
