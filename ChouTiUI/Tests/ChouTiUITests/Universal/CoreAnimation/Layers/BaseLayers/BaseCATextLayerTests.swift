@@ -94,7 +94,8 @@ class BaseCATextLayerTests: XCTestCase {
 
     layer.add(animation, forKey: "opacity")
 
-    wait(timeout: 0.05)
+    // wait for the layer to have a presentation layer
+    expect(layer.presentation()).toEventuallyNot(beNil())
 
     let presentationLayer = try layer.presentation().unwrap()
     expect(presentationLayer.debugDescription) == "Hello"

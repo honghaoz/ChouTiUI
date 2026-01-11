@@ -220,7 +220,7 @@ class CALayer_FullSizeSublayerTests: XCTestCase {
     layer.addFullSizeSublayer(sublayer)
 
     // wait for the layer to have a presentation layer
-    wait(timeout: 0.05)
+    expect(layer.presentation()).toEventuallyNot(beNil())
 
     layer.bounds = CGRect(x: 0, y: 0, width: 200, height: 300)
 
@@ -250,7 +250,7 @@ class CALayer_FullSizeSublayerTests: XCTestCase {
     layer.addFullSizeSublayer(sublayer)
 
     // wait for the layer to have a presentation layer
-    wait(timeout: 0.05)
+    expect(layer.presentation()).toEventuallyNot(beNil())
 
     CATransaction.disableAnimations {
       layer.bounds = CGRect(x: 0, y: 0, width: 200, height: 300)

@@ -278,7 +278,7 @@ class CALayer_BackgroundColorTests: XCTestCase {
     window.layer.addSublayer(layer)
 
     // wait for the layer to have a presentation layer
-    wait(timeout: 0.05)
+    expect(layer.presentation()).toEventuallyNot(beNil())
 
     layer.bounds = CGRect(x: 0, y: 0, width: 200, height: 300)
 

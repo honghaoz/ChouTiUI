@@ -77,10 +77,7 @@ class BaseCAShapeLayerTests: XCTestCase {
 
     layer.add(animation, forKey: "opacity")
 
-    wait(timeout: 0.05)
-
-    let presentationLayer = try layer.presentation().unwrap()
-    expect(presentationLayer.debugDescription) == "Hello"
+    expect(layer.presentation()?.debugDescription).toEventually(beEqual(to: "Hello"))
   }
 
   func test_bindingObservationStorage() {

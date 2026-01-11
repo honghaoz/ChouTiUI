@@ -143,7 +143,7 @@ class CALayer_ShapeTests: XCTestCase {
     window.layer.addSublayer(layer)
 
     // wait for the layer to have a presentation layer
-    wait(timeout: 0.05)
+    expect(layer.presentation()).toEventuallyNot(beNil())
 
     layer.bounds = CGRect(x: 0, y: 0, width: 200, height: 300)
     let animation = CABasicAnimation(keyPath: "bounds")
@@ -171,7 +171,7 @@ class CALayer_ShapeTests: XCTestCase {
     window.layer.addSublayer(layer)
 
     // wait for the layer to have a presentation layer
-    wait(timeout: 0.05)
+    expect(layer.presentation()).toEventuallyNot(beNil())
 
     layer.bounds.size = CGSize(width: 200, height: 300)
     let animation = CABasicAnimation(keyPath: "bounds.size")
@@ -199,7 +199,7 @@ class CALayer_ShapeTests: XCTestCase {
     window.layer.addSublayer(layer)
 
     // wait for the layer to have a presentation layer
-    wait(timeout: 0.05)
+    expect(layer.presentation()).toEventuallyNot(beNil())
 
     layer.bounds.size.width = 200
     let animation = CABasicAnimation(keyPath: "bounds.size.width")
@@ -227,7 +227,7 @@ class CALayer_ShapeTests: XCTestCase {
     window.layer.addSublayer(layer)
 
     // wait for the layer to have a presentation layer
-    wait(timeout: 0.05)
+    expect(layer.presentation()).toEventuallyNot(beNil())
 
     layer.bounds.size.height = 300
     let animation = CABasicAnimation(keyPath: "bounds.size.height")
@@ -257,7 +257,7 @@ class CALayer_ShapeTests: XCTestCase {
     window.layer.addSublayer(layer)
 
     // wait for the layer to have a presentation layer
-    wait(timeout: 0.05)
+    expect(layer.presentation()).toEventuallyNot(beNil())
 
     layer.bounds = CGRect(x: 0, y: 0, width: 200, height: 300)
     wait(timeout: 1e-6) // wait until next runloop
@@ -281,7 +281,7 @@ class CALayer_ShapeTests: XCTestCase {
     window.layer.addSublayer(layer)
 
     // wait for the layer to have a presentation layer
-    wait(timeout: 0.05)
+    expect(layer.presentation()).toEventuallyNot(beNil())
 
     layer.bounds.size = CGSize(width: 200, height: 300)
     wait(timeout: 1e-6) // wait until next runloop
@@ -305,7 +305,7 @@ class CALayer_ShapeTests: XCTestCase {
     window.layer.addSublayer(layer)
 
     // wait for the layer to have a presentation layer
-    wait(timeout: 0.05)
+    expect(layer.presentation()).toEventuallyNot(beNil())
 
     layer.bounds.size.width = 200
     wait(timeout: 1e-6) // wait until next runloop
@@ -329,7 +329,7 @@ class CALayer_ShapeTests: XCTestCase {
     window.layer.addSublayer(layer)
 
     // wait for the layer to have a presentation layer
-    wait(timeout: 0.05)
+    expect(layer.presentation()).toEventuallyNot(beNil())
 
     layer.bounds.size.height = 300
     wait(timeout: 1e-6) // wait until next runloop

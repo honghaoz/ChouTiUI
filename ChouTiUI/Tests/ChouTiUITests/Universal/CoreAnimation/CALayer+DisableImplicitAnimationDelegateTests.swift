@@ -41,9 +41,6 @@ class CALayer_DisableImplicitAnimationDelegateTests: XCTestCase {
     do {
       let tester = LayerImplicitAnimationTester()
 
-      // wait for the layer to have a presentation layer
-      wait(timeout: 0.05)
-
       let implicitAnimations = tester.getImplicitAnimations()
       expect(implicitAnimations.compactMap(\.keyPath).sorted()) == ["bounds", "position"]
     }
@@ -52,9 +49,6 @@ class CALayer_DisableImplicitAnimationDelegateTests: XCTestCase {
     do {
       let tester = LayerImplicitAnimationTester()
       tester.layer.delegate = CALayer.DisableImplicitAnimationDelegate.shared
-
-      // wait for the layer to have a presentation layer
-      wait(timeout: 0.05)
 
       let implicitAnimations = tester.getImplicitAnimations()
       expect(implicitAnimations.compactMap(\.keyPath).sorted()) == []
@@ -70,6 +64,9 @@ private class LayerImplicitAnimationTester {
   init() {
     layer = CALayer(frame: CGRect(x: 50, y: 50, width: 100, height: 100))
     environment.containerLayer.addSublayer(layer)
+
+    // wait for the layer to have a presentation layer
+    expect(self.layer.presentation()).toEventuallyNot(beNil())
   }
 
   func getImplicitAnimations() -> [CABasicAnimation] {

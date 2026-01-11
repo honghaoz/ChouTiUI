@@ -93,7 +93,7 @@ class CALayer_AnimationExtensionsTests: XCTestCase {
     window.layer.addSublayer(layer)
 
     // wait for the layer to have a presentation layer
-    wait(timeout: 0.05)
+    expect(layer.presentation()).toEventuallyNot(beNil())
 
     layer.bounds.size = CGSize(width: 200, height: 200)
 
@@ -110,7 +110,7 @@ class CALayer_AnimationExtensionsTests: XCTestCase {
     window.layer.addSublayer(layer)
 
     // wait for the layer to have a presentation layer
-    wait(timeout: 0.05)
+    expect(layer.presentation()).toEventuallyNot(beNil())
 
     layer.bounds.size = CGSize(width: 200, height: 200)
 
