@@ -3,9 +3,11 @@
 name: lint
 on:
   push:
-    branches-ignore:
-      - "github-actions/**" # ignore github-actions branches
-      - "dependabot/**" # ignore dependabot branches
+    branches:
+      - main
+      - master
+      - develop
+      - ci
   pull_request: # any pull request against any branch
   workflow_dispatch: # manual trigger
 
