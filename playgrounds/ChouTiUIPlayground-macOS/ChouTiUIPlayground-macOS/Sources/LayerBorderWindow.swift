@@ -740,7 +740,8 @@ private class BorderLayerDemoLayer: CALayer {
     addSublayer(contentLayer)
 
     borderLayer.borderContent = borderContent
-    borderLayer.borderMask = .cornerRadius(contentLayer.cornerRadius, borderWidth: 10, offset: offset)
+    borderLayer.borderMask = .cornerRadius(contentLayer.cornerRadius, offset: offset)
+    borderLayer.borderWidth = 10
     addSublayer(borderLayer)
 
     observeInset()
@@ -755,7 +756,8 @@ private class BorderLayerDemoLayer: CALayer {
     addSublayer(contentLayer)
 
     borderLayer.borderContent = borderContent
-    borderLayer.borderMask = .shape(shape, borderWidth: 10, offset: offset)
+    borderLayer.borderMask = .shape(shape, offset: offset)
+    borderLayer.borderWidth = 10
     addSublayer(borderLayer)
 
     observeInset()

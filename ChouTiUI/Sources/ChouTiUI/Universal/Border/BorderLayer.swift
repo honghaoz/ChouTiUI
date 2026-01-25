@@ -35,15 +35,23 @@ import ChouTi
 /// A layer that can render a border.
 public final class BorderLayer: CALayer {
 
+  /// Border width for the border.
   override public var borderWidth: CGFloat {
     get {
       return super.borderWidth
     }
-    set { // swiftlint:disable:this unused_setter_value
-      ChouTi.assertFailure("borderWidth is not supported on BorderLayer, use borderMask instead.")
+    set {
+      // forward the border width to the underlying "borderWidthValue" property without changing the super.borderWidth
+      // since we manage the border width style manually
+      borderWidthValue = newValue
+      setNeedsLayout()
     }
   }
 
+  /// The actual border width value.
+  private var borderWidthValue: CGFloat = 1
+
+  /// Unsupported. Use `borderContent` instead.
   override public var borderColor: CGColor? {
     get {
       return super.borderColor
@@ -53,12 +61,13 @@ public final class BorderLayer: CALayer {
     }
   }
 
+  /// Unsupported. Use `borderMask` instead.
   override public var cornerRadius: CGFloat {
     get {
       return super.cornerRadius
     }
     set { // swiftlint:disable:this unused_setter_value
-      ChouTi.assertFailure("cornerRadius is not supported on BorderLayer, use borderContent instead.")
+      ChouTi.assertFailure("cornerRadius is not supported on BorderLayer, use borderMask instead.")
     }
   }
 
@@ -103,18 +112,16 @@ public final class BorderLayer: CALayer {
     ///
     /// - Parameters:
     ///   - cornerRadius: The corner radius in points.
-    ///   - borderWidth: The width of the border in points.
     ///   - cornerCurve: The corner curve of the border. The default value is `continuous`.
     ///   - offset: The offset of the border in points. Positive value to make the border outward/bigger, negative value to make the border inward/smaller. The default value is 0.
-    case cornerRadius(_ cornerRadius: CGFloat, borderWidth: CGFloat, cornerCurve: CALayerCornerCurve = .continuous, offset: CGFloat = 0)
+    case cornerRadius(_ cornerRadius: CGFloat, cornerCurve: CALayerCornerCurve = .continuous, offset: CGFloat = 0)
 
     /// A shape border.
     ///
     /// - Parameters:
     ///   - shape: The shape of the border. If the offset is not 0, the shape should be preferably an `OffsetableShape`.
-    ///   - borderWidth: The width of the border in points.
     ///   - offset: The offset of the border in points. Positive value to make the border outward/bigger, negative value to make the border inward/smaller. The default value is 0.
-    case shape(_ shape: any Shape, borderWidth: CGFloat, offset: CGFloat = 0)
+    case shape(_ shape: any Shape, offset: CGFloat = 0)
 
     /// The offset to be added to the bounds of the border layer (host layer) bounds, for the content layer and border mask layer.
     ///
@@ -122,15 +129,15 @@ public final class BorderLayer: CALayer {
     /// - When the offset is negative, the bounds of the content/mask layer won't be changed.
     fileprivate var boundsExtendedOffset: CGFloat {
       switch self {
-      case .cornerRadius(_, _, _, let offset),
-           .shape(_, _, let offset):
+      case .cornerRadius(_, _, let offset),
+           .shape(_, let offset):
         return offset > 0 ? offset : 0
       }
     }
   }
 
-  /// The mask of the border. The default value is a zero corner radius border with a width of 1.
-  public var borderMask: BorderMask = .cornerRadius(0, borderWidth: 1, offset: 0)
+  /// The mask of the border. The default value is a zero corner radius border.
+  public var borderMask: BorderMask = .cornerRadius(0, offset: 0) // TODO: do we need to trigger setNeedsLayout?
 
   /// The mask layer.
   private var borderMaskLayer: CALayer?
@@ -150,6 +157,7 @@ public final class BorderLayer: CALayer {
     }
 
     super.init(layer: layer)
+    borderWidthValue = layer.borderWidthValue
   }
 
   @available(*, unavailable)
@@ -163,7 +171,7 @@ public final class BorderLayer: CALayer {
     super.layoutSublayers()
 
     switch (borderContent, borderMask) {
-    case (.color(let color), .cornerRadius(let cornerRadius, let borderWidth, let cornerCurve, let offset)):
+    case (.color(let color), .cornerRadius(let cornerRadius, let cornerCurve, let offset)):
       // solid color + corner radius
       // just use layer's border directly
 
@@ -182,11 +190,11 @@ public final class BorderLayer: CALayer {
       // use layer's border directly
       super.borderColor = color.cgColor
       super.cornerRadius = cornerRadius
-      super.borderWidth = borderWidth
+      super.borderWidth = borderWidthValue
       self.cornerCurve = cornerCurve
       self.borderOffset = offset
 
-    case (.color(let color), .shape(let shape, let borderWidth, let offset)):
+    case (.color(let color), .shape(let shape, let offset)):
       // solid color + shape
       // use a color layer as the border content and a shape layer as the border mask
 
@@ -226,7 +234,7 @@ public final class BorderLayer: CALayer {
 
       // 2) set up border mask layer with shape
       resetBorderStyle()
-      updateMaskLayer(for: shape, borderWidth: borderWidth, offset: offset, borderContentFrame: borderContentColorLayer.frame)
+      updateMaskLayer(for: shape, borderWidth: borderWidthValue, offset: offset, borderContentFrame: borderContentColorLayer.frame)
 
     case (.gradient, _),
          (.layer, _):
@@ -312,7 +320,7 @@ public final class BorderLayer: CALayer {
       resetBorderStyle()
 
       switch borderMask {
-      case .cornerRadius(let cornerRadius, let borderWidth, let cornerCurve, let offset):
+      case .cornerRadius(let cornerRadius, let cornerCurve, let offset):
         let borderMaskLayer = self.borderMaskLayer ?? {
           let borderMaskLayer = CALayer()
           borderMaskLayer.strongDelegate = CALayer.DisableImplicitAnimationDelegate.shared
@@ -340,11 +348,11 @@ public final class BorderLayer: CALayer {
         }
 
         borderMaskLayer.cornerRadius = cornerRadius
-        borderMaskLayer.borderWidth = borderWidth
+        borderMaskLayer.borderWidth = borderWidthValue
         borderMaskLayer.cornerCurve = cornerCurve
         borderMaskLayer.borderOffset = offset
-      case .shape(let shape, let borderWidth, let offset):
-        updateMaskLayer(for: shape, borderWidth: borderWidth, offset: offset, borderContentFrame: borderContentFrame)
+      case .shape(let shape, let offset):
+        updateMaskLayer(for: shape, borderWidth: borderWidthValue, offset: offset, borderContentFrame: borderContentFrame)
       }
     }
   }
