@@ -227,9 +227,8 @@ open class BaseCATextLayer: CATextLayer, BaseCALayerInternalType {
 
       let yOffset: CGFloat
       switch verticalAlignment {
-      case .top:
-        yOffset = 0
-      case .center:
+      case .top, // .top is unreachable
+           .center:
         yOffset = (bounds.height - textSize.height) / 2
       case .bottom:
         yOffset = (bounds.height - textSize.height)

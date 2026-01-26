@@ -114,6 +114,30 @@ class CALayer_ShapeTests: XCTestCase {
     Assert.resetTestAssertionFailureHandler()
   }
 
+  func test_shape_boundsChange_afterShapeRemoved() {
+    let window = TestWindow()
+
+    let layer = CALayer()
+    layer.delegate = CALayer.DisableImplicitAnimationDelegate.shared
+    layer.frame = CGRect(x: 0, y: 0, width: 100, height: 100)
+    layer.shape = Rectangle()
+    window.layer.addSublayer(layer)
+
+    let maskLayer = layer.mask
+    expect(maskLayer) != nil
+
+    // remove the shape, the mask layer should be untracked
+    layer.shape = nil
+    expect(layer.mask) == nil
+
+    // trigger bounds change, the mask layer should not be updated because it's no longer tracked
+    layer.bounds = CGRect(x: 0, y: 0, width: 200, height: 200)
+    wait(timeout: 1e-6) // wait until next runloop
+
+    // mask layer path should not be updated (it's no longer tracked)
+    expect((maskLayer as? CAShapeLayer)?.path?.pathElements()) == Rectangle().path(in: CGRect(x: 0, y: 0, width: 100, height: 100)).pathElements()
+  }
+
   // MARK: - Size Change No Animation
 
   func test_shape_noAnimation_boundsChanged() throws {

@@ -245,4 +245,64 @@ class CALayer_AnimationExtensionsTests: XCTestCase {
 
     expect(sizeAnimation.keyPath) == "bounds.size.width"
   }
+
+  func test_sizeAnimation_withNonPropertyAnimation() throws {
+    let layer = CALayer()
+    layer.bounds = CGRect(x: 0, y: 0, width: 100, height: 100)
+
+    // add a non-property animation (CAAnimationGroup)
+    layer.add(
+      {
+        let group = CAAnimationGroup()
+        group.animations = [CABasicAnimation(keyPath: "opacity")]
+        return group
+      }(),
+      forKey: "group"
+    )
+
+    // add a bounds animation
+    layer.add(
+      {
+        let animation = CABasicAnimation(keyPath: "bounds")
+        animation.fromValue = CGRect(x: 0, y: 0, width: 100, height: 100)
+        animation.toValue = CGRect(x: 0, y: 0, width: 200, height: 200)
+        return animation
+      }(),
+      forKey: "bounds"
+    )
+
+    let sizeAnimation = try layer.sizeAnimation().unwrap()
+
+    expect(sizeAnimation.keyPath) == "bounds"
+  }
+
+  func test_sizeAnimation_withTransitionAnimation() throws {
+    let layer = CALayer()
+    layer.bounds = CGRect(x: 0, y: 0, width: 100, height: 100)
+
+    // add a transition animation (not a CAPropertyAnimation)
+    layer.add(
+      {
+        let transition = CATransition()
+        transition.type = .fade
+        return transition
+      }(),
+      forKey: "transition"
+    )
+
+    // add a bounds.size animation
+    layer.add(
+      {
+        let animation = CABasicAnimation(keyPath: "bounds.size")
+        animation.fromValue = CGSize(width: 100, height: 100)
+        animation.toValue = CGSize(width: 200, height: 200)
+        return animation
+      }(),
+      forKey: "bounds.size"
+    )
+
+    let sizeAnimation = try layer.sizeAnimation().unwrap()
+
+    expect(sizeAnimation.keyPath) == "bounds.size"
+  }
 }

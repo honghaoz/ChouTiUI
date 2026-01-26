@@ -42,6 +42,16 @@ class BorderMetalLayerTests: XCTestCase {
     expect(borderLayer.contents) != nil
   }
 
+  func test_updateBorder_withDefaultBoundsAndScale() {
+    let borderLayer = BorderMetalLayer()
+    borderLayer.frame = CGRect(x: 0, y: 0, width: 100, height: 50)
+    borderLayer.contentsScale = 2
+
+    // call without bounds and scale, should use self.bounds and contentsScale
+    borderLayer.updateBorder(width: 2, content: .color(.red), shape: Circle())
+    expect(borderLayer.contents) != nil
+  }
+
   func test_updateBorder_noDrawable() {
     Assert.setTestAssertionFailureHandler { message, metadata, file, line, column in
       expect(message) == "Failed to get drawable or command buffer"

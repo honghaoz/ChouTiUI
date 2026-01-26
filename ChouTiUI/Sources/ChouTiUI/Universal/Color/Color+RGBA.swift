@@ -229,6 +229,9 @@ public extension Color {
             alpha: components[3]
           )
         } else if numComponents == 2 {
+          // this is impossible, because usingColorSpace(.displayP3()) converts any color (including grayscale) to displayP3 RGB
+          // so the result always has 4 components (R, G, B, A)
+
           // This is a grayscale color, which is a special case.
           // The first component is the white value (same as red, green, and blue),
           // and the second is the alpha value.

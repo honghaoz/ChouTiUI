@@ -56,12 +56,17 @@ public extension CALayer {
   /// - Returns: The most granular size change animation.
   func sizeAnimation() -> CABasicAnimation? {
     animations()
-      .min(by: { animation1, animation2 in
-        guard let animation1KeyPath = (animation1 as? CAPropertyAnimation)?.keyPath, let animation2KeyPath = (animation2 as? CAPropertyAnimation)?.keyPath else {
-          return false
+      .compactMap { animation -> (animation: CABasicAnimation, order: Int)? in
+        guard let animation = animation as? CABasicAnimation,
+              let keyPath = animation.keyPath,
+              let order = Self.boundsSizeAnimationKeyPathOrder[keyPath]
+        else {
+          return nil
         }
-        return Self.boundsSizeAnimationKeyPathOrder[animation1KeyPath] ?? Int.max < Self.boundsSizeAnimationKeyPathOrder[animation2KeyPath] ?? Int.max
-      }) as? CABasicAnimation
+        return (animation, order)
+      }
+      .min { $0.order < $1.order }?
+      .animation
   }
 
   private static let boundsSizeAnimationKeyPathOrder: [String: Int] = [

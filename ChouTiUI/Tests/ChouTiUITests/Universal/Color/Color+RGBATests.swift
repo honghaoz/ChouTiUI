@@ -711,15 +711,34 @@ class Color_RGBATests: XCTestCase {
   }
 
   func testGrayScaleColor_displayP3() {
-    let color = Color.white(0.5)
+    let color = Color.white(0.7)
     guard let rgba = color.rgba(colorSpace: .displayP3) else {
       fail("Failed to get RGBA")
       return
     }
-    expect(rgba.red) == 0.5
-    expect(rgba.green) == 0.5
-    expect(rgba.blue) == 0.5
+    expect(rgba.red).to(beApproximatelyEqual(to: 0.7, within: 1e-6))
+    expect(rgba.green).to(beApproximatelyEqual(to: 0.7, within: 1e-6))
+    expect(rgba.blue).to(beApproximatelyEqual(to: 0.7, within: 1e-6))
     expect(rgba.alpha) == 1
+  }
+
+  func testGrayScaleColor_displayP3_fromCGColor() throws {
+    // Create a grayscale CGColor directly with 2 components (white + alpha)
+    // When converted to displayP3, it becomes 4 components (R, G, B, A)
+    let grayscaleCGColor = CGColor(gray: 0.7, alpha: 0.8)
+    let color = Color.from(cgColor: grayscaleCGColor)
+
+    guard let rgba = color.rgba(colorSpace: .displayP3) else {
+      fail("Failed to get RGBA")
+      return
+    }
+
+    // The grayscale value is converted to displayP3 RGB color space
+    // All RGB components have the same converted value
+    expect(rgba.red).to(beApproximatelyEqual(to: 0.7523762583732605, within: 1e-6))
+    expect(rgba.green).to(beApproximatelyEqual(to: 0.7523762583732605, within: 1e-6))
+    expect(rgba.blue).to(beApproximatelyEqual(to: 0.7523762583732605, within: 1e-6))
+    expect(rgba.alpha).to(beApproximatelyEqual(to: 0.8, within: 1e-6))
   }
 
   func testColorAlpha() {

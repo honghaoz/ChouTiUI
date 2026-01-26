@@ -1,8 +1,8 @@
 //
-//  NSView+ThemeUpdating.swift
+//  SolveForInputableTests.swift
 //  ChouTiUI
 //
-//  Created by Honghao Zhang on 1/14/23.
+//  Created by Honghao Zhang on 1/25/26.
 //  Copyright © 2020 Honghao Zhang.
 //
 //  MIT License
@@ -28,19 +28,31 @@
 //  IN THE SOFTWARE.
 //
 
-#if canImport(AppKit)
+import QuartzCore
 
-import AppKit
+import ChouTiTest
 
-extension NSView: ThemeUpdating {}
+import ChouTi
+import ChouTiUI
 
-#endif
+class SolveForInputableTests: XCTestCase {
 
-// TODO: support UIView for ThemeUpdating
-//
-// Implementation notes:
-// - Create `UIView+ThemeUpdating.swift` with `extension UIView: ThemeUpdating {}`
-// - Create `UITraitEnvironment+Bindings.swift` to provide `themeBinding` for `UITraitEnvironment` types
-// - Use `registerForTraitChanges([UITraitUserInterfaceStyle.self], handler:)` (iOS 17+) to observe dark/light mode changes
-// - Convert `traitCollection.userInterfaceStyle` to `Theme`
-// - For iOS 16 and earlier, fall back to overriding `traitCollectionDidChange(_:)` (requires subclassing or swizzling)
+  func test_solveForInput_objectDoesNotRespondToSelector() {
+    // Create an NSObject that conforms to SolveForInputable but doesn't
+    // actually implement the private _solveForInput: method
+    let object = FakeTimingFunction()
+
+    Assert.setTestAssertionFailureHandler { message, metadata, file, line, column in
+      expect(message.hasPrefix("object doesn't respond to selector")) == true
+    }
+
+    let result = object.solveForInput(0.5)
+    expect(result) == nil
+
+    Assert.resetTestAssertionFailureHandler()
+  }
+}
+
+/// A fake timing function that conforms to SolveForInputable but doesn't
+/// respond to the private _solveForInput: selector.
+private final class FakeTimingFunction: NSObject, SolveForInputable {}

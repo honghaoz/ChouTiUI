@@ -69,6 +69,9 @@ public extension CALayer {
     case (nil, nil),
          (.some, nil):
       // remove shape
+      if let maskLayer = mask {
+        removeFullSizeTrackingLayer(maskLayer)
+      }
       mask = nil
 
     case (nil, .some):
@@ -89,6 +92,7 @@ public extension CALayer {
 
   private func setupMaskLayer() {
     guard let shape = self.shape else {
+      ChouTi.assertFailure("shape is nil") // impossible, all call sites should have a shape
       return
     }
 
@@ -103,7 +107,7 @@ public extension CALayer {
         guard let shape = self?.shape,
               let maskLayer = maskLayer
         else {
-          return
+          return // impossible, full size tracking should be teared down when shape is nil
         }
 
         let layer = context.hostLayer
@@ -112,6 +116,7 @@ public extension CALayer {
       onAddSizeChangeAnimation: { context, sizeAnimation in
         // add path animation if bounds changes
         guard let animationCopy = sizeAnimation.copy() as? CABasicAnimation else {
+          ChouTi.assertFailure("failed to copy animation, animation: \(sizeAnimation)")
           return
         }
 
@@ -159,7 +164,7 @@ public extension CALayer {
       timing: timing,
       from: { maskLayer in
         guard let maskLayer = maskLayer as? CAShapeLayer else {
-          return currentShape.path(in: maskLayer.bounds)
+          return currentShape.path(in: maskLayer.bounds) // impossible, maskLayer is always a CAShapeLayer
         }
         if fromShape == nil {
           // no from shape, use the current in-flight shape
