@@ -260,23 +260,24 @@ public final class BorderLayer: CALayer {
           return gradientLayer
         }()
 
-        borderContentGradientLayer.background = .gradient(gradient)
+        borderContentGradientLayer.setBackgroundGradientColor(gradient)
         borderContentGradientLayer.contentsScale = contentsScale
 
         addSublayer(borderContentGradientLayer)
 
-        let borderContentGradientLayerOldFrame = borderContentGradientLayer.frame
-        borderContentGradientLayer.frame = borderContentFrame
+        // below code order matters, the size animation should be added before the frame is set to the new bounds.
 
         // add size sync animation so that the border content layer can follow the bounds change
         if let sizeAnimation = self.sizeAnimation() {
           borderContentGradientLayer.addFrameAnimation(
-            from: borderContentGradientLayerOldFrame,
-            to: borderContentGradientLayer.frame,
+            from: borderContentGradientLayer.frame, // old frame
+            to: borderContentFrame,
             presentationBounds: borderContentGradientLayer.presentation()?.frame,
             with: sizeAnimation
           )
         }
+
+        borderContentGradientLayer.frame = borderContentFrame
 
       case .layer(let contentLayer):
         self.borderContentColorLayer?.removeFromSuperlayer()
@@ -302,18 +303,23 @@ public final class BorderLayer: CALayer {
 
         contentLayer.contentsScale = contentsScale
 
-        let contentLayerOldFrame = contentLayer.frame
-        contentLayer.frame = borderContentFrame
+        // below code order matters, the size animation should be added before the frame is set to the new bounds.
+        // if the contentLayer has a full size tracking layer, setting the frame will trigger the full size tracking logic,
+        // which will check the contentLayer's size change animation and use it as a reference animation for the contentLayer's full size tracking layer.
+        // to make sure the contentLayer's full size tracking layer can see the size change animation,
+        // the size animation should be added before the frame is set to the new bounds.
 
         // add size sync animation so that the border content layer can follow the bounds change
         if let sizeAnimation = self.sizeAnimation() {
           contentLayer.addFrameAnimation(
-            from: contentLayerOldFrame,
-            to: contentLayer.frame,
+            from: contentLayer.frame, // old frame
+            to: borderContentFrame,
             presentationBounds: contentLayer.presentation()?.frame,
             with: sizeAnimation
           )
         }
+
+        contentLayer.frame = borderContentFrame
       }
 
       // 2) set up border mask layer
@@ -334,18 +340,17 @@ public final class BorderLayer: CALayer {
 
         borderMaskLayer.contentsScale = contentsScale
 
-        let borderMaskLayerOldFrame = borderMaskLayer.frame
-        borderMaskLayer.frame = bounds
-
         // add size sync animation so that the border mask layer can follow the bounds change
         if let sizeAnimation = self.sizeAnimation() {
           borderMaskLayer.addFrameAnimation(
-            from: borderMaskLayerOldFrame,
-            to: borderMaskLayer.frame,
+            from: borderMaskLayer.frame, // old frame
+            to: bounds,
             presentationBounds: borderMaskLayer.presentation()?.frame,
             with: sizeAnimation
           )
         }
+
+        borderMaskLayer.frame = bounds
 
         borderMaskLayer.cornerRadius = cornerRadius
         borderMaskLayer.borderWidth = borderWidthValue

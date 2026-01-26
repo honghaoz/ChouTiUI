@@ -223,4 +223,55 @@ class CALayer_FullSizeTrackingLayerTests: XCTestCase {
     try expect((layer3.animation(forKey: "position") as? CABasicAnimation).unwrap().duration) == 1.5
     try expect((layer3.animation(forKey: "position-1") as? CABasicAnimation).unwrap().duration) == 1.5
   }
+
+  /// Test the order of block invocation when the bounds change.
+  func test_blockInvocationOrder() {
+    let window = TestWindow()
+
+    let beginFrame = CGRect(x: 0, y: 0, width: 100, height: 100)
+    let endFrame = CGRect(x: 0, y: 0, width: 150, height: 200)
+
+    let layer1 = CALayer()
+    layer1.frame = beginFrame
+    window.layer.addSublayer(layer1)
+
+    let layer2 = CALayer()
+
+    enum BlockType: Equatable {
+      case onBoundsChange
+      case onAddSizeChangeAnimation
+    }
+
+    var blockInvocationOrder: [BlockType] = []
+    layer1.addFullSizeTrackingLayer(
+      layer2,
+      onBoundsChange: { [weak layer2] context in
+        expect(layer2?.frame) == beginFrame // layer2's frame should not be changed yet
+
+        expect(context.oldBounds) == beginFrame
+        expect(context.newBounds) == endFrame
+
+        blockInvocationOrder.append(.onBoundsChange)
+      },
+      onAddSizeChangeAnimation: { context, animation in
+        expect(context.oldBounds) == beginFrame
+        expect(context.newBounds) == endFrame
+
+        blockInvocationOrder.append(.onAddSizeChangeAnimation)
+      }
+    )
+
+    // when add size change animations
+    layer1.animateFrame(to: endFrame, timing: .easeInEaseOut(duration: 1.5))
+
+    // then layers should have correct size change animation
+    try expect(
+      layer1.animationKeys().unwrap().sorted()
+    ).to(beEqual(
+      to: ["bounds.size", "position"]
+    ))
+
+    // verify onBoundsChange block is called before onAddSizeChangeAnimation block
+    expect(blockInvocationOrder) == [.onBoundsChange, .onAddSizeChangeAnimation]
+  }
 }

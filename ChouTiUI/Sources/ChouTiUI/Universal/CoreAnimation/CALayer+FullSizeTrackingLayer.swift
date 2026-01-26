@@ -93,12 +93,18 @@ public extension CALayer {
   ///   - layer: The layer to track.
   ///   - onBoundsChange: The block to be called when the bounds change.
   ///                     The block will be called with a context containing the host layer, the tracking layer, the old bounds and the new bounds.
+  ///                     The block is called when the host layer's bounds is just changed, before the `layer`'s frame is set to the new bounds (model value) and the size change animation is added.
   ///   - onAddSizeChangeAnimation: The block to be called when the tracking layer adds a size change animation based on the host layer's size change animation.
   ///                     The block will be called with a context containing the host layer, the tracking layer, the old bounds and the new bounds, and the host layer's size change animation. Don't modify the size animation, try to make a copy of it if needed.
+  ///                     The block invoke time is indeterminate, it could be called before or after the `layer`'s frame is set to the new bounds (model value).
   func addFullSizeTrackingLayer(_ layer: CALayer,
                                 onBoundsChange: ((_ context: BoundsChangeContext) -> Void)? = nil,
                                 onAddSizeChangeAnimation: ((_ context: BoundsChangeContext, _ sizeAnimation: CABasicAnimation) -> Void)? = nil)
   {
+    CATransaction.disableAnimations { // disable the implicit animation to avoid any UI artifact
+      layer.frame = bounds
+    }
+
     fullSizeTrackingLayers[ObjectIdentifier(layer)] = LayerTrackingInfo(layer: layer, onBoundsChange: onBoundsChange, onAddSizeChangeAnimation: onAddSizeChangeAnimation)
 
     // add the bounds change listener
@@ -127,20 +133,21 @@ public extension CALayer {
       let onBoundsChange = layerTrackingInfo.onBoundsChange
       let onAddSizeChangeAnimation = layerTrackingInfo.onAddSizeChangeAnimation
 
+      // call the onBoundsChange block here instead of in the `RunLoop.main.perform` block so that
+      // the onBoundsChange block can be triggered during event tracking run loop mode (e.g. window resizing).
+      onBoundsChange?(BoundsChangeContext(hostLayer: self, trackingLayer: layer, oldBounds: oldBounds, newBounds: newBounds))
+
       // order matters here, the size synchronization animation should be added before the frame is set to the new bounds
       // so that any sublayers of `layer` can see the size change animation and follow the host layer's size change
       self.addSizeSynchronizationAnimation(
         to: layer,
         oldBounds: oldBounds,
         newBounds: newBounds,
-        onAddSizeChangeAnimation: onAddSizeChangeAnimation
+        onAddSizeChangeAnimation: onAddSizeChangeAnimation,
+        shouldSchedule: true
       )
 
       layer.frame = newBounds
-
-      // call the onBoundsChange block here instead of in the `RunLoop.main.perform` block so that
-      // the onBoundsChange block can be triggered during event tracking run loop mode (e.g. window resizing).
-      onBoundsChange?(BoundsChangeContext(hostLayer: self, trackingLayer: layer, oldBounds: oldBounds, newBounds: newBounds))
     }
   }
 
@@ -149,7 +156,7 @@ public extension CALayer {
                                                oldBounds: CGRect,
                                                newBounds: CGRect,
                                                onAddSizeChangeAnimation: ((_ context: BoundsChangeContext, _ sizeAnimation: CABasicAnimation) -> Void)?,
-                                               shouldSchedule: Bool = true)
+                                               shouldSchedule: Bool)
   {
     guard let sizeAnimation = self.sizeAnimation() else {
       // no size animation found

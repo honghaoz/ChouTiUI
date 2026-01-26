@@ -632,6 +632,28 @@ class LayerBorderWindow: NSWindow {
           return button
         })
         .fixedSize()
+
+        ViewNode(make: { _ in
+          let button = NSButton(title: "Increase Size", target: nil, action: nil)
+          button.addAction {
+            BorderLayerDemoLayer.inset.value -= 10
+          }
+          button.wantsLayer = true
+          button.sizeToFit()
+          return button
+        })
+        .fixedSize()
+
+        ViewNode(make: { _ in
+          let button = NSButton(title: "Decrease Size", target: nil, action: nil)
+          button.addAction {
+            BorderLayerDemoLayer.inset.value += 10
+          }
+          button.wantsLayer = true
+          button.sizeToFit()
+          return button
+        })
+        .fixedSize()
       }
     }
     .frame(width: .flexible, height: Constants.toolbarHeight)
