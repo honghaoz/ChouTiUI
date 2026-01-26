@@ -65,6 +65,9 @@ class CALayer_FullSizeTrackingLayerTests: XCTestCase {
       }
     )
 
+    // expect the tracking layer's frame to be the same as the host layer's frame
+    expect(layer2.frame) == layer1.frame
+
     // when add size change animation
     layer1.animateFrame(to: CGRect(x: 0, y: 0, width: 150, height: 200), timing: .easeInEaseOut(duration: 1.5))
 
@@ -273,5 +276,125 @@ class CALayer_FullSizeTrackingLayerTests: XCTestCase {
 
     // verify onBoundsChange block is called before onAddSizeChangeAnimation block
     expect(blockInvocationOrder) == [.onBoundsChange, .onAddSizeChangeAnimation]
+  }
+
+  func test_removeFullSizeTrackingLayer() {
+    let window = TestWindow()
+
+    let layer1 = CALayer()
+    layer1.frame = CGRect(x: 0, y: 0, width: 100, height: 100)
+    window.layer.addSublayer(layer1)
+
+    let layer2 = CALayer()
+    layer1.addFullSizeTrackingLayer(layer2)
+
+    // when change the host layer's frame
+    layer1.frame = CGRect(x: 0, y: 0, width: 150, height: 200)
+
+    // then the tracking layer's frame should be the same as the host layer's frame
+    expect(layer2.frame) == layer1.frame
+
+    // when remove the tracking layer
+    layer1.removeFullSizeTrackingLayer(layer2)
+
+    // when change the host layer's frame again
+    layer1.frame = CGRect(x: 0, y: 0, width: 200, height: 300)
+
+    // then the tracking layer's frame should not be changed
+    expect(layer2.frame) == CGRect(x: 0, y: 0, width: 150, height: 200)
+  }
+
+  /// Test the case when the host layer's size change animation is non-additive.
+  func test_nonAdditiveAnimation() throws {
+    let window = TestWindow()
+
+    let layer1 = CALayer()
+    layer1.frame = CGRect(x: 0, y: 0, width: 100, height: 100)
+    window.layer.addSublayer(layer1)
+
+    var onBoundsChangeCallCount = 0
+    var onAddSizeChangeAnimationCallCount = 0
+    var onAddSizeChangeAnimationAnimation: CABasicAnimation?
+
+    let layer2 = CALayer()
+    layer1.addFullSizeTrackingLayer(
+      layer2,
+      onBoundsChange: { _ in
+        onBoundsChangeCallCount += 1
+      },
+      onAddSizeChangeAnimation: { _, animation in
+        onAddSizeChangeAnimationCallCount += 1
+        onAddSizeChangeAnimationAnimation = animation
+      }
+    )
+
+    // expect the tracking layer's frame to be the same as the host layer's frame
+    expect(layer2.frame) == layer1.frame
+
+    // when add a non-additive size change animation to the host layer
+    // NOTE: animation must be added BEFORE changing bounds, because the bounds change listener
+    // looks for the animation on the host layer to synchronize to the tracking layer
+    let oldBounds = layer1.bounds
+    let newBounds = CGRect(x: 0, y: 0, width: 150, height: 200)
+
+    let sizeAnimation = CABasicAnimation(keyPath: "bounds.size")
+    sizeAnimation.duration = 1.5
+    sizeAnimation.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+    sizeAnimation.isAdditive = false
+    sizeAnimation.fromValue = oldBounds.size
+    sizeAnimation.toValue = newBounds.size
+    layer1.add(sizeAnimation, forKey: "bounds.size")
+
+    let positionAnimation = CABasicAnimation(keyPath: "position")
+    positionAnimation.duration = 1.5
+    positionAnimation.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+    positionAnimation.isAdditive = false
+    positionAnimation.fromValue = oldBounds.center
+    positionAnimation.toValue = newBounds.center
+    layer1.add(positionAnimation, forKey: "position")
+
+    // now change the bounds (this triggers the bounds change listener which will sync the animation)
+    layer1.bounds = newBounds
+    layer1.position = newBounds.center
+
+    // then the host layer should have non-additive animations
+    try expect(
+      layer1.animationKeys().unwrap().sorted()
+    ).to(beEqual(
+      to: ["bounds.size", "position"]
+    ))
+    let hostSizeAnimation = try (layer1.animation(forKey: "bounds.size") as? CABasicAnimation).unwrap()
+    expect(hostSizeAnimation.isAdditive) == false
+    expect(hostSizeAnimation.fromValue as? CGSize) == oldBounds.size
+    expect(hostSizeAnimation.toValue as? CGSize) == newBounds.size
+    expect(hostSizeAnimation.duration) == 1.5
+
+    // then the tracking layer should also have non-additive animations
+    try expect(
+      layer2.animationKeys().unwrap().sorted()
+    ).to(beEqual(
+      to: ["bounds.size", "position"]
+    ))
+    let trackingSizeAnimation = try (layer2.animation(forKey: "bounds.size") as? CABasicAnimation).unwrap()
+    expect(trackingSizeAnimation.isAdditive) == false
+    // for non-additive animation, the fromValue should be the presentation bounds size (or old bounds if no presentation)
+    // and the toValue should be the new bounds size
+    expect(trackingSizeAnimation.fromValue as? CGSize) == oldBounds.size
+    expect(trackingSizeAnimation.toValue as? CGSize) == newBounds.size
+    expect(trackingSizeAnimation.duration) == 1.5
+    expect(trackingSizeAnimation.timingFunction) == CAMediaTimingFunction(name: .easeInEaseOut)
+
+    let trackingPositionAnimation = try (layer2.animation(forKey: "position") as? CABasicAnimation).unwrap()
+    expect(trackingPositionAnimation.isAdditive) == false
+    expect(trackingPositionAnimation.fromValue as? CGPoint) == oldBounds.center
+    expect(trackingPositionAnimation.toValue as? CGPoint) == newBounds.center
+    expect(trackingPositionAnimation.duration) == 1.5
+
+    // verify callbacks
+    expect(onBoundsChangeCallCount) == 1
+    expect(onAddSizeChangeAnimationCallCount) == 1
+    expect(onAddSizeChangeAnimationAnimation?.isAdditive) == false
+    expect(onAddSizeChangeAnimationAnimation?.duration) == 1.5
+    expect(onAddSizeChangeAnimationAnimation?.keyPath) == "bounds.size"
   }
 }
