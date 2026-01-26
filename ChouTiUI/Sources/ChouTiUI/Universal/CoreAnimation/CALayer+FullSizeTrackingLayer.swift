@@ -127,18 +127,20 @@ public extension CALayer {
       let onBoundsChange = layerTrackingInfo.onBoundsChange
       let onAddSizeChangeAnimation = layerTrackingInfo.onAddSizeChangeAnimation
 
-      layer.frame = newBounds
-
-      // call the onBoundsChange block here instead of in the `RunLoop.main.perform` block so that
-      // the onBoundsChange block can be triggered during event tracking run loop mode (e.g. window resizing).
-      onBoundsChange?(BoundsChangeContext(hostLayer: self, trackingLayer: layer, oldBounds: oldBounds, newBounds: newBounds))
-
+      // order matters here, the size synchronization animation should be added before the frame is set to the new bounds
+      // so that any sublayers of `layer` can see the size change animation and follow the host layer's size change
       self.addSizeSynchronizationAnimation(
         to: layer,
         oldBounds: oldBounds,
         newBounds: newBounds,
         onAddSizeChangeAnimation: onAddSizeChangeAnimation
       )
+
+      layer.frame = newBounds
+
+      // call the onBoundsChange block here instead of in the `RunLoop.main.perform` block so that
+      // the onBoundsChange block can be triggered during event tracking run loop mode (e.g. window resizing).
+      onBoundsChange?(BoundsChangeContext(hostLayer: self, trackingLayer: layer, oldBounds: oldBounds, newBounds: newBounds))
     }
   }
 

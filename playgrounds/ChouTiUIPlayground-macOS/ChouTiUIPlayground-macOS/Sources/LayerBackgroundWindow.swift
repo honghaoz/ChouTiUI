@@ -66,6 +66,35 @@ class LayerBackgroundWindow: NSWindow {
     addLayerWithBackground()
     addLayerWithBackground2()
     addLayerWithBackground3()
+
+    addFullSizeSublayerTest()
+  }
+
+  private func addFullSizeSublayerTest() {
+    // nested sublayers test
+    // layer1 -> layer2 -> layer3
+    // when layer1 animates its frame, layer2 and layer3 should also animate their frames perfectly.
+
+    let layer1 = CALayer()
+    layer1.frame = CGRect(10, 10, 100, 50)
+    layer1.backgroundColor = NSColor.red.cgColor
+    contentView?.layer()?.addSublayer(layer1)
+
+    let layer2 = CALayer()
+    layer2.backgroundColor = NSColor.blue.withAlphaComponent(0.5).cgColor
+    layer1.addFullSizeSublayer(layer2)
+
+    let layer3 = CALayer()
+    layer3.backgroundColor = NSColor.yellow.withAlphaComponent(0.5).cgColor
+    layer2.addFullSizeSublayer(layer3)
+
+    delay(1) {
+      layer1.animateFrame(to: CGRect(10, 10, 50, 30), timing: .easeInEaseOut(duration: 1.5))
+    }
+
+    delay(1.4) {
+      layer1.animateFrame(to: CGRect(10, 10, 20, 10), timing: .easeInEaseOut(duration: 1.5))
+    }
   }
 
   // Show the window.
