@@ -8,17 +8,24 @@
 --enable wrapSwitchCases
 
 --disable blankLinesAtStartOfScope
+--disable blankLinesBetweenImports
 --disable conditionalAssignment # https://github.com/nicklockwood/SwiftFormat/issues/1582
 --disable docComments
+--disable emptyExtensions
 --disable isEmpty
 --disable preferForLoop
+--disable redundantMemberwiseInit
 --disable redundantOptionalBinding
+--disable redundantProperty
 --disable redundantReturn
 --disable redundantSelf # https://github.com/nicklockwood/SwiftFormat/issues/1438
 --disable redundanttype
 --disable sortImports
 --disable strongifiedSelf
+--disable testSuiteAccessControl
 --disable unusedArguments
+--disable validateTestCases
+--disable wrapPropertyBodies
 
 # format options
 --decimalgrouping none
