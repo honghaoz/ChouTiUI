@@ -39,32 +39,33 @@ class CALayer_ThemingTests: XCTestCase {
 
   func test_theme_standaloneLayer() {
     let layer = CALayer()
-    expect(layer.theme) == .light
+    expect(layer.theme) == .light // initial theme is light
     expect(layer.overrideTheme) == nil
 
     let sublayer1 = CALayer()
     layer.addSublayer(sublayer1)
-    expect(sublayer1.theme) == .light
+    expect(sublayer1.theme) == .light // sublayer1 should inherit layer's theme
     expect(sublayer1.overrideTheme) == nil
 
-    layer.overrideTheme = .dark
+    layer.overrideTheme = .dark // set layer's override theme to dark
     expect(layer.theme) == .dark
     expect(layer.overrideTheme) == .dark
-    expect(sublayer1.theme) == .dark
+    expect(sublayer1.theme) == .dark // sublayer1 should inherit layer's override theme
     expect(sublayer1.overrideTheme) == nil
 
     // when add new sublayer, it should inherit current layer's theme
     let sublayer2 = CALayer()
     layer.addSublayer(sublayer2)
-    expect(sublayer2.theme) == .dark
+    expect(sublayer2.theme) == .dark // sublayer2 should inherit layer's theme
     expect(sublayer2.overrideTheme) == nil
 
     let sublayer3 = CALayer()
     sublayer3.overrideTheme = .light
     sublayer2.addSublayer(sublayer3)
-    expect(sublayer3.theme) == .light
+    expect(sublayer3.theme) == .light // sublayer3 should NOT inherit sublayer2's theme as it has an explicit override theme
     expect(sublayer3.overrideTheme) == .light
 
+    // clear root layer's override theme, sublayers should revert to light theme
     layer.overrideTheme = nil
     expect(layer.theme) == .light
     expect(layer.overrideTheme) == nil
@@ -75,6 +76,7 @@ class CALayer_ThemingTests: XCTestCase {
     expect(sublayer3.theme) == .light
     expect(sublayer3.overrideTheme) == .light
 
+    // set root layer's override theme to light, sublayers should inherit it
     layer.overrideTheme = .light
     expect(layer.theme) == .light
     expect(layer.overrideTheme) == .light
@@ -85,6 +87,29 @@ class CALayer_ThemingTests: XCTestCase {
     expect(sublayer3.theme) == .light
     expect(sublayer3.overrideTheme) == .light
 
+    // clear root layer's override theme from light, sublayers should revert to light theme
+    layer.overrideTheme = nil
+    expect(layer.theme) == .light
+    expect(layer.overrideTheme) == nil
+    expect(sublayer1.theme) == .light
+    expect(sublayer1.overrideTheme) == nil
+    expect(sublayer2.theme) == .light
+    expect(sublayer2.overrideTheme) == nil
+    expect(sublayer3.theme) == .light
+    expect(sublayer3.overrideTheme) == .light
+
+    // set root layer's override theme to dark, sublayers should inherit it
+    layer.overrideTheme = .dark
+    expect(layer.theme) == .dark
+    expect(layer.overrideTheme) == .dark
+    expect(sublayer1.theme) == .dark
+    expect(sublayer1.overrideTheme) == nil
+    expect(sublayer2.theme) == .dark
+    expect(sublayer2.overrideTheme) == nil
+    expect(sublayer3.theme) == .light
+    expect(sublayer3.overrideTheme) == .light
+
+    // clear root layer's override theme from dark, sublayers should revert to light theme
     layer.overrideTheme = nil
     expect(layer.theme) == .light
     expect(layer.overrideTheme) == nil
@@ -97,39 +122,50 @@ class CALayer_ThemingTests: XCTestCase {
   }
 
   func test_theme_layerBackedView() {
+    // get current theme, this is based on the current system theme
     #if os(macOS)
-    let currentTheme: Theme = NSApplication.shared.theme
+    let currentTheme: Theme = NSApplication.shared.theme // current macOS system theme
+    #else
+    let currentTheme: Theme = UITraitCollection.current.userInterfaceStyle.theme // current iOS/tvOS/visionOS system theme
+    #endif
 
+    // given a view in a window hierarchy
     let view = View()
+    #if os(macOS)
     view.wantsLayer = true
+    #endif
 
+    let window = TestWindow()
+    window.contentView().addSubview(view)
+
+    // then view's theme should be the same as the current system theme
+    expect(view.theme) == currentTheme
     expect(view.unsafeLayer.theme) == currentTheme
     expect(view.unsafeLayer.overrideTheme) == nil
 
+    // when set the layer's override theme to dark, the view's theme should be dark
     view.unsafeLayer.overrideTheme = .dark
     expect(view.theme) == .dark
     expect(view.unsafeLayer.theme) == .dark
     expect(view.unsafeLayer.overrideTheme) == .dark
 
+    // when clear the layer's override theme from dark, the view's theme should revert to the current system theme
     view.unsafeLayer.overrideTheme = nil
-    expect(view.theme) == .dark // expect to restore to current theme, but it keeps last theme
-    expect(view.unsafeLayer.theme) == .dark // expect to restore to current theme, but it keeps last theme
+    expect(view.theme) == currentTheme
+    expect(view.unsafeLayer.theme) == currentTheme
     expect(view.unsafeLayer.overrideTheme) == nil
 
+    // when set the layer's override theme to light, the view's theme should be light
     view.unsafeLayer.overrideTheme = .light
-    expect(view.theme) == .light // expect to restore to current theme, but it keeps last theme
-    expect(view.unsafeLayer.theme) == .light // expect to restore to current theme, but it keeps last theme
+    expect(view.theme) == .light
+    expect(view.unsafeLayer.theme) == .light
     expect(view.unsafeLayer.overrideTheme) == .light
 
+    // when clear the layer's override theme from light, the view's theme should revert to the current system theme
     view.unsafeLayer.overrideTheme = nil
-    expect(view.theme) == .light // expect to restore to current theme, but it keeps last theme
-    expect(view.unsafeLayer.theme) == .light // expect to restore to current theme, but it keeps last theme
+    expect(view.theme) == currentTheme
+    expect(view.unsafeLayer.theme) == currentTheme
     expect(view.unsafeLayer.overrideTheme) == nil
-
-    #else
-    // let currentTheme: Theme = UITraitCollection.current.userInterfaceStyle.theme
-    // TODO: test for iOS
-    #endif
   }
 
   func test_themeBinding_standaloneLayer() {
@@ -221,53 +257,102 @@ class CALayer_ThemingTests: XCTestCase {
   }
 
   func test_themeBinding_layerBackedView() {
+    // get current theme, this is based on the current system theme
     #if os(macOS)
-    let view = View()
-    view.wantsLayer = true
+    let currentTheme: Theme = NSApplication.shared.theme // current macOS system theme
+    #else
+    let currentTheme: Theme = UITraitCollection.current.userInterfaceStyle.theme // current iOS/tvOS/visionOS system theme
+    #endif
 
-    // set initial theme
-    view.overrideTheme = .light
+    let view = View()
+    #if os(macOS)
+    view.wantsLayer = true
+    #endif
+
+    let window = TestWindow()
+    window.contentView().addSubview(view)
+
+    // verify the initial theme values are correct
+    expect(view.theme) == currentTheme
+    if #available(iOS 17.0, tvOS 17.0, visionOS 1.0, *) {
+      expect(view.themeBinding.value) == currentTheme
+    }
+
+    let initialTheme = currentTheme.opposite
+
+    // set initial override theme to initial theme (opposite of current theme)
+    view.overrideTheme = initialTheme
     wait(timeout: 0.05)
-    expect(view.theme) == .light
-    expect(view.themeBinding.value) == .light
+
+    // then view's theme should be initial theme
+    expect(view.theme) == initialTheme
+    if #available(iOS 17.0, tvOS 17.0, visionOS 1.0, *) {
+      expect(view.themeBinding.value) == initialTheme
+    }
 
     let bindingObservationStorage = BindingObservationStorage()
 
-    var receivedThemes: [Theme] = []
-    view.themeBinding.observe { theme in
-      receivedThemes.append(theme)
-    }.store(in: bindingObservationStorage)
+    // observe view's theme updates
+    var viewThemeBindingThemes: [Theme] = []
+    if #available(iOS 17.0, tvOS 17.0, visionOS 1.0, *) {
+      view.themeBinding.observe { theme in
+        viewThemeBindingThemes.append(theme)
+      }.store(in: bindingObservationStorage)
+    }
 
-    view.overrideTheme = .dark
+    // when change the view's override theme
+    view.overrideTheme = initialTheme.opposite
     wait(timeout: 0.05)
-    expect(view.theme) == .dark
-    expect(view.themeBinding.value) == .dark
-    expect(receivedThemes) == [.dark]
+    expect(view.theme) == initialTheme.opposite
+    if #available(iOS 17.0, tvOS 17.0, visionOS 1.0, *) {
+      expect(view.themeBinding.value) == initialTheme.opposite
+    }
 
+    // then binding should emit value as theme is changed
+    expect(viewThemeBindingThemes) == [initialTheme.opposite]
+
+    // add a sublayer to the view
     let sublayer = CALayer()
     view.unsafeLayer.addSublayer(sublayer)
-    expect(sublayer.themeBinding.value) == .dark
+    expect(sublayer.theme) == initialTheme.opposite
+    expect(sublayer.themeBinding.value) == initialTheme.opposite
 
-    var receivedThemes1: [Theme] = []
+    var sublayerThemeBindingThemes: [Theme] = []
     sublayer.themeBinding.observe { theme in
-      receivedThemes1.append(theme)
+      sublayerThemeBindingThemes.append(theme)
     }.store(in: bindingObservationStorage)
 
-    view.overrideTheme = .light
+    // when change the view's override theme again
+    view.overrideTheme = initialTheme
     wait(timeout: 0.05)
-    expect(view.theme) == .light
-    expect(view.themeBinding.value) == .light
-    expect(receivedThemes) == [.dark, .light]
-    expect(receivedThemes1) == [.light]
+    expect(view.theme) == initialTheme
+    if #available(iOS 17.0, tvOS 17.0, visionOS 1.0, *) {
+      expect(view.themeBinding.value) == initialTheme
+    }
+    expect(viewThemeBindingThemes) == [initialTheme.opposite, initialTheme]
+    expect(sublayerThemeBindingThemes) == [initialTheme]
 
+    // when clear the view's override theme, should revert to current system theme
     view.overrideTheme = nil
     wait(timeout: 0.05)
-    expect(view.theme) == .light
-    expect(view.themeBinding.value) == .light
-    expect(receivedThemes) == [.dark, .light]
-    expect(receivedThemes1) == [.light]
-    #else
-    // TODO: test for iOS
-    #endif
+    expect(view.theme) == currentTheme
+    if #available(iOS 17.0, tvOS 17.0, visionOS 1.0, *) {
+      expect(view.themeBinding.value) == currentTheme
+    }
+    expect(viewThemeBindingThemes) == [initialTheme.opposite, initialTheme, currentTheme]
+    expect(sublayerThemeBindingThemes) == [initialTheme, currentTheme]
+  }
+}
+
+private extension Theme {
+
+  /// Returns the opposite theme.
+  var opposite: Theme {
+    switch self {
+    case .light:
+      return .dark
+    case .dark:
+      return .light
+    }
   }
 }

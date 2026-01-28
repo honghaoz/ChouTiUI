@@ -30,16 +30,29 @@
 
 import ChouTiTest
 
+import ChouTi
 import ChouTiUI
 
 class View_ThemedBackgroundColorTests: XCTestCase {
 
   func test_setBackgroundColor() {
-    #if os(macOS)
-    let view = View()
-    view.wantsLayer = true
+    // On iOS, the view must be in a window hierarchy for trait changes to propagate
+    let window = TestWindow()
 
-    view.setBackgroundColor(ThemedUnifiedColor(light: .color(.red), dark: .color(.blue)))
+    let view = View()
+    #if os(macOS)
+    view.wantsLayer = true
+    #endif
+
+    window.contentView().addSubview(view)
+
+    if #available(iOS 17.0, tvOS 17.0, visionOS 1.0, *) {
+      view.setBackgroundColor(ThemedUnifiedColor(light: .color(.red), dark: .color(.blue)))
+    }
+
+    // verify the underlying theme binding observation is set up
+    let observations = DynamicLookup(view.bindingObservationStorage).lazyProperty("observations") as? [AnyHashable: BindingObservation]
+    try expect(Array(observations.unwrap().keys)) == ["io.chouti.ChouTiUI.ThemeUpdating.themed-background-color"]
 
     view.overrideTheme = .light
     wait(timeout: 0.01)
@@ -49,7 +62,13 @@ class View_ThemedBackgroundColorTests: XCTestCase {
     wait(timeout: 0.01)
     expect(view.layer()?.backgroundColor) == Color.blue.cgColor
 
-    view.setBackgroundColor(ThemedColor(light: .yellow, dark: .green))
+    if #available(iOS 17.0, tvOS 17.0, visionOS 1.0, *) {
+      view.setBackgroundColor(ThemedColor(light: .yellow, dark: .green))
+    }
+
+    // verify the underlying theme binding observations still have only one observation
+    let observations1 = DynamicLookup(view.bindingObservationStorage).lazyProperty("observations") as? [AnyHashable: BindingObservation]
+    try expect(Array(observations1.unwrap().keys)) == ["io.chouti.ChouTiUI.ThemeUpdating.themed-background-color"]
 
     view.overrideTheme = .light
     wait(timeout: 0.01)
@@ -58,8 +77,5 @@ class View_ThemedBackgroundColorTests: XCTestCase {
     view.overrideTheme = .dark
     wait(timeout: 0.01)
     expect(view.layer()?.backgroundColor) == Color.green.cgColor
-    #else
-    // TODO: test for iOS
-    #endif
   }
 }

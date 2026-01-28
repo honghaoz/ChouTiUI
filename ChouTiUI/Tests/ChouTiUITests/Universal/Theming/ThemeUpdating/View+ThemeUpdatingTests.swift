@@ -1,5 +1,5 @@
 //
-//  NSView+ThemeUpdatingTests.swift
+//  View+ThemeUpdatingTests.swift
 //  ChouTiUI
 //
 //  Created by Honghao Zhang on 10/13/24.
@@ -29,31 +29,45 @@
 //
 
 #if canImport(AppKit)
-
 import AppKit
+#endif
+
+#if canImport(UIKit)
+import UIKit
+#endif
 
 import ChouTiTest
 
+import ChouTi
 import ChouTiUI
 
-class NSView_ThemeUpdatingTests: XCTestCase {
+class View_ThemeUpdatingTests: XCTestCase {
 
   func test_themeBinding_debounce() {
-    let view = NSView()
+    let window = TestWindow()
+
+    let view = View()
+    window.contentView().addSubview(view)
 
     // ensure initial theme is light
     view.overrideTheme = .light
     wait(timeout: 0.05)
     expect(view.theme) == .light
-    expect(view.themeBinding.value) == .light
+    if #available(iOS 17.0, tvOS 17.0, visionOS 1.0, *) {
+      expect(view.themeBinding.value) == .light
+    }
 
     // test observing
     let expectation = XCTestExpectation(description: "themeBinding")
     var receivedThemes: [Theme] = []
-    let observation = view.themeBinding.observe { theme in
-      receivedThemes.append(theme)
-      if receivedThemes.count == 1 {
-        expectation.fulfill()
+
+    var observation: (any BindingObservation)!
+    if #available(iOS 17.0, tvOS 17.0, visionOS 1.0, *) {
+      observation = view.themeBinding.observe { theme in
+        receivedThemes.append(theme)
+        if receivedThemes.count == 1 {
+          expectation.fulfill()
+        }
       }
     }
     _ = observation
@@ -72,6 +86,23 @@ class NSView_ThemeUpdatingTests: XCTestCase {
     // only [.dark] because of trailing debounce
     expect(receivedThemes) == [.dark]
   }
-}
 
-#endif
+  func test_themeBinding_accessFromBackgroundThread() {
+    let window = TestWindow()
+
+    let view = View()
+    window.contentView().addSubview(view)
+
+    // test accessing from background thread
+    let expectation = XCTestExpectation(description: "themeBinding")
+    let backgroundQueue = DispatchQueue(label: "backgroundQueue")
+    backgroundQueue.async {
+      expect(view.theme) == window.theme
+      if #available(iOS 17.0, tvOS 17.0, visionOS 1.0, *) {
+        expect(view.themeBinding.value) == window.theme
+      }
+      expectation.fulfill()
+    }
+    wait(for: [expectation], timeout: 1)
+  }
+}

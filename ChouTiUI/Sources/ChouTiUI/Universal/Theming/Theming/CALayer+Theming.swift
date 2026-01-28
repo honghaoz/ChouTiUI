@@ -70,10 +70,14 @@ extension CALayer: Theming, ThemeUpdating {
   /// - Note: This binding's value maybe out of sync with the actual theme if the layer is added to a new layer.
   public var themeBinding: AnyBinding<Theme> {
     if let backedView {
-      #if os(macOS)
+      #if canImport(AppKit)
       return backedView.themeBinding
-      #else
-      return (backedView as? ThemeUpdating).assert("backed view is not ThemeUpdating")?.themeBinding ?? StaticBinding(Theme.light).eraseToAnyBinding()
+      #elseif canImport(UIKit)
+      if #available(iOS 17.0, tvOS 17.0, visionOS 1.0, *) {
+        return backedView.themeBinding
+      } else {
+        return (backedView as? ThemeUpdating).assert("backed view is not ThemeUpdating")?.themeBinding ?? StaticBinding(Theme.light).eraseToAnyBinding()
+      }
       #endif
     } else {
       return superlayer?.themeBinding ?? _themeBinding.eraseToAnyBinding()

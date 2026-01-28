@@ -1,5 +1,5 @@
 //
-//  NSView+ThemeUpdating.swift
+//  View+ThemeUpdating.swift
 //  ChouTiUI
 //
 //  Created by Honghao Zhang on 1/14/23.
@@ -34,13 +34,11 @@ import AppKit
 
 extension NSView: ThemeUpdating {}
 
-#endif
+#elseif canImport(UIKit)
 
-// TODO: support UIView for ThemeUpdating
-//
-// Implementation notes:
-// - Create `UIView+ThemeUpdating.swift` with `extension UIView: ThemeUpdating {}`
-// - Create `UITraitEnvironment+Bindings.swift` to provide `themeBinding` for `UITraitEnvironment` types
-// - Use `registerForTraitChanges([UITraitUserInterfaceStyle.self], handler:)` (iOS 17+) to observe dark/light mode changes
-// - Convert `traitCollection.userInterfaceStyle` to `Theme`
-// - For iOS 16 and earlier, fall back to overriding `traitCollectionDidChange(_:)` (requires subclassing or swizzling)
+import UIKit
+
+@available(iOS 17.0, tvOS 17.0, visionOS 1.0, *) // UIView conforms to ThemeUpdating on iOS 17+ where `UITraitChangeObservable.registerForTraitChanges` is available.
+extension UIView: ThemeUpdating {}
+
+#endif
