@@ -37,11 +37,11 @@ test-macOS: # Run tests on macOS.
 
 .PHONY: test-iOS
 test-iOS: # Run tests on iOS.
-	@$(REPO_ROOT)/scripts/swift-package/test-workspace.sh --workspace-path "Project.xcworkspace" --scheme "ChouTiUI" --os "iOS"
+	@$(REPO_ROOT)/scripts/swift-package/test-workspace.sh --workspace-path "Project.xcworkspace" --scheme "ChouTiUI" --os "iOS" --beautify false
 
 .PHONY: test-tvOS
 test-tvOS: # Run tests on tvOS.
-	@$(REPO_ROOT)/scripts/swift-package/test-workspace.sh --workspace-path "Project.xcworkspace" --scheme "ChouTiUI" --os "tvOS"
+	@$(REPO_ROOT)/scripts/swift-package/test-workspace.sh --workspace-path "Project.xcworkspace" --scheme "ChouTiUI" --os "tvOS" --beautify false
 
 .PHONY: test-visionOS
 test-visionOS: # Run tests on visionOS.
