@@ -38,7 +38,8 @@ extension UIView: Theming {
 
   public var theme: Theme {
     let getThemeFromTraitCollection: () -> Theme = {
-      switch self.traitCollection.userInterfaceStyle {
+      let traitCollection = Thread.isMainThread ? self.traitCollection : DispatchQueue.main.sync { self.traitCollection }
+      switch traitCollection.userInterfaceStyle {
       case .unspecified:
         #if !os(tvOS)
         ChouTi.assertFailure("unspecified traitCollection.userInterfaceStyle")
@@ -54,6 +55,7 @@ extension UIView: Theming {
       }
     }
 
+    let overrideUserInterfaceStyle = Thread.isMainThread ? self.overrideUserInterfaceStyle : DispatchQueue.main.sync { self.overrideUserInterfaceStyle }
     switch overrideUserInterfaceStyle {
     case .unspecified:
       return getThemeFromTraitCollection()

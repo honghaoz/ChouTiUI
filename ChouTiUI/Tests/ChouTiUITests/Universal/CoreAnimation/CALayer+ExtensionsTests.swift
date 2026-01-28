@@ -78,6 +78,7 @@ class CALayer_ExtensionsTests: XCTestCase {
     expect(subSublayer.presentingView) === view
   }
 
+  @available(macOS 15.0, iOS 18.0, tvOS 18.0, visionOS 2.0, *)
   func test_borderOffset() {
     let layer = CALayer()
 

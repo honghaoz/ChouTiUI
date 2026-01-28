@@ -45,6 +45,7 @@ class ComposeNode_LayerModifiersTests: XCTestCase {
 
   // MARK: - Border Offset
 
+  @available(macOS 15.0, iOS 18.0, tvOS 18.0, visionOS 2.0, *)
   func test_borderOffset() {
     // normal border offset value
     do {
