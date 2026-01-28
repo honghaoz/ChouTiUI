@@ -28,6 +28,8 @@
 //  IN THE SOFTWARE.
 //
 
+import Foundation
+
 import ChouTi
 
 /// A type that can provide a theme binding.
@@ -35,4 +37,10 @@ public protocol ThemeUpdating: Theming {
 
   /// A binding to the theme.
   var themeBinding: AnyBinding<Theme> { get }
+}
+
+enum ThemeUpdatingConstants {
+
+  /// The debounce interval for the theme updating.
+  static let themeUpdatingDebounceInterval: TimeInterval = 0.0025
 }

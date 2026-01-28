@@ -38,23 +38,84 @@ import ChouTi
 class ThemeMonitorTests: XCTestCase {
 
   func test_theme() {
-    #if os(macOS)
+    #if canImport(AppKit)
+    let currentTheme: Theme = NSApplication.shared.theme // current macOS system theme
+    #else
+    let currentTheme: Theme = UITraitCollection.current.userInterfaceStyle.theme // current iOS/tvOS/visionOS system theme
+    #endif
+
+    #if canImport(AppKit)
+    let themeMonitor = ThemeMonitor.shared
+    expect(themeMonitor.theme) == currentTheme
+    expect(themeMonitor.themeBinding.value) == currentTheme
+
     // ensure initial theme
     let application = NSApplication.shared
     application.overrideTheme = .dark
-    wait(timeout: 0.05)
-
-    let themeMonitor = ThemeMonitor.shared
     expect(themeMonitor.theme) == .dark
-    expect(themeMonitor.themeBinding.value) == .dark
+    expect(themeMonitor.themeBinding.value).toEventually(beEqual(to: .dark))
 
     application.overrideTheme = .light
-    wait(timeout: 0.05)
     expect(themeMonitor.theme) == .light
-    expect(themeMonitor.themeBinding.value) == .light
+    expect(themeMonitor.themeBinding.value).toEventually(beEqual(to: .light))
 
-    expect(themeMonitor.accentColorBinding.value) == Color.controlAccentColor
+    // reset
+    application.overrideTheme = nil
+
+    #elseif canImport(UIKit)
+
+    let themeMonitor = ThemeMonitor.shared
+    expect(themeMonitor.theme) == currentTheme
+    expect(themeMonitor.themeBinding.value) == currentTheme
+
+    themeMonitor.overrideTheme = .dark
+    expect(themeMonitor.theme) == .dark
+    expect(themeMonitor.themeBinding.value).toEventually(beEqual(to: .dark))
+
+    themeMonitor.overrideTheme = .light
+    expect(themeMonitor.theme) == .light
+    expect(themeMonitor.themeBinding.value).toEventually(beEqual(to: .light))
+
+    // reset
+    themeMonitor.overrideTheme = nil
     #endif
+  }
+
+  /// Test the debounce behavior of the theme binding.
+  func test_themeBinding_debounce() {
+    let themeMonitor = ThemeMonitor()
+
+    let overrideTheme: (Theme?) -> Void = { theme in
+      #if canImport(AppKit)
+      NSApplication.shared.overrideTheme = theme
+      #elseif canImport(UIKit)
+      themeMonitor.overrideTheme = theme
+      #endif
+    }
+
+    overrideTheme(.dark)
+    expect(themeMonitor.theme) == .dark
+    expect(themeMonitor.themeBinding.value).toEventually(beEqual(to: .dark))
+
+    var receivedThemes: [Theme] = []
+    let observation = themeMonitor.themeBinding.observe { theme in
+      receivedThemes.append(theme)
+    }
+    _ = observation
+
+    overrideTheme(.light)
+    expect(receivedThemes) == [] // no emission yet
+
+    overrideTheme(.dark)
+    expect(receivedThemes) == [] // no emission yet
+
+    overrideTheme(.light)
+    expect(receivedThemes) == [] // no emission yet
+
+    expect(receivedThemes).toEventually(beEqual(to: [.light])) // should emit after debounce
+
+    // reset
+    overrideTheme(nil)
   }
 
   func test_accentColorBinding() {

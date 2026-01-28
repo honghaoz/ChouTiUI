@@ -79,7 +79,7 @@ public extension ThemeUpdating where Self: NSAppearanceCustomization {
     // self -> effectiveAppearanceBinding <- observation <- bindingObservationStorage
     // self -> bindingObservationStorage
     effectiveAppearanceBinding
-      .trailingDebounce(for: 0.0025, queue: .makeMain()) // add debounce because `effectiveAppearance` may emit too fast unnecessarily
+      .trailingDebounce(for: ThemeUpdatingConstants.themeUpdatingDebounceInterval, queue: .makeMain()) // add debounce because `effectiveAppearance` may emit too fast unnecessarily
       .observe { [weak themeBinding] appearance, stop in
         guard let themeBinding else {
           ChouTi.assertFailure("no themeBinding")

@@ -42,7 +42,7 @@ class ViewController: UIViewController {
     super.viewDidLoad()
 
     label = UILabel()
-    label.text = "Current OS theme: \(ThemeMonitor.shared.theme)"
+    label.text = "Current OS theme: \(view.theme)"
     label.textAlignment = .center
     label.textColor = .label
 
@@ -54,9 +54,17 @@ class ViewController: UIViewController {
       label.centerYAnchor.constraint(equalTo: view.centerYAnchor),
     ])
 
-    ThemeMonitor.shared.themeBinding.observe { [weak self] theme in
-      self?.label.text = "Current OS theme: \(theme)"
-    }.store(in: bindingObservationStorage)
+    if #available(iOS 17.0, *) {
+      view.themeBinding.observe { [weak self] theme in
+        print("theme changed to \(theme)")
+        self?.label.text = "Current OS theme: \(theme)"
+      }.store(in: bindingObservationStorage)
+    } else {
+      ThemeMonitor.shared.themeBinding.observe { [weak self] theme in
+        print("theme changed to \(theme)")
+        self?.label.text = "Current OS theme: \(theme)"
+      }.store(in: bindingObservationStorage)
+    }
 
     addLayerWithShape()
     testBorderMetalLayer()

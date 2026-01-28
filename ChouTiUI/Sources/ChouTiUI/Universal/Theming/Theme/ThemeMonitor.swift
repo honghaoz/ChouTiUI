@@ -113,17 +113,19 @@ public final class ThemeMonitor: UIWindow, ThemeMonitorType {
 
   private lazy var _themeBinding = Binding<Theme>(theme)
 
+  /// A debouncer to avoid excessive theme updates.
+  private lazy var themeUpdatingDebouncer = TrailingDebouncer(interval: ThemeUpdatingConstants.themeUpdatingDebounceInterval)
+
   public init() {
     /// can use `UITraitCollection.current.userInterfaceStyle.theme` to get the current theme
-    guard let windowScene = Application.shared.windowScenes.first else {
-      ChouTi.assertFailure("no window scenes")
+    if let windowScene = Application.shared.windowScenes.first {
+      super.init(windowScene: windowScene)
+    } else {
       super.init(frame: .zero)
-      return
     }
-    super.init(windowScene: windowScene)
 
     if #available(iOS 17.0, tvOS 17.0, visionOS 1.0, *) {
-      registerForTraitChanges([UITraitUserInterfaceStyle.self]) { (self: Self, previousTraitCollection: UITraitCollection) in
+      registerForTraitChanges([UITraitUserInterfaceStyle.self]) { (self: Self, _) in
         self.updateThemeIfNeeded()
       }
     }
@@ -143,8 +145,17 @@ public final class ThemeMonitor: UIWindow, ThemeMonitorType {
   }
 
   private func updateThemeIfNeeded() {
-    if _themeBinding.value != theme {
-      _themeBinding.value = theme
+    // use debouncer to avoid excessive theme updates
+    // this can happen when app goes into background, the trait collection change can emit unnecessarily fast.
+    // for example, if the app's theme is light, make the app goes into background, the trait collection change will emit "dark" then "light" in a short time.
+    themeUpdatingDebouncer.debounce { [weak self] in
+      guard let self = self else {
+        return
+      }
+
+      if self._themeBinding.value != self.theme {
+        self._themeBinding.value = self.theme
+      }
     }
   }
 }
