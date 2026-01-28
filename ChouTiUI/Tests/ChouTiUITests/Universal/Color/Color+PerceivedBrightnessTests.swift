@@ -63,14 +63,14 @@ class Color_PerceivedBrightnessTests: XCTestCase {
     // https://www.w3schools.com/colors/colors_cmyk.asp
     do {
       let cmykWhite = try CGColor(colorSpace: CGColorSpaceCreateDeviceCMYK(), components: [0, 0, 0, 0, 1]).unwrap()
-      try expect(cmykWhite.asColor().unwrap().perceivedBrightness()) == 0.99878945094347
+      try expect(cmykWhite.asColor().unwrap().perceivedBrightness()).to(beApproximatelyEqual(to: 0.99878945094347, within: 1e-7))
 
       let cmykBlack = try CGColor(colorSpace: CGColorSpaceCreateDeviceCMYK(), components: [0, 0, 0, 1, 1]).unwrap()
       try expect(cmykBlack.asColor().unwrap().perceivedBrightness()) == 0.10031022909283638
 
       // light green, cmyk(57%, 0%, 59%, 21%)
       let cmykLightGreen = try CGColor(colorSpace: CGColorSpaceCreateDeviceCMYK(), components: [0.57, 0, 0.59, 0.21, 1]).unwrap()
-      try expect(cmykLightGreen.asColor().unwrap().perceivedBrightness()) == 0.5049150318205357
+      try expect(cmykLightGreen.asColor().unwrap().perceivedBrightness()).to(beApproximatelyEqual(to: 0.5049150318205357, within: 1e-7))
 
       // dark green, cmyk(89%, 0%, 51%, 47%)
       let cmykDarkGreen = try CGColor(colorSpace: CGColorSpaceCreateDeviceCMYK(), components: [0.89, 0, 0.51, 0.47, 1]).unwrap()

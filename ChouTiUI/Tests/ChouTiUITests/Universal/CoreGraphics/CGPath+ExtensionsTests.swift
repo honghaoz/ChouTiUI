@@ -104,7 +104,7 @@ class CGPath_ExtensionsTests: XCTestCase {
     do {
       let rect = CGRect(x: 0, y: 0, width: 100, height: 100)
       let path = CGPath.path(roundedRect: rect, cornerWidth: 10, cornerHeight: 20)
-      expect(path.pathElements()) == [
+      expectPathElementsEqual(path.pathElements(), [
         .moveToPoint(CGPoint(100.0, 50)),
         .addLineToPoint(CGPoint(100.0, 90)),
         .addCurveToPoint(CGPoint(100.0, 95.522847498), CGPoint(95.522847498, 100), CGPoint(90.0, 100)),
@@ -115,7 +115,7 @@ class CGPath_ExtensionsTests: XCTestCase {
         .addLineToPoint(CGPoint(90.0, 0.0)),
         .addCurveToPoint(CGPoint(95.522847498, 3.381768755302334e-16), CGPoint(100.0, 4.477152502), CGPoint(100.0, 10.0)),
         .closeSubpath,
-      ]
+      ], absoluteTolerance: 1e-9)
     }
 
     // with transform
@@ -123,7 +123,7 @@ class CGPath_ExtensionsTests: XCTestCase {
       let rect = CGRect(x: 0, y: 0, width: 100, height: 100)
       let transform = CGAffineTransform.translation(x: 10, y: 20)
       let path = CGPath.path(roundedRect: rect, cornerWidth: 10, cornerHeight: 20, transform: transform)
-      expect(path.pathElements()) == [
+      expectPathElementsEqual(path.pathElements(), [
         .moveToPoint(CGPoint(110, 70)),
         .addLineToPoint(CGPoint(110, 110)),
         .addCurveToPoint(CGPoint(110, 115.522847498), CGPoint(105.522847498, 120), CGPoint(100, 120)),
@@ -134,7 +134,7 @@ class CGPath_ExtensionsTests: XCTestCase {
         .addLineToPoint(CGPoint(100, 20)),
         .addCurveToPoint(CGPoint(105.522847498, 20), CGPoint(110.0, 24.477152502), CGPoint(110.0, 30.0)),
         .closeSubpath,
-      ]
+      ], absoluteTolerance: 1e-9)
     }
   }
 

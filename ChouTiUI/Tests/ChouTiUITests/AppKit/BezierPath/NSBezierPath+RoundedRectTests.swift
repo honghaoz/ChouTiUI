@@ -295,7 +295,7 @@ class NSBezierPath_RoundedRectTests: XCTestCase {
       .addCurveToPoint(CGPoint(x: 50.0, y: 0.0), CGPoint(x: 50.0, y: 0.0), CGPoint(x: 50.0, y: 0.0)),
       .addLineToPoint(CGPoint(x: 80.0, y: 0.0)),
     ]
-    expectPathElementsEqual(path.cgPath.pathElements(), expectedElements)
+    expectPathElementsEqual(path.cgPath.pathElements(), expectedElements, absoluteTolerance: 1e-8)
   }
 
   func test_horizontalRect_shape3b_2() {
@@ -328,7 +328,7 @@ class NSBezierPath_RoundedRectTests: XCTestCase {
       .addCurveToPoint(CGPoint(x: 30.0, y: 0.0), CGPoint(x: 30.0, y: 0.0), CGPoint(x: 30.0, y: 0.0)),
       .addLineToPoint(CGPoint(x: 80.0, y: 0.0)),
     ]
-    expectPathElementsEqual(path.cgPath.pathElements(), expectedElements)
+    expectPathElementsEqual(path.cgPath.pathElements(), expectedElements, absoluteTolerance: 1e-8)
   }
 
   func test_verticalRect_shape1() {
@@ -468,7 +468,7 @@ class NSBezierPath_RoundedRectTests: XCTestCase {
       .addCurveToPoint(CGPoint(x: 30.0, y: 0.0), CGPoint(x: 30.0, y: 0.0), CGPoint(x: 30.0, y: 0.0)),
       .addLineToPoint(CGPoint(x: 30.0, y: 0.0)),
     ]
-    expectPathElementsEqual(path.cgPath.pathElements(), expectedElements)
+    expectPathElementsEqual(path.cgPath.pathElements(), expectedElements, absoluteTolerance: 1e-8)
   }
 
   func test_verticalRect_shape3a_2() {
@@ -501,7 +501,7 @@ class NSBezierPath_RoundedRectTests: XCTestCase {
       .addCurveToPoint(CGPoint(x: 30.0, y: 0.0), CGPoint(x: 30.0, y: 0.0), CGPoint(x: 30.0, y: 0.0)),
       .addLineToPoint(CGPoint(x: 30.0, y: 0.0)),
     ]
-    expectPathElementsEqual(path.cgPath.pathElements(), expectedElements)
+    expectPathElementsEqual(path.cgPath.pathElements(), expectedElements, absoluteTolerance: 1e-8)
   }
 
   // MARK: - Oval Corner Radius

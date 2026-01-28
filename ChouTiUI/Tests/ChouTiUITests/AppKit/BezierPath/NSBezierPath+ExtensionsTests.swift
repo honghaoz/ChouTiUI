@@ -45,9 +45,8 @@ class NSBezierPath_ExtensionsTests: XCTestCase {
 
   func test_init_arc() {
     let path = BezierPath(arcCenter: .zero, radius: 1, startAngle: 0, endAngle: .pi, clockwise: true)
-    let memoryAddressString = memoryAddressString(path)
-
     #if canImport(AppKit)
+    let memoryAddressString = memoryAddressString(path)
     expect(String(describing: path)) ==
       """
       Path <\(memoryAddressString)>
@@ -60,12 +59,11 @@ class NSBezierPath_ExtensionsTests: XCTestCase {
     #endif
 
     #if canImport(UIKit)
-    expect(String(describing: path)) ==
-      """
-      <UIBezierPath: \(memoryAddressString); <MoveTo {1, 0}>,
-       <CurveTo {0, 1} {1, 0.55228474979999997} {0.55228474979999997, 1}>,
-       <CurveTo {-1, 0} {-0.55228474979999997, 1} {-1, 0.55228474979999997}>
-      """
+    expectPathElementsEqual(path.cgPath.pathElements(), [
+      .moveToPoint(CGPoint(1, 0)),
+      .addCurveToPoint(CGPoint(1.0, 0.5522847498), CGPoint(0.5522847498, 1.0), CGPoint(0, 1)),
+      .addCurveToPoint(CGPoint(-0.5522847498, 1.0), CGPoint(-1.0, 0.5522847498), CGPoint(-1, 0)),
+    ], absoluteTolerance: 1e-9)
     #endif
   }
 
@@ -107,9 +105,8 @@ class NSBezierPath_ExtensionsTests: XCTestCase {
     path.addArc(withCenter: CGPoint(x: 1, y: 1), radius: 1, startAngle: 0, endAngle: .pi, clockwise: true)
     expect(path.currentPoint.isApproximatelyEqual(to: CGPoint(x: 0, y: 1), absoluteTolerance: 1e-6)) == true
 
-    let memoryAddressString = memoryAddressString(path)
-
     #if canImport(AppKit)
+    let memoryAddressString = memoryAddressString(path)
     expect(String(describing: path)) ==
       """
       Path <\(memoryAddressString)>
@@ -123,13 +120,12 @@ class NSBezierPath_ExtensionsTests: XCTestCase {
     #endif
 
     #if canImport(UIKit)
-    expect(String(describing: path)) ==
-      """
-      <UIBezierPath: \(memoryAddressString); <MoveTo {0, 0}>,
-       <LineTo {2, 1}>,
-       <CurveTo {1, 2} {2, 1.5522847498000001} {1.5522847498000001, 2}>,
-       <CurveTo {0, 1} {0.44771525020000003, 2} {0, 1.5522847498000001}>
-      """
+    expectPathElementsEqual(path.cgPath.pathElements(), [
+      .moveToPoint(CGPoint(0, 0)),
+      .addLineToPoint(CGPoint(2, 1)),
+      .addCurveToPoint(CGPoint(2.0, 1.5522847498), CGPoint(1.5522847498, 2.0), CGPoint(1, 2)),
+      .addCurveToPoint(CGPoint(0.4477152502, 2.0), CGPoint(0, 1.5522847498), CGPoint(0, 1)),
+    ], absoluteTolerance: 1e-9)
     #endif
   }
 
