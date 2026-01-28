@@ -50,8 +50,7 @@ public extension ThemeUpdating where Self: UITraitEnvironment {
       return binding
     }
 
-    let traitCollection = Thread.isMainThread ? self.traitCollection : DispatchQueue.main.sync { self.traitCollection }
-    let currentTheme = traitCollection.userInterfaceStyle.theme
+    let currentTheme = DispatchQueue.onMainSync { self.traitCollection.userInterfaceStyle.theme }
     let themeBinding = Binding<Theme>(currentTheme)
     let anyThemeBinding = themeBinding.eraseToAnyBinding()
     objc_setAssociatedObject(self, &AssociateKey.themeBinding, anyThemeBinding, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
@@ -80,7 +79,7 @@ public extension ThemeUpdating where Self: UITraitEnvironment {
 private extension ThemeUpdating where Self: UITraitEnvironment {
 
   func useRegisterForTraitChanges(themeBinding: Binding<Theme>) {
-    let registerTraitChanges: () -> Void = {
+    DispatchQueue.onMainSync {
       MainActor.assumeIsolated {
         guard let observable = self as? UITraitChangeObservable else {
           return
@@ -105,14 +104,6 @@ private extension ThemeUpdating where Self: UITraitEnvironment {
           }
         }
         objc_setAssociatedObject(self, &AssociateKey.traitChangeRegistration, registration, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
-      }
-    }
-
-    if Thread.isMainThread {
-      registerTraitChanges()
-    } else {
-      DispatchQueue.main.sync {
-        registerTraitChanges()
       }
     }
   }

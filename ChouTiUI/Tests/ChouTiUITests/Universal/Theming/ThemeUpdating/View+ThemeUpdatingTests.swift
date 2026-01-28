@@ -88,6 +88,7 @@ class View_ThemeUpdatingTests: XCTestCase {
     let backgroundQueue = DispatchQueue(label: "backgroundQueue")
     backgroundQueue.async {
       expect(view.theme) == window.theme
+      expect(view.overrideTheme) == nil
       expect(view.themeBinding.value) == window.theme
       expectation.fulfill()
     }

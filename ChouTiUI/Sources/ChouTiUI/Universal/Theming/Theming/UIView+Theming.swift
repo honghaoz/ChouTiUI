@@ -38,8 +38,7 @@ extension UIView: Theming {
 
   public var theme: Theme {
     let getThemeFromTraitCollection: () -> Theme = {
-      let traitCollection = Thread.isMainThread ? self.traitCollection : DispatchQueue.main.sync { self.traitCollection }
-      switch traitCollection.userInterfaceStyle {
+      switch self.traitCollection.userInterfaceStyle {
       case .unspecified:
         #if !os(tvOS)
         ChouTi.assertFailure("unspecified traitCollection.userInterfaceStyle")
@@ -55,22 +54,23 @@ extension UIView: Theming {
       }
     }
 
-    let overrideUserInterfaceStyle = Thread.isMainThread ? self.overrideUserInterfaceStyle : DispatchQueue.main.sync { self.overrideUserInterfaceStyle }
+    let overrideUserInterfaceStyle = DispatchQueue.onMainSync { self.overrideUserInterfaceStyle }
     switch overrideUserInterfaceStyle {
     case .unspecified:
-      return getThemeFromTraitCollection()
+      return DispatchQueue.onMainSync { getThemeFromTraitCollection() }
     case .light:
       return .light
     case .dark:
       return .dark
     @unknown default:
       ChouTi.assertFailure("unknown overrideUserInterfaceStyle: \(overrideUserInterfaceStyle)")
-      return getThemeFromTraitCollection()
+      return DispatchQueue.onMainSync { getThemeFromTraitCollection() }
     }
   }
 
   public var overrideTheme: Theme? {
     get {
+      let overrideUserInterfaceStyle = DispatchQueue.onMainSync { self.overrideUserInterfaceStyle }
       switch overrideUserInterfaceStyle {
       case .unspecified:
         return nil
@@ -84,10 +84,12 @@ extension UIView: Theming {
       }
     }
     set {
-      if let newValue {
-        overrideUserInterfaceStyle = newValue.isLight ? .light : .dark
-      } else {
-        overrideUserInterfaceStyle = .unspecified
+      DispatchQueue.onMainSync {
+        if let newValue {
+          overrideUserInterfaceStyle = newValue.isLight ? .light : .dark
+        } else {
+          overrideUserInterfaceStyle = .unspecified
+        }
       }
     }
   }
