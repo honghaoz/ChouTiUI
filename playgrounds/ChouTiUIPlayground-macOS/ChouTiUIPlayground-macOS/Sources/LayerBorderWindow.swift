@@ -762,7 +762,9 @@ private class BorderLayerDemoLayer: CALayer {
     addSublayer(contentLayer)
 
     borderLayer.borderContent = borderContent
-    borderLayer.borderMask = .cornerRadius(contentLayer.cornerRadius, offset: offset)
+    if #available(macOS 15.0, iOS 18.0, tvOS 18.0, visionOS 2.0, *) {
+      borderLayer.borderMask = .cornerRadius(contentLayer.cornerRadius, offset: offset)
+    }
     borderLayer.borderWidth = 10
     addSublayer(borderLayer)
 

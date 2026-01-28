@@ -67,6 +67,7 @@ public extension CALayer {
   /// The offset of the border of the layer.
   ///
   /// Positive value makes the border move outward, negative value makes the border move inward.
+  @available(macOS 15.0, iOS 18.0, tvOS 18.0, visionOS 2.0, *)
   var borderOffset: CGFloat {
     get {
       value(forKey: Self.borderOffsetKey).assert("missing value for key \(Self.borderOffsetKey)") as? CGFloat ?? 0

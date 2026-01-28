@@ -39,6 +39,7 @@ public extension ComposeNode {
   ///
   /// - Parameter offset: The border offset to set.
   /// - Returns: A new node with the border offset set.
+  @available(macOS 15.0, iOS 18.0, tvOS 18.0, visionOS 2.0, *)
   func borderOffset(_ offset: CGFloat) -> some ComposeNode {
     borderOffset(Themed(offset))
   }
@@ -49,6 +50,7 @@ public extension ComposeNode {
   ///
   /// - Parameter offset: The border offset to set.
   /// - Returns: A new node with the border offset set.
+  @available(macOS 15.0, iOS 18.0, tvOS 18.0, visionOS 2.0, *)
   func borderOffset(_ offset: Themed<CGFloat>) -> some ComposeNode {
     onUpdate { item, context in
       guard context.updateType.requiresFullUpdate else {

@@ -47,7 +47,13 @@ class LayerBorderOffsetWindow: NSWindow {
     ColorNode(.white.opacity(0.2))
       .cornerRadius(16)
       .border(color: .red, width: 4)
-      .borderOffset(borderOffset)
+      .map {
+        if #available(macOS 15.0, iOS 18.0, tvOS 18.0, visionOS 2.0, *) {
+          $0.borderOffset(borderOffset)
+        } else {
+          $0
+        }
+      }
       .animation(.easeInEaseOut(duration: 1))
       .overlay {
         LabelNode("Border offset: \(borderOffset.rounded())")
