@@ -29,16 +29,11 @@
 //
 
 #if canImport(AppKit)
-
 import AppKit
-
-extension NSView: ThemeUpdating {}
-
-#elseif canImport(UIKit)
-
-import UIKit
-
-@available(iOS 17.0, tvOS 17.0, visionOS 1.0, *) // UIView conforms to ThemeUpdating on iOS 17+ where `UITraitChangeObservable.registerForTraitChanges` is available.
-extension UIView: ThemeUpdating {}
-
 #endif
+
+#if canImport(UIKit)
+import UIKit
+#endif
+
+extension View: ThemeUpdating {}

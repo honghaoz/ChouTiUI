@@ -29,6 +29,12 @@
 //
 
 #if canImport(AppKit)
+import AppKit
+#endif
+
+#if canImport(UIKit)
+import UIKit
+#endif
 
 public extension ThemeUpdating where Self: View {
 
@@ -54,45 +60,6 @@ public extension ThemeUpdating where Self: View {
       case .dark:
         self?.layer()?.background = color.dark
       }
-    }.store(in: bindingObservationStorage, for: Constants.themeBindingObservationStorageKey) // set explicit key to override the old one
+    }.store(in: bindingObservationStorage, for: "io.chouti.ChouTiUI.ThemeUpdating.themed-background-color") // set explicit key to override the old one
   }
-}
-
-#elseif canImport(UIKit)
-
-@available(iOS 17.0, tvOS 17.0, visionOS 1.0, *)
-public extension ThemeUpdating where Self: View {
-
-  /// Set themed background color.
-  ///
-  /// - Parameters:
-  ///   - color: The color to set.
-  @inlinable
-  @inline(__always)
-  func setBackgroundColor(_ color: ThemedColor) {
-    setBackgroundColor(color.themedUnifiedColor)
-  }
-
-  /// Set themed background color.
-  ///
-  /// - Parameters:
-  ///   - color: The color to set.
-  func setBackgroundColor(_ color: ThemedUnifiedColor) {
-    themeBinding.emitCurrentValue().observe { [weak self] theme in
-      switch theme {
-      case .light:
-        self?.layer.background = color.light
-      case .dark:
-        self?.layer.background = color.dark
-      }
-    }.store(in: bindingObservationStorage, for: Constants.themeBindingObservationStorageKey) // set explicit key to override the old one
-  }
-}
-
-#endif
-
-// MARK: - Constants
-
-private enum Constants {
-  static let themeBindingObservationStorageKey = "io.chouti.ChouTiUI.ThemeUpdating.themed-background-color"
 }

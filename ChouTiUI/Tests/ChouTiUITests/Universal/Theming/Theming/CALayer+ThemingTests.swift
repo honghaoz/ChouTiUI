@@ -274,9 +274,7 @@ class CALayer_ThemingTests: XCTestCase {
 
     // verify the initial theme values are correct
     expect(view.theme) == currentTheme
-    if #available(iOS 17.0, tvOS 17.0, visionOS 1.0, *) {
-      expect(view.themeBinding.value) == currentTheme
-    }
+    expect(view.themeBinding.value) == currentTheme
 
     let initialTheme = currentTheme.opposite
 
@@ -286,27 +284,21 @@ class CALayer_ThemingTests: XCTestCase {
 
     // then view's theme should be initial theme
     expect(view.theme) == initialTheme
-    if #available(iOS 17.0, tvOS 17.0, visionOS 1.0, *) {
-      expect(view.themeBinding.value) == initialTheme
-    }
+    expect(view.themeBinding.value) == initialTheme
 
     let bindingObservationStorage = BindingObservationStorage()
 
     // observe view's theme updates
     var viewThemeBindingThemes: [Theme] = []
-    if #available(iOS 17.0, tvOS 17.0, visionOS 1.0, *) {
-      view.themeBinding.observe { theme in
-        viewThemeBindingThemes.append(theme)
-      }.store(in: bindingObservationStorage)
-    }
+    view.themeBinding.observe { theme in
+      viewThemeBindingThemes.append(theme)
+    }.store(in: bindingObservationStorage)
 
     // when change the view's override theme
     view.overrideTheme = initialTheme.opposite
     wait(timeout: 0.05)
     expect(view.theme) == initialTheme.opposite
-    if #available(iOS 17.0, tvOS 17.0, visionOS 1.0, *) {
-      expect(view.themeBinding.value) == initialTheme.opposite
-    }
+    expect(view.themeBinding.value) == initialTheme.opposite
 
     // then binding should emit value as theme is changed
     expect(viewThemeBindingThemes) == [initialTheme.opposite]
@@ -326,9 +318,7 @@ class CALayer_ThemingTests: XCTestCase {
     view.overrideTheme = initialTheme
     wait(timeout: 0.05)
     expect(view.theme) == initialTheme
-    if #available(iOS 17.0, tvOS 17.0, visionOS 1.0, *) {
-      expect(view.themeBinding.value) == initialTheme
-    }
+    expect(view.themeBinding.value) == initialTheme
     expect(viewThemeBindingThemes) == [initialTheme.opposite, initialTheme]
     expect(sublayerThemeBindingThemes) == [initialTheme]
 
@@ -336,9 +326,7 @@ class CALayer_ThemingTests: XCTestCase {
     view.overrideTheme = nil
     wait(timeout: 0.05)
     expect(view.theme) == currentTheme
-    if #available(iOS 17.0, tvOS 17.0, visionOS 1.0, *) {
-      expect(view.themeBinding.value) == currentTheme
-    }
+    expect(view.themeBinding.value) == currentTheme
     expect(viewThemeBindingThemes) == [initialTheme.opposite, initialTheme, currentTheme]
     expect(sublayerThemeBindingThemes) == [initialTheme, currentTheme]
   }

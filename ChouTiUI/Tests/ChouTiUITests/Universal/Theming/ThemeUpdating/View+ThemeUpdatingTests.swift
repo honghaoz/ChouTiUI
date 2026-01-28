@@ -53,16 +53,11 @@ class View_ThemeUpdatingTests: XCTestCase {
     view.overrideTheme = .light
     wait(timeout: 0.05)
     expect(view.theme) == .light
-    if #available(iOS 17.0, tvOS 17.0, visionOS 1.0, *) {
-      expect(view.themeBinding.value) == .light
-    }
+    expect(view.themeBinding.value) == .light
 
     var receivedThemes: [Theme] = []
-    var observation: (any BindingObservation)!
-    if #available(iOS 17.0, tvOS 17.0, visionOS 1.0, *) {
-      observation = view.themeBinding.observe { theme in
-        receivedThemes.append(theme)
-      }
+    let observation = view.themeBinding.observe { theme in
+      receivedThemes.append(theme)
     }
     _ = observation
 
@@ -93,9 +88,7 @@ class View_ThemeUpdatingTests: XCTestCase {
     let backgroundQueue = DispatchQueue(label: "backgroundQueue")
     backgroundQueue.async {
       expect(view.theme) == window.theme
-      if #available(iOS 17.0, tvOS 17.0, visionOS 1.0, *) {
-        expect(view.themeBinding.value) == window.theme
-      }
+      expect(view.themeBinding.value) == window.theme
       expectation.fulfill()
     }
     wait(for: [expectation], timeout: 1)

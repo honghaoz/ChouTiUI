@@ -46,9 +46,7 @@ class View_ThemedBackgroundColorTests: XCTestCase {
 
     window.contentView().addSubview(view)
 
-    if #available(iOS 17.0, tvOS 17.0, visionOS 1.0, *) {
-      view.setBackgroundColor(ThemedUnifiedColor(light: .color(.red), dark: .color(.blue)))
-    }
+    view.setBackgroundColor(ThemedUnifiedColor(light: .color(.red), dark: .color(.blue)))
 
     // verify the underlying theme binding observation is set up
     let observations = DynamicLookup(view.bindingObservationStorage).lazyProperty("observations") as? [AnyHashable: BindingObservation]
@@ -62,9 +60,7 @@ class View_ThemedBackgroundColorTests: XCTestCase {
     wait(timeout: 0.01)
     expect(view.layer()?.backgroundColor) == Color.blue.cgColor
 
-    if #available(iOS 17.0, tvOS 17.0, visionOS 1.0, *) {
-      view.setBackgroundColor(ThemedColor(light: .yellow, dark: .green))
-    }
+    view.setBackgroundColor(ThemedColor(light: .yellow, dark: .green))
 
     // verify the underlying theme binding observations still have only one observation
     let observations1 = DynamicLookup(view.bindingObservationStorage).lazyProperty("observations") as? [AnyHashable: BindingObservation]
