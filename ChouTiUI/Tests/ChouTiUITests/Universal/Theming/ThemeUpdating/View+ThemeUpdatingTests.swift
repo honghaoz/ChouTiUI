@@ -57,34 +57,29 @@ class View_ThemeUpdatingTests: XCTestCase {
       expect(view.themeBinding.value) == .light
     }
 
-    // test observing
-    let expectation = XCTestExpectation(description: "themeBinding")
     var receivedThemes: [Theme] = []
-
     var observation: (any BindingObservation)!
     if #available(iOS 17.0, tvOS 17.0, visionOS 1.0, *) {
       observation = view.themeBinding.observe { theme in
         receivedThemes.append(theme)
-        if receivedThemes.count == 1 {
-          expectation.fulfill()
-        }
       }
     }
     _ = observation
 
     view.overrideTheme = .dark
     expect(view.theme) == .dark
+    expect(receivedThemes) == []
 
     view.overrideTheme = .light
     expect(view.theme) == .light
+    expect(receivedThemes) == []
 
     view.overrideTheme = .dark
     expect(view.theme) == .dark
-
-    wait(for: [expectation], timeout: 1)
+    expect(receivedThemes) == []
 
     // only [.dark] because of trailing debounce
-    expect(receivedThemes) == [.dark]
+    expect(receivedThemes).toEventually(beEqual(to: [.dark]))
   }
 
   func test_themeBinding_accessFromBackgroundThread() {

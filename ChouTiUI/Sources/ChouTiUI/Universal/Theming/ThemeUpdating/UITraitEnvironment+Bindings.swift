@@ -39,6 +39,7 @@ private enum AssociateKey {
 
   static var themeBinding: UInt8 = 0
   static var traitChangeRegistration: UInt8 = 0
+  static var themeUpdatingDebouncer: UInt8 = 0
 }
 
 @available(iOS 17.0, tvOS 17.0, visionOS 1.0, *)
@@ -57,13 +58,18 @@ public extension ThemeUpdating where Self: UITraitChangeObservable & UITraitEnvi
     let registerTraitChanges: () -> Void = {
       MainActor.assumeIsolated {
         let registration = self.registerForTraitChanges([UITraitUserInterfaceStyle.self]) { [weak themeBinding] (object: Self, _: UITraitCollection) in
-          guard let themeBinding else {
-            ChouTi.assertFailure("no themeBinding")
-            return
-          }
-          let newTheme = object.traitCollection.userInterfaceStyle.theme
-          if newTheme != themeBinding.value {
-            themeBinding.value = newTheme
+          // use debouncer to avoid excessive theme updates
+          // this can happen when app goes into background, the trait collection change can emit unnecessarily fast.
+          // for example, if the app's theme is light, make the app goes into background, the trait collection change will emit "dark" then "light" in a short time.
+          object.themeUpdatingDebouncer.debounce { [weak themeBinding] in
+            guard let themeBinding else {
+              ChouTi.assertFailure("no themeBinding")
+              return
+            }
+            let newTheme = object.traitCollection.userInterfaceStyle.theme
+            if newTheme != themeBinding.value {
+              themeBinding.value = newTheme
+            }
           }
         }
         objc_setAssociatedObject(self, &AssociateKey.traitChangeRegistration, registration, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
@@ -79,6 +85,15 @@ public extension ThemeUpdating where Self: UITraitChangeObservable & UITraitEnvi
     }
 
     return anyThemeBinding
+  }
+
+  private var themeUpdatingDebouncer: TrailingDebouncer {
+    if let debouncer = objc_getAssociatedObject(self, &AssociateKey.themeUpdatingDebouncer) as? TrailingDebouncer {
+      return debouncer
+    }
+    let debouncer = TrailingDebouncer(interval: ThemeUpdatingConstants.themeUpdatingDebounceInterval)
+    objc_setAssociatedObject(self, &AssociateKey.themeUpdatingDebouncer, debouncer, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+    return debouncer
   }
 }
 
