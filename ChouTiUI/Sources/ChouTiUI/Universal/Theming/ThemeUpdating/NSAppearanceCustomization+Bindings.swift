@@ -51,11 +51,13 @@ public extension NSAppearanceCustomization {
       return binding
     }
 
-    let newBinding = Binding<NSAppearance>(effectiveAppearance)
+    let newBinding = DispatchQueue.onMainSync { Binding<NSAppearance>(effectiveAppearance) }
     objc_setAssociatedObject(self, &AssociateKey.effectiveAppearanceBinding, newBinding, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
 
     let observationToken: KVOObserver<Self, NSAppearance> = observe("effectiveAppearance") { [weak newBinding] object, _, newValue in
-      ChouTi.assert(object.effectiveAppearance == newValue)
+      DispatchQueue.onMainSync {
+        ChouTi.assert(object.effectiveAppearance == newValue)
+      }
       newBinding?.value = newValue
     }
     objc_setAssociatedObject(self, &AssociateKey.effectiveAppearanceKVOToken, observationToken, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
@@ -72,7 +74,7 @@ public extension ThemeUpdating where Self: NSAppearanceCustomization {
       return binding
     }
 
-    let themeBinding = Binding<Theme>(effectiveAppearance.theme)
+    let themeBinding = Binding<Theme>(DispatchQueue.onMainSync { effectiveAppearance.theme })
     let anyThemeBinding = themeBinding.eraseToAnyBinding()
     objc_setAssociatedObject(self, &AssociateKey.themeBinding, anyThemeBinding, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
 

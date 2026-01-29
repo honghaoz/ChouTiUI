@@ -128,6 +128,27 @@ class NSPopover_ThemingTests: XCTestCase {
       expect(popover.overrideTheme) == nil
     }
   }
+
+  func test_theme_onBackgroundThread() {
+    let expectation = XCTestExpectation(description: "theme")
+
+    let currentTheme = NSApplication.shared.theme
+
+    let popover = NSPopover()
+
+    DispatchQueue.global().async {
+      expect(popover.theme) == currentTheme
+      expect(popover.overrideTheme) == nil
+
+      popover.overrideTheme = .dark
+      expect(popover.theme) == .dark
+      expect(popover.overrideTheme) == .dark
+
+      expectation.fulfill()
+    }
+
+    wait(for: [expectation], timeout: 1)
+  }
 }
 
 #endif

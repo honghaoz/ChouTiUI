@@ -35,23 +35,25 @@ import AppKit
 extension NSPopover: Theming {
 
   public var theme: Theme {
-    effectiveAppearance.theme
+    DispatchQueue.onMainSync { effectiveAppearance.theme }
   }
 
   public var overrideTheme: Theme? {
     get {
-      appearance?.theme ?? nil
+      DispatchQueue.onMainSync { appearance?.theme ?? nil }
     }
     set {
-      if let newValue {
-        appearance = NSAppearance(named: newValue.isLight ? .aqua : .darkAqua)
-      } else {
-        appearance = nil
-      }
+      DispatchQueue.onMainSync {
+        if let newValue {
+          appearance = NSAppearance(named: newValue.isLight ? .aqua : .darkAqua)
+        } else {
+          appearance = nil
+        }
 
-      // expected to affect content view controller's theme
-      // but it seems not working, so set the view's override theme here
-      contentViewController?.view.overrideTheme = newValue
+        // expected to affect content view controller's theme
+        // but it seems not working, so set the view's override theme here
+        contentViewController?.view.overrideTheme = newValue
+      }
     }
   }
 }

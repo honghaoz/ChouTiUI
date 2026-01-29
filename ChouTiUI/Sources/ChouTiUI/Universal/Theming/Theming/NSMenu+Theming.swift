@@ -35,23 +35,25 @@ import AppKit
 extension NSMenu: Theming {
 
   public var theme: Theme {
-    effectiveAppearance.theme
+    DispatchQueue.onMainSync { effectiveAppearance.theme }
   }
 
   public var overrideTheme: Theme? {
     get {
-      appearance?.theme ?? nil
+      DispatchQueue.onMainSync { appearance?.theme ?? nil }
     }
     set {
-      if let newValue {
-        appearance = NSAppearance(named: newValue.isLight ? .aqua : .darkAqua)
-      } else {
-        appearance = nil
-      }
+      DispatchQueue.onMainSync {
+        if let newValue {
+          appearance = NSAppearance(named: newValue.isLight ? .aqua : .darkAqua)
+        } else {
+          appearance = nil
+        }
 
-      // for each menu item, set its view's override theme
-      for item in items {
-        item.view?.overrideTheme = newValue
+        // for each menu item, set its view's override theme
+        for item in items {
+          item.view?.overrideTheme = newValue
+        }
       }
     }
   }

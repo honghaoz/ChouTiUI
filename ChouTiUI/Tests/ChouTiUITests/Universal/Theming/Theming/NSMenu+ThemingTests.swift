@@ -126,6 +126,26 @@ class NSMenu_ThemingTests: XCTestCase {
       expect(menu.overrideTheme) == nil
     }
   }
+
+  func test_theme_onBackgroundThread() {
+    let expectation = XCTestExpectation(description: "theme")
+
+    let currentTheme = NSApplication.shared.theme
+
+    DispatchQueue.global().async {
+      let menu = NSMenu()
+      expect(menu.theme) == currentTheme
+      expect(menu.overrideTheme) == nil
+
+      menu.overrideTheme = .dark
+      expect(menu.theme) == .dark
+      expect(menu.overrideTheme) == .dark
+
+      expectation.fulfill()
+    }
+
+    wait(for: [expectation], timeout: 1)
+  }
 }
 
 #endif

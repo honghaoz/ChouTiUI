@@ -61,6 +61,26 @@ class NSView_ThemingTests: XCTestCase {
     expect(view.theme) == .light // expected to be currentTheme, but it returns the last override theme
     expect(view.overrideTheme) == nil
   }
+
+  func test_theme_onBackgroundThread() {
+    let expectation = XCTestExpectation(description: "theme")
+
+    let view = NSView()
+    let currentTheme = NSApplication.shared.theme
+
+    DispatchQueue.global().async {
+      expect(view.theme) == currentTheme
+      expect(view.overrideTheme) == nil
+
+      view.overrideTheme = .dark
+      expect(view.theme) == .dark
+      expect(view.overrideTheme) == .dark
+
+      expectation.fulfill()
+    }
+
+    wait(for: [expectation], timeout: 1)
+  }
 }
 
 #endif

@@ -35,18 +35,20 @@ import AppKit
 extension NSView: Theming {
 
   public var theme: Theme {
-    effectiveAppearance.theme
+    DispatchQueue.onMainSync { effectiveAppearance.theme }
   }
 
   public var overrideTheme: Theme? {
     get {
-      appearance?.theme ?? nil
+      DispatchQueue.onMainSync { appearance?.theme ?? nil }
     }
     set {
-      if let newValue {
-        appearance = NSAppearance(named: newValue.isLight ? .aqua : .darkAqua)
-      } else {
-        appearance = nil
+      DispatchQueue.onMainSync {
+        if let newValue {
+          appearance = NSAppearance(named: newValue.isLight ? .aqua : .darkAqua)
+        } else {
+          appearance = nil
+        }
       }
     }
   }

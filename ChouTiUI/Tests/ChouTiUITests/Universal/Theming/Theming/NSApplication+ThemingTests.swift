@@ -92,6 +92,20 @@ class NSApplication_ThemingTests: XCTestCase {
     expect(NSMenu().theme) == currentTheme
     expect(NSMenu().overrideTheme) == nil
   }
+
+  func test_theme_onBackgroundThread() {
+    let expectation = XCTestExpectation(description: "theme")
+
+    DispatchQueue.global().async {
+      let application = NSApplication.shared
+      application.overrideTheme = .dark
+      expect(application.theme) == .dark
+      expect(application.overrideTheme) == .dark
+      expectation.fulfill()
+    }
+
+    wait(for: [expectation], timeout: 1)
+  }
 }
 
 #endif

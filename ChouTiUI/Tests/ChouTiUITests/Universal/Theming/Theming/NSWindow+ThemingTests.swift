@@ -123,6 +123,26 @@ class NSWindow_ThemingTests: XCTestCase {
       expect(window.overrideTheme) == nil
     }
   }
+
+  func test_theme_onBackgroundThread() {
+    let expectation = XCTestExpectation(description: "theme")
+
+    let window = NSWindow()
+    let currentTheme = NSApplication.shared.theme
+
+    DispatchQueue.global().async {
+      expect(window.theme) == currentTheme
+      expect(window.overrideTheme) == nil
+
+      window.overrideTheme = .dark
+      expect(window.theme) == .dark
+      expect(window.overrideTheme) == .dark
+
+      expectation.fulfill()
+    }
+
+    wait(for: [expectation], timeout: 1)
+  }
 }
 
 #endif
