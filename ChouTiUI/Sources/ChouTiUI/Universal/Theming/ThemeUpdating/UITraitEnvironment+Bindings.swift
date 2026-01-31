@@ -50,7 +50,7 @@ public extension ThemeUpdating where Self: UITraitEnvironment {
       return binding
     }
 
-    let currentTheme = DispatchQueue.onMainSync { self.traitCollection.userInterfaceStyle.theme }
+    let currentTheme = DispatchQueue.onMainSync { self.theme }
     let themeBinding = Binding<Theme>(currentTheme)
     let anyThemeBinding = themeBinding.eraseToAnyBinding()
     objc_setAssociatedObject(self, &AssociateKey.themeBinding, anyThemeBinding, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
@@ -92,12 +92,12 @@ private extension ThemeUpdating where Self: UITraitEnvironment {
           // use debouncer to avoid excessive theme updates
           // this can happen when app goes into background, the trait collection change can emit unnecessarily fast.
           // for example, if the app's theme is light, make the app goes into background, the trait collection change will emit "dark" then "light" in a short time.
-          self.themeUpdatingDebouncer.debounce { [traitCollection, weak themeBinding] in
-            guard let themeBinding else {
-              ChouTi.assertFailure("no themeBinding")
+          self.themeUpdatingDebouncer.debounce { [weak self, weak themeBinding] in
+            guard let self, let themeBinding else {
+              ChouTi.assertFailure("no self or themeBinding")
               return
             }
-            let newTheme = traitCollection.userInterfaceStyle.theme
+            let newTheme = self.theme
             if newTheme != themeBinding.value {
               themeBinding.value = newTheme
             }
@@ -165,8 +165,12 @@ private extension ThemeUpdating where Self: UITraitEnvironment {
     // use debouncer to avoid excessive theme updates
     // this can happen when app goes into background, the trait collection change can emit unnecessarily fast.
     // for example, if the app's theme is light, make the app goes into background, the trait collection change will emit "dark" then "light" in a short time.
-    self.themeUpdatingDebouncer.debounce { [traitCollection] in
-      let newTheme = traitCollection.userInterfaceStyle.theme
+    self.themeUpdatingDebouncer.debounce { [weak self] in
+      guard let self = self else {
+        ChouTi.assertFailure("no self")
+        return
+      }
+      let newTheme = self.theme
       if newTheme != themeBinding.value {
         themeBinding.value = newTheme
       }

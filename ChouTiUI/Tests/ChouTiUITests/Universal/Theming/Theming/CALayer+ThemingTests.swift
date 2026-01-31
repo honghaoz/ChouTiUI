@@ -331,16 +331,3 @@ class CALayer_ThemingTests: XCTestCase {
     expect(sublayerThemeBindingThemes) == [initialTheme, currentTheme]
   }
 }
-
-private extension Theme {
-
-  /// Returns the opposite theme.
-  var opposite: Theme {
-    switch self {
-    case .light:
-      return .dark
-    case .dark:
-      return .light
-    }
-  }
-}
