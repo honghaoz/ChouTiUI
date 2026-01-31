@@ -6,7 +6,7 @@
       "location" : "https://github.com/honghaoz/ChouTi",
       "state" : {
         "branch" : "master",
-        "revision" : "6b8b418a0125a234710d738583dacb899b9efc38"
+        "revision" : "ecf2bdc07ab5657b86888796bb8fc5c6492dfb5d"
       }
     },
     {
@@ -15,7 +15,7 @@
       "location" : "https://github.com/honghaoz/ComposeUI",
       "state" : {
         "branch" : "master",
-        "revision" : "54707bd50d5e2c3a3124893edadb672558f0c945"
+        "revision" : "f6e7dbd517b6bcda0fb0aff8c628469b5b5cfcc8"
       }
     }
   ],
