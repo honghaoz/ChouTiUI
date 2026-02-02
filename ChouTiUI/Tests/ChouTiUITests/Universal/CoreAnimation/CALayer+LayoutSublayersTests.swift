@@ -61,7 +61,7 @@ class CALayer_LayoutSublayersTests: XCTestCase {
       calledLayer = layer
     }
 
-    expect(getClassName(layer)) == "ChouTiUI_CALayer"
+    expect(getClassName(layer)) == "ChouTiIMI_CALayer"
 
     // trigger layoutSublayers
     layer.setNeedsLayout()
@@ -99,7 +99,7 @@ class CALayer_LayoutSublayersTests: XCTestCase {
       calledLayer1 = layer
     }
 
-    expect(getClassName(layer)) == "ChouTiUI_CALayer"
+    expect(getClassName(layer)) == "ChouTiIMI_CALayer"
 
     // trigger layoutSublayers
     layer.setNeedsLayout()
@@ -116,7 +116,7 @@ class CALayer_LayoutSublayersTests: XCTestCase {
       calledLayer2 = layer
     }
 
-    expect(getClassName(layer)) == "ChouTiUI_CALayer"
+    expect(getClassName(layer)) == "ChouTiIMI_CALayer"
 
     // trigger layoutSublayers
     layer.setNeedsLayout()
@@ -135,7 +135,7 @@ class CALayer_LayoutSublayersTests: XCTestCase {
       calledLayer3 = layer
     }
 
-    expect(getClassName(layer)) == "ChouTiUI_CALayer"
+    expect(getClassName(layer)) == "ChouTiIMI_CALayer"
 
     // trigger layoutSublayers
     layer.setNeedsLayout()
@@ -149,7 +149,7 @@ class CALayer_LayoutSublayersTests: XCTestCase {
 
     // cancel callback 2
     token2?.cancel()
-    expect(getClassName(layer)) == "ChouTiUI_CALayer" // still swizzled because of callbacks 1 and 3
+    expect(getClassName(layer)) == "ChouTiIMI_CALayer" // still swizzled because of callbacks 1 and 3
 
     // trigger layoutSublayers
     layer.setNeedsLayout()
@@ -160,7 +160,7 @@ class CALayer_LayoutSublayersTests: XCTestCase {
 
     // cancel callback 1
     token1?.cancel()
-    expect(getClassName(layer)) == "ChouTiUI_CALayer" // still swizzled because of callback 3
+    expect(getClassName(layer)) == "ChouTiIMI_CALayer" // still swizzled because of callback 3
 
     // trigger layoutSublayers
     layer.setNeedsLayout()
@@ -330,7 +330,7 @@ class CALayer_LayoutSublayersTests: XCTestCase {
       token?.cancel()
     }
 
-    expect(getClassName(layer)) == "ChouTiUI_CALayer"
+    expect(getClassName(layer)) == "ChouTiIMI_CALayer"
 
     // trigger layoutSublayers
     layer.setNeedsLayout()
@@ -355,7 +355,7 @@ class CALayer_LayoutSublayersTests: XCTestCase {
       }
       _ = token // use token to prevent warning
 
-      expect(getClassName(layer)) == "ChouTiUI_CALayer"
+      expect(getClassName(layer)) == "ChouTiIMI_CALayer"
 
       layer.setNeedsLayout()
       layer.layoutIfNeeded()
@@ -364,7 +364,7 @@ class CALayer_LayoutSublayersTests: XCTestCase {
 
     // token is deallocated, but the block should still be there
     // because the token is stored in the layoutSublayersBlocks dictionary
-    expect(getClassName(layer)) == "ChouTiUI_CALayer"
+    expect(getClassName(layer)) == "ChouTiIMI_CALayer"
 
     layer.setNeedsLayout()
     layer.layoutIfNeeded()
@@ -381,8 +381,8 @@ class CALayer_LayoutSublayersTests: XCTestCase {
     layer2.onLayoutSublayers { _ in }
 
     // both layers should have the same swizzled class
-    expect(getClassName(layer1)) == "ChouTiUI_CALayer"
-    expect(getClassName(layer2)) == "ChouTiUI_CALayer"
+    expect(getClassName(layer1)) == "ChouTiIMI_CALayer"
+    expect(getClassName(layer2)) == "ChouTiIMI_CALayer"
   }
 
   func test_onLayoutSublayers_multipleSubclasses() {
@@ -398,8 +398,8 @@ class CALayer_LayoutSublayersTests: XCTestCase {
     layer2.onLayoutSublayers { _ in }
 
     // each subclass should have its own swizzled class
-    expect(getClassName(layer1)) == "ChouTiUI__TtCFC13ChouTiUITests28CALayer_LayoutSublayersTests41test_onLayoutSublayers_multipleSubclassesFT_T_L_12CustomLayer1"
-    expect(getClassName(layer2)) == "ChouTiUI__TtCFC13ChouTiUITests28CALayer_LayoutSublayersTests41test_onLayoutSublayers_multipleSubclassesFT_T_L_12CustomLayer2"
+    expect(getClassName(layer1)) == "ChouTiIMI__TtCFC13ChouTiUITests28CALayer_LayoutSublayersTests41test_onLayoutSublayers_multipleSubclassesFT_T_L_12CustomLayer1"
+    expect(getClassName(layer2)) == "ChouTiIMI__TtCFC13ChouTiUITests28CALayer_LayoutSublayersTests41test_onLayoutSublayers_multipleSubclassesFT_T_L_12CustomLayer2"
   }
 
   func test_onLayoutSublayers_viewLayer() {
@@ -426,11 +426,11 @@ class CALayer_LayoutSublayersTests: XCTestCase {
 
     // view and layer (optionally) should be swizzled
     #if os(macOS)
-    expect(getClassName(view)) == "ChouTiUI_NSView"
-    expect(getClassName(layer)) == "ChouTiUI_NSViewBackingLayer"
+    expect(getClassName(view)) == "ChouTiIMI_NSView"
+    expect(getClassName(layer)) == "ChouTiIMI_NSViewBackingLayer"
     #else
     expect(getClassName(view)) == "UIView"
-    expect(getClassName(layer)) == "ChouTiUI_CALayer"
+    expect(getClassName(layer)) == "ChouTiIMI_CALayer"
     #endif
 
     // view's layout cycle should trigger layoutSublayers
@@ -458,6 +458,74 @@ class CALayer_LayoutSublayersTests: XCTestCase {
     expect(callCount) == 2 // should not call the block again
   }
 
+  func test_onLayoutSublayers_viewLayer_multipleCalls() {
+    // test view's layer calling layoutSublayers when the view is laid out
+
+    let view = View(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
+    #if os(macOS)
+    view.wantsLayer = true
+    #endif
+    let layer = view.unsafeLayer
+
+    #if os(macOS)
+    expect(getClassName(layer)) == "NSViewBackingLayer"
+    expect(getClassName(view)) == "NSView"
+    #else
+    expect(getClassName(layer)) == "CALayer"
+    expect(getClassName(view)) == "UIView"
+    #endif
+
+    // when trigger onLayoutSublayers multiple times
+    var callCount1 = 0
+    let token1 = layer.onLayoutSublayers { _ in
+      callCount1 += 1
+    }
+
+    var callCount2 = 0
+    let token2 = layer.onLayoutSublayers { _ in
+      callCount2 += 1
+    }
+
+    // view and layer (optionally) should be swizzled
+    #if os(macOS)
+    expect(getClassName(view)) == "ChouTiIMI_NSView"
+    expect(getClassName(layer)) == "ChouTiIMI_NSViewBackingLayer"
+    #else
+    expect(getClassName(view)) == "UIView"
+    expect(getClassName(layer)) == "ChouTiIMI_CALayer"
+    #endif
+
+    // view's layout cycle should trigger layoutSublayers
+    // and should only call the block once with multiple onLayoutSublayers calls
+    view.setNeedsLayout()
+    view.layoutIfNeeded()
+    expect(callCount1) == 1
+    expect(callCount2) == 1
+
+    // second call should also work
+    view.setNeedsLayout()
+    view.layoutIfNeeded()
+    expect(callCount1) == 2
+    expect(callCount2) == 2
+
+    token1.cancel()
+    token2.cancel()
+
+    #if os(macOS)
+    expect(getClassName(view)) == "NSView"
+    expect(getClassName(layer)) == "NSViewBackingLayer"
+    #else
+    expect(getClassName(view)) == "UIView"
+    expect(getClassName(layer)) == "CALayer"
+    #endif
+
+    // trigger layoutSublayers
+    layer.setNeedsLayout()
+    layer.layoutIfNeeded()
+    expect(callCount1) == 2 // should not call the block again
+    expect(callCount2) == 2 // should not call the block again
+  }
+
   func test_onLayoutSublayers_swizzle_then_KVO() {
     // swizzle, KVO, unKVO, unswizzle
     let layer: CALayer = layer
@@ -470,7 +538,7 @@ class CALayer_LayoutSublayersTests: XCTestCase {
       layoutCount += 1
     }
 
-    expect(getClassName(layer)) == "ChouTiUI_CALayer"
+    expect(getClassName(layer)) == "ChouTiIMI_CALayer"
 
     // add KVO - it should create NSKVONotifying class
     var kvoCallCount = 0
@@ -478,7 +546,7 @@ class CALayer_LayoutSublayersTests: XCTestCase {
       kvoCallCount += 1
     }
 
-    expect(getClassName(layer)) == "NSKVONotifying_ChouTiUI_CALayer"
+    expect(getClassName(layer)) == "NSKVONotifying_ChouTiIMI_CALayer"
 
     // both callbacks should work
     layer.setNeedsLayout()
@@ -491,11 +559,11 @@ class CALayer_LayoutSublayersTests: XCTestCase {
     // cancel KVO
     observation.invalidate()
     // Note: CALayer KVO doesn't always revert the class immediately
-    // expect(getClassName(layer)) == "ChouTiUI_CALayer"
+    // expect(getClassName(layer)) == "ChouTiIMI_CALayer"
 
     // cancel our swizzle
     token.cancel()
-    // After canceling, class should be back to either CALayer or still NSKVONotifying_ChouTiUI_CALayer
+    // After canceling, class should be back to either CALayer or still NSKVONotifying_ChouTiIMI_CALayer
 
     layer.setNeedsLayout()
     layer.layoutIfNeeded()
@@ -514,7 +582,7 @@ class CALayer_LayoutSublayersTests: XCTestCase {
       layoutCount1 += 1
     }
 
-    expect(getClassName(layer)) == "ChouTiUI_CALayer"
+    expect(getClassName(layer)) == "ChouTiIMI_CALayer"
 
     // add KVO - it should create NSKVONotifying class
     var kvoCallCount = 0
@@ -522,7 +590,7 @@ class CALayer_LayoutSublayersTests: XCTestCase {
       kvoCallCount += 1
     }
 
-    expect(getClassName(layer)) == "NSKVONotifying_ChouTiUI_CALayer"
+    expect(getClassName(layer)) == "NSKVONotifying_ChouTiIMI_CALayer"
 
     // both callbacks should work
     layer.setNeedsLayout()
@@ -536,7 +604,7 @@ class CALayer_LayoutSublayersTests: XCTestCase {
     token1.cancel()
 
     // should stay as NSKVONotifying class
-    expect(getClassName(layer)) == "NSKVONotifying_ChouTiUI_CALayer"
+    expect(getClassName(layer)) == "NSKVONotifying_ChouTiIMI_CALayer"
 
     // KVO should still work
     layer.bounds = CGRect(x: 0, y: 0, width: 300, height: 300)
@@ -545,14 +613,14 @@ class CALayer_LayoutSublayersTests: XCTestCase {
     // clean up KVO
     observation.invalidate()
     // Note: CALayer KVO doesn't always revert the class immediately
-    // expect(getClassName(layer)) == "ChouTiUI_CALayer" // the class is left with our swizzled class
+    // expect(getClassName(layer)) == "ChouTiIMI_CALayer" // the class is left with our swizzled class
 
     // add our swizzle again
     var layoutCount2 = 0
     let token2 = layer.onLayoutSublayers { _ in
       layoutCount2 += 1
     }
-    expect(getClassName(layer)) == "NSKVONotifying_ChouTiUI_CALayer"
+    expect(getClassName(layer)) == "NSKVONotifying_ChouTiIMI_CALayer"
 
     layer.setNeedsLayout()
     layer.layoutIfNeeded()
@@ -572,7 +640,7 @@ class CALayer_LayoutSublayersTests: XCTestCase {
       layoutCount1 += 1
     }
 
-    expect(getClassName(layer)) == "ChouTiUI_CALayer"
+    expect(getClassName(layer)) == "ChouTiIMI_CALayer"
 
     // add KVO
     var kvoCallCount = 0
@@ -580,7 +648,7 @@ class CALayer_LayoutSublayersTests: XCTestCase {
       kvoCallCount += 1
     }
 
-    expect(getClassName(layer)) == "NSKVONotifying_ChouTiUI_CALayer"
+    expect(getClassName(layer)) == "NSKVONotifying_ChouTiIMI_CALayer"
 
     // add second swizzle callback
     var layoutCount2 = 0
@@ -588,7 +656,7 @@ class CALayer_LayoutSublayersTests: XCTestCase {
       layoutCount2 += 1
     }
 
-    expect(getClassName(layer)) == "NSKVONotifying_ChouTiUI_CALayer" // should still be the same KVO class
+    expect(getClassName(layer)) == "NSKVONotifying_ChouTiIMI_CALayer" // should still be the same KVO class
 
     // test all callbacks work
     layer.setNeedsLayout()
@@ -601,7 +669,7 @@ class CALayer_LayoutSublayersTests: XCTestCase {
 
     // remove first layout callback
     token1.cancel()
-    expect(getClassName(layer)) == "NSKVONotifying_ChouTiUI_CALayer" // should still be the same KVO class
+    expect(getClassName(layer)) == "NSKVONotifying_ChouTiIMI_CALayer" // should still be the same KVO class
 
     // second callback should still work
     layer.setNeedsLayout()
@@ -611,7 +679,7 @@ class CALayer_LayoutSublayersTests: XCTestCase {
 
     // Remove second layout callback
     token2.cancel()
-    expect(getClassName(layer)) == "NSKVONotifying_ChouTiUI_CALayer" // should still be the same KVO class
+    expect(getClassName(layer)) == "NSKVONotifying_ChouTiIMI_CALayer" // should still be the same KVO class
 
     // KVO should still work
     layer.bounds = CGRect(x: 0, y: 0, width: 300, height: 300)
