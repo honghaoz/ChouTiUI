@@ -40,6 +40,7 @@ private enum AssociateKey {
   static var themeBinding: UInt8 = 0
   static var themeBindingImplementation: UInt8 = 0
   static var traitChangeRegistration: UInt8 = 0
+  static var traitCollectionDidChangeInterceptToken: UInt8 = 0
   static var themeUpdatingDebouncer: UInt8 = 0
 }
 
@@ -59,7 +60,7 @@ public extension ThemeUpdating where Self: UITraitEnvironment {
     if #available(iOS 17.0, tvOS 17.0, visionOS 1.0, *) {
       useRegisterForTraitChanges(themeBinding: themeBinding)
     } else {
-      TraitCollectionDidChangeSwizzler.swizzleIfNeeded()
+      hookTraitCollectionDidChangeIfNeeded()
     }
 
     return anyThemeBinding
@@ -109,39 +110,37 @@ private extension ThemeUpdating where Self: UITraitEnvironment {
   }
 }
 
-/// For iOS 16 and below.
-private enum TraitCollectionDidChangeSwizzler {
+// MARK: - iOS 16 and below
 
-  static var isSwizzled = false
-  static let lock = NSLock()
-  static var swizzledIMPs: [IMP] = []
+private extension ThemeUpdating where Self: UITraitEnvironment {
 
-  static func swizzleIfNeeded() {
-    lock.lock()
-    defer {
-      lock.unlock()
+  var traitCollectionDidChangeInterceptToken: CancellableToken? {
+    get {
+      objc_getAssociatedObject(self, &AssociateKey.traitCollectionDidChangeInterceptToken) as? CancellableToken
     }
-
-    guard isSwizzled == false else {
-      return
+    set {
+      if let newValue {
+        objc_setAssociatedObject(self, &AssociateKey.traitCollectionDidChangeInterceptToken, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+      } else {
+        objc_setAssociatedObject(self, &AssociateKey.traitCollectionDidChangeInterceptToken, nil, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+      }
     }
-    isSwizzled = true
-
-    swizzleTraitCollectionDidChange(for: UIView.self)
   }
+}
 
-  private static func swizzleTraitCollectionDidChange(for class: AnyClass) {
-    let selector = #selector(UIView.traitCollectionDidChange(_:))
-    guard let method = class_getInstanceMethod(`class`, selector) else {
+private extension ThemeUpdating where Self: UITraitEnvironment {
+
+  func hookTraitCollectionDidChangeIfNeeded() {
+    guard traitCollectionDidChangeInterceptToken == nil else {
       return
     }
 
-    typealias TraitCollectionDidChangeIMP = @convention(c) (AnyObject, Selector, UITraitCollection?) -> Void
-    let originalIMP = method_getImplementation(method)
-    let originalImplementation = unsafeBitCast(originalIMP, to: TraitCollectionDidChangeIMP.self)
+    guard let object = self as? NSObject else {
+      return
+    }
 
-    let newImplementation: @convention(block) (AnyObject, UITraitCollection?) -> Void = { object, previousTraitCollection in
-      originalImplementation(object, selector, previousTraitCollection)
+    let token = object.intercept(selector: #selector(UIView.traitCollectionDidChange(_:))) { (object, _, previousTraitCollection: UITraitCollection?, callOriginal) in
+      callOriginal(previousTraitCollection)
 
       guard let object = object as? (any ThemeUpdating & UITraitEnvironment) else {
         return
@@ -149,9 +148,7 @@ private enum TraitCollectionDidChangeSwizzler {
       object.updateThemeBindingIfNeeded()
     }
 
-    let newIMP = imp_implementationWithBlock(newImplementation)
-    method_setImplementation(method, newIMP)
-    swizzledIMPs.append(newIMP)
+    traitCollectionDidChangeInterceptToken = token
   }
 }
 
