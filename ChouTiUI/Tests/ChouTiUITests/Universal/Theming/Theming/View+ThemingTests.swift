@@ -43,6 +43,7 @@ import ChouTiUI
 class View_ThemingTests: XCTestCase {
 
   func test_theme_standaloneView() {
+    let currentTheme = ThemingTest.currentTheme
     let view = View()
 
     expect(view.theme) == currentTheme
@@ -74,6 +75,8 @@ class View_ThemingTests: XCTestCase {
   }
 
   func test_theme_viewInWindow() {
+    let currentTheme = ThemingTest.currentTheme
+
     let window = TestWindow()
     let view = View()
     window.contentView().addSubview(view)
@@ -100,7 +103,7 @@ class View_ThemingTests: XCTestCase {
 
   /// Test that view in view hierarchy should follow the parent view's theme.
   func test_theme_viewInViewHierarchy() {
-    let currentTheme = currentTheme
+    let currentTheme = ThemingTest.currentTheme
 
     // given a container view in a window
     let window = TestWindow()
@@ -179,7 +182,7 @@ class View_ThemingTests: XCTestCase {
   // MARK: - Edge Cases
 
   func test_theme_onBackgroundThread() {
-    let currentTheme = currentTheme
+    let currentTheme = ThemingTest.currentTheme
 
     let expectation = XCTestExpectation(description: "theme")
 
@@ -200,15 +203,6 @@ class View_ThemingTests: XCTestCase {
   }
 
   // MARK: - Helper
-
-  /// Get the current theme, this is based on the current system theme.
-  private var currentTheme: Theme {
-    #if os(macOS)
-    return NSApplication.shared.theme // current macOS system theme
-    #else
-    return UITraitCollection.current.userInterfaceStyle.theme // current iOS/tvOS/visionOS system theme
-    #endif
-  }
 
   /// Expect the theme of a view to be the given theme.
   private func expectTheme(of view: View, toBe expectedTheme: Theme, line: UInt = #line) {

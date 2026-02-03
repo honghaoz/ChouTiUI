@@ -38,11 +38,7 @@ import ChouTi
 class ThemeMonitorTests: XCTestCase {
 
   func test_theme() {
-    #if canImport(AppKit)
-    let currentTheme: Theme = NSApplication.shared.theme // current macOS system theme
-    #else
-    let currentTheme: Theme = UITraitCollection.current.userInterfaceStyle.theme // current iOS/tvOS/visionOS system theme
-    #endif
+    let currentTheme = ThemingTest.currentTheme
 
     #if canImport(AppKit)
     let themeMonitor = ThemeMonitor.shared

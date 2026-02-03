@@ -40,7 +40,7 @@ class NSWindow_ThemingTests: XCTestCase {
 
   func test_theme() {
     let window = NSWindow()
-    let currentTheme = NSApplication.shared.theme
+    let currentTheme = ThemingTest.currentTheme
 
     expect(window.theme) == currentTheme
     expect(window.overrideTheme) == nil
@@ -67,7 +67,7 @@ class NSWindow_ThemingTests: XCTestCase {
     let view = NSView()
     window.contentView = view
 
-    let currentTheme = NSApplication.shared.theme
+    let currentTheme = ThemingTest.currentTheme
 
     // override window theme, should affect view theme
     do {
@@ -128,7 +128,7 @@ class NSWindow_ThemingTests: XCTestCase {
     let expectation = XCTestExpectation(description: "theme")
 
     let window = NSWindow()
-    let currentTheme = NSApplication.shared.theme
+    let currentTheme = ThemingTest.currentTheme
 
     DispatchQueue.global().async {
       expect(window.theme) == currentTheme

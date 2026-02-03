@@ -40,7 +40,7 @@ class NSPopover_ThemingTests: XCTestCase {
 
   func test_theme() {
     let popover = NSPopover()
-    let currentTheme = NSApplication.shared.theme
+    let currentTheme = ThemingTest.currentTheme
 
     expect(popover.theme) == currentTheme
     expect(popover.overrideTheme) == nil
@@ -63,7 +63,7 @@ class NSPopover_ThemingTests: XCTestCase {
   }
 
   func test_contentViewController() {
-    let currentTheme = NSApplication.shared.theme
+    let currentTheme = ThemingTest.currentTheme
 
     let popover = NSPopover()
     let viewController = NSViewController()
@@ -132,7 +132,7 @@ class NSPopover_ThemingTests: XCTestCase {
   func test_theme_onBackgroundThread() {
     let expectation = XCTestExpectation(description: "theme")
 
-    let currentTheme = NSApplication.shared.theme
+    let currentTheme = ThemingTest.currentTheme
 
     let popover = NSPopover()
 

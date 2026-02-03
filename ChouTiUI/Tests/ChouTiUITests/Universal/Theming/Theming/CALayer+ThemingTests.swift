@@ -122,12 +122,7 @@ class CALayer_ThemingTests: XCTestCase {
   }
 
   func test_theme_layerBackedView() {
-    // get current theme, this is based on the current system theme
-    #if os(macOS)
-    let currentTheme: Theme = NSApplication.shared.theme // current macOS system theme
-    #else
-    let currentTheme: Theme = UITraitCollection.current.userInterfaceStyle.theme // current iOS/tvOS/visionOS system theme
-    #endif
+    let currentTheme = ThemingTest.currentTheme
 
     // given a view in a window hierarchy
     let view = View()

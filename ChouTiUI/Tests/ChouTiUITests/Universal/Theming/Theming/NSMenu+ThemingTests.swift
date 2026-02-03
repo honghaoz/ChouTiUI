@@ -40,7 +40,7 @@ class NSMenu_ThemingTests: XCTestCase {
 
   func test_theme() {
     let menu = NSMenu()
-    let currentTheme = NSApplication.shared.theme
+    let currentTheme = ThemingTest.currentTheme
 
     expect(menu.theme) == currentTheme
     expect(menu.overrideTheme) == nil
@@ -64,7 +64,7 @@ class NSMenu_ThemingTests: XCTestCase {
 
   func test_menuItemView() {
     let menu = NSMenu()
-    let currentTheme = NSApplication.shared.theme
+    let currentTheme = ThemingTest.currentTheme
 
     let menuItem = NSMenuItem()
     let view = NSView()
@@ -130,7 +130,7 @@ class NSMenu_ThemingTests: XCTestCase {
   func test_theme_onBackgroundThread() {
     let expectation = XCTestExpectation(description: "theme")
 
-    let currentTheme = NSApplication.shared.theme
+    let currentTheme = ThemingTest.currentTheme
 
     DispatchQueue.global().async {
       let menu = NSMenu()

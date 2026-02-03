@@ -79,13 +79,7 @@ class View_ThemeUpdatingTests: XCTestCase {
 
   /// Test that when view's override theme is set, the theme binding should emit the override theme.
   func test_themeBinding_overrideTheme() {
-    // get current theme, this is based on the current system theme
-    #if os(macOS)
-    let currentTheme: Theme = NSApplication.shared.theme // current macOS system theme
-    #else
-    let currentTheme: Theme = UITraitCollection.current.userInterfaceStyle.theme // current iOS/tvOS/visionOS system theme
-    #endif
-
+    let currentTheme = ThemingTest.currentTheme
     let initialTheme = currentTheme.opposite
 
     // given a view with an initial override theme
