@@ -43,14 +43,14 @@ extension UIView: Theming {
         #if !os(tvOS)
         ChouTi.assertFailure("unspecified traitCollection.userInterfaceStyle")
         #endif
-        return self.window?.theme ?? .light
+        return self.superview?.theme ?? self.window?.theme ?? .light
       case .light:
         return .light
       case .dark:
         return .dark
       @unknown default:
         ChouTi.assertFailure("unknown UIUserInterfaceStyle: \(self.traitCollection.userInterfaceStyle)")
-        return self.window?.theme ?? .light
+        return self.superview?.theme ?? self.window?.theme ?? .light
       }
     }
 
