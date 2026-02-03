@@ -61,7 +61,7 @@ class View_onLayoutSubviewsTests: XCTestCase {
       calledView = view
     }
 
-    expect(getClassName(view)) == "ChouTiUI_\(viewClassName)"
+    expect(getClassName(view)) == "ChouTiIMI_\(viewClassName)"
 
     // trigger layout
     view.setNeedsLayout()
@@ -100,7 +100,7 @@ class View_onLayoutSubviewsTests: XCTestCase {
       calledView1 = view
     }
 
-    expect(getClassName(view)) == "ChouTiUI_\(viewClassName)"
+    expect(getClassName(view)) == "ChouTiIMI_\(viewClassName)"
 
     // trigger layout
     view.setNeedsLayout()
@@ -117,7 +117,7 @@ class View_onLayoutSubviewsTests: XCTestCase {
       calledView2 = view
     }
 
-    expect(getClassName(view)) == "ChouTiUI_\(viewClassName)"
+    expect(getClassName(view)) == "ChouTiIMI_\(viewClassName)"
 
     // trigger layout
     view.setNeedsLayout()
@@ -136,7 +136,7 @@ class View_onLayoutSubviewsTests: XCTestCase {
       calledView3 = view
     }
 
-    expect(getClassName(view)) == "ChouTiUI_\(viewClassName)"
+    expect(getClassName(view)) == "ChouTiIMI_\(viewClassName)"
 
     // trigger layout
     view.setNeedsLayout()
@@ -150,7 +150,7 @@ class View_onLayoutSubviewsTests: XCTestCase {
 
     // cancel callback 2
     token2?.cancel()
-    expect(getClassName(view)) == "ChouTiUI_\(viewClassName)" // still swizzled because of callbacks 1 and 3
+    expect(getClassName(view)) == "ChouTiIMI_\(viewClassName)" // still swizzled because of callbacks 1 and 3
 
     // trigger layout
     view.setNeedsLayout()
@@ -161,7 +161,7 @@ class View_onLayoutSubviewsTests: XCTestCase {
 
     // cancel callback 1
     token1?.cancel()
-    expect(getClassName(view)) == "ChouTiUI_\(viewClassName)" // still swizzled because of callback 3
+    expect(getClassName(view)) == "ChouTiIMI_\(viewClassName)" // still swizzled because of callback 3
 
     // trigger layout
     view.setNeedsLayout()
@@ -565,7 +565,7 @@ class View_onLayoutSubviewsTests: XCTestCase {
       token?.cancel()
     }
 
-    expect(getClassName(view)) == "ChouTiUI_\(viewClassName)"
+    expect(getClassName(view)) == "ChouTiIMI_\(viewClassName)"
 
     // trigger layout
     view.setNeedsLayout()
@@ -592,7 +592,7 @@ class View_onLayoutSubviewsTests: XCTestCase {
       }
       _ = token // use token to prevent warning
 
-      expect(getClassName(view)) == "ChouTiUI_\(viewClassName)"
+      expect(getClassName(view)) == "ChouTiIMI_\(viewClassName)"
 
       view.setNeedsLayout()
       view.layoutIfNeeded()
@@ -601,7 +601,7 @@ class View_onLayoutSubviewsTests: XCTestCase {
 
     // token is deallocated, but the block should still be there
     // because the token is stored in the layoutSubviewsBlocks dictionary
-    expect(getClassName(view)) == "ChouTiUI_\(viewClassName)"
+    expect(getClassName(view)) == "ChouTiIMI_\(viewClassName)"
 
     view.setNeedsLayout()
     view.layoutIfNeeded()
@@ -615,8 +615,8 @@ class View_onLayoutSubviewsTests: XCTestCase {
     view1.onLayoutSubviews { _ in }
     view2.onLayoutSubviews { _ in }
 
-    expect(getClassName(view1)) == "ChouTiUI_\(viewClassName)"
-    expect(getClassName(view2)) == "ChouTiUI_\(viewClassName)"
+    expect(getClassName(view1)) == "ChouTiIMI_\(viewClassName)"
+    expect(getClassName(view2)) == "ChouTiIMI_\(viewClassName)"
   }
 
   func test_onLayoutSubviews_multipleSubclasses() {
@@ -636,8 +636,8 @@ class View_onLayoutSubviewsTests: XCTestCase {
     view2.onLayoutSubviews { _ in }
 
     // each subclass should have its own swizzled class
-    expect(getClassName(view1)) == "ChouTiUI__TtCFC13ChouTiUITests26View_onLayoutSubviewsTests40test_onLayoutSubviews_multipleSubclassesFT_T_L_11CustomView1"
-    expect(getClassName(view2)) == "ChouTiUI__TtCFC13ChouTiUITests26View_onLayoutSubviewsTests40test_onLayoutSubviews_multipleSubclassesFT_T_L_11CustomView2"
+    expect(getClassName(view1)) == "ChouTiIMI__TtCFC13ChouTiUITests26View_onLayoutSubviewsTests40test_onLayoutSubviews_multipleSubclassesFT_T_L_11CustomView1"
+    expect(getClassName(view2)) == "ChouTiIMI__TtCFC13ChouTiUITests26View_onLayoutSubviewsTests40test_onLayoutSubviews_multipleSubclassesFT_T_L_11CustomView2"
   }
 
   // MARK: - KVO Interaction Tests
@@ -657,7 +657,7 @@ class View_onLayoutSubviewsTests: XCTestCase {
       layoutCount += 1
     }
 
-    expect(getClassName(view)) == "ChouTiUI_\(viewClassName)"
+    expect(getClassName(view)) == "ChouTiIMI_\(viewClassName)"
 
     // add KVO - it should create NSKVONotifying class
     var kvoCallCount = 0
@@ -665,7 +665,7 @@ class View_onLayoutSubviewsTests: XCTestCase {
       kvoCallCount += 1
     }
 
-    expect(getClassName(view)) == "NSKVONotifying_ChouTiUI_\(viewClassName)"
+    expect(getClassName(view)) == "NSKVONotifying_ChouTiIMI_\(viewClassName)"
 
     // both callbacks should work
     view.setNeedsLayout()
@@ -677,7 +677,7 @@ class View_onLayoutSubviewsTests: XCTestCase {
 
     // cancel KVO
     observation.invalidate()
-    expect(getClassName(view)) == "ChouTiUI_\(viewClassName)"
+    expect(getClassName(view)) == "ChouTiIMI_\(viewClassName)"
 
     // cancel our swizzle
     token.cancel()
@@ -703,7 +703,7 @@ class View_onLayoutSubviewsTests: XCTestCase {
       layoutCount1 += 1
     }
 
-    expect(getClassName(view)) == "ChouTiUI_\(viewClassName)"
+    expect(getClassName(view)) == "ChouTiIMI_\(viewClassName)"
 
     // add KVO - it should create NSKVONotifying class
     var kvoCallCount = 0
@@ -711,7 +711,7 @@ class View_onLayoutSubviewsTests: XCTestCase {
       kvoCallCount += 1
     }
 
-    expect(getClassName(view)) == "NSKVONotifying_ChouTiUI_\(viewClassName)"
+    expect(getClassName(view)) == "NSKVONotifying_ChouTiIMI_\(viewClassName)"
 
     // both callbacks should work
     view.setNeedsLayout()
@@ -725,7 +725,7 @@ class View_onLayoutSubviewsTests: XCTestCase {
     token1.cancel()
 
     // should stay as NSKVONotifying class
-    expect(getClassName(view)) == "NSKVONotifying_ChouTiUI_\(viewClassName)"
+    expect(getClassName(view)) == "NSKVONotifying_ChouTiIMI_\(viewClassName)"
 
     // KVO should still work
     view.frame = CGRect(x: 0, y: 0, width: 300, height: 300)
@@ -733,7 +733,7 @@ class View_onLayoutSubviewsTests: XCTestCase {
 
     // clean up KVO
     observation.invalidate()
-    expect(getClassName(view)) == "ChouTiUI_\(viewClassName)" // the class is left with our swizzled class
+    expect(getClassName(view)) == "ChouTiIMI_\(viewClassName)" // the class is left with our swizzled class
 
     // add our swizzle again
     var layoutCount2 = 0
@@ -741,7 +741,7 @@ class View_onLayoutSubviewsTests: XCTestCase {
       layoutCount2 += 1
     }
 
-    expect(getClassName(view)) == "ChouTiUI_\(viewClassName)"
+    expect(getClassName(view)) == "ChouTiIMI_\(viewClassName)"
 
     view.setNeedsLayout()
     view.layoutIfNeeded()
@@ -765,7 +765,7 @@ class View_onLayoutSubviewsTests: XCTestCase {
       layoutCount1 += 1
     }
 
-    expect(getClassName(view)) == "ChouTiUI_\(viewClassName)"
+    expect(getClassName(view)) == "ChouTiIMI_\(viewClassName)"
 
     // add KVO
     var kvoCallCount = 0
@@ -773,7 +773,7 @@ class View_onLayoutSubviewsTests: XCTestCase {
       kvoCallCount += 1
     }
 
-    expect(getClassName(view)) == "NSKVONotifying_ChouTiUI_\(viewClassName)"
+    expect(getClassName(view)) == "NSKVONotifying_ChouTiIMI_\(viewClassName)"
 
     // add second swizzle callback
     var layoutCount2 = 0
@@ -781,7 +781,7 @@ class View_onLayoutSubviewsTests: XCTestCase {
       layoutCount2 += 1
     }
 
-    expect(getClassName(view)) == "NSKVONotifying_ChouTiUI_\(viewClassName)" // should still be the same KVO class
+    expect(getClassName(view)) == "NSKVONotifying_ChouTiIMI_\(viewClassName)" // should still be the same KVO class
 
     // test all callbacks work
     view.setNeedsLayout()
@@ -794,7 +794,7 @@ class View_onLayoutSubviewsTests: XCTestCase {
 
     // remove first layout callback
     token1.cancel()
-    expect(getClassName(view)) == "NSKVONotifying_ChouTiUI_\(viewClassName)" // should still be the same KVO class
+    expect(getClassName(view)) == "NSKVONotifying_ChouTiIMI_\(viewClassName)" // should still be the same KVO class
 
     // second callback should still work
     view.setNeedsLayout()
@@ -804,7 +804,7 @@ class View_onLayoutSubviewsTests: XCTestCase {
 
     // Remove second layout callback
     token2.cancel()
-    expect(getClassName(view)) == "NSKVONotifying_ChouTiUI_\(viewClassName)" // should still be the same KVO class
+    expect(getClassName(view)) == "NSKVONotifying_ChouTiIMI_\(viewClassName)" // should still be the same KVO class
 
     // KVO should still work
     view.frame = CGRect(x: 0, y: 0, width: 300, height: 300)
@@ -813,7 +813,7 @@ class View_onLayoutSubviewsTests: XCTestCase {
     // clean up
     observation.invalidate()
 
-    expect(getClassName(view)) == "ChouTiUI_\(viewClassName)"
+    expect(getClassName(view)) == "ChouTiIMI_\(viewClassName)"
   }
 
   func test_onLayoutSubviews_KVO_then_swizzle() {
