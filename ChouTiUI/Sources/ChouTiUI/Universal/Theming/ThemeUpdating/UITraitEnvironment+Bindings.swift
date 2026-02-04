@@ -58,7 +58,7 @@ public extension ThemeUpdating where Self: UITraitEnvironment {
     objc_setAssociatedObject(self, &AssociateKey.themeBindingImplementation, themeBinding, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
 
     if #available(iOS 17.0, tvOS 17.0, visionOS 1.0, *) {
-      useRegisterForTraitChanges(themeBinding: themeBinding)
+      useRegisterForTraitChanges()
     } else {
       hookTraitCollectionDidChangeIfNeeded()
     }
@@ -76,33 +76,19 @@ public extension ThemeUpdating where Self: UITraitEnvironment {
   }
 }
 
+// MARK: - iOS 17 and above
+
 @available(iOS 17.0, tvOS 17.0, visionOS 1.0, *)
 private extension ThemeUpdating where Self: UITraitEnvironment {
 
-  func useRegisterForTraitChanges(themeBinding: Binding<Theme>) {
+  func useRegisterForTraitChanges() {
     DispatchQueue.onMainSync {
       MainActor.assumeIsolated {
         guard let observable = self as? UITraitChangeObservable else {
           return
         }
-        let registration = observable.registerForTraitChanges([UITraitUserInterfaceStyle.self]) { [weak themeBinding, weak self] (_: any UITraitEnvironment, _: UITraitCollection) in
-          guard let self else {
-            return
-          }
-
-          // use debouncer to avoid excessive theme updates
-          // this can happen when app goes into background, the trait collection change can emit unnecessarily fast.
-          // for example, if the app's theme is light, make the app goes into background, the trait collection change will emit "dark" then "light" in a short time.
-          self.themeUpdatingDebouncer.debounce { [weak self, weak themeBinding] in
-            guard let self, let themeBinding else {
-              ChouTi.assertFailure("no self or themeBinding")
-              return
-            }
-            let newTheme = self.theme
-            if newTheme != themeBinding.value {
-              themeBinding.value = newTheme
-            }
-          }
+        let registration = observable.registerForTraitChanges([UITraitUserInterfaceStyle.self]) { [weak self] (_: any UITraitEnvironment, _: UITraitCollection) in
+          self?.updateThemeBindingIfNeeded()
         }
         objc_setAssociatedObject(self, &AssociateKey.traitChangeRegistration, registration, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
       }
@@ -152,6 +138,8 @@ private extension ThemeUpdating where Self: UITraitEnvironment {
   }
 }
 
+// MARK: - Helpers
+
 private extension ThemeUpdating where Self: UITraitEnvironment {
 
   func updateThemeBindingIfNeeded() {
@@ -164,8 +152,7 @@ private extension ThemeUpdating where Self: UITraitEnvironment {
     // for example, if the app's theme is light, make the app goes into background, the trait collection change will emit "dark" then "light" in a short time.
     self.themeUpdatingDebouncer.debounce { [weak self] in
       guard let self = self else {
-        ChouTi.assertFailure("no self")
-        return
+        return // it's possible that self is deallocated before the debounce is called
       }
       let newTheme = self.theme
       if newTheme != themeBinding.value {
