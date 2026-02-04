@@ -164,19 +164,22 @@ class CALayer_ThemingTests: XCTestCase {
   }
 
   func test_themeBinding_standaloneLayer() {
+    // given a standalone layer
     let layer = CALayer()
     let themeBinding = layer.themeBinding
-
     expect(themeBinding.value) == .light
 
+    // given a sublayer
     let sublayer = CALayer()
     let sublayerThemeBinding = sublayer.themeBinding
     layer.addSublayer(sublayer)
     expect(sublayerThemeBinding.value) == .light
 
+    // when set the layer's override theme to dark
     layer.overrideTheme = .dark
     expect(themeBinding.value) == .dark
 
+    // then a new sublayer should inherit the layer's theme
     let sublayer2 = CALayer()
     let sublayer2ThemeBinding = sublayer2.themeBinding
     layer.addSublayer(sublayer2)
