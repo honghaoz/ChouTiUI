@@ -111,4 +111,52 @@ class View_ThemeUpdatingTests: XCTestCase {
     }
     wait(for: [expectation], timeout: 1)
   }
+
+  /// Test that when view moves to a new parent view, the theme binding only updates if the new parent view has a different theme.
+  func test_themeBinding_viewHierarchy() {
+    let currentTheme = ThemingTest.currentTheme
+
+    let window = TestWindow()
+
+    // given a container view with an initial theme (the opposite of the current theme)
+    let containerView = View()
+    window.contentView().addSubview(containerView)
+
+    containerView.overrideTheme = currentTheme.opposite
+    expect(containerView.theme) == currentTheme.opposite
+    expect(containerView.themeBinding.value) == currentTheme.opposite
+
+    // given a child view
+    let childView = View()
+    expect(childView.theme) == currentTheme // the standalone view should follow the current theme
+    expect(childView.themeBinding.value) == currentTheme // the standalone view should follow the current theme
+
+    // observe child view's theme updates
+    var receivedThemes: [Theme] = []
+    let observation = childView.themeBinding.observe { theme in
+      receivedThemes.append(theme)
+    }
+    _ = observation
+
+    // when add the child view to the container view
+    containerView.addSubview(childView)
+
+    // then the child view's theme and theme binding value should be the same as the container view's theme
+    // use toEventually because the theme update happens on next runloop
+    expect(childView.theme).toEventually(beEqual(to: currentTheme.opposite))
+    expect(childView.themeBinding.value).toEventually(beEqual(to: currentTheme.opposite))
+
+    // child view should emit the change
+    expect(receivedThemes) == [currentTheme.opposite]
+
+    // when change the container view's theme
+    containerView.overrideTheme = currentTheme
+
+    // then the child view's theme and theme binding value should also update to the new theme
+    expect(childView.theme).toEventually(beEqual(to: currentTheme))
+    expect(childView.themeBinding.value).toEventually(beEqual(to: currentTheme))
+
+    // child view should emit the change
+    expect(receivedThemes) == [currentTheme.opposite, currentTheme]
+  }
 }
