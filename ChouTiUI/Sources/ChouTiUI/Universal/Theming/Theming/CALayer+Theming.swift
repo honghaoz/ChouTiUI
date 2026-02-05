@@ -36,6 +36,10 @@ import ChouTi
 
 extension CALayer: Theming {
 
+  private enum AssociateKey {
+    static var overrideTheme: UInt8 = 0
+  }
+
   /// The theme of the layer.
   ///
   /// If the layer is a backing layer of a view, this will return the view's theme.
@@ -92,53 +96,6 @@ extension CALayer: Theming {
     }
     set {
       setAssociatedObject(newValue, for: &AssociateKey.overrideTheme)
-
-      // update self's theme binding
-      let newTheme = newValue ?? theme
-      if _themeBinding.value != newTheme {
-        _themeBinding.value = newTheme
-      }
-
-      // trigger sublayers' theme binding update
-      for sublayer in sublayers ?? [] where sublayer.backedView == nil {
-        let theme = sublayer.theme
-        if sublayer._themeBinding.value != theme {
-          sublayer._themeBinding.value = theme
-        }
-      }
     }
-  }
-}
-
-// MARK: - ThemeUpdating
-
-extension CALayer: ThemeUpdating {
-
-  /// - Note: This binding's value maybe out of sync with the actual theme if the layer is added to a new layer.
-  public var themeBinding: AnyBinding<Theme> {
-    if let backedView {
-      return backedView.themeBinding
-    } else {
-      return superlayer?.themeBinding ?? _themeBinding.eraseToAnyBinding()
-    }
-  }
-
-  private var _themeBinding: Binding<Theme> {
-    if let existing = getAssociatedObject(for: &AssociateKey.themeBinding) as? ChouTi.Binding<Theme> {
-      return existing
-    }
-    let new = ChouTi.Binding<Theme>(theme)
-    setAssociatedObject(new, for: &AssociateKey.themeBinding)
-    return new
-  }
-}
-
-// MARK: - Private
-
-private extension CALayer {
-
-  private enum AssociateKey {
-    static var overrideTheme: UInt8 = 0
-    static var themeBinding: UInt8 = 0
   }
 }
