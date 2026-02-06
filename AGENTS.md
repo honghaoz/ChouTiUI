@@ -53,3 +53,24 @@ You are an expert iOS/macOS UI developer with a passion for clean, maintainable 
 ## Agent-Specific Instructions
 - Prefer `rg` for search, and keep edits minimal and focused.
 - When adding tests, use ChouTiTest helpers and keep assertions explicit.
+
+## Workflow Orchestration
+
+### 1. Plan Mode Default
+
+- Enter plan mode for ANY non-trivial task (3+ steps or architectural decisions)
+- If something goes sideways, STOP and re-plan immediately - don't keep pushing
+- Use plan mode for verification steps, not just building
+- Write detailed specs upfront to reduce ambiguity
+
+### 2. Self-Improvement Loop
+- After ANY correction from the user, update 'AGENTS.md' with the new pattern and lessons learned.
+- Write rules for yourself that prevent the same mistake
+- Ruthlessly iterate on these lessons until mistake rate drops
+- Review lessons at session start for relevant project
+
+## Lessons and Conventions
+
+Add short, actionable rules here when a pattern repeats.
+
+- TODO: Add lessons and conventions here (remove this placeholder when done)
