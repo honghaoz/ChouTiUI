@@ -79,14 +79,14 @@ class View_ThemeUpdatingTests: XCTestCase {
 
   /// Test that when view's override theme is set, the theme binding should emit the override theme.
   func test_themeBinding_overrideTheme() {
+    let window = TestWindow()
+
     let currentTheme = ThemingTest.currentTheme
     let initialTheme = currentTheme.opposite
 
     // given a view with an initial override theme
     let view = View()
-    #if os(macOS)
-    view.wantsLayer = true
-    #endif
+    window.contentView().addSubview(view)
     view.overrideTheme = initialTheme
 
     // the view's theme and theme binding value should be the initial override theme
