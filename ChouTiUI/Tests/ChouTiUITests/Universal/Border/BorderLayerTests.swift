@@ -157,4 +157,46 @@ class BorderLayerTests: XCTestCase {
     expect(layer.mask?.frame) == layer.bounds.expanded(by: 6)
     expect(layer.mask?.cornerRadius) == 16
   }
+
+  /// Verifies `.shape(Rectangle, offset:)` updates the internal mask path even when bounds stay the same.
+  ///
+  /// Regression context:
+  /// When offset changed from `0` to a negative value without any bounds change, the stroke path updated
+  /// but the nested mask path could remain stale, making the visible border appear thicker.
+  /// This test ensures the stroke path and mask path remain aligned after the offset-only update.
+  func test_solidColor_shape_negativeOffset_updatesMaskPath_whenBoundsUnchanged() {
+    // given: a shape border starts with offset 0 so baseline stroke/mask geometry is captured
+    let layer = makeBorderLayer(usesNativeCornerRadiusBorderOffset: false)
+    layer.frame = CGRect(x: 0, y: 0, width: 120, height: 80)
+    layer.borderWidth = 4
+    layer.borderContent = .color(.red)
+    layer.borderMask = .shape(Rectangle(cornerRadius: 12), offset: 0)
+
+    layer.layoutSublayers()
+
+    guard let initialBorderMaskLayer = layer.mask as? CAShapeLayer else {
+      fail("expected shape border mask layer.")
+      return
+    }
+    let initialMaskPathBounds = (initialBorderMaskLayer.mask as? CAShapeLayer)?.path?.boundingBoxOfPath
+
+    // when: only offset changes to a negative value while bounds stay unchanged
+    layer.borderMask = .shape(Rectangle(cornerRadius: 12), offset: -8)
+    layer.layoutSublayers()
+
+    guard let updatedBorderMaskLayer = layer.mask as? CAShapeLayer else {
+      fail("expected shape border mask layer after offset update.")
+      return
+    }
+
+    let updatedStrokePathBounds = updatedBorderMaskLayer.path?.boundingBoxOfPath
+    let updatedMaskPathBounds = (updatedBorderMaskLayer.mask as? CAShapeLayer)?.path?.boundingBoxOfPath
+
+    // then: stroke and nested mask paths are both updated and remain aligned
+    expect(initialMaskPathBounds) != nil
+    expect(updatedStrokePathBounds) != nil
+    expect(updatedMaskPathBounds) != nil
+    expect(updatedMaskPathBounds) == updatedStrokePathBounds
+    expect(updatedMaskPathBounds) != initialMaskPathBounds
+  }
 }

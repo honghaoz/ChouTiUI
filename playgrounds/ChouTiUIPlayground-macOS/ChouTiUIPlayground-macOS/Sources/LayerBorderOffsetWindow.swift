@@ -44,26 +44,67 @@ class LayerBorderOffsetWindow: NSWindow {
   private lazy var composeView = ComposeView { [weak self] in
     let borderOffset: CGFloat = 200 * ((self?.sliderValue ?? 0) - 0.5)
 
-    ColorNode(.white.opacity(0.2))
-      .cornerRadius(16)
-      .border(color: .red, width: 4)
-      .map {
-        if #available(macOS 15.0, iOS 18.0, tvOS 18.0, visionOS 2.0, *) {
-          $0.borderOffset(borderOffset)
-        } else {
-          $0
+    VStack {
+      Spacer()
+
+      HStack(spacing: 48) {
+        // direct layer
+        ColorNode(.white.opacity(0.2))
+          .cornerRadius(16)
+          .border(color: .red, width: 4)
+          .map {
+            if #available(macOS 15.0, iOS 18.0, tvOS 18.0, visionOS 2.0, *) {
+              $0.borderOffset(borderOffset)
+            } else {
+              $0
+            }
+          }
+          .animation(.easeInEaseOut(duration: 1))
+          .frame(width: .flexible, height: 120)
+          .overlay {
+            LabelNode("CALayer.borderOffset")
+              .font(.systemFont(ofSize: 12, weight: .semibold))
+              .textColor(.white)
+          }
+          .overlay {
+            LayerNode()
+              .cornerRadius(16)
+              .border(color: .red.opacity(0.5), width: 4)
+          }
+
+        // BorderLayer with borderOffset
+        LayerNode(make: { _ in
+          BorderLayerOffsetDemoLayer(variant: .cornerRadiusOffset, borderOffset: borderOffset)
+        }, update: { layer, _ in
+          layer.demoOffset = borderOffset
+        })
+        .frame(width: .flexible, height: 120)
+        .overlay {
+          LabelNode("BorderLayer.cornerRadius(offset:)")
+            .font(.systemFont(ofSize: 12, weight: .semibold))
+            .textColor(.white)
+        }
+
+        // BorderLayer with mask
+        LayerNode(make: { _ in
+          BorderLayerOffsetDemoLayer(variant: .shapeMask, borderOffset: borderOffset)
+        }, update: { layer, _ in
+          layer.demoOffset = borderOffset
+        })
+        .frame(width: .flexible, height: 120)
+        .overlay {
+          LabelNode("BorderLayer.shape(Rectangle, offset:)")
+            .font(.systemFont(ofSize: 12, weight: .semibold))
+            .textColor(.white)
         }
       }
-      .animation(.easeInEaseOut(duration: 1))
-      .overlay {
-        LabelNode("Border offset: \(borderOffset.rounded())")
-      }
-      .overlay {
-        LayerNode()
-          .cornerRadius(16)
-          .border(color: .red.opacity(0.5), width: 4)
-      }
-      .padding(50)
+      .padding(horizontal: 48)
+
+      Spacer()
+    }
+
+    LabelNode("Border offset: \(borderOffset.rounded())")
+      .textColor(.white)
 
     HStack {
       LabelNode("Border offset:")
@@ -86,7 +127,7 @@ class LayerBorderOffsetWindow: NSWindow {
 
   init() {
     super.init(
-      contentRect: NSRect(x: 0, y: 0, width: 400, height: 300),
+      contentRect: NSRect(x: 0, y: 0, width: 1024, height: 512),
       styleMask: [.titled, .closable, .miniaturizable, .resizable],
       backing: .buffered,
       defer: false
@@ -124,5 +165,81 @@ class LayerBorderOffsetWindow: NSWindow {
   // Close without releasing (hide)
   func hide() {
     orderOut(nil)
+  }
+}
+
+private final class BorderLayerOffsetDemoLayer: CALayer {
+
+  enum Variant {
+    case cornerRadiusOffset
+    case shapeMask
+  }
+
+  private let variant: Variant
+  private let contentLayer = CALayer()
+  private let referenceLayer = CALayer()
+  private let borderLayer = BorderLayer()
+
+  var demoOffset: CGFloat {
+    didSet {
+      updateBorderMask()
+    }
+  }
+
+  init(variant: Variant, borderOffset: CGFloat) {
+    self.variant = variant
+    self.demoOffset = borderOffset
+    super.init()
+
+    contentLayer.strongDelegate = CALayer.DisableImplicitAnimationDelegate.shared
+    contentLayer.backgroundColor = Color.white.opacity(0.2).cgColor
+    addSublayer(contentLayer)
+
+    referenceLayer.strongDelegate = CALayer.DisableImplicitAnimationDelegate.shared
+    referenceLayer.borderColor = Color.red.opacity(0.5).cgColor
+    referenceLayer.borderWidth = 4
+    addSublayer(referenceLayer)
+
+    borderLayer.strongDelegate = CALayer.DisableImplicitAnimationDelegate.shared
+    borderLayer.borderContent = .color(.red)
+    borderLayer.borderWidth = 4
+    addSublayer(borderLayer)
+  }
+
+  @available(*, unavailable)
+  required init?(coder: NSCoder) {
+    fatalError("init(coder:) is unavailable") // swiftlint:disable:this fatal_error
+  }
+
+  override func layoutSublayers() {
+    super.layoutSublayers()
+
+    let cornerRadius: CGFloat = 16
+
+    contentLayer.frame = bounds
+    contentLayer.cornerRadius = cornerRadius
+    contentLayer.cornerCurve = .continuous
+
+    referenceLayer.frame = bounds
+    referenceLayer.cornerRadius = cornerRadius
+    referenceLayer.cornerCurve = .continuous
+
+    borderLayer.frame = bounds
+
+    updateBorderMask(cornerRadius: cornerRadius)
+  }
+
+  private func updateBorderMask(cornerRadius: CGFloat = 16) {
+    switch variant {
+    case .cornerRadiusOffset:
+      if #available(macOS 15.0, iOS 18.0, tvOS 18.0, visionOS 2.0, *) {
+        borderLayer.borderMask = .cornerRadius(cornerRadius, offset: demoOffset)
+      } else {
+        borderLayer.borderMask = .shape(Rectangle(cornerRadius: cornerRadius), offset: demoOffset)
+      }
+    case .shapeMask:
+      borderLayer.borderMask = .shape(Rectangle(cornerRadius: cornerRadius), offset: demoOffset)
+    }
+    borderLayer.setNeedsLayout()
   }
 }

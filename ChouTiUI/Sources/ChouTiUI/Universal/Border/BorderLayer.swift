@@ -598,7 +598,11 @@ private class MaskShapeLayer: CAShapeLayer {
   ///
   /// - Parameter bounds: The bounds of the layer.
   /// - Returns: The path of the mask.
-  var maskPath: ((CGRect) -> CGPath) = { CGPath(rect: $0, transform: nil) }
+  var maskPath: ((CGRect) -> CGPath) = { CGPath(rect: $0, transform: nil) } {
+    didSet {
+      updateMaskPath()
+    }
+  }
 
   override var contentsScale: CGFloat {
     get {
@@ -638,8 +642,11 @@ private class MaskShapeLayer: CAShapeLayer {
     }
 
     let maskLayerOldBounds = maskLayer.frame
+    let maskLayerOldPath = maskLayer.path
+
+    let maskLayerNewPath = maskPath(bounds)
     maskLayer.frame = bounds
-    maskLayer.path = maskPath(bounds)
+    maskLayer.path = maskLayerNewPath
 
     if let sizeAnimation = self.sizeAnimation() {
       maskLayer.addFrameAnimation(
@@ -652,10 +659,18 @@ private class MaskShapeLayer: CAShapeLayer {
       if let pathAnimation = sizeAnimation.copy() as? CABasicAnimation {
         pathAnimation.keyPath = "path"
         pathAnimation.isAdditive = false
-        pathAnimation.fromValue = maskLayer.presentation()?.path
-        pathAnimation.toValue = maskLayer.path
+        pathAnimation.fromValue = maskLayer.presentation()?.path ?? maskLayerOldPath
+        pathAnimation.toValue = maskLayerNewPath
         maskLayer.add(pathAnimation, forKey: "path")
       }
     }
+  }
+
+  private func updateMaskPath() {
+    guard let maskLayer = mask as? CAShapeLayer else {
+      return
+    }
+
+    maskLayer.path = maskPath(bounds)
   }
 }
