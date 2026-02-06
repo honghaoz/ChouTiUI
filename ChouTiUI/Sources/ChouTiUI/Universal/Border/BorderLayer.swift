@@ -106,53 +106,28 @@ public final class BorderLayer: CALayer {
   // MARK: - Border Mask
 
   /// The mask of the border.
-  public struct BorderMask {
-
-    fileprivate enum Storage {
-      case cornerRadius(_ cornerRadius: CGFloat, cornerCurve: CALayerCornerCurve, offset: CGFloat)
-      case shape(_ shape: any Shape, offset: CGFloat)
-    }
-
-    fileprivate let storage: Storage
+  public enum BorderMask {
 
     /// A corner radius border.
     ///
     /// - Parameters:
     ///   - cornerRadius: The corner radius in points.
     ///   - cornerCurve: The corner curve of the border. The default value is `continuous`.
-    public static func cornerRadius(_ cornerRadius: CGFloat, cornerCurve: CALayerCornerCurve = .continuous) -> BorderMask {
-      BorderMask(storage: .cornerRadius(cornerRadius, cornerCurve: cornerCurve, offset: 0))
-    }
-
-    /// A corner radius border with offset.
-    ///
-    /// - Parameters:
-    ///   - cornerRadius: The corner radius in points.
-    ///   - cornerCurve: The corner curve of the border. The default value is `continuous`.
-    ///   - offset: The offset of the border in points. Positive value to make the border outward/bigger, negative value to make the border inward/smaller.
-    @available(macOS 15.0, iOS 18.0, tvOS 18.0, visionOS 2.0, *)
-    public static func cornerRadius(_ cornerRadius: CGFloat, cornerCurve: CALayerCornerCurve = .continuous, offset: CGFloat) -> BorderMask {
-      BorderMask(storage: .cornerRadius(cornerRadius, cornerCurve: cornerCurve, offset: offset))
-    }
+    ///   - offset: The offset of the border in points. Positive value to make the border outward/bigger, negative value to make the border inward/smaller. The default value is `0`.
+    case cornerRadius(_ cornerRadius: CGFloat, cornerCurve: CALayerCornerCurve = .continuous, offset: CGFloat = 0)
 
     /// A shape border.
     ///
     /// - Parameters:
     ///   - shape: The shape of the border. If the offset is not 0, the shape should be preferably an `OffsetableShape`.
     ///   - offset: The offset of the border in points. Positive value to make the border outward/bigger, negative value to make the border inward/smaller. The default value is 0.
-    public static func shape(_ shape: any Shape, offset: CGFloat = 0) -> BorderMask {
-      BorderMask(storage: .shape(shape, offset: offset))
-    }
+    case shape(_ shape: any Shape, offset: CGFloat = 0)
 
-    /// The offset to be added to the bounds of the border layer (host layer) bounds, for the content layer and border mask layer.
-    ///
-    /// - When the offset is positive, the bounds of the content/mask layer will be extended by the offset.
-    /// - When the offset is negative, the bounds of the content/mask layer won't be changed.
-    fileprivate var boundsExtendedOffset: CGFloat {
-      switch self.storage {
+    fileprivate var offset: CGFloat {
+      switch self {
       case .cornerRadius(_, _, let offset),
            .shape(_, let offset):
-        return offset > 0 ? offset : 0
+        return offset
       }
     }
   }
@@ -191,73 +166,39 @@ public final class BorderLayer: CALayer {
   override public func layoutSublayers() {
     super.layoutSublayers()
 
-    switch (borderContent, borderMask.storage) {
+    switch (borderContent, borderMask) {
     case (.color(let color), .cornerRadius(let cornerRadius, let cornerCurve, let offset)):
       // solid color + corner radius
-      // just use layer's border directly
+      if usesNativeCornerRadiusBorderOffset {
+        // use layer's border directly
 
-      // reset border content layer
-      self.borderContentColorLayer?.removeFromSuperlayer()
-      self.borderContentColorLayer = nil
-      self.borderContentGradientLayer?.removeFromSuperlayer()
-      self.borderContentGradientLayer = nil
-      self.borderContentExternalLayer?.removeFromSuperlayer()
-      self.borderContentExternalLayer = nil
+        // reset border content layer
+        self.borderContentColorLayer?.removeFromSuperlayer()
+        self.borderContentColorLayer = nil
+        self.borderContentGradientLayer?.removeFromSuperlayer()
+        self.borderContentGradientLayer = nil
+        self.borderContentExternalLayer?.removeFromSuperlayer()
+        self.borderContentExternalLayer = nil
 
-      // reset border mask layer
-      self.borderMaskLayer = nil
-      self.mask = nil
+        // reset border mask layer
+        self.borderMaskLayer = nil
+        self.mask = nil
 
-      // use layer's border directly
-      super.borderColor = color.cgColor
-      super.cornerRadius = cornerRadius
-      super.borderWidth = borderWidthValue
-      self.cornerCurve = cornerCurve
-      if #available(macOS 15.0, iOS 18.0, tvOS 18.0, visionOS 2.0, *) {
-        self.borderOffset = offset
+        // use layer's border directly
+        super.borderColor = color.cgColor
+        super.cornerRadius = cornerRadius
+        super.borderWidth = borderWidthValue
+        self.cornerCurve = cornerCurve
+        if #available(macOS 15.0, iOS 18.0, tvOS 18.0, visionOS 2.0, *) {
+          self.borderOffset = offset
+        }
+      } else {
+        updateColorBorderWithCornerRadiusMask(color: color, cornerRadius: cornerRadius, cornerCurve: cornerCurve, offset: offset)
       }
 
     case (.color(let color), .shape(let shape, let offset)):
       // solid color + shape
-      // use a color layer as the border content and a shape layer as the border mask
-
-      // reset unused border content layers
-      self.borderContentGradientLayer?.removeFromSuperlayer()
-      self.borderContentGradientLayer = nil
-      self.borderContentExternalLayer?.removeFromSuperlayer()
-      self.borderContentExternalLayer = nil
-
-      // 1) set up border content color layer
-      let borderContentColorLayer = self.borderContentColorLayer ?? {
-        let colorLayer = CALayer()
-        colorLayer.strongDelegate = CALayer.DisableImplicitAnimationDelegate.shared
-        self.borderContentColorLayer = colorLayer
-        return colorLayer
-      }()
-
-      borderContentColorLayer.background = .color(color)
-      borderContentColorLayer.contentsScale = contentsScale
-
-      addSublayer(borderContentColorLayer)
-
-      let borderContentColorLayerOldFrame = borderContentColorLayer.frame
-
-      // extend the content layer's bounds by the border mask's offset so that the border with offset can have effect on it.
-      borderContentColorLayer.frame = bounds.expanded(by: borderMask.boundsExtendedOffset)
-
-      // add size sync animation so that the border content layer can follow the bounds change
-      if let sizeAnimation = self.sizeAnimation() {
-        borderContentColorLayer.addFrameAnimation(
-          from: borderContentColorLayerOldFrame,
-          to: borderContentColorLayer.frame,
-          presentationBounds: borderContentColorLayer.presentation()?.frame,
-          with: sizeAnimation
-        )
-      }
-
-      // 2) set up border mask layer with shape
-      resetBorderStyle()
-      updateMaskLayer(for: shape, borderWidth: borderWidthValue, offset: offset, borderContentFrame: borderContentColorLayer.frame)
+      updateColorBorderWithShape(color: color, shape: shape, offset: offset)
 
     case (.gradient, _),
          (.layer, _):
@@ -265,7 +206,7 @@ public final class BorderLayer: CALayer {
       // 1) set up border content layer
 
       // extend the content layer's bounds by the border mask's offset so that the border with offset can have effect on it.
-      let borderContentFrame = bounds.expanded(by: borderMask.boundsExtendedOffset)
+      let borderContentFrame = bounds.expanded(by: max(0, borderMask.offset))
 
       switch borderContent {
       case .color:
@@ -348,42 +289,163 @@ public final class BorderLayer: CALayer {
       // 2) set up border mask layer
       resetBorderStyle()
 
-      switch borderMask.storage {
+      switch borderMask {
       case .cornerRadius(let cornerRadius, let cornerCurve, let offset):
-        let borderMaskLayer = self.borderMaskLayer ?? {
-          let borderMaskLayer = CALayer()
-          borderMaskLayer.strongDelegate = CALayer.DisableImplicitAnimationDelegate.shared
-          self.borderMaskLayer = borderMaskLayer
-          return borderMaskLayer
-        }()
-
-        if mask !== borderMaskLayer {
-          mask = borderMaskLayer
-        }
-
-        borderMaskLayer.contentsScale = contentsScale
-
-        // add size sync animation so that the border mask layer can follow the bounds change
-        if let sizeAnimation = self.sizeAnimation() {
-          borderMaskLayer.addFrameAnimation(
-            from: borderMaskLayer.frame, // old frame
-            to: bounds,
-            presentationBounds: borderMaskLayer.presentation()?.frame,
-            with: sizeAnimation
-          )
-        }
-
-        borderMaskLayer.frame = bounds
-
-        borderMaskLayer.cornerRadius = cornerRadius
-        borderMaskLayer.borderWidth = borderWidthValue
-        borderMaskLayer.cornerCurve = cornerCurve
-        if #available(macOS 15.0, iOS 18.0, tvOS 18.0, visionOS 2.0, *) {
-          borderMaskLayer.borderOffset = offset
-        }
+        updateCornerRadiusMaskLayer(
+          cornerRadius: cornerRadius,
+          cornerCurve: cornerCurve,
+          offset: offset,
+          borderContentFrame: borderContentFrame,
+          useNativeBorderOffset: usesNativeCornerRadiusBorderOffset
+        )
       case .shape(let shape, let offset):
         updateMaskLayer(for: shape, borderWidth: borderWidthValue, offset: offset, borderContentFrame: borderContentFrame)
       }
+    }
+  }
+
+  private var usesNativeCornerRadiusBorderOffset: Bool {
+    if #available(macOS 15.0, iOS 18.0, tvOS 18.0, visionOS 2.0, *) {
+      return true // CALayer supports native "borderOffset" property since macOS 15, iOS 18, tvOS 18, visionOS 2.0
+    } else {
+      return false
+    }
+  }
+
+  private func updateColorBorderWithShape(color: Color, shape: any Shape, offset: CGFloat) {
+    // solid color + shape
+    // use a color layer as the border content and a shape layer as the border mask
+
+    // reset unused border content layers
+    self.borderContentGradientLayer?.removeFromSuperlayer()
+    self.borderContentGradientLayer = nil
+    self.borderContentExternalLayer?.removeFromSuperlayer()
+    self.borderContentExternalLayer = nil
+
+    // 1) set up border content color layer
+    let borderContentColorLayer = self.borderContentColorLayer ?? {
+      let colorLayer = CALayer()
+      colorLayer.strongDelegate = CALayer.DisableImplicitAnimationDelegate.shared
+      self.borderContentColorLayer = colorLayer
+      return colorLayer
+    }()
+
+    borderContentColorLayer.background = .color(color)
+    borderContentColorLayer.contentsScale = contentsScale
+
+    addSublayer(borderContentColorLayer)
+
+    let borderContentColorLayerOldFrame = borderContentColorLayer.frame
+
+    // extend the content layer's bounds by the border mask's offset so that the border with offset can have effect on it.
+    borderContentColorLayer.frame = bounds.expanded(by: max(0, offset))
+
+    // add size sync animation so that the border content layer can follow the bounds change
+    if let sizeAnimation = self.sizeAnimation() {
+      borderContentColorLayer.addFrameAnimation(
+        from: borderContentColorLayerOldFrame,
+        to: borderContentColorLayer.frame,
+        presentationBounds: borderContentColorLayer.presentation()?.frame,
+        with: sizeAnimation
+      )
+    }
+
+    // 2) set up border mask layer with shape
+    resetBorderStyle()
+    updateMaskLayer(for: shape, borderWidth: borderWidthValue, offset: offset, borderContentFrame: borderContentColorLayer.frame)
+  }
+
+  private func updateColorBorderWithCornerRadiusMask(
+    color: Color,
+    cornerRadius: CGFloat,
+    cornerCurve: CALayerCornerCurve,
+    offset: CGFloat
+  ) {
+    // solid color + standard corner radius border
+    // to support offset, use a color layer as the border content and a corner radius mask layer as the border mask
+
+    // reset unused border content layers
+    self.borderContentGradientLayer?.removeFromSuperlayer()
+    self.borderContentGradientLayer = nil
+    self.borderContentExternalLayer?.removeFromSuperlayer()
+    self.borderContentExternalLayer = nil
+
+    // 1) set up border content color layer
+    let borderContentColorLayer = self.borderContentColorLayer ?? {
+      let colorLayer = CALayer()
+      colorLayer.strongDelegate = CALayer.DisableImplicitAnimationDelegate.shared
+      self.borderContentColorLayer = colorLayer
+      return colorLayer
+    }()
+
+    borderContentColorLayer.background = .color(color)
+    borderContentColorLayer.contentsScale = contentsScale
+    addSublayer(borderContentColorLayer)
+
+    let borderContentColorLayerOldFrame = borderContentColorLayer.frame
+    borderContentColorLayer.frame = bounds.expanded(by: max(0, offset))
+
+    // add size sync animation so that the border content layer can follow the bounds change
+    if let sizeAnimation = self.sizeAnimation() {
+      borderContentColorLayer.addFrameAnimation(
+        from: borderContentColorLayerOldFrame,
+        to: borderContentColorLayer.frame,
+        presentationBounds: borderContentColorLayer.presentation()?.frame,
+        with: sizeAnimation
+      )
+    }
+
+    // 2) set up border mask layer with corner radius
+    resetBorderStyle()
+    updateCornerRadiusMaskLayer(
+      cornerRadius: cornerRadius,
+      cornerCurve: cornerCurve,
+      offset: offset,
+      borderContentFrame: borderContentColorLayer.frame,
+      useNativeBorderOffset: false
+    )
+  }
+
+  private func updateCornerRadiusMaskLayer(
+    cornerRadius: CGFloat,
+    cornerCurve: CALayerCornerCurve,
+    offset: CGFloat,
+    borderContentFrame: CGRect,
+    useNativeBorderOffset: Bool
+  ) {
+    let borderMaskLayer: CALayer
+    if let existingMaskLayer = self.borderMaskLayer, (existingMaskLayer as? MaskShapeLayer) == nil {
+      borderMaskLayer = existingMaskLayer
+    } else {
+      let newMaskLayer = CALayer()
+      newMaskLayer.strongDelegate = CALayer.DisableImplicitAnimationDelegate.shared
+      self.borderMaskLayer = newMaskLayer
+      borderMaskLayer = newMaskLayer
+    }
+
+    if mask !== borderMaskLayer {
+      mask = borderMaskLayer
+    }
+    borderMaskLayer.contentsScale = contentsScale
+
+    // Pre-iOS 18/macOS 15 compatibility mode emulates borderOffset by moving and resizing the mask layer.
+    let maskFrame = useNativeBorderOffset ? bounds : borderContentFrame.expanded(by: min(offset, 0))
+
+    if let sizeAnimation = self.sizeAnimation() {
+      borderMaskLayer.addFrameAnimation(
+        from: borderMaskLayer.frame, // old frame
+        to: maskFrame,
+        presentationBounds: borderMaskLayer.presentation()?.frame,
+        with: sizeAnimation
+      )
+    }
+
+    borderMaskLayer.frame = maskFrame
+    borderMaskLayer.cornerRadius = useNativeBorderOffset ? cornerRadius : max(0, cornerRadius + offset)
+    borderMaskLayer.borderWidth = borderWidthValue
+    borderMaskLayer.cornerCurve = cornerCurve
+    if useNativeBorderOffset, #available(macOS 15.0, iOS 18.0, tvOS 18.0, visionOS 2.0, *) {
+      borderMaskLayer.borderOffset = offset
     }
   }
 
@@ -431,7 +493,7 @@ public final class BorderLayer: CALayer {
       // ```
 
       // Simple logic:
-      let boundsExtendedOffset = borderMask.boundsExtendedOffset
+      let boundsExtendedOffset = max(0, offset)
       borderMaskLayer.path = offsetableShape.path(in: bounds.offsetBy(dx: boundsExtendedOffset, dy: boundsExtendedOffset), offset: offset)
 
       // add path animation so that the border mask layer can follow the bounds change
