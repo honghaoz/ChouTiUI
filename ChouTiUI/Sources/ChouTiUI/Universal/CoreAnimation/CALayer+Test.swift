@@ -36,7 +36,15 @@ import ChouTi
 
 extension CALayer {
 
-  var test: Test { Test(host: self) }
+  var test: Test {
+    get {
+      Test(host: self)
+    }
+    set { // swiftlint:disable:this unused_setter_value
+      // No-op. This setter exists so test helpers can be used with writeback syntax:
+      // `layer.test.someTestKnob = ...`
+    }
+  }
 
   struct Test {
 

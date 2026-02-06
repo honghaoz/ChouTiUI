@@ -304,7 +304,19 @@ public final class BorderLayer: CALayer {
     }
   }
 
-  private var usesNativeCornerRadiusBorderOffset: Bool {
+  #if DEBUG
+  /// Test override for `usesNativeCornerRadiusBorderOffset`.
+  fileprivate var testUsesNativeCornerRadiusBorderOffset: Bool?
+  #endif
+
+  /// Whether to use the native "borderOffset" property for corner radius border.
+  fileprivate var usesNativeCornerRadiusBorderOffset: Bool {
+    #if DEBUG
+    if let testUsesNativeCornerRadiusBorderOffset {
+      return testUsesNativeCornerRadiusBorderOffset
+    }
+    #endif
+
     if #available(macOS 15.0, iOS 18.0, tvOS 18.0, visionOS 2.0, *) {
       return true // CALayer supports native "borderOffset" property since macOS 15, iOS 18, tvOS 18, visionOS 2.0
     } else {
@@ -557,6 +569,24 @@ public final class BorderLayer: CALayer {
   // TODO: support animations
   // public func animate() {}
 }
+
+// MARK: - Testing
+
+#if DEBUG
+
+extension BorderLayer.Test {
+
+  var usesNativeCornerRadiusBorderOffset: Bool {
+    get {
+      (self.host as! BorderLayer).usesNativeCornerRadiusBorderOffset // swiftlint:disable:this force_cast
+    }
+    set {
+      (self.host as! BorderLayer).testUsesNativeCornerRadiusBorderOffset = newValue // swiftlint:disable:this force_cast
+    }
+  }
+}
+
+#endif
 
 /// A masked shape layer.
 ///

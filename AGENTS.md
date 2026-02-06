@@ -73,4 +73,4 @@ You are an expert iOS/macOS UI developer with a passion for clean, maintainable 
 
 Add short, actionable rules here when a pattern repeats.
 
-- TODO: Add lessons and conventions here (remove this placeholder when done)
+- In tests, avoid OS-version branching when behavior can be injected; expose debug test knobs so both code paths are exercised deterministically on every CI/runtime environment.
