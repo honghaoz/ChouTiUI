@@ -37,6 +37,14 @@ import ChouTiUI
 
 class CALayer_ShapeTests: XCTestCase {
 
+  // MARK: - Constants
+
+  private enum Constants {
+    static let nextRunLoopWait: TimeInterval = 1e-6
+    static let explicitAnimationDuration: TimeInterval = 0.1
+    static let implicitAnimationDuration: TimeInterval = 0.25
+  }
+
   func test_shape() {
     let layer = CALayer()
 
@@ -140,6 +148,27 @@ class CALayer_ShapeTests: XCTestCase {
 
   // MARK: - Size Change No Animation
 
+  func test_shape_onLiveFrameChange_updatesMaskPath_whenMaskBoundsChanges() throws {
+    // given: a layer with a shape that records every path request
+    let layer = CALayer()
+    layer.bounds = CGRect(x: 0, y: 0, width: 100, height: 100)
+
+    let recorder = PathRecordingRectangle.Recorder()
+    layer.shape = PathRecordingRectangle(recorder: recorder)
+
+    let maskLayer = try (layer.mask as? CAShapeLayer).unwrap()
+    recorder.rects.removeAll()
+
+    // when: mask layer bounds changes (which should trigger onLiveFrameChange)
+    maskLayer.bounds = CGRect(x: 0, y: 0, width: 220, height: 330)
+    wait(timeout: Constants.nextRunLoopWait) // wait until next runloop
+
+    // then: shape.path(in:) should be called with the updated live frame size and mask path should be updated
+    expect(recorder.rects.count) > 0
+    try expect(recorder.rects.last.unwrap()) == CGRect(x: 0, y: 0, width: 220, height: 330)
+    expect(maskLayer.path?.pathElements()) == Rectangle().path(in: CGRect(x: 0, y: 0, width: 220, height: 330)).pathElements()
+  }
+
   func test_shape_noAnimation_boundsChanged() throws {
     let window = TestWindow()
 
@@ -172,18 +201,14 @@ class CALayer_ShapeTests: XCTestCase {
     layer.bounds = CGRect(x: 0, y: 0, width: 200, height: 300)
     let animation = CABasicAnimation(keyPath: "bounds")
     animation.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-    animation.duration = 0.1
+    animation.duration = Constants.explicitAnimationDuration
     animation.fromValue = CGRect(x: 0, y: 0, width: 100, height: 100)
     animation.toValue = CGRect(x: 0, y: 0, width: 200, height: 300)
     layer.add(animation, forKey: "bounds")
 
-    wait(timeout: 1e-6) // wait until next runloop
+    wait(timeout: Constants.nextRunLoopWait) // wait until next runloop
 
-    let maskPathAnimation = try (layer.mask?.animation(forKey: "path") as? CABasicAnimation).unwrap()
-    expect(maskPathAnimation.keyPath) == "path"
-    expect((maskPathAnimation.toValue as! CGPath)) === (layer.mask as? CAShapeLayer)?.path // swiftlint:disable:this force_cast
-    expect(maskPathAnimation.isAdditive) == false
-    expect(maskPathAnimation.duration) == 0.1
+    expect(layer.mask?.animation(forKey: "path")) == nil
   }
 
   func test_shape_explicitAnimation_boundsSizeChanged() throws {
@@ -200,18 +225,14 @@ class CALayer_ShapeTests: XCTestCase {
     layer.bounds.size = CGSize(width: 200, height: 300)
     let animation = CABasicAnimation(keyPath: "bounds.size")
     animation.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-    animation.duration = 0.1
+    animation.duration = Constants.explicitAnimationDuration
     animation.fromValue = CGSize(width: 100, height: 100)
     animation.toValue = CGSize(width: 200, height: 300)
     layer.add(animation, forKey: "bounds.size")
 
-    wait(timeout: 1e-6) // wait until next runloop
+    wait(timeout: Constants.nextRunLoopWait) // wait until next runloop
 
-    let maskPathAnimation = try (layer.mask?.animation(forKey: "path") as? CABasicAnimation).unwrap()
-    expect(maskPathAnimation.keyPath) == "path"
-    expect((maskPathAnimation.toValue as! CGPath)) === (layer.mask as? CAShapeLayer)?.path // swiftlint:disable:this force_cast
-    expect(maskPathAnimation.isAdditive) == false
-    expect(maskPathAnimation.duration) == 0.1
+    expect(layer.mask?.animation(forKey: "path")) == nil
   }
 
   func test_shape_explicitAnimation_boundsSizeWidthChanged() throws {
@@ -228,18 +249,14 @@ class CALayer_ShapeTests: XCTestCase {
     layer.bounds.size.width = 200
     let animation = CABasicAnimation(keyPath: "bounds.size.width")
     animation.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-    animation.duration = 0.1
+    animation.duration = Constants.explicitAnimationDuration
     animation.fromValue = 100
     animation.toValue = 200
     layer.add(animation, forKey: "bounds.size.width")
 
-    wait(timeout: 1e-6) // wait until next runloop
+    wait(timeout: Constants.nextRunLoopWait) // wait until next runloop
 
-    let maskPathAnimation = try (layer.mask?.animation(forKey: "path") as? CABasicAnimation).unwrap()
-    expect(maskPathAnimation.keyPath) == "path"
-    expect((maskPathAnimation.toValue as! CGPath)) === (layer.mask as? CAShapeLayer)?.path // swiftlint:disable:this force_cast
-    expect(maskPathAnimation.isAdditive) == false
-    expect(maskPathAnimation.duration) == 0.1
+    expect(layer.mask?.animation(forKey: "path")) == nil
   }
 
   func test_shape_explicitAnimation_boundsSizeHeightChanged() throws {
@@ -256,18 +273,14 @@ class CALayer_ShapeTests: XCTestCase {
     layer.bounds.size.height = 300
     let animation = CABasicAnimation(keyPath: "bounds.size.height")
     animation.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-    animation.duration = 0.1
+    animation.duration = Constants.explicitAnimationDuration
     animation.fromValue = 100
     animation.toValue = 300
     layer.add(animation, forKey: "bounds.size.height")
 
-    wait(timeout: 1e-6) // wait until next runloop
+    wait(timeout: Constants.nextRunLoopWait) // wait until next runloop
 
-    let maskPathAnimation = try (layer.mask?.animation(forKey: "path") as? CABasicAnimation).unwrap()
-    expect(maskPathAnimation.keyPath) == "path"
-    expect((maskPathAnimation.toValue as! CGPath)) === (layer.mask as? CAShapeLayer)?.path // swiftlint:disable:this force_cast
-    expect(maskPathAnimation.isAdditive) == false
-    expect(maskPathAnimation.duration) == 0.1
+    expect(layer.mask?.animation(forKey: "path")) == nil
   }
 
   // MARK: - Size Change Implicit Animation
@@ -284,16 +297,12 @@ class CALayer_ShapeTests: XCTestCase {
     expect(layer.presentation()).toEventuallyNot(beNil())
 
     layer.bounds = CGRect(x: 0, y: 0, width: 200, height: 300)
-    wait(timeout: 1e-6) // wait until next runloop
+    wait(timeout: Constants.nextRunLoopWait) // wait until next runloop
 
     let boundsAnimation = try (layer.animation(forKey: "bounds") as? CABasicAnimation).unwrap()
-    expect(boundsAnimation.duration) == 0.25
+    expect(boundsAnimation.duration) == Constants.implicitAnimationDuration
 
-    let maskPathAnimation = try (layer.mask?.animation(forKey: "path") as? CABasicAnimation).unwrap()
-    expect(maskPathAnimation.keyPath) == "path"
-    expect((maskPathAnimation.toValue as! CGPath)) === (layer.mask as? CAShapeLayer)?.path // swiftlint:disable:this force_cast
-    expect(maskPathAnimation.isAdditive) == false
-    expect(maskPathAnimation.duration) == 0.25
+    expect(layer.mask?.animation(forKey: "path")) == nil
   }
 
   func test_boundsChange_implicitAnimation_boundsSizeChanged() throws {
@@ -308,16 +317,12 @@ class CALayer_ShapeTests: XCTestCase {
     expect(layer.presentation()).toEventuallyNot(beNil())
 
     layer.bounds.size = CGSize(width: 200, height: 300)
-    wait(timeout: 1e-6) // wait until next runloop
+    wait(timeout: Constants.nextRunLoopWait) // wait until next runloop
 
     let boundsAnimation = try (layer.animation(forKey: "bounds") as? CABasicAnimation).unwrap()
-    expect(boundsAnimation.duration) == 0.25
+    expect(boundsAnimation.duration) == Constants.implicitAnimationDuration
 
-    let maskPathAnimation = try (layer.mask?.animation(forKey: "path") as? CABasicAnimation).unwrap()
-    expect(maskPathAnimation.keyPath) == "path"
-    expect((maskPathAnimation.toValue as! CGPath)) === (layer.mask as? CAShapeLayer)?.path // swiftlint:disable:this force_cast
-    expect(maskPathAnimation.isAdditive) == false
-    expect(maskPathAnimation.duration) == 0.25
+    expect(layer.mask?.animation(forKey: "path")) == nil
   }
 
   func test_boundsChange_implicitAnimation_boundsSizeWidthChanged() throws {
@@ -332,16 +337,12 @@ class CALayer_ShapeTests: XCTestCase {
     expect(layer.presentation()).toEventuallyNot(beNil())
 
     layer.bounds.size.width = 200
-    wait(timeout: 1e-6) // wait until next runloop
+    wait(timeout: Constants.nextRunLoopWait) // wait until next runloop
 
     let boundsAnimation = try (layer.animation(forKey: "bounds") as? CABasicAnimation).unwrap()
-    expect(boundsAnimation.duration) == 0.25
+    expect(boundsAnimation.duration) == Constants.implicitAnimationDuration
 
-    let maskPathAnimation = try (layer.mask?.animation(forKey: "path") as? CABasicAnimation).unwrap()
-    expect(maskPathAnimation.keyPath) == "path"
-    expect((maskPathAnimation.toValue as! CGPath)) === (layer.mask as? CAShapeLayer)?.path // swiftlint:disable:this force_cast
-    expect(maskPathAnimation.isAdditive) == false
-    expect(maskPathAnimation.duration) == 0.25
+    expect(layer.mask?.animation(forKey: "path")) == nil
   }
 
   func test_boundsChange_implicitAnimation_boundsSizeHeightChanged() throws {
@@ -356,16 +357,12 @@ class CALayer_ShapeTests: XCTestCase {
     expect(layer.presentation()).toEventuallyNot(beNil())
 
     layer.bounds.size.height = 300
-    wait(timeout: 1e-6) // wait until next runloop
+    wait(timeout: Constants.nextRunLoopWait) // wait until next runloop
 
     let boundsAnimation = try (layer.animation(forKey: "bounds") as? CABasicAnimation).unwrap()
-    expect(boundsAnimation.duration) == 0.25
+    expect(boundsAnimation.duration) == Constants.implicitAnimationDuration
 
-    let maskPathAnimation = try (layer.mask?.animation(forKey: "path") as? CABasicAnimation).unwrap()
-    expect(maskPathAnimation.keyPath) == "path"
-    expect((maskPathAnimation.toValue as! CGPath)) === (layer.mask as? CAShapeLayer)?.path // swiftlint:disable:this force_cast
-    expect(maskPathAnimation.isAdditive) == false
-    expect(maskPathAnimation.duration) == 0.25
+    expect(layer.mask?.animation(forKey: "path")) == nil
   }
 
   // MARK: - Shape Animation
@@ -449,5 +446,27 @@ class CALayer_ShapeTests: XCTestCase {
     expect(maskPathAnimation.timingFunction) == CAMediaTimingFunction(name: .easeInEaseOut)
 
     expect(layer.shape?.isEqual(to: Circle())) == true
+  }
+}
+
+private struct PathRecordingRectangle: Shape {
+
+  final class Recorder {
+    var rects: [CGRect] = []
+  }
+
+  let recorder: Recorder
+
+  func path(in rect: CGRect) -> CGPath {
+    recorder.rects.append(rect)
+    return Rectangle().path(in: rect)
+  }
+
+  static func == (lhs: Self, rhs: Self) -> Bool {
+    lhs.recorder === rhs.recorder
+  }
+
+  func hash(into hasher: inout Hasher) {
+    hasher.combine(ObjectIdentifier(recorder))
   }
 }

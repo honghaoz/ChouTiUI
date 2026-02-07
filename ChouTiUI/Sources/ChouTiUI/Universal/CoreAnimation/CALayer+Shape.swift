@@ -98,35 +98,18 @@ public extension CALayer {
 
     let maskLayer = BaseCAShapeLayer()
     maskLayer.frame = bounds
-    maskLayer.path = shape.path(in: bounds)
     mask = maskLayer
 
-    addFullSizeTrackingLayer(
-      maskLayer,
-      onBoundsChange: { [weak self, weak maskLayer] context in
-        guard let shape = self?.shape,
-              let maskLayer = maskLayer
-        else {
-          return // impossible, full size tracking should be teared down when shape is nil
-        }
+    // make sure the mask layer follow the host layer's bounds
+    addFullSizeTrackingLayer(maskLayer)
 
-        let layer = context.hostLayer
-        maskLayer.path = shape.path(in: layer.bounds)
-      },
-      onAddSizeChangeAnimation: { context, sizeAnimation in
-        // add path animation if bounds changes
-        guard let animationCopy = sizeAnimation.copy() as? CABasicAnimation else {
-          ChouTi.assertFailure("failed to copy animation, animation: \(sizeAnimation)")
-          return
-        }
-
-        animationCopy.keyPath = "path"
-        animationCopy.isAdditive = false
-        animationCopy.fromValue = maskLayer.presentation()?.path
-        animationCopy.toValue = maskLayer.path
-        maskLayer.add(animationCopy, forKey: "path")
-      }
-    )
+    // observe the mask layer's size change so that the mask layer's path can be updated, including when the host layer is animated.
+    // we don't animate the mask layer's path here because the path animation can't be additive where the host layer usually animates its size change additively.
+    // to make sure the mask layer's path is updated in sync with the host layer's size change, we use `onLiveFrameChange`.
+    maskLayer.path = shape.path(in: bounds)
+    maskLayer.onLiveFrameChange { (layer: CAShapeLayer, frame) in
+      layer.path = shape.path(in: frame.origin(.zero))
+    }
   }
 
   /// Animate the shape of the layer.
