@@ -75,3 +75,4 @@ You are an expert iOS/macOS UI developer with a passion for clean, maintainable 
 Add short, actionable rules here when a pattern repeats.
 
 - In tests, avoid OS-version branching when behavior can be injected; expose debug test knobs so both code paths are exercised deterministically on every CI/runtime environment.
+- For `Self`-typed callback APIs, verify concrete subtype ergonomics by directly accessing subtype properties/methods in the callback (compile-time usage), not by runtime casting assertions.

@@ -110,7 +110,17 @@ public extension CALayer {
   ///   - block: The block to be called when the frame changes. It will be called with the layer and the new frame.
   /// - Returns: A cancellable token that can be used to remove the block.
   @discardableResult
-  func onLiveFrameChange(_ block: @escaping (CALayer, CGRect) -> Void) -> CancellableToken {
+  func onLiveFrameChange<LayerType: CALayer>(_ block: @escaping (LayerType, CGRect) -> Void) -> CancellableToken {
+    _onLiveFrameChange { layer, frame in
+      guard let layer = layer as? LayerType else {
+        ChouTi.assertFailure("expect layer type \(LayerType.self), got \(type(of: layer))")
+        return
+      }
+      block(layer, frame)
+    }
+  }
+
+  private func _onLiveFrameChange(_ block: @escaping (CALayer, CGRect) -> Void) -> CancellableToken {
     lastFrame = frame // set initial last frame
 
     let token = ValueCancellableToken(value: block) { [weak self] token in

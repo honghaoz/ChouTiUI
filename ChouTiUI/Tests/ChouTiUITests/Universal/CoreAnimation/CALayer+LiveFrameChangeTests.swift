@@ -77,6 +77,34 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
     try expect(capturedFrames.first.unwrap().1) == CGRect(x: 100, y: 200, width: 100, height: 200)
   }
 
+  func test_onLiveFrameChange_noAnimations_providesConcreteLayerAPIWithoutCasting() throws {
+    // given: a CAShapeLayer observed by onLiveFrameChange
+    let shapeLayer = CAShapeLayer()
+    shapeLayer.delegate = CALayer.DisableImplicitAnimationDelegate.shared
+    shapeLayer.frame = CGRect(x: 10, y: 20, width: 100, height: 200)
+    window.layer.addSublayer(shapeLayer)
+    wait(timeout: 1e-6)
+
+    let expectedPath = CGPath(ellipseIn: CGRect(x: 0, y: 0, width: 20, height: 12), transform: nil)
+    shapeLayer.path = expectedPath
+
+    var capturedPath: CGPath?
+    var capturedFrame: CGRect?
+    shapeLayer.onLiveFrameChange { (layer: CAShapeLayer, frame) in
+      // compile-time check: callback layer can use `CAShapeLayer` API without casting
+      capturedPath = layer.path
+      capturedFrame = frame
+    }
+
+    // when: the shape layer frame changes
+    shapeLayer.position = CGPoint(x: 150, y: 300)
+    wait(timeout: 1e-6)
+
+    // then: callback should be able to read `CAShapeLayer` API directly and get expected values
+    try expect(capturedPath.unwrap().boundingBoxOfPath) == expectedPath.boundingBoxOfPath
+    try expect(capturedFrame.unwrap()) == CGRect(x: 100, y: 200, width: 100, height: 200)
+  }
+
   func test_onLiveFrameChange_noAnimations_boundsSizeChanged() throws {
     var capturedFrames: [(CALayer, CGRect)] = []
 
