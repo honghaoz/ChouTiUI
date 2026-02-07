@@ -291,15 +291,20 @@ public final class BorderLayer: CALayer {
 
       switch borderMask {
       case .cornerRadius(let cornerRadius, let cornerCurve, let offset):
-        updateCornerRadiusMaskLayer(
-          cornerRadius: cornerRadius,
+        updateMaskLayerForCornerRadius(
+          cornerRadius,
           cornerCurve: cornerCurve,
           offset: offset,
           borderContentFrame: borderContentFrame,
           useNativeBorderOffset: usesNativeBorderOffset
         )
       case .shape(let shape, let offset):
-        updateMaskLayer(for: shape, borderWidth: borderWidthValue, offset: offset, borderContentFrame: borderContentFrame)
+        updateMaskLayerForShape(
+          shape,
+          borderWidth: borderWidthValue,
+          offset: offset,
+          borderContentFrame: borderContentFrame
+        )
       }
     }
   }
@@ -364,15 +369,19 @@ public final class BorderLayer: CALayer {
 
     // 2) set up border mask layer with shape
     resetBorderStyle()
-    updateMaskLayer(for: shape, borderWidth: borderWidthValue, offset: offset, borderContentFrame: borderContentColorLayer.frame)
+    updateMaskLayerForShape(
+      shape,
+      borderWidth: borderWidthValue,
+      offset: offset,
+      borderContentFrame: borderContentColorLayer.frame
+    )
   }
 
-  private func updateColorBorderWithCornerRadiusMask(
-    color: Color,
-    cornerRadius: CGFloat,
-    cornerCurve: CALayerCornerCurve,
-    offset: CGFloat
-  ) {
+  private func updateColorBorderWithCornerRadiusMask(color: Color,
+                                                     cornerRadius: CGFloat,
+                                                     cornerCurve: CALayerCornerCurve,
+                                                     offset: CGFloat)
+  {
     // solid color + standard corner radius border
     // to support offset, use a color layer as the border content and a corner radius mask layer as the border mask
 
@@ -409,8 +418,8 @@ public final class BorderLayer: CALayer {
 
     // 2) set up border mask layer with corner radius
     resetBorderStyle()
-    updateCornerRadiusMaskLayer(
-      cornerRadius: cornerRadius,
+    updateMaskLayerForCornerRadius(
+      cornerRadius,
       cornerCurve: cornerCurve,
       offset: offset,
       borderContentFrame: borderContentColorLayer.frame,
@@ -418,13 +427,12 @@ public final class BorderLayer: CALayer {
     )
   }
 
-  private func updateCornerRadiusMaskLayer(
-    cornerRadius: CGFloat,
-    cornerCurve: CALayerCornerCurve,
-    offset: CGFloat,
-    borderContentFrame: CGRect,
-    useNativeBorderOffset: Bool
-  ) {
+  private func updateMaskLayerForCornerRadius(_ cornerRadius: CGFloat,
+                                              cornerCurve: CALayerCornerCurve,
+                                              offset: CGFloat,
+                                              borderContentFrame: CGRect,
+                                              useNativeBorderOffset: Bool)
+  {
     let borderMaskLayer: CALayer
     if let existingMaskLayer = self.borderMaskLayer, (existingMaskLayer as? MaskShapeLayer) == nil {
       borderMaskLayer = existingMaskLayer
@@ -461,7 +469,11 @@ public final class BorderLayer: CALayer {
     }
   }
 
-  private func updateMaskLayer(for shape: any Shape, borderWidth: CGFloat, offset: CGFloat, borderContentFrame: CGRect) {
+  private func updateMaskLayerForShape(_ shape: any Shape,
+                                       borderWidth: CGFloat,
+                                       offset: CGFloat,
+                                       borderContentFrame: CGRect)
+  {
     let borderMaskLayer: MaskShapeLayer
     if let existingMaskLayer = self.borderMaskLayer as? MaskShapeLayer {
       borderMaskLayer = existingMaskLayer
