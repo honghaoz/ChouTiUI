@@ -105,62 +105,136 @@ class BorderLayerTests: XCTestCase {
   }
 
   func test_solidColor_cornerRadius_positiveOffset_useNativeBorderOffset() {
+    // given: a border layer with native border offset support
     let layer = makeBorderLayer(usesNativeBorderOffset: true)
-    layer.frame = CGRect(x: 0, y: 0, width: 100, height: 50)
+    layer.frame = CGRect(x: 0, y: 0, width: 100, height: 60)
+    layer.borderWidth = 4
     layer.borderContent = .color(.red)
-    layer.borderMask = .cornerRadius(8, offset: 3)
+    layer.borderMask = .cornerRadius(12, offset: 3)
 
+    // when: layout the layer
     layer.layoutSublayers()
 
+    // then: the layer should not have a mask and no sublayers
     expect(layer.mask) == nil
     expect(layer.sublayers?.count ?? 0) == 0
+
+    // then: the layer should have border properties set as expected
+    expect(layer.borderColor) == Color.red.cgColor
+    expect(layer.cornerRadius) == 12
+    expect(layer.borderWidth) == 4
+    expect(layer.cornerCurve) == .continuous
+    if #available(macOS 15.0, iOS 18.0, tvOS 18.0, visionOS 2.0, *) {
+      expect(layer.borderOffset) == 3
+    }
+
+    // then: the layer's internal layers should be nil
+    expect(DynamicLookup(layer).keyPath("borderContentColorLayer") as CALayer?) == nil
+    expect(DynamicLookup(layer).keyPath("borderContentGradientLayer") as CAGradientLayer?) == nil
+    expect(DynamicLookup(layer).keyPath("borderContentExternalLayer") as CALayer?) == nil
+    expect(DynamicLookup(layer).keyPath("borderMaskLayer") as CALayer?) == nil
   }
 
-  func test_solidColor_cornerRadius_positiveOffset_useMaskLayer() {
+  func test_solidColor_cornerRadius_positiveOffset_useMaskLayer() throws {
+    // given: a border layer with fallback border offset support
     let layer = makeBorderLayer(usesNativeBorderOffset: false)
-    layer.frame = CGRect(x: 0, y: 0, width: 100, height: 50)
+    layer.frame = CGRect(x: 0, y: 0, width: 100, height: 60)
+    layer.borderWidth = 4
     layer.borderContent = .color(.red)
-    layer.borderMask = .cornerRadius(8, offset: 3)
+    layer.borderMask = .cornerRadius(12, offset: 3)
 
+    // when: layout the layer
     layer.layoutSublayers()
 
-    expect(layer.mask) != nil
-    expect(layer.mask as? CAShapeLayer) == nil
-    expect(layer.mask?.frame) == layer.bounds.expanded(by: 3)
-    expect(layer.mask?.cornerRadius) == 11
-    expect(layer.sublayers?.count ?? 0) == 1
-    expect(layer.sublayers?.first?.frame) == layer.bounds.expanded(by: 3)
+    // then: the layer should have a content layer for the solid color
+    let contentLayer = try (layer.sublayers?.first as? CALayer).unwrap()
+    expect(contentLayer.frame) == layer.bounds.expanded(by: 3)
+    expect(contentLayer.backgroundColor) == Color.red.cgColor
+    expect(contentLayer.contentsScale) == layer.contentsScale
+
+    // then: the layer should have a mask layer for masking the solid color
+    let maskLayer = try layer.mask.unwrap()
+    expect(maskLayer.frame) == layer.bounds.expanded(by: 3)
+    expect(maskLayer.cornerRadius) == 15
+    expect(maskLayer.borderWidth) == 4
+    expect(maskLayer.cornerCurve) == .continuous
+    if #available(macOS 15.0, iOS 18.0, tvOS 18.0, visionOS 2.0, *) {
+      expect(layer.borderOffset) == 0
+    }
+
+    // then: the layer's internal layers should be set as expected
+    expect(DynamicLookup(layer).keyPath("borderContentColorLayer") as CALayer?) === contentLayer
+    expect(DynamicLookup(layer).keyPath("borderContentGradientLayer") as CAGradientLayer?) == nil
+    expect(DynamicLookup(layer).keyPath("borderContentExternalLayer") as CALayer?) == nil
+    expect(DynamicLookup(layer).keyPath("borderMaskLayer") as CALayer?) === maskLayer
   }
 
   func test_solidColor_cornerRadius_negativeOffset_useNativeBorderOffset() {
+    // given: a border layer with native border offset support
     let layer = makeBorderLayer(usesNativeBorderOffset: true)
     layer.frame = CGRect(x: 0, y: 0, width: 100, height: 60)
     layer.borderWidth = 4
     layer.borderContent = .color(.red)
     layer.borderMask = .cornerRadius(12, offset: -3)
 
+    // when: layout the layer
     layer.layoutSublayers()
 
+    // then: the layer should not have a mask and no sublayers
     expect(layer.mask) == nil
     expect(layer.sublayers?.count ?? 0) == 0
+
+    // then: the layer should have border properties set as expected
+    expect(layer.borderColor) == Color.red.cgColor
+    expect(layer.cornerRadius) == 12
+    expect(layer.borderWidth) == 4
+    expect(layer.cornerCurve) == .continuous
+    if #available(macOS 15.0, iOS 18.0, tvOS 18.0, visionOS 2.0, *) {
+      expect(layer.borderOffset) == -3
+    }
+
+    // then: the layer's internal layers should be nil
+    expect(DynamicLookup(layer).keyPath("borderContentColorLayer") as CALayer?) == nil
+    expect(DynamicLookup(layer).keyPath("borderContentGradientLayer") as CAGradientLayer?) == nil
+    expect(DynamicLookup(layer).keyPath("borderContentExternalLayer") as CALayer?) == nil
+    expect(DynamicLookup(layer).keyPath("borderMaskLayer") as CALayer?) == nil
   }
 
-  func test_solidColor_cornerRadius_negativeOffset_useMaskLayer() {
+  func test_solidColor_cornerRadius_negativeOffset_useMaskLayer() throws {
+    // given: a border layer with fallback border offset support
     let layer = makeBorderLayer(usesNativeBorderOffset: false)
     layer.frame = CGRect(x: 0, y: 0, width: 100, height: 60)
     layer.borderWidth = 4
     layer.borderContent = .color(.red)
     layer.borderMask = .cornerRadius(12, offset: -3)
 
+    // when: layout the layer
     layer.layoutSublayers()
 
-    expect(layer.mask) != nil
-    expect(layer.mask as? CAShapeLayer) == nil
-    expect(layer.mask?.frame) == layer.bounds.expanded(by: -3)
-    expect(layer.mask?.cornerRadius) == 9
-    expect(layer.sublayers?.count ?? 0) == 1
-    expect(layer.sublayers?.first?.frame) == layer.bounds
+    // then: the layer should have a content layer for the solid color
+    let contentLayer = try (layer.sublayers?.first as? CALayer).unwrap()
+    expect(contentLayer.frame) == layer.bounds
+    expect(contentLayer.backgroundColor) == Color.red.cgColor
+    expect(contentLayer.contentsScale) == layer.contentsScale
+
+    // then: the layer should have a mask layer for masking the solid color
+    let maskLayer = try layer.mask.unwrap()
+    expect(maskLayer.frame) == layer.bounds.expanded(by: -3)
+    expect(maskLayer.cornerRadius) == 9
+    expect(maskLayer.borderWidth) == 4
+    expect(maskLayer.cornerCurve) == .continuous
+    if #available(macOS 15.0, iOS 18.0, tvOS 18.0, visionOS 2.0, *) {
+      expect(layer.borderOffset) == 0
+    }
+
+    // then: the layer's internal layers should be set as expected
+    expect(DynamicLookup(layer).keyPath("borderContentColorLayer") as CALayer?) === contentLayer
+    expect(DynamicLookup(layer).keyPath("borderContentGradientLayer") as CAGradientLayer?) == nil
+    expect(DynamicLookup(layer).keyPath("borderContentExternalLayer") as CALayer?) == nil
+    expect(DynamicLookup(layer).keyPath("borderMaskLayer") as CALayer?) === maskLayer
   }
+
+  // MARK: - Gradient + Corner Radius
 
   func test_gradient_cornerRadius_positiveOffset_useNativeBorderOffset() {
     let layer = makeBorderLayer(usesNativeBorderOffset: true)
