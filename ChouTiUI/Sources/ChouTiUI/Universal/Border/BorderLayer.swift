@@ -106,7 +106,7 @@ public final class BorderLayer: CALayer {
   // MARK: - Border Mask
 
   /// The mask of the border.
-  public enum BorderMask {
+  public enum BorderMask: Equatable {
 
     /// A corner radius border.
     ///
@@ -130,10 +130,28 @@ public final class BorderLayer: CALayer {
         return offset
       }
     }
+
+    public static func == (lhs: BorderMask, rhs: BorderMask) -> Bool {
+      switch (lhs, rhs) {
+      case (.cornerRadius(let lhsCornerRadius, let lhsCornerCurve, let lhsOffset), .cornerRadius(let rhsCornerRadius, let rhsCornerCurve, let rhsOffset)):
+        return lhsCornerRadius == rhsCornerRadius && lhsCornerCurve == rhsCornerCurve && lhsOffset == rhsOffset
+      case (.shape(let lhsShape, let lhsOffset), .shape(let rhsShape, let rhsOffset)):
+        return lhsShape.isEqual(to: rhsShape) && lhsOffset == rhsOffset
+      case (.cornerRadius, .shape),
+           (.shape, .cornerRadius):
+        return false
+      }
+    }
   }
 
   /// The mask of the border. The default value is a zero corner radius border.
-  public var borderMask: BorderMask = .cornerRadius(0) // TODO: do we need to trigger setNeedsLayout?
+  public var borderMask: BorderMask = .cornerRadius(0) {
+    didSet {
+      if borderMask != oldValue {
+        setNeedsLayout()
+      }
+    }
+  }
 
   /// The mask layer.
   private var borderMaskLayer: CALayer?
@@ -163,6 +181,12 @@ public final class BorderLayer: CALayer {
 
   // MARK: - Layout
 
+  /// The last bounds.
+  private var lastBounds: CGRect?
+
+  /// The last border mask offset.
+  private var lastBorderMaskOffset: CGFloat?
+
   override public func layoutSublayers() {
     super.layoutSublayers()
 
@@ -191,6 +215,9 @@ public final class BorderLayer: CALayer {
       if #available(macOS 15.0, iOS 18.0, tvOS 18.0, visionOS 2.0, *) {
         self.borderOffset = offset
       }
+
+      lastBounds = nil
+      lastBorderMaskOffset = nil
 
       return
     }
@@ -227,6 +254,9 @@ public final class BorderLayer: CALayer {
         borderContentFrame: borderContentFrame
       )
     }
+
+    lastBounds = bounds
+    lastBorderMaskOffset = borderMask.offset
   }
 
   // MARK: - Helpers
@@ -454,23 +484,11 @@ public final class BorderLayer: CALayer {
 
     borderMaskLayer.frame = borderContentFrame
 
+    // update the border mask layer's path provider
+    let maskPath: (CGRect) -> CGPath
     if let offsetableShape = shape as? (any OffsetableShape) {
-      // Expanded logic:
-      // ```
-      // if offset > 0 {
-      //   // border mask layer is expanded, should use the original bounds in the expanded bounds's coordinate system
-      //   borderMaskLayer.path = offsetableShape.path(in: bounds.offsetBy(dx: offset, dy: offset), offset: offset)
-      // } else {
-      //   // border mask layer doesn't shrink, can just use the bounds directly
-      //   borderMaskLayer.path = offsetableShape.path(in: bounds, offset: offset)
-      // }
-      // ```
-
-      // Simple logic:
-      let boundsExtendedOffset = max(0, offset)
-      borderMaskLayer.path = offsetableShape.path(in: bounds.offsetBy(dx: boundsExtendedOffset, dy: boundsExtendedOffset), offset: offset)
-
-      borderMaskLayer.maskPath = { borderMaskLayerBounds in
+      // offsetable shape
+      maskPath = { borderMaskLayerBounds in
         // Expanded logic:
         // ```
         // if offset > 0 {
@@ -482,29 +500,33 @@ public final class BorderLayer: CALayer {
         // }
         // ```
 
-        // Simple logic:
-        offsetableShape.path(in: borderMaskLayerBounds.expanded(by: -boundsExtendedOffset), offset: offset)
+        // Simplified logic:
+        offsetableShape.path(in: borderMaskLayerBounds.expanded(by: -max(0, offset)), offset: offset)
       }
     } else {
       // not offsetable shape
       if offset >= 0 {
         // the border mask layer is expanded, use the expanded bounds directly
-        borderMaskLayer.path = shape.path(in: borderMaskLayer.bounds)
-        borderMaskLayer.maskPath = shape.path(in:)
+        maskPath = shape.path(in:)
       } else {
         // the border mask layer doesn't shrink, should use the shrunk bounds
-        borderMaskLayer.path = shape.path(in: bounds.expanded(by: offset))
-        borderMaskLayer.maskPath = { bounds in shape.path(in: bounds.expanded(by: offset)) }
+        maskPath = { bounds in shape.path(in: bounds.expanded(by: offset)) }
       }
     }
+    borderMaskLayer.maskPath = maskPath
 
-    // add path animation so that the border mask layer can follow the bounds change
-    if let pathAnimation = self.sizeAnimation()?.copy() as? CABasicAnimation {
-      pathAnimation.keyPath = "path"
-      pathAnimation.isAdditive = false
-      pathAnimation.fromValue = borderMaskLayer.presentation()?.path
-      pathAnimation.toValue = borderMaskLayer.path
-      borderMaskLayer.add(pathAnimation, forKey: "path")
+    // We only refresh the mask path when the bounds isn't changed AND the offset is changed.
+    //
+    // When the bounds is changed, we don't call `updateMaskPath()` because the mask path will be updated automatically
+    // by the `onLiveFrameChange` observer in the `MaskShapeLayer`, and the `onLiveFrameChange` is called on the next display refresh cycle.
+    // Refreshing the mask path here will render the final border immediately, which is not desirable.
+    //
+    // However, when the bounds is not changed, while the offset is changed, we need to refresh the mask path here to
+    // ensure the border is updated immediately.
+    if let lastBounds = lastBounds, lastBounds == bounds,
+       let lastBorderMaskOffset = lastBorderMaskOffset, lastBorderMaskOffset != offset
+    {
+      borderMaskLayer.updateMaskPath()
     }
 
     borderMaskLayer.lineWidth = 2 * borderWidthValue // double width so half is inside, half is outside
@@ -536,19 +558,23 @@ extension BorderLayer.Test {
 
 /// A masked shape layer.
 ///
-/// - The layer has a mask that clips the layer's content with a path.
+/// - The layer's path is set to the mask path.
+/// - The layer has a mask that clips the layer's content to the mask path.
 /// - The layer is a shape layer, it can set stroke, fill, etc.
+///
+/// With a stroke set, the layer can render a border ring.
+///
+/// The mask path is lively updated when the layer's bounds changes.
 private class MaskShapeLayer: CAShapeLayer {
 
-  /// The path of the mask.
+  /// The mask path provider.
+  ///
+  /// If the provider is changed, you may need to call `updateMaskPath()` to update the mask path immediately.
+  /// Otherwise, the mask path will be updated when the layer's bounds changes.
   ///
   /// - Parameter bounds: The bounds of the layer.
   /// - Returns: The path of the mask.
-  var maskPath: ((CGRect) -> CGPath) = { CGPath(rect: $0, transform: nil) } {
-    didSet {
-      updateMaskPath()
-    }
-  }
+  var maskPath: ((CGRect) -> CGPath) = { CGPath(rect: $0, transform: nil) }
 
   override var contentsScale: CGFloat {
     get {
@@ -563,11 +589,23 @@ private class MaskShapeLayer: CAShapeLayer {
   override init() {
     super.init()
 
+    // disable implicit animations
     strongDelegate = CALayer.DisableImplicitAnimationDelegate.shared
 
-    let maskLayer = CAShapeLayer()
-    maskLayer.strongDelegate = CALayer.DisableImplicitAnimationDelegate.shared
+    // set up mask layer
+    let maskLayer = BaseCAShapeLayer()
+    maskLayer.frame = bounds
     mask = maskLayer
+
+    // make sure the mask layer follow the host layer's bounds
+    addFullSizeTrackingLayer(maskLayer)
+
+    // keep mask paths in sync with live frame changes when frame is animated.
+    maskLayer.path = self.maskPath(bounds)
+    onLiveFrameChange { (layer: MaskShapeLayer, frame) in
+      let bounds = frame.origin(.zero)
+      layer.updateMaskPath(bounds: bounds)
+    }
   }
 
   @available(*, unavailable)
@@ -580,43 +618,12 @@ private class MaskShapeLayer: CAShapeLayer {
     super.init(layer: layer)
   }
 
-  override func layoutSublayers() {
-    super.layoutSublayers()
-
-    guard let maskLayer = mask as? CAShapeLayer else {
-      return
-    }
-
-    let maskLayerOldBounds = maskLayer.frame
-    let maskLayerOldPath = maskLayer.path
-
-    let maskLayerNewPath = maskPath(bounds)
-    maskLayer.frame = bounds
-    maskLayer.path = maskLayerNewPath
-
-    if let sizeAnimation = self.sizeAnimation() {
-      maskLayer.addFrameAnimation(
-        from: maskLayerOldBounds,
-        to: maskLayer.frame,
-        presentationBounds: self.presentation()?.bounds,
-        with: sizeAnimation
-      )
-
-      if let pathAnimation = sizeAnimation.copy() as? CABasicAnimation {
-        pathAnimation.keyPath = "path"
-        pathAnimation.isAdditive = false
-        pathAnimation.fromValue = maskLayer.presentation()?.path ?? maskLayerOldPath
-        pathAnimation.toValue = maskLayerNewPath
-        maskLayer.add(pathAnimation, forKey: "path")
-      }
-    }
-  }
-
-  private func updateMaskPath() {
-    guard let maskLayer = mask as? CAShapeLayer else {
-      return
-    }
-
-    maskLayer.path = maskPath(bounds)
+  /// Update the mask path immediately.
+  ///
+  /// - Parameter bounds: The bounds of the layer. If `nil`, the layer's bounds will be used.
+  func updateMaskPath(bounds: CGRect? = nil) {
+    let path = maskPath(bounds ?? self.bounds)
+    self.path = path
+    (self.mask as? BaseCAShapeLayer)?.path = path
   }
 }
