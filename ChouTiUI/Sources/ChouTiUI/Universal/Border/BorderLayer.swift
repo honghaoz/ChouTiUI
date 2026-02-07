@@ -169,7 +169,7 @@ public final class BorderLayer: CALayer {
     switch (borderContent, borderMask) {
     case (.color(let color), .cornerRadius(let cornerRadius, let cornerCurve, let offset)):
       // solid color + corner radius
-      if usesNativeCornerRadiusBorderOffset {
+      if usesNativeBorderOffset {
         // use layer's border directly
 
         // reset border content layer
@@ -296,7 +296,7 @@ public final class BorderLayer: CALayer {
           cornerCurve: cornerCurve,
           offset: offset,
           borderContentFrame: borderContentFrame,
-          useNativeBorderOffset: usesNativeCornerRadiusBorderOffset
+          useNativeBorderOffset: usesNativeBorderOffset
         )
       case .shape(let shape, let offset):
         updateMaskLayer(for: shape, borderWidth: borderWidthValue, offset: offset, borderContentFrame: borderContentFrame)
@@ -305,15 +305,15 @@ public final class BorderLayer: CALayer {
   }
 
   #if DEBUG
-  /// Test override for `usesNativeCornerRadiusBorderOffset`.
-  fileprivate var testUsesNativeCornerRadiusBorderOffset: Bool?
+  /// Test override for `usesNativeBorderOffset`.
+  fileprivate var testUsesNativeBorderOffset: Bool?
   #endif
 
-  /// Whether to use the native "borderOffset" property for corner radius border.
-  fileprivate var usesNativeCornerRadiusBorderOffset: Bool {
+  /// Whether to use the native "borderOffset" property for border.
+  fileprivate var usesNativeBorderOffset: Bool {
     #if DEBUG
-    if let testUsesNativeCornerRadiusBorderOffset {
-      return testUsesNativeCornerRadiusBorderOffset
+    if let testUsesNativeBorderOffset {
+      return testUsesNativeBorderOffset
     }
     #endif
 
@@ -576,12 +576,12 @@ public final class BorderLayer: CALayer {
 
 extension BorderLayer.Test {
 
-  var usesNativeCornerRadiusBorderOffset: Bool {
+  var usesNativeBorderOffset: Bool {
     get {
-      (self.host as! BorderLayer).usesNativeCornerRadiusBorderOffset // swiftlint:disable:this force_cast
+      (self.host as! BorderLayer).usesNativeBorderOffset // swiftlint:disable:this force_cast
     }
     set {
-      (self.host as! BorderLayer).testUsesNativeCornerRadiusBorderOffset = newValue // swiftlint:disable:this force_cast
+      (self.host as! BorderLayer).testUsesNativeBorderOffset = newValue // swiftlint:disable:this force_cast
     }
   }
 }

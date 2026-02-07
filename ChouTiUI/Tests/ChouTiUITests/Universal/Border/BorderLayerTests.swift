@@ -32,18 +32,80 @@ import QuartzCore
 
 import ChouTiTest
 
+import ChouTi
 @testable import ChouTiUI
 
 class BorderLayerTests: XCTestCase {
 
-  private func makeBorderLayer(usesNativeCornerRadiusBorderOffset: Bool) -> BorderLayer {
-    let layer = BorderLayer()
-    layer.test.usesNativeCornerRadiusBorderOffset = usesNativeCornerRadiusBorderOffset
-    return layer
+  // MARK: - Solid Color + Corner Radius
+
+  func test_solidColor_cornerRadius_zeroOffset_useNativeBorderOffset() {
+    // given: a border layer with native border offset support
+    let layer = makeBorderLayer(usesNativeBorderOffset: true)
+    layer.frame = CGRect(x: 0, y: 0, width: 100, height: 60)
+    layer.borderWidth = 4
+    layer.borderContent = .color(.red)
+    layer.borderMask = .cornerRadius(12)
+
+    // when: layout the layer
+    layer.layoutSublayers()
+
+    // then: the layer should not have a mask and no sublayers
+    expect(layer.mask) == nil
+    expect(layer.sublayers?.count ?? 0) == 0
+
+    // then: the layer should have a border properties set as expected
+    expect(layer.borderColor) == Color.red.cgColor
+    expect(layer.cornerRadius) == 12
+    expect(layer.borderWidth) == 4
+    expect(layer.cornerCurve) == .continuous
+    if #available(macOS 15.0, iOS 18.0, tvOS 18.0, visionOS 2.0, *) {
+      expect(layer.borderOffset) == 0
+    }
+
+    // then: the layer's internal layers should be nil
+    expect(DynamicLookup(layer).keyPath("borderContentColorLayer") as CALayer?) == nil
+    expect(DynamicLookup(layer).keyPath("borderContentGradientLayer") as CAGradientLayer?) == nil
+    expect(DynamicLookup(layer).keyPath("borderContentExternalLayer") as CALayer?) == nil
+    expect(DynamicLookup(layer).keyPath("borderMaskLayer") as CALayer?) == nil
+  }
+
+  func test_solidColor_cornerRadius_zeroOffset_useMaskLayer() throws {
+    // given: a border layer with fallback border offset support
+    let layer = makeBorderLayer(usesNativeBorderOffset: false)
+    layer.frame = CGRect(x: 0, y: 0, width: 100, height: 60)
+    layer.borderWidth = 4
+    layer.borderContent = .color(.red)
+    layer.borderMask = .cornerRadius(12)
+
+    // when: layout the layer
+    layer.layoutSublayers()
+
+    // then: the layer should have a content layer for the solid color
+    let contentLayer = try (layer.sublayers?.first as? CALayer).unwrap()
+    expect(contentLayer.frame) == layer.bounds
+    expect(contentLayer.backgroundColor) == Color.red.cgColor
+    expect(contentLayer.contentsScale) == layer.contentsScale
+
+    // then: the layer should have a mask layer for masking the solid color
+    let maskLayer = try layer.mask.unwrap()
+    expect(maskLayer.frame) == layer.bounds
+    expect(maskLayer.cornerRadius) == 12
+    expect(maskLayer.borderWidth) == 4
+    expect(maskLayer.cornerCurve) == .continuous
+    if #available(macOS 15.0, iOS 18.0, tvOS 18.0, visionOS 2.0, *) {
+      expect(layer.borderOffset) == 0
+    }
+
+    // then: the layer's internal layers should be set as expected
+    expect(DynamicLookup(layer).keyPath("borderContentColorLayer") as CALayer?) === contentLayer
+    expect(DynamicLookup(layer).keyPath("borderContentGradientLayer") as CAGradientLayer?) == nil
+    expect(DynamicLookup(layer).keyPath("borderContentExternalLayer") as CALayer?) == nil
+    expect(DynamicLookup(layer).keyPath("borderMaskLayer") as CALayer?) === maskLayer
   }
 
   func test_solidColor_cornerRadius_positiveOffset_useNativeBorderOffset() {
-    let layer = makeBorderLayer(usesNativeCornerRadiusBorderOffset: true)
+    let layer = makeBorderLayer(usesNativeBorderOffset: true)
     layer.frame = CGRect(x: 0, y: 0, width: 100, height: 50)
     layer.borderContent = .color(.red)
     layer.borderMask = .cornerRadius(8, offset: 3)
@@ -55,7 +117,7 @@ class BorderLayerTests: XCTestCase {
   }
 
   func test_solidColor_cornerRadius_positiveOffset_useMaskLayer() {
-    let layer = makeBorderLayer(usesNativeCornerRadiusBorderOffset: false)
+    let layer = makeBorderLayer(usesNativeBorderOffset: false)
     layer.frame = CGRect(x: 0, y: 0, width: 100, height: 50)
     layer.borderContent = .color(.red)
     layer.borderMask = .cornerRadius(8, offset: 3)
@@ -70,38 +132,8 @@ class BorderLayerTests: XCTestCase {
     expect(layer.sublayers?.first?.frame) == layer.bounds.expanded(by: 3)
   }
 
-  func test_solidColor_cornerRadius_zeroOffset_useNativeBorderOffset() {
-    let layer = makeBorderLayer(usesNativeCornerRadiusBorderOffset: true)
-    layer.frame = CGRect(x: 0, y: 0, width: 100, height: 60)
-    layer.borderWidth = 4
-    layer.borderContent = .color(.red)
-    layer.borderMask = .cornerRadius(12)
-
-    layer.layoutSublayers()
-
-    expect(layer.mask) == nil
-    expect(layer.sublayers?.count ?? 0) == 0
-  }
-
-  func test_solidColor_cornerRadius_zeroOffset_useMaskLayer() {
-    let layer = makeBorderLayer(usesNativeCornerRadiusBorderOffset: false)
-    layer.frame = CGRect(x: 0, y: 0, width: 100, height: 60)
-    layer.borderWidth = 4
-    layer.borderContent = .color(.red)
-    layer.borderMask = .cornerRadius(12)
-
-    layer.layoutSublayers()
-
-    expect(layer.mask) != nil
-    expect(layer.mask as? CAShapeLayer) == nil
-    expect(layer.mask?.frame) == layer.bounds
-    expect(layer.mask?.cornerRadius) == 12
-    expect(layer.sublayers?.count ?? 0) == 1
-    expect(layer.sublayers?.first?.frame) == layer.bounds
-  }
-
   func test_solidColor_cornerRadius_negativeOffset_useNativeBorderOffset() {
-    let layer = makeBorderLayer(usesNativeCornerRadiusBorderOffset: true)
+    let layer = makeBorderLayer(usesNativeBorderOffset: true)
     layer.frame = CGRect(x: 0, y: 0, width: 100, height: 60)
     layer.borderWidth = 4
     layer.borderContent = .color(.red)
@@ -114,7 +146,7 @@ class BorderLayerTests: XCTestCase {
   }
 
   func test_solidColor_cornerRadius_negativeOffset_useMaskLayer() {
-    let layer = makeBorderLayer(usesNativeCornerRadiusBorderOffset: false)
+    let layer = makeBorderLayer(usesNativeBorderOffset: false)
     layer.frame = CGRect(x: 0, y: 0, width: 100, height: 60)
     layer.borderWidth = 4
     layer.borderContent = .color(.red)
@@ -131,7 +163,7 @@ class BorderLayerTests: XCTestCase {
   }
 
   func test_gradient_cornerRadius_positiveOffset_useNativeBorderOffset() {
-    let layer = makeBorderLayer(usesNativeCornerRadiusBorderOffset: true)
+    let layer = makeBorderLayer(usesNativeBorderOffset: true)
     layer.frame = CGRect(x: 0, y: 0, width: 120, height: 80)
     layer.borderWidth = 3
     layer.borderContent = .gradient(.linearGradient(LinearGradientColor(colors: [.red, .green], locations: [0, 1])))
@@ -145,7 +177,7 @@ class BorderLayerTests: XCTestCase {
   }
 
   func test_gradient_cornerRadius_positiveOffset_useMaskLayer() {
-    let layer = makeBorderLayer(usesNativeCornerRadiusBorderOffset: false)
+    let layer = makeBorderLayer(usesNativeBorderOffset: false)
     layer.frame = CGRect(x: 0, y: 0, width: 120, height: 80)
     layer.borderWidth = 3
     layer.borderContent = .gradient(.linearGradient(LinearGradientColor(colors: [.red, .green], locations: [0, 1])))
@@ -158,6 +190,8 @@ class BorderLayerTests: XCTestCase {
     expect(layer.mask?.cornerRadius) == 16
   }
 
+  // MARK: - Solid Color + Shape
+
   /// Verifies `.shape(Rectangle, offset:)` updates the internal mask path even when bounds stay the same.
   ///
   /// Regression context:
@@ -166,7 +200,7 @@ class BorderLayerTests: XCTestCase {
   /// This test ensures the stroke path and mask path remain aligned after the offset-only update.
   func test_solidColor_shape_negativeOffset_updatesMaskPath_whenBoundsUnchanged() {
     // given: a shape border starts with offset 0 so baseline stroke/mask geometry is captured
-    let layer = makeBorderLayer(usesNativeCornerRadiusBorderOffset: false)
+    let layer = makeBorderLayer()
     layer.frame = CGRect(x: 0, y: 0, width: 120, height: 80)
     layer.borderWidth = 4
     layer.borderContent = .color(.red)
@@ -198,5 +232,14 @@ class BorderLayerTests: XCTestCase {
     expect(updatedMaskPathBounds) != nil
     expect(updatedMaskPathBounds) == updatedStrokePathBounds
     expect(updatedMaskPathBounds) != initialMaskPathBounds
+  }
+
+  // MARK: - Helper Methods
+
+  private func makeBorderLayer(usesNativeBorderOffset: Bool = false) -> BorderLayer {
+    let layer = BorderLayer()
+    layer.test.usesNativeBorderOffset = usesNativeBorderOffset
+    _ = layer.test.usesNativeBorderOffset // to cover the property setter
+    return layer
   }
 }
