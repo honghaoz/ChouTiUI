@@ -53,12 +53,10 @@ class View_ThemedBackgroundColorTests: XCTestCase {
     try expect(Array(observations.unwrap().keys)) == ["io.chouti.ChouTiUI.ThemeUpdating.themed-background-color"]
 
     view.overrideTheme = .light
-    wait(timeout: 0.01)
-    expect(view.layer()?.backgroundColor) == Color.red.cgColor
+    expect(try view.unsafeLayer.backgroundColor.unwrap()).toEventually(beEqual(to: Color.red.cgColor))
 
     view.overrideTheme = .dark
-    wait(timeout: 0.01)
-    expect(view.layer()?.backgroundColor) == Color.blue.cgColor
+    expect(try view.unsafeLayer.backgroundColor.unwrap()).toEventually(beEqual(to: Color.blue.cgColor))
 
     view.setBackgroundColor(ThemedColor(light: .yellow, dark: .green))
 
@@ -67,11 +65,9 @@ class View_ThemedBackgroundColorTests: XCTestCase {
     try expect(Array(observations1.unwrap().keys)) == ["io.chouti.ChouTiUI.ThemeUpdating.themed-background-color"]
 
     view.overrideTheme = .light
-    wait(timeout: 0.01)
-    expect(view.layer()?.backgroundColor) == Color.yellow.cgColor
+    expect(try view.unsafeLayer.backgroundColor.unwrap()).toEventually(beEqual(to: Color.yellow.cgColor))
 
     view.overrideTheme = .dark
-    wait(timeout: 0.01)
-    expect(view.layer()?.backgroundColor) == Color.green.cgColor
+    expect(try view.unsafeLayer.backgroundColor.unwrap()).toEventually(beEqual(to: Color.green.cgColor))
   }
 }
