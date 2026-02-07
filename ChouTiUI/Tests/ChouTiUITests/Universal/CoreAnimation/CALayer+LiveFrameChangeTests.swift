@@ -663,6 +663,62 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
     }
   }
 
+  func test_onLiveFrameChange_explicitAnimation_boundsSizeChanged_twice() throws {
+    // given: a live frame observer on a layer that will run two sequential resize animations
+    let waiter = TickWaiter()
+    var capturedFrames: [(CALayer, CGRect)] = []
+
+    let secondAnimationExpectation = XCTestExpectation(description: "tick second animation")
+    layer.onLiveFrameChange { layer, frame in
+      capturedFrames.append((layer, frame))
+      waiter.tick()
+      if isGitHubActionsMac, layer.animationKeys()?.contains("bounds.size-2") == true {
+        secondAnimationExpectation.fulfill()
+      }
+    }
+
+    // when: the first explicit bounds.size animation runs
+    layer.bounds.size = CGSize(width: 110, height: 220)
+    let firstAnimation = CABasicAnimation(keyPath: "bounds.size")
+    firstAnimation.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+    firstAnimation.duration = Constants.explicitAnimationDuration
+    firstAnimation.fromValue = CGSize(width: 100, height: 200)
+    firstAnimation.toValue = CGSize(width: 110, height: 220)
+    layer.add(firstAnimation, forKey: "bounds.size-1")
+
+    if isGitHubActionsMac {
+      wait(timeout: 0.2)
+    } else {
+      waiter.wait() // wait until the first animation is finished
+      expect(capturedFrames.count) > 2
+    }
+
+    // then: the first animation should produce live updates and end at the first target frame
+    let firstAnimationFrameCount = capturedFrames.count
+    try expect(capturedFrames.last.unwrap().1) == CGRect(x: 5, y: 10, width: 110, height: 220)
+
+    // when: a second explicit bounds.size animation runs after the first one has completed
+    layer.bounds.size = CGSize(width: 120, height: 240)
+    let secondAnimation = CABasicAnimation(keyPath: "bounds.size")
+    secondAnimation.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+    secondAnimation.duration = Constants.explicitAnimationDuration
+    secondAnimation.fromValue = CGSize(width: 110, height: 220)
+    secondAnimation.toValue = CGSize(width: 120, height: 240)
+    layer.add(secondAnimation, forKey: "bounds.size-2")
+
+    if isGitHubActionsMac {
+      wait(for: [secondAnimationExpectation], timeout: 1)
+    } else {
+      waiter.wait() // wait until the second animation is finished
+
+      // then: callbacks should continue for the second animation and end at the second target frame
+      expect(capturedFrames.count) > firstAnimationFrameCount
+      try expect(capturedFrames.last.unwrap().0) === layer
+      try expect(capturedFrames.last.unwrap().1) == CGRect(x: 0, y: 0, width: 120, height: 240)
+      expect(layer.sublayers?.count ?? 0) == 0 // should have no display layer
+    }
+  }
+
   // MARK: - Implicit Animation
 
   func test_onLiveFrameChange_implicitAnimation_positionChanged() throws {

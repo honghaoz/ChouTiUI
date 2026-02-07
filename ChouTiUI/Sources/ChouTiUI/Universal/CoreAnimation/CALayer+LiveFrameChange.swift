@@ -187,6 +187,7 @@ public extension CALayer {
       return
     }
 
+    setUpDisplayLayer()
     displayLayer?.run(for: maxDuration * 1.5) { [weak self] in
       self?.tick()
     }
@@ -200,6 +201,7 @@ public extension CALayer {
       return
     }
 
+    setUpDisplayLayer()
     displayLayer?.run(for: maxDuration * 1.5) { [weak self] in
       self?.tick()
     }
