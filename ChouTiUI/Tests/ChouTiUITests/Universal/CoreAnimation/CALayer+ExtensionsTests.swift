@@ -120,7 +120,7 @@ class CALayer_ExtensionsTests: XCTestCase {
     layer.strongDelegate = Delegate(onDeallocate: {
       isDeallocated = true
     })
-    weak var weakDelegate: (any CALayerDelegate)? = layer.strongDelegate
+    weak let weakDelegate: (any CALayerDelegate)? = layer.strongDelegate
 
     expect(layer.strongDelegate) === weakDelegate
     expect(layer.delegate) === weakDelegate

@@ -119,7 +119,7 @@ class CALayer_PositionChangeTests: XCTestCase {
 
   func test_releaseSelf() {
     var layer: CALayer? = CALayer()
-    weak var weakLayer: CALayer? = layer
+    weak let weakLayer: CALayer? = layer
     layer?.onPositionChange(block: { _, _, _ in })
 
     layer = nil

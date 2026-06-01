@@ -67,7 +67,6 @@ extension UIWindowScene: Theming {
     set {
       // swiftlint:disable:next fatal_error
       fatalError("UIWindowScene doesn't support setting overrideTheme")
-      _ = newValue
     }
   }
 }

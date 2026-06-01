@@ -47,7 +47,6 @@ extension UIApplication: Theming {
     set {
       // swiftlint:disable:next fatal_error
       fatalError("UIApplication doesn't support setting overrideTheme")
-      _ = newValue
     }
   }
 }
