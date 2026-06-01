@@ -28,16 +28,16 @@ jobs:
     runs-on: ${{ vars.MACOS }}
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Bootstrap
         uses: ./.github/actions/bootstrap
       - name: Test with Codecov
         run: make test-codecov -C ChouTiUI
       - name: Upload code coverage
-        uses: codecov/codecov-action@v4.5.0
+        uses: codecov/codecov-action@v6
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          file: ChouTiUI/.build/debug/codecov/coverage.lcov
+          files: ChouTiUI/.build/debug/codecov/coverage.lcov
           disable_search: true
           flags: ChouTiUI
           name: ChouTiUI
@@ -53,7 +53,7 @@ jobs:
     runs-on: ${{ vars.MACOS }}
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Bootstrap
         uses: ./.github/actions/bootstrap
       # - name: Download visionOS simulator

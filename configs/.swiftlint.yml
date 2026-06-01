@@ -78,6 +78,8 @@ shorthand_operator:
   severity: warning
 superfluous_disable_command:
   severity: warning
+force_unwrapping:
+  ignored_literal_argument_functions: []
 
 custom_rules:
   fatal_error:

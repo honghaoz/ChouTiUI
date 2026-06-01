@@ -44,7 +44,7 @@ extension UIApplication: Theming {
       // swiftlint:disable:next fatal_error
       fatalError("UIApplication doesn't support getting overrideTheme")
     }
-    set {
+    set { // swiftlint:disable:this unused_setter_value
       // swiftlint:disable:next fatal_error
       fatalError("UIApplication doesn't support setting overrideTheme")
     }

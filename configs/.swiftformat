@@ -2,6 +2,7 @@
 --enable blankLineAfterImports
 --enable noForceTryInTests
 --enable redundantNilInit
+--enable wrapCaseBodies
 --enable wrapConditionalBodies
 --enable wrapEnumCases
 --enable wrapSwitchCases
@@ -17,11 +18,11 @@
 --disable redundantEquatable
 --disable redundantMemberwiseInit
 --disable redundantOptionalBinding
---disable redundantProperty
 --disable redundantReturn
 --disable redundantSelf # https://github.com/nicklockwood/SwiftFormat/issues/1438
 --disable redundantThrows
 --disable redundanttype
+--disable redundantVariable
 --disable redundantViewBuilder
 --disable sortImports
 --disable strongifiedSelf

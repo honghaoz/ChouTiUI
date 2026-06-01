@@ -309,13 +309,13 @@ public extension CALayer {
         keyPath: "colors",
         timing: timing,
         from: { layer in
-          guard let colors = (layer as? CAGradientLayer)?.colors else {
+          guard let colors = layer.colors else {
             ChouTi.assertFailure("unexpected missing gradient colors")
             return nil
           }
           return Array(repeating: fromSolidColor.cgColor, count: colors.count)
         },
-        to: { layer in (layer as? CAGradientLayer)?.colors },
+        to: { layer in layer.colors },
         updateAnimation: { animation in
           animation.delegate = AnimationDelegate(
             animationDidStop: { [weak self] animation, finished in
@@ -340,9 +340,9 @@ public extension CALayer {
       gradientLayer.animate(
         keyPath: "colors",
         timing: timing,
-        from: { layer in (layer as? CAGradientLayer)?.colors },
+        from: { layer in layer.colors },
         to: { layer in
-          guard let colors = (layer as? CAGradientLayer)?.colors else {
+          guard let colors = layer.colors else {
             ChouTi.assertFailure("unexpected missing gradient colors")
             return nil
           }

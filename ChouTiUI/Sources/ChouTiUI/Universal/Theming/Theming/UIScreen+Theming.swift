@@ -58,7 +58,7 @@ extension UIScreen: Theming {
       // swiftlint:disable:next fatal_error
       fatalError("UIScreen doesn't support getting overrideTheme")
     }
-    set {
+    set { // swiftlint:disable:this unused_setter_value
       // swiftlint:disable:next fatal_error
       fatalError("UIScreen doesn't support setting overrideTheme")
     }

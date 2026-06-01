@@ -146,9 +146,6 @@ public extension CALayer {
       keyPath: "path",
       timing: timing,
       from: { maskLayer in
-        guard let maskLayer = maskLayer as? CAShapeLayer else {
-          return currentShape.path(in: maskLayer.bounds) // impossible, maskLayer is always a CAShapeLayer
-        }
         if fromShape == nil {
           // no from shape, use the current in-flight shape
           return maskLayer.presentation()?.path ?? currentShape.path(in: maskLayer.bounds)
