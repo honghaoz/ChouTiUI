@@ -312,8 +312,18 @@ public enum Sizing {
     /// The window bottom bar height.
     public static let windowBottomBarHeight: CGFloat = 34
 
-    /// The window corner radius.
-    public static let windowCornerRadius: CGFloat = System.macOS_bigSur ? 10 : 5
+    /// The fallback window corner radius for standard titled windows.
+    ///
+    /// Use `NSWindow.cornerRadius` when a concrete AppKit window is available.
+    public static let windowCornerRadius: CGFloat = {
+      if System.macOS_tahoe {
+        return 16
+      } else if System.macOS_bigSur {
+        return 10
+      } else {
+        return 5
+      }
+    }()
 
     /// The navigation bar height.
     public static let navigationBarHeight: CGFloat = windowTitleBarHeight + iOS.navigationBarHeight - (iOS.navigationBarHeight - iOS.navigationBarButtonHeight) / 2

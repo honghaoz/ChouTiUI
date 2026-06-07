@@ -124,7 +124,7 @@ class ViewController: NSViewController {
         }
       }
 
-      HStack {
+      HStack(spacing: 4) {
         ViewNode(make: { _ in
           let button = NSButton(title: "Layer Background", target: nil, action: nil)
           let windowBox = WeakBox<LayerBackgroundWindow>(nil)
@@ -182,6 +182,22 @@ class ViewController: NSViewController {
             let newWindow = LayerBorderOffsetWindow()
             newWindow.show()
             windowBox.object = newWindow
+          }
+          button.wantsLayer = true
+          button.sizeToFit()
+          return button
+        })
+        .fixedSize()
+
+        ViewNode(make: { _ in
+          let button = NSButton(title: "Window Radius", target: nil, action: nil)
+          var demo: WindowCornerRadiusDemo?
+          button.addAction {
+            demo?.close()
+
+            let newDemo = WindowCornerRadiusDemo()
+            newDemo.show()
+            demo = newDemo
           }
           button.wantsLayer = true
           button.sizeToFit()
