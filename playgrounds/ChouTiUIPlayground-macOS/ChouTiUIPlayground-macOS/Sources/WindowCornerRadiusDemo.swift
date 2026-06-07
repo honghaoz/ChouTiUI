@@ -40,7 +40,7 @@ final class WindowCornerRadiusDemo {
     close()
 
     let origin = NSScreen.main?.visibleFrame.origin ?? .zero
-    let baseFrame = NSRect(x: origin.x + 120, y: origin.y + 380, width: 360, height: 220)
+    let baseFrame = NSRect(x: origin.x + 120, y: origin.y + 580, width: 360, height: 220)
 
     windows = [
       makeTitledWindow(
@@ -49,21 +49,39 @@ final class WindowCornerRadiusDemo {
         frame: baseFrame
       ),
       makeTitledWindow(
+        title: "Toolbar Automatic",
+        subtitle: "Expected radius: \(Self.expectedCornerRadius(toolbarStyle: .automatic))",
+        frame: baseFrame.offsetBy(dx: 390, dy: 50),
+        toolbarStyle: .automatic
+      ),
+      makeTitledWindow(
+        title: "Toolbar Expanded",
+        subtitle: "Expected radius: \(Self.expectedCornerRadius(toolbarStyle: .expanded))",
+        frame: baseFrame.offsetBy(dx: 780, dy: 50),
+        toolbarStyle: .expanded
+      ),
+      makeTitledWindow(
+        title: "Toolbar Preference",
+        subtitle: "Expected radius: \(Self.expectedCornerRadius(toolbarStyle: .preference))",
+        frame: baseFrame.offsetBy(dx: 0, dy: -280),
+        toolbarStyle: .preference
+      ),
+      makeTitledWindow(
         title: "Toolbar Unified",
         subtitle: "Expected radius: \(Self.expectedCornerRadius(toolbarStyle: .unified))",
-        frame: baseFrame.offsetBy(dx: 390, dy: 0),
+        frame: baseFrame.offsetBy(dx: 390, dy: -280),
         toolbarStyle: .unified
       ),
       makeTitledWindow(
         title: "Toolbar Compact",
         subtitle: "Expected radius: \(Self.expectedCornerRadius(toolbarStyle: .unifiedCompact))",
-        frame: baseFrame.offsetBy(dx: 780, dy: 0),
+        frame: baseFrame.offsetBy(dx: 780, dy: -280),
         toolbarStyle: .unifiedCompact
       ),
       makeBorderlessWindow(
         title: "Borderless",
         subtitle: "Expected radius: 0",
-        frame: baseFrame.offsetBy(dx: 390, dy: -280)
+        frame: baseFrame.offsetBy(dx: 390, dy: -560)
       ),
     ]
 
@@ -74,7 +92,7 @@ final class WindowCornerRadiusDemo {
     windows.forEach { $0.close() }
     windows.removeAll()
   }
-  
+
   private func makeTitledWindow(title: String,
                                 subtitle: String,
                                 frame: NSRect,
@@ -86,7 +104,7 @@ final class WindowCornerRadiusDemo {
       backing: .buffered,
       defer: false
     )
-    
+
     window.title = title
     window.isReleasedWhenClosed = false
 
@@ -98,6 +116,12 @@ final class WindowCornerRadiusDemo {
       window.toolbar = toolbar
       if #available(macOS 11, *) {
         switch toolbarStyle {
+        case .automatic:
+          window.toolbarStyle = .automatic
+        case .expanded:
+          window.toolbarStyle = .expanded
+        case .preference:
+          window.toolbarStyle = .preference
         case .unified:
           window.toolbarStyle = .unified
         case .unifiedCompact:
@@ -172,15 +196,18 @@ final class WindowCornerRadiusDemo {
     switch toolbarStyle {
     case .some(.unifiedCompact):
       return 20
-    case .some(.unified):
+    case .some(.automatic), .some(.unified):
       return 26
-    case .none:
+    case .none, .some(.expanded), .some(.preference):
       return 16
     }
   }
 }
 
 private enum DemoToolbarStyle {
+  case automatic
+  case expanded
+  case preference
   case unified
   case unifiedCompact
 }
@@ -198,7 +225,7 @@ private final class WindowCornerRadiusToolbarDelegate: NSObject, NSToolbarDelega
   func toolbarAllowedItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
     [itemIdentifier]
   }
-  
+
   func toolbar(_ toolbar: NSToolbar,
                itemForItemIdentifier itemIdentifier: NSToolbarItem.Identifier,
                willBeInsertedIntoToolbar flag: Bool
