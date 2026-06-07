@@ -196,9 +196,12 @@ final class WindowCornerRadiusDemo {
     switch toolbarStyle {
     case .some(.unifiedCompact):
       return 20
-    case .some(.automatic), .some(.unified):
+    case .some(.automatic),
+         .some(.unified):
       return 26
-    case .none, .some(.expanded), .some(.preference):
+    case .none,
+         .some(.expanded),
+         .some(.preference):
       return 16
     }
   }
@@ -228,8 +231,8 @@ private final class WindowCornerRadiusToolbarDelegate: NSObject, NSToolbarDelega
 
   func toolbar(_ toolbar: NSToolbar,
                itemForItemIdentifier itemIdentifier: NSToolbarItem.Identifier,
-               willBeInsertedIntoToolbar flag: Bool
-  ) -> NSToolbarItem? {
+               willBeInsertedIntoToolbar flag: Bool) -> NSToolbarItem?
+  {
     let item = NSToolbarItem(itemIdentifier: itemIdentifier)
     item.label = "Radius"
     item.paletteLabel = "Radius"
