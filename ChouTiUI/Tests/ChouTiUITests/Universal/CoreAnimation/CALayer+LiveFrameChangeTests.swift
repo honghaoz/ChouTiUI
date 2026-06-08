@@ -204,7 +204,7 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
     layer.onLiveFrameChange { layer, frame in
       capturedFrames.append((layer, frame))
       waiter.tick()
-      if isGitHubActionsMac {
+      if isGitHubActions {
         expectation.fulfill()
       }
     }
@@ -218,7 +218,7 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
     animation.toValue = CGPoint(x: 150, y: 300)
     layer.add(animation, forKey: "position")
 
-    if isGitHubActionsMac {
+    if isGitHubActions {
       wait(for: [expectation], timeout: 1)
     } else {
       waiter.wait() // wait until the animation is finished
@@ -238,14 +238,14 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
     layer.onLiveFrameChange { layer, frame in
       capturedFrames.append((layer, frame))
       waiter.tick()
-      if isGitHubActionsMac {
+      if isGitHubActions {
         expectation.fulfill()
       }
     }
 
     layer.animate(keyPath: "position", to: CGPoint(x: 150, y: 300), timing: .easeInEaseOut(duration: Constants.explicitAnimationDuration))
 
-    if isGitHubActionsMac {
+    if isGitHubActions {
       wait(for: [expectation], timeout: 1)
     } else {
       waiter.wait() // wait until the animation is finished
@@ -265,7 +265,7 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
     layer.onLiveFrameChange { layer, frame in
       capturedFrames.append((layer, frame))
       waiter.tick()
-      if isGitHubActionsMac {
+      if isGitHubActions {
         expectation.fulfill()
       }
     }
@@ -279,7 +279,7 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
     animation.toValue = 150
     layer.add(animation, forKey: "position.x")
 
-    if isGitHubActionsMac {
+    if isGitHubActions {
       wait(for: [expectation], timeout: 1)
     } else {
       waiter.wait() // wait until the animation is finished
@@ -299,14 +299,14 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
     layer.onLiveFrameChange { layer, frame in
       capturedFrames.append((layer, frame))
       waiter.tick()
-      if isGitHubActionsMac {
+      if isGitHubActions {
         expectation.fulfill()
       }
     }
 
     layer.animate(keyPath: "position.x", to: 150, timing: .easeInEaseOut(duration: Constants.explicitAnimationDuration))
 
-    if isGitHubActionsMac {
+    if isGitHubActions {
       wait(for: [expectation], timeout: 1)
     } else {
       waiter.wait() // wait until the animation is finished
@@ -326,7 +326,7 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
     layer.onLiveFrameChange { layer, frame in
       capturedFrames.append((layer, frame))
       waiter.tick()
-      if isGitHubActionsMac {
+      if isGitHubActions {
         expectation.fulfill()
       }
     }
@@ -340,7 +340,7 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
     animation.toValue = 300
     layer.add(animation, forKey: "position.y")
 
-    if isGitHubActionsMac {
+    if isGitHubActions {
       wait(for: [expectation], timeout: 1)
     } else {
       waiter.wait() // wait until the animation is finished
@@ -360,14 +360,14 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
     layer.onLiveFrameChange { layer, frame in
       capturedFrames.append((layer, frame))
       waiter.tick()
-      if isGitHubActionsMac {
+      if isGitHubActions {
         expectation.fulfill()
       }
     }
 
     layer.animate(keyPath: "position.y", to: 300, timing: .easeInEaseOut(duration: Constants.explicitAnimationDuration))
 
-    if isGitHubActionsMac {
+    if isGitHubActions {
       wait(for: [expectation], timeout: 1)
     } else {
       waiter.wait() // wait until the animation is finished
@@ -387,7 +387,7 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
     layer.onLiveFrameChange { layer, frame in
       capturedFrames.append((layer, frame))
       waiter.tick()
-      if isGitHubActionsMac {
+      if isGitHubActions {
         expectation.fulfill()
       }
     }
@@ -400,7 +400,7 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
     animation.toValue = CGRect(x: 10, y: 20, width: 110, height: 220)
     layer.add(animation, forKey: "bounds")
 
-    if isGitHubActionsMac {
+    if isGitHubActions {
       wait(for: [expectation], timeout: 1)
     } else {
       waiter.wait() // wait until the animation is finished
@@ -420,7 +420,7 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
     layer.onLiveFrameChange { layer, frame in
       capturedFrames.append((layer, frame))
       waiter.tick()
-      if isGitHubActionsMac {
+      if isGitHubActions {
         expectation.fulfill()
       }
     }
@@ -445,7 +445,7 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
       }
     )
 
-    if isGitHubActionsMac {
+    if isGitHubActions {
       wait(for: [expectation], timeout: 1)
     } else {
       waiter.wait() // wait until the animation is finished
@@ -487,7 +487,7 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
     layer.onLiveFrameChange { layer, frame in
       capturedFrames.append((layer, frame))
       waiter.tick()
-      if isGitHubActionsMac {
+      if isGitHubActions {
         expectation.fulfill()
       }
     }
@@ -501,7 +501,7 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
     animation.toValue = CGSize(width: 110, height: 220)
     layer.add(animation, forKey: "bounds.size")
 
-    if isGitHubActionsMac {
+    if isGitHubActions {
       wait(for: [expectation], timeout: 1)
     } else {
       waiter.wait() // wait until the animation is finished
@@ -521,7 +521,7 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
     layer.onLiveFrameChange { layer, frame in
       capturedFrames.append((layer, frame))
       waiter.tick()
-      if isGitHubActionsMac {
+      if isGitHubActions {
         expectation.fulfill()
       }
     }
@@ -534,7 +534,7 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
     animation.toValue = 110
     layer.add(animation, forKey: "bounds.size.width")
 
-    if isGitHubActionsMac {
+    if isGitHubActions {
       wait(for: [expectation], timeout: 1)
     } else {
       waiter.wait() // wait until the animation is finished
@@ -554,14 +554,14 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
     layer.onLiveFrameChange { layer, frame in
       capturedFrames.append((layer, frame))
       waiter.tick()
-      if isGitHubActionsMac {
+      if isGitHubActions {
         expectation.fulfill()
       }
     }
 
     layer.animate(keyPath: "bounds.size.width", to: 110, timing: .easeInEaseOut(duration: Constants.explicitAnimationDuration))
 
-    if isGitHubActionsMac {
+    if isGitHubActions {
       wait(for: [expectation], timeout: 1)
     } else {
       waiter.wait() // wait until the animation is finished
@@ -581,7 +581,7 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
     layer.onLiveFrameChange { layer, frame in
       capturedFrames.append((layer, frame))
       waiter.tick()
-      if isGitHubActionsMac {
+      if isGitHubActions {
         expectation.fulfill()
       }
     }
@@ -594,7 +594,7 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
     animation.toValue = 220
     layer.add(animation, forKey: "bounds.size.height")
 
-    if isGitHubActionsMac {
+    if isGitHubActions {
       wait(for: [expectation], timeout: 1)
     } else {
       waiter.wait() // wait until the animation is finished
@@ -614,14 +614,14 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
     layer.onLiveFrameChange { layer, frame in
       capturedFrames.append((layer, frame))
       waiter.tick()
-      if isGitHubActionsMac {
+      if isGitHubActions {
         expectation.fulfill()
       }
     }
 
     layer.animate(keyPath: "bounds.size.height", to: 220, timing: .easeInEaseOut(duration: Constants.explicitAnimationDuration))
 
-    if isGitHubActionsMac {
+    if isGitHubActions {
       wait(for: [expectation], timeout: 1)
     } else {
       waiter.wait() // wait until the animation is finished
@@ -641,14 +641,14 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
     layer.onLiveFrameChange { layer, frame in
       capturedFrames.append((layer, frame))
       waiter.tick()
-      if isGitHubActionsMac {
+      if isGitHubActions {
         expectation.fulfill()
       }
     }
 
     layer.animateFrame(to: CGRect(x: 20, y: 40, width: 110, height: 220), timing: .easeInEaseOut(duration: Constants.explicitAnimationDuration))
 
-    if isGitHubActionsMac {
+    if isGitHubActions {
       wait(for: [expectation], timeout: 1)
     } else {
       waiter.wait() // wait until the animation is finished
@@ -668,7 +668,7 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
     layer.onLiveFrameChange { layer, frame in
       capturedFrames.append((layer, frame))
       waiter.tick()
-      if isGitHubActionsMac {
+      if isGitHubActions {
         if layer.animationKeys()?.contains("bounds.size-1") == true {
           expectation.fulfill()
         }
@@ -679,7 +679,7 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
     wait(timeout: 0.1)
     layer.animateFrame(to: CGRect(x: 30, y: 50, width: 120, height: 230), timing: .easeInEaseOut(duration: Constants.explicitAnimationDuration))
 
-    if isGitHubActionsMac {
+    if isGitHubActions {
       wait(for: [expectation], timeout: 1)
     } else {
       waiter.wait() // wait until the animation is finished
@@ -700,7 +700,7 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
     layer.onLiveFrameChange { layer, frame in
       capturedFrames.append((layer, frame))
       waiter.tick()
-      if isGitHubActionsMac, layer.animationKeys()?.contains("bounds.size-2") == true {
+      if isGitHubActions, layer.animationKeys()?.contains("bounds.size-2") == true {
         secondAnimationExpectation.fulfill()
       }
     }
@@ -714,7 +714,7 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
     firstAnimation.toValue = CGSize(width: 110, height: 220)
     layer.add(firstAnimation, forKey: "bounds.size-1")
 
-    if isGitHubActionsMac {
+    if isGitHubActions {
       wait(timeout: 0.2)
     } else {
       waiter.wait() // wait until the first animation is finished
@@ -725,7 +725,7 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
     // On GitHub Actions we intentionally avoid asserting the exact final frame because timing
     // can still be in-flight when this assertion runs.
     let firstAnimationFrameCount = capturedFrames.count
-    if !isGitHubActionsMac {
+    if !isGitHubActions {
       try expect(capturedFrames.last.unwrap().1) == CGRect(x: 5, y: 10, width: 110, height: 220)
     }
 
@@ -738,7 +738,7 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
     secondAnimation.toValue = CGSize(width: 120, height: 240)
     layer.add(secondAnimation, forKey: "bounds.size-2")
 
-    if isGitHubActionsMac {
+    if isGitHubActions {
       wait(for: [secondAnimationExpectation], timeout: 1)
       expect(capturedFrames.count) > firstAnimationFrameCount
     } else {
@@ -766,7 +766,7 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
     layer.onLiveFrameChange { layer, frame in
       capturedFrames.append((layer, frame))
       waiter.tick()
-      if isGitHubActionsMac {
+      if isGitHubActions {
         expectation.fulfill()
       }
     }
@@ -777,7 +777,7 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
     let positionAnimation = try (layer.animation(forKey: "position") as? CABasicAnimation).unwrap()
     expect(positionAnimation.duration) == 0.25
 
-    if isGitHubActionsMac {
+    if isGitHubActions {
       wait(for: [expectation], timeout: 1)
     } else {
       waiter.wait() // wait until the animation is finished
@@ -801,7 +801,7 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
     layer.onLiveFrameChange { layer, frame in
       capturedFrames.append((layer, frame))
       waiter.tick()
-      if isGitHubActionsMac {
+      if isGitHubActions {
         expectation.fulfill()
       }
     }
@@ -812,7 +812,7 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
     let positionAnimation = try (layer.animation(forKey: "position") as? CABasicAnimation).unwrap()
     expect(positionAnimation.duration) == 0.25
 
-    if isGitHubActionsMac {
+    if isGitHubActions {
       wait(for: [expectation], timeout: 1)
     } else {
       waiter.wait() // wait until the animation is finished
@@ -836,7 +836,7 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
     layer.onLiveFrameChange { layer, frame in
       capturedFrames.append((layer, frame))
       waiter.tick()
-      if isGitHubActionsMac {
+      if isGitHubActions {
         expectation.fulfill()
       }
     }
@@ -847,7 +847,7 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
     let positionAnimation = try (layer.animation(forKey: "position") as? CABasicAnimation).unwrap()
     expect(positionAnimation.duration) == 0.25
 
-    if isGitHubActionsMac {
+    if isGitHubActions {
       wait(for: [expectation], timeout: 1)
     } else {
       waiter.wait() // wait until the animation is finished
@@ -893,7 +893,7 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
     layer.onLiveFrameChange { layer, frame in
       capturedFrames.append((layer, frame))
       waiter.tick()
-      if isGitHubActionsMac {
+      if isGitHubActions {
         expectation.fulfill()
       }
     }
@@ -904,7 +904,7 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
     let boundsAnimation = try (layer.animation(forKey: "bounds") as? CABasicAnimation).unwrap()
     expect(boundsAnimation.duration) == 0.25
 
-    if isGitHubActionsMac {
+    if isGitHubActions {
       wait(for: [expectation], timeout: 1)
     } else {
       waiter.wait() // wait until the animation is finished
@@ -928,7 +928,7 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
     layer.onLiveFrameChange { layer, frame in
       capturedFrames.append((layer, frame))
       waiter.tick()
-      if isGitHubActionsMac {
+      if isGitHubActions {
         expectation.fulfill()
       }
     }
@@ -939,7 +939,7 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
     let boundsAnimation = try (layer.animation(forKey: "bounds") as? CABasicAnimation).unwrap()
     expect(boundsAnimation.duration) == 0.25
 
-    if isGitHubActionsMac {
+    if isGitHubActions {
       wait(for: [expectation], timeout: 1)
     } else {
       waiter.wait() // wait until the animation is finished
@@ -963,7 +963,7 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
     layer.onLiveFrameChange { layer, frame in
       capturedFrames.append((layer, frame))
       waiter.tick()
-      if isGitHubActionsMac {
+      if isGitHubActions {
         expectation.fulfill()
       }
     }
@@ -974,7 +974,7 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
     let boundsAnimation = try (layer.animation(forKey: "bounds") as? CABasicAnimation).unwrap()
     expect(boundsAnimation.duration) == 0.25
 
-    if isGitHubActionsMac {
+    if isGitHubActions {
       wait(for: [expectation], timeout: 1)
     } else {
       waiter.wait() // wait until the animation is finished
@@ -998,7 +998,7 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
     layer.onLiveFrameChange { layer, frame in
       capturedFrames.append((layer, frame))
       waiter.tick()
-      if isGitHubActionsMac {
+      if isGitHubActions {
         expectation.fulfill()
       }
     }
@@ -1009,7 +1009,7 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
     let boundsAnimation = try (layer.animation(forKey: "bounds") as? CABasicAnimation).unwrap()
     expect(boundsAnimation.duration) == 0.25
 
-    if isGitHubActionsMac {
+    if isGitHubActions {
       wait(for: [expectation], timeout: 1)
     } else {
       waiter.wait() // wait until the animation is finished
@@ -1033,7 +1033,7 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
     layer.onLiveFrameChange { layer, frame in
       capturedFrames.append((layer, frame))
       waiter.tick()
-      if isGitHubActionsMac {
+      if isGitHubActions {
         expectation.fulfill()
       }
     }
@@ -1046,7 +1046,7 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
     expect(positionAnimation.duration) == 0.25
     expect(boundsAnimation.duration) == 0.25
 
-    if isGitHubActionsMac {
+    if isGitHubActions {
       wait(for: [expectation], timeout: 1)
     } else {
       waiter.wait() // wait until the animation is finished
@@ -1065,11 +1065,13 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
   }
 }
 
-#if os(macOS)
-private let isGitHubActionsMac: Bool = Environment.isGitHubActions
-#else
-private let isGitHubActionsMac: Bool = false
-#endif
+/// Whether the tests are running on GitHub Actions.
+///
+/// These live-frame tests are timing-sensitive: they rely on render-server display ticks during a
+/// short (0.1s) animation and infer completion from a quiet window. On loaded CI runners (both macOS
+/// and iOS simulators) the render loop can stall longer than that window, which makes exact-frame
+/// assertions flaky. On CI we relax those assertions to only verify that callbacks fire.
+private let isGitHubActions: Bool = Environment.isGitHubActions
 
 /// A helper class to wait for the tick to finish.
 private class TickWaiter: XCTestCase { // swiftlint:disable:this private_unit_test

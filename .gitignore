@@ -95,6 +95,9 @@ vendor
 !.vscode/settings.json
 !.vscode/launch.json
 
+# ===== AI =====
+.claude
+
 # ===== Environment =====
 .env
 
