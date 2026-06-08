@@ -255,15 +255,15 @@ public extension CALayer {
       } else if solidColorAnimation != nil {
         // has solid color animation, there's a in-progress animation, use the current background color
         #if canImport(AppKit)
-        return UnifiedColor.color(Color(cgColor: presentation().assert("missing presentation layer")?.backgroundColor ?? backgroundColor ?? CGColor.clear) ?? .clear)
+        return UnifiedColor.color(Color(cgColor: presentation().assertNotNil("missing presentation layer")?.backgroundColor ?? backgroundColor ?? CGColor.clear) ?? .clear)
         #endif
         #if canImport(UIKit)
-        return UnifiedColor.color(Color(cgColor: presentation().assert("missing presentation layer")?.backgroundColor ?? backgroundColor ?? .clear))
+        return UnifiedColor.color(Color(cgColor: presentation().assertNotNil("missing presentation layer")?.backgroundColor ?? backgroundColor ?? .clear))
         #endif
       } else {
         // no animation, just use the model value
         #if canImport(AppKit)
-        return background ?? UnifiedColor.color(Color(cgColor: backgroundColor ?? .clear).assert("failed to convert CGColor to Color") ?? .clear)
+        return background ?? UnifiedColor.color(Color(cgColor: backgroundColor ?? .clear).assertNotNil("failed to convert CGColor to Color") ?? .clear)
         #endif
         #if canImport(UIKit)
         return background ?? UnifiedColor.color(Color(cgColor: backgroundColor ?? .clear))

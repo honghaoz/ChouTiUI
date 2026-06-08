@@ -99,8 +99,8 @@ public extension CALayer {
       for token in self.positionChangeBlocks.values {
         token.value(
           self,
-          change.oldValue.assert("unexpected nil old value") ?? layer.position,
-          change.newValue.assert("unexpected nil new value") ?? layer.position
+          change.oldValue.assertNotNil("unexpected nil old value") ?? layer.position,
+          change.newValue.assertNotNil("unexpected nil new value") ?? layer.position
         )
       }
     }

@@ -45,7 +45,7 @@ public extension UIScreen {
       ChouTi.assertFailure("Failed to get display corner radius.")
       return 0
     }
-    return (value as? CGFloat).assert("Got invalid display corner radius.", metadata: ["value": "\(value)"]) ?? 0
+    return (value as? CGFloat).assertNotNil("Got invalid display corner radius.", metadata: ["value": "\(value)"]) ?? 0
   }
 
   // https://kylebashour.com/posts/finding-the-real-iphone-x-corner-radius

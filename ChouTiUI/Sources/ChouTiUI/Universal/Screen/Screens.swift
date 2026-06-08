@@ -58,7 +58,7 @@ public enum Screens {
   ///     super.loadView()
   ///
   ///     // initialize application's mainScreen
-  ///     if let screen = view.window?.screen.assert() {
+  ///     if let screen = view.window?.screen.assertNotNil() {
   ///       hostApplication()?.mainScreen = screen
   ///     }
   ///   }

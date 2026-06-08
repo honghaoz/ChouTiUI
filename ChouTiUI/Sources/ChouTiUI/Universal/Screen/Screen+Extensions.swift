@@ -48,7 +48,7 @@ public extension Screen {
     #if os(visionOS)
     return Sizing.visionOS.scaleFactor
     #else
-    Screens.mainScreen.assert("missing main screen")?.scale ?? 2.0
+    Screens.mainScreen.assertNotNil("missing main screen")?.scale ?? 2.0
     #endif
   }
 

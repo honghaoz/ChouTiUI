@@ -70,7 +70,7 @@ public extension CALayer {
   @available(macOS 15.0, iOS 18.0, tvOS 18.0, visionOS 2.0, *)
   var borderOffset: CGFloat {
     get {
-      value(forKey: Self.borderOffsetKey).assert("missing value for key \(Self.borderOffsetKey)") as? CGFloat ?? 0
+      value(forKey: Self.borderOffsetKey).assertNotNil("missing value for key \(Self.borderOffsetKey)") as? CGFloat ?? 0
     }
     set {
       setValue(newValue, forKey: Self.borderOffsetKey)

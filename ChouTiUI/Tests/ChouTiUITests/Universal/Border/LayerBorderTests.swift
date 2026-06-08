@@ -64,7 +64,10 @@ class LayerBorderTests: XCTestCase {
       let linearGradientColor = LinearGradientColor(colors: [.red, .green], locations: [0, 1])
       Assert.setTestAssertionFailureHandler { message, metadata, file, line, column in
         expect(message) == "LayerBorder only supports solid color"
-        expect(metadata) == ["borderColor": "\(UnifiedColor.gradient(.linearGradient(linearGradientColor)))"]
+        expect(metadata) == [
+          "borderColor": "\(UnifiedColor.gradient(.linearGradient(linearGradientColor)))",
+          "type": "UIColor",
+        ]
       }
 
       let layerBorder = LayerBorder(border: Border(linearGradientColor, 1))

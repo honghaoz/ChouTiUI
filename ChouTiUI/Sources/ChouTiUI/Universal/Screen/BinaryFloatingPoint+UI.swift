@@ -71,7 +71,7 @@ public extension BinaryFloatingPoint {
     #if os(visionOS)
     return 1 / Sizing.visionOS.scaleFactor
     #else
-    return Screen.mainScreen().assert("Screen.mainScreen() is nil")?.halfPoint ?? 0.5
+    return Screen.mainScreen().assertNotNil("Screen.mainScreen() is nil")?.halfPoint ?? 0.5
     #endif
   }
 }

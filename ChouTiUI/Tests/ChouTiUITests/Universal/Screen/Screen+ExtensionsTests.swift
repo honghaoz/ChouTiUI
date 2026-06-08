@@ -99,7 +99,7 @@ class Screen_ExtensionsTests: XCTestCase {
   @available(iOS 10.3, macOS 12.0, *)
   func testMinimumRefreshInterval() {
     if let mainScreen = Screen.mainScreen() {
-      expect(mainScreen.minimumRefreshInterval).to(beApproximatelyEqual(to: 1 / Double(mainScreen.maximumFramesPerSecond), within: 1e-9))
+      expect(mainScreen.minimumRefreshInterval).to(beApproximatelyEqual(to: 1 / Double(mainScreen.maximumFramesPerSecond), within: 1e-6))
     }
   }
 

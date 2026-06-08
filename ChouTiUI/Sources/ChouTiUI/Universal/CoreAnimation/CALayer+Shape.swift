@@ -79,7 +79,7 @@ public extension CALayer {
       setupMaskLayer()
 
     case (.some, .some(let newShape)):
-      if let existingMaskLayer = (mask as? CAShapeLayer).assert("should have mask layer") {
+      if let existingMaskLayer = (mask as? CAShapeLayer).assertNotNil("should have mask layer") {
         // update the mask layer path so that if the bounds changes, the mask layer will be updated
         existingMaskLayer.frame = bounds
         existingMaskLayer.path = newShape.path(in: bounds)

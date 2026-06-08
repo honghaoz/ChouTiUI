@@ -60,7 +60,7 @@ public struct LayerBorder: Equatable, CustomStringConvertible {
   /// Creates a layer border with the given border.
   /// - Parameter border: The border to create the layer border with.
   public init(border: Border) {
-    self.borderColor = border.color.solidColor.assert("LayerBorder only supports solid color", metadata: ["borderColor": "\(border.color)"])?.cgColor
+    self.borderColor = border.color.solidColor.assertNotNil("LayerBorder only supports solid color", metadata: ["borderColor": "\(border.color)"])?.cgColor
     self.borderWidth = border.width
   }
 

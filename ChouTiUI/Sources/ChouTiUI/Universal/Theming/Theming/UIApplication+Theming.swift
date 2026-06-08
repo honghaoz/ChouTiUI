@@ -35,8 +35,8 @@ import UIKit
 extension UIApplication: Theming {
 
   public var theme: Theme {
-    foregroundActiveWindowScenes.first.assert("No foreground active window scene")?.theme
-      ?? windowScenes.first.assert("No window scene")?.theme ?? .light
+    foregroundActiveWindowScenes.first.assertNotNil("No foreground active window scene")?.theme
+      ?? windowScenes.first.assertNotNil("No window scene")?.theme ?? .light
   }
 
   public var overrideTheme: Theme? {
