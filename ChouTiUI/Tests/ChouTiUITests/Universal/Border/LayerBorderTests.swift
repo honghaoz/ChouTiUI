@@ -66,7 +66,13 @@ class LayerBorderTests: XCTestCase {
         expect(message) == "LayerBorder only supports solid color"
         expect(metadata) == [
           "borderColor": "\(UnifiedColor.gradient(.linearGradient(linearGradientColor)))",
-          "type": "UIColor",
+          "type": {
+            #if canImport(AppKit)
+            return "NSColor"
+            #else
+            return "UIColor"
+            #endif
+          }(),
         ]
       }
 
