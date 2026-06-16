@@ -99,3 +99,9 @@ custom_rules:
     match_kinds:
       - identifier
     severity: error
+
+  init_function_reference:
+    name: "Init Function Reference"
+    message: "Avoid passing `.init` as a function reference (e.g. map(Foo.init)). Use an explicit closure like map { Foo($0) } instead."
+    regex: '\.init\b(?!\s*[({])'
+    severity: warning
