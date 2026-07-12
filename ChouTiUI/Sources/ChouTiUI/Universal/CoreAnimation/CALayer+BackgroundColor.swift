@@ -417,7 +417,22 @@ public extension CALayer {
     }
 
     let gradientLayer = AnimatedGradientLayer()
-    addFullSizeSublayer(gradientLayer)
+
+    // insert the animation gradient layer below the layer's content sublayers so that the animating background doesn't
+    // cover the layer's content:
+    // - if there's a background gradient layer, insert just above it.
+    // - otherwise, insert at the bottom. if the background is updated to a gradient at the end of `animateBackground`,
+    //   the new background gradient layer is inserted at index 0, which places it right below this animation gradient layer.
+    let index: UInt32
+    if let backgroundGradientLayer,
+       let backgroundGradientLayerIndex = sublayers?.firstIndex(where: { $0 === backgroundGradientLayer })
+    {
+      index = UInt32(backgroundGradientLayerIndex) + 1
+    } else {
+      index = 0
+    }
+    addFullSizeSublayer(gradientLayer, at: index)
+
     self.animationGradientLayer = gradientLayer
     return gradientLayer
   }
