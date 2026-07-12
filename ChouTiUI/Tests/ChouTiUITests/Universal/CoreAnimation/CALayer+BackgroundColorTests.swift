@@ -363,6 +363,9 @@ class CALayer_BackgroundColorTests: XCTestCase {
       layer.background = UnifiedColor.color(.red)
       window.layer.addSublayer(layer)
 
+      // freeze the layer's timeline so that the in-progress animation state is deterministic, regardless of how busy/slow the test machine is.
+      layer.speed = 0
+
       // first animation
       layer.animateBackground(to: UnifiedColor.color(.green), timing: .easeInEaseOut(duration: 0.2))
       var animation = try (layer.animation(forKey: "backgroundColor").unwrap() as? CABasicAnimation).unwrap()
@@ -371,9 +374,16 @@ class CALayer_BackgroundColorTests: XCTestCase {
       expect(animation.duration) == 0.2
       expect(layer.test.solidColorAnimation) != nil
 
-      wait(timeout: 0.1)
+      // wait for the layer to have a presentation layer, i.e. the first animation is committed.
+      // since the layer's timeline is frozen, the first animation stays in progress at its beginning, with the
+      // presentation color being the from color (red).
+      expect(layer.presentation()).toEventuallyNot(beNil())
+
       // second animation
+      // the layer's model backgroundColor is green now, but the in-progress (presentation) color is still red, so the
+      // checks below can verify the second animation starts from the in-progress color instead of the model color.
       let inProgressColor = try layer.presentation().unwrap().backgroundColor.unwrap()
+      expect(inProgressColor) == Color.red.cgColor
       layer.animateBackground(to: UnifiedColor.color(.blue), timing: .easeInEaseOut(duration: 0.1))
       animation = try (layer.animation(forKey: "backgroundColor").unwrap() as? CABasicAnimation).unwrap()
       expect(animation.fromValue as! CGColor) != Color.green.cgColor // swiftlint:disable:this force_cast
@@ -382,8 +392,14 @@ class CALayer_BackgroundColorTests: XCTestCase {
       expect(animation.duration) == 0.1
       expect(layer.test.solidColorAnimation) != nil
 
-      wait(timeout: 0.051)
+      // adding the second animation replaces the first one, which triggers the first animation's didStop callback on the next runloop turn.
+      // give the runloop a turn so the callback fires.
+      // the frozen timeline guarantees the second animation cannot complete during this wait.
+      wait(timeout: 0.05)
       expect(layer.test.solidColorAnimation) != nil // the first animation completion doesn't clear the solidColorAnimation
+
+      // resume the layer's timeline so that the second animation can complete and clean up.
+      layer.speed = 1
       expect(layer.test.solidColorAnimation).toEventually(beEqual(to: nil))
     }
   }
@@ -469,28 +485,40 @@ class CALayer_BackgroundColorTests: XCTestCase {
     layer.background = .linearGradient(LinearGradientColor([.red, .blue]))
     window.layer.addSublayer(layer)
 
-    // Start first animation
+    // freeze the layer's timeline so that the in-progress animation state is deterministic, regardless of how busy/slow the test machine is.
+    layer.speed = 0
+
+    // start first animation
     let firstGradient = LinearGradientColor([.green, .yellow])
     layer.animateBackground(to: UnifiedColor.linearGradient(firstGradient), timing: .easeInEaseOut(duration: 0.1))
     let animationLayer = try layer.test.animationGradientLayer.unwrap()
     expect(animationLayer.type) == .axial
     expect(layer.test.animationGradientLayer) != nil
 
-    // Wait for animation to be in progress
+    // give the runloop a turn so the first animation is committed.
     wait(timeout: 0.05)
 
-    // Start second animation while first is in progress
+    // start second animation while first is in progress
     let secondGradient = LinearGradientColor([.purple, .orange])
     layer.animateBackground(to: UnifiedColor.linearGradient(secondGradient), timing: .easeInEaseOut(duration: 0.1))
 
-    // Verify that the animation layer is still the same instance and properly configured
+    // verify that the animation layer is still the same instance and properly configured
     expect(layer.test.animationGradientLayer) === animationLayer
     expect(animationLayer.type) == .axial
     expect(animationLayer.colors as! [CGColor]) == [Color.purple, .orange].map(\.cgColor) // swiftlint:disable:this force_cast
 
-    // Verify animation exists on the layer
+    // verify animation exists on the layer
     expect(animationLayer.animation(forKey: "colors")) != nil
     expect(layer.test.animationGradientLayer) != nil
+
+    // adding the second animation replaces the first one, which triggers the first animation's didStop callback on the
+    // next runloop turn.
+    // give the runloop a turn so the callback fires.
+    wait(timeout: 0.05)
+    expect(layer.test.animationGradientLayer) === animationLayer // the first animation's completion doesn't tear down the animation gradient layer
+
+    // resume the layer's timeline so that the second animation can complete and clean up.
+    layer.speed = 1
     expect(layer.test.animationGradientLayer).toEventually(beEqual(to: nil))
   }
 
@@ -500,30 +528,41 @@ class CALayer_BackgroundColorTests: XCTestCase {
     layer.background = .radialGradient(RadialGradientColor(colors: [.red, .blue], centerPoint: .center, endPoint: .topRight))
     window.layer.addSublayer(layer)
 
-    // Start first animation
+    // freeze the layer's timeline so that the in-progress animation state is deterministic, regardless of how busy/slow the test machine is.
+    layer.speed = 0
+
+    // start first animation
     let firstGradient = RadialGradientColor(colors: [.green, .yellow], centerPoint: .center, endPoint: .bottom)
     layer.animateBackground(to: UnifiedColor.radialGradient(firstGradient), timing: .easeInEaseOut(duration: 0.1))
     let animationLayer = try layer.test.animationGradientLayer.unwrap()
     expect(animationLayer.type) == .radial
     expect(layer.test.animationGradientLayer) != nil
 
-    // Wait for animation to be in progress
+    // give the runloop a turn so the first animation is committed.
     wait(timeout: 0.05)
 
     // Start second animation while first is in progress
     let secondGradient = RadialGradientColor(colors: [.purple, .orange], centerPoint: .topLeft, endPoint: .bottomRight)
     layer.animateBackground(to: UnifiedColor.radialGradient(secondGradient), timing: .easeInEaseOut(duration: 0.1))
 
-    // Verify that the animation layer is still the same instance and properly configured
+    // verify that the animation layer is still the same instance and properly configured
     expect(layer.test.animationGradientLayer) === animationLayer
     expect(animationLayer.type) == .radial
     expect(animationLayer.colors as! [CGColor]) == [Color.purple, .orange].map(\.cgColor) // swiftlint:disable:this force_cast
     expect(animationLayer.startPoint) == UnitPoint.topLeft.cgPoint
     expect(animationLayer.endPoint) == UnitPoint.bottomRight.cgPoint
 
-    // Verify animation exists on the layer
+    // verify animation exists on the layer
     expect(animationLayer.animation(forKey: "colors")) != nil
     expect(layer.test.animationGradientLayer) != nil
+
+    // adding the second animation replaces the first one, which triggers the first animation's didStop callback on the next runloop turn.
+    // give the runloop a turn so the callback fires.
+    wait(timeout: 0.05)
+    expect(layer.test.animationGradientLayer) === animationLayer // the first animation's completion doesn't tear down the animation gradient layer
+
+    // resume the layer's timeline so that the second animation can complete and clean up.
+    layer.speed = 1
     expect(layer.test.animationGradientLayer).toEventually(beEqual(to: nil))
   }
 
@@ -533,30 +572,41 @@ class CALayer_BackgroundColorTests: XCTestCase {
     layer.background = .angularGradient(AngularGradientColor(colors: [.red, .blue], centerPoint: .center, aimingPoint: .top))
     window.layer.addSublayer(layer)
 
-    // Start first animation
+    // freeze the layer's timeline so that the in-progress animation state is deterministic, regardless of how busy/slow the test machine is.
+    layer.speed = 0
+
+    // start first animation
     let firstGradient = AngularGradientColor(colors: [.green, .yellow], centerPoint: .center, aimingPoint: .bottom)
     layer.animateBackground(to: UnifiedColor.angularGradient(firstGradient), timing: .easeInEaseOut(duration: 0.1))
     let animationLayer = try layer.test.animationGradientLayer.unwrap()
     expect(animationLayer.type) == .conic
     expect(layer.test.animationGradientLayer) != nil
 
-    // Wait for animation to be in progress
+    // give the runloop a turn so the first animation is committed. The frozen timeline
+    // keeps the first animation in progress no matter how long this wait takes.
     wait(timeout: 0.05)
 
-    // Start second animation while first is in progress
+    // start second animation while first is in progress
     let secondGradient = AngularGradientColor(colors: [.purple, .orange], centerPoint: .topLeft, aimingPoint: .bottomRight)
     layer.animateBackground(to: UnifiedColor.angularGradient(secondGradient), timing: .easeInEaseOut(duration: 0.1))
 
-    // Verify that the animation layer is still the same instance and properly configured
+    // verify that the animation layer is still the same instance and properly configured
     expect(layer.test.animationGradientLayer) === animationLayer
     expect(animationLayer.type) == .conic
     expect(animationLayer.colors as! [CGColor]) == [Color.purple, .orange].map(\.cgColor) // swiftlint:disable:this force_cast
     expect(animationLayer.startPoint) == UnitPoint.topLeft.cgPoint
     expect(animationLayer.endPoint) == UnitPoint.bottomRight.cgPoint
 
-    // Verify animation exists on the layer
+    // verify animation exists on the layer
     expect(animationLayer.animation(forKey: "colors")) != nil
     expect(layer.test.animationGradientLayer) != nil
+
+    // adding the second animation replaces the first one, which triggers the first animation's didStop callback on the next runloop turn. give the runloop a turn so the callback fires.
+    wait(timeout: 0.05)
+    expect(layer.test.animationGradientLayer) === animationLayer // the first animation's completion doesn't tear down the animation gradient layer
+
+    // resume the layer's timeline so that the second animation can complete and clean up.
+    layer.speed = 1
     expect(layer.test.animationGradientLayer).toEventually(beEqual(to: nil))
   }
 
@@ -567,9 +617,15 @@ class CALayer_BackgroundColorTests: XCTestCase {
     layer.bounds = CGRect(x: 0, y: 0, width: 100, height: 100)
     window.layer.addSublayer(layer)
 
-    // Start gradient animation
+    // start gradient animation
+    //
+    // Note: this test can't use the frozen timeline (`layer.speed = 0`) approach that other in-progress animation tests
+    // use: committing the size synchronization animations onto a frozen layer prevents the "colors" animation from ever
+    // starting/completing on the render server, so the cleanup check at the end would never happen. instead, use a
+    // duration long enough that the animation is reliably still in progress when the runloop turn below runs, even on a
+    // busy/slow test machine.
     let firstGradient = LinearGradientColor([.red, .blue])
-    layer.animateBackground(to: UnifiedColor.linearGradient(firstGradient), timing: .easeInEaseOut(duration: 0.05))
+    layer.animateBackground(to: UnifiedColor.linearGradient(firstGradient), timing: .easeInEaseOut(duration: 1))
     let animationGradientLayer = try layer.test.animationGradientLayer.unwrap()
 
     // Verify initial state

@@ -128,8 +128,8 @@ class ThemeMonitorTests: XCTestCase {
     _ = observation
 
     Foundation.DistributedNotificationCenter.default().postNotificationName(.accentColorDidChange, object: nil)
-    wait(timeout: 0.05)
-    expect(lastValue) == Color.controlAccentColor
+
+    expect(lastValue).toEventually(beEqual(to: Color.controlAccentColor))
     expect(bindingEmissionCount) == 1
     #endif
   }
