@@ -479,6 +479,122 @@ class CALayer_BackgroundColorTests: XCTestCase {
     expect(layer.test.animationGradientLayer).toEventually(beEqual(to: nil))
   }
 
+  func test_animation_animationGradientLayerZOrder() throws {
+    // verify that the animation gradient layer is inserted below the layer's content sublayers, so that the animating
+    // background doesn't cover the layer's content.
+
+    // solid -> gradient
+    do {
+      // given: a layer with a solid background and a content sublayer
+      let window = TestWindow()
+      let layer = CALayer()
+      layer.background = .color(.red)
+      window.layer.addSublayer(layer)
+
+      let contentLayer = CALayer()
+      layer.addSublayer(contentLayer)
+
+      // when: animating to a gradient background
+      layer.animateBackground(to: .linearGradient(LinearGradientColor([.red, .blue])), timing: .easeInEaseOut(duration: 0.05))
+
+      // then: background gradient layer at the bottom, animation gradient layer above it, content on top
+      let backgroundGradientLayer = try layer.backgroundGradientLayer.unwrap()
+      let animationGradientLayer = try layer.test.animationGradientLayer.unwrap()
+      let sublayers = try layer.sublayers.unwrap()
+      expect(sublayers.count) == 3
+      expect(sublayers[0]) === backgroundGradientLayer
+      expect(sublayers[1]) === animationGradientLayer
+      expect(sublayers[2]) === contentLayer
+
+      // then: after the animation completes, the background gradient layer stays below the content
+      expect(layer.test.animationGradientLayer).toEventually(beEqual(to: nil))
+      let finalSublayers = try layer.sublayers.unwrap()
+      expect(finalSublayers.count) == 2
+      expect(finalSublayers[0]) === backgroundGradientLayer
+      expect(finalSublayers[1]) === contentLayer
+    }
+
+    // gradient -> gradient
+    do {
+      // given: a layer with a gradient background and a content sublayer
+      let window = TestWindow()
+      let layer = CALayer()
+      layer.background = .linearGradient(LinearGradientColor([.red, .blue]))
+      window.layer.addSublayer(layer)
+
+      let contentLayer = CALayer()
+      layer.addSublayer(contentLayer)
+
+      // when: animating to another gradient background
+      layer.animateBackground(to: .linearGradient(LinearGradientColor([.green, .yellow])), timing: .easeInEaseOut(duration: 0.05))
+
+      // then: animation gradient layer sits between the background gradient layer and the content
+      let backgroundGradientLayer = try layer.backgroundGradientLayer.unwrap()
+      let animationGradientLayer = try layer.test.animationGradientLayer.unwrap()
+      let sublayers = try layer.sublayers.unwrap()
+      expect(sublayers.count) == 3
+      expect(sublayers[0]) === backgroundGradientLayer
+      expect(sublayers[1]) === animationGradientLayer
+      expect(sublayers[2]) === contentLayer
+
+      expect(layer.test.animationGradientLayer).toEventually(beEqual(to: nil))
+    }
+
+    // gradient -> solid
+    do {
+      // given: a layer with a gradient background and a content sublayer
+      let window = TestWindow()
+      let layer = CALayer()
+      layer.background = .linearGradient(LinearGradientColor([.red, .blue]))
+      window.layer.addSublayer(layer)
+
+      let contentLayer = CALayer()
+      layer.addSublayer(contentLayer)
+
+      // when: animating to a solid background
+      layer.animateBackground(to: .color(.green), timing: .easeInEaseOut(duration: 0.05))
+
+      // then: the background gradient layer is removed, animation gradient layer stays below the content
+      expect(layer.backgroundGradientLayer) == nil
+      let animationGradientLayer = try layer.test.animationGradientLayer.unwrap()
+      let sublayers = try layer.sublayers.unwrap()
+      expect(sublayers.count) == 2
+      expect(sublayers[0]) === animationGradientLayer
+      expect(sublayers[1]) === contentLayer
+
+      expect(layer.test.animationGradientLayer).toEventually(beEqual(to: nil))
+    }
+
+    // gradient -> solid, then retarget to gradient while the animation is in progress
+    do {
+      // given: a layer with an in-progress gradient -> solid background animation
+      let window = TestWindow()
+      let layer = CALayer()
+      layer.background = .linearGradient(LinearGradientColor([.red, .blue]))
+      window.layer.addSublayer(layer)
+
+      let contentLayer = CALayer()
+      layer.addSublayer(contentLayer)
+
+      layer.animateBackground(to: .color(.green), timing: .easeInEaseOut(duration: 0.05))
+      let animationGradientLayer = try layer.test.animationGradientLayer.unwrap()
+
+      // when: animating to a gradient background, reusing the animation gradient layer
+      layer.animateBackground(to: .linearGradient(LinearGradientColor([.purple, .orange])), timing: .easeInEaseOut(duration: 0.05))
+
+      // then: the new background gradient layer is inserted below the reused animation gradient layer
+      expect(layer.test.animationGradientLayer) === animationGradientLayer
+      let backgroundGradientLayer = try layer.backgroundGradientLayer.unwrap()
+      let sublayers = try layer.sublayers.unwrap()
+      expect(sublayers.count) == 3
+      expect(sublayers[0]) === backgroundGradientLayer
+      expect(sublayers[1]) === animationGradientLayer
+      expect(sublayers[2]) === contentLayer
+
+      expect(layer.test.animationGradientLayer).toEventually(beEqual(to: nil))
+    }
+  }
+
   func test_inProgressGradientAnimation_linear() throws {
     let window = TestWindow()
     let layer = CALayer()
