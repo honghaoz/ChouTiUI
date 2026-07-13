@@ -45,6 +45,8 @@ class CALayer_ShapeTests: XCTestCase {
     static let implicitAnimationDuration: TimeInterval = 0.25
   }
 
+  // MARK: - Shape
+
   func test_shape() {
     let layer = CALayer()
 
@@ -120,6 +122,148 @@ class CALayer_ShapeTests: XCTestCase {
     expect(layer.mask) != nil // should create a new mask layer
 
     Assert.resetTestAssertionFailureHandler()
+  }
+
+  func test_shape_update_thenBoundsChange_usesNewShape() throws {
+    // given: a layer whose shape is updated from a rectangle to a circle
+    let window = TestWindow()
+    let layer = CALayer()
+    layer.delegate = CALayer.DisableImplicitAnimationDelegate.shared
+    layer.frame = CGRect(x: 0, y: 0, width: 100, height: 100)
+    layer.shape = Rectangle()
+    window.layer.addSublayer(layer)
+
+    layer.shape = Circle()
+
+    // when: the layer's bounds changes
+    layer.bounds = CGRect(x: 0, y: 0, width: 200, height: 200)
+    wait(timeout: Constants.nextRunLoopWait) // wait until next runloop
+
+    // then: the mask path should use the current (circle) shape, not the original (rectangle) shape
+    let maskLayer = try (layer.mask as? CAShapeLayer).unwrap()
+    let newBounds = CGRect(x: 0, y: 0, width: 200, height: 200)
+    expect(maskLayer.path?.pathElements()) == Circle().path(in: newBounds).pathElements()
+  }
+
+  func test_shape_animateShape_thenBoundsChange_usesNewShape() throws {
+    // given: a layer whose shape is animated from a rectangle to a circle
+    let window = TestWindow()
+    let layer = CALayer()
+    layer.delegate = CALayer.DisableImplicitAnimationDelegate.shared
+    layer.frame = CGRect(x: 0, y: 0, width: 100, height: 100)
+    layer.shape = Rectangle()
+    window.layer.addSublayer(layer)
+
+    layer.animateShape(to: Circle(), timing: .easeInEaseOut(duration: 0.05))
+
+    // when: the layer's bounds changes after the shape animation
+    layer.bounds = CGRect(x: 0, y: 0, width: 200, height: 200)
+    wait(timeout: Constants.nextRunLoopWait) // wait until next runloop
+
+    // then: the mask path should use the new (circle) shape
+    let maskLayer = try (layer.mask as? CAShapeLayer).unwrap()
+    let newBounds = CGRect(x: 0, y: 0, width: 200, height: 200)
+    expect(maskLayer.path?.pathElements()) == Circle().path(in: newBounds).pathElements()
+  }
+
+  func test_shape_nilToNil_keepsExternalMask() {
+    // given: a layer with a user-installed mask, no shape
+    let layer = CALayer()
+    layer.bounds = CGRect(x: 0, y: 0, width: 100, height: 100)
+
+    let customMask = CALayer()
+    layer.mask = customMask
+
+    // when: setting shape to nil (shape was already nil)
+    layer.shape = nil
+
+    // then: the user-installed mask should be untouched
+    expect(layer.mask) === customMask
+  }
+
+  func test_shape_someToNil_keepsExternalMask() {
+    // given: a layer with a shape
+    let layer = CALayer()
+    layer.bounds = CGRect(x: 0, y: 0, width: 100, height: 100)
+    layer.shape = Circle()
+
+    // when: setting the mask to a custom layer
+    let customMask = CALayer()
+    layer.mask = customMask
+
+    // when: setting shape to nil while the mask is still the custom layer
+    layer.shape = nil
+
+    // then: the user-installed mask should be untouched
+    expect(layer.mask) === customMask
+  }
+
+  func test_shape_externalMaskRemoval_untracksOldMaskLayer() throws {
+    // given: a layer with a shape, whose mask is removed externally, then a new shape is set
+    let window = TestWindow()
+    let layer = CALayer()
+    layer.delegate = CALayer.DisableImplicitAnimationDelegate.shared
+    layer.frame = CGRect(x: 0, y: 0, width: 100, height: 100)
+    layer.shape = Rectangle()
+    window.layer.addSublayer(layer)
+
+    let oldMaskLayer = try (layer.mask as? CAShapeLayer).unwrap()
+
+    layer.mask = nil // external mask removal
+
+    Assert.setTestAssertionFailureHandler { message, _, _, _, _ in
+      expect(message) == "should have mask layer"
+    }
+    layer.shape = Circle() // creates a new mask layer
+    Assert.resetTestAssertionFailureHandler()
+
+    // when: the layer's bounds changes
+    layer.bounds = CGRect(x: 0, y: 0, width: 200, height: 200)
+    wait(timeout: Constants.nextRunLoopWait) // wait until next runloop
+
+    // then: the old mask layer should not be tracked anymore, i.e. its frame is not updated
+    expect(oldMaskLayer.frame) == CGRect(x: 0, y: 0, width: 100, height: 100)
+
+    // then: the new mask layer follows the host layer's bounds
+    let newMaskLayer = try (layer.mask as? CAShapeLayer).unwrap()
+    expect(newMaskLayer.frame) == CGRect(x: 0, y: 0, width: 200, height: 200)
+    expect(newMaskLayer.path?.pathElements()) == Circle().path(in: CGRect(x: 0, y: 0, width: 200, height: 200)).pathElements()
+  }
+
+  func test_shape_maskReplacedExternally_reinstallsOnShapeUpdate() throws {
+    // given: a layer with a shape, whose mask is replaced externally with another shape layer
+    let window = TestWindow()
+    let layer = CALayer()
+    layer.delegate = CALayer.DisableImplicitAnimationDelegate.shared
+    layer.frame = CGRect(x: 0, y: 0, width: 100, height: 100)
+    layer.shape = Rectangle()
+    window.layer.addSublayer(layer)
+
+    let oldMaskLayer = try (layer.mask as? CAShapeLayer).unwrap()
+
+    let externalMask = CAShapeLayer()
+    layer.mask = externalMask // external mask replacement
+
+    Assert.setTestAssertionFailureHandler { message, _, _, _, _ in
+      expect(message) == "mask layer should be the shape-installed mask layer"
+    }
+
+    // when: updating the shape
+    layer.shape = Circle()
+
+    Assert.resetTestAssertionFailureHandler()
+
+    // then: the shape-installed mask layer is reinstalled, restoring the shape
+    let newMaskLayer = try (layer.mask as? CAShapeLayer).unwrap()
+    expect(newMaskLayer) !== externalMask
+    expect(newMaskLayer) !== oldMaskLayer
+    expect(newMaskLayer.path?.pathElements()) == Circle().path(in: CGRect(x: 0, y: 0, width: 100, height: 100)).pathElements()
+
+    // then: the old mask layer is not tracked anymore
+    layer.bounds = CGRect(x: 0, y: 0, width: 200, height: 200)
+    wait(timeout: Constants.nextRunLoopWait) // wait until next runloop
+    expect(oldMaskLayer.frame) == CGRect(x: 0, y: 0, width: 100, height: 100)
+    expect(newMaskLayer.frame) == CGRect(x: 0, y: 0, width: 200, height: 200)
   }
 
   func test_shape_boundsChange_afterShapeRemoved() {
@@ -381,18 +525,57 @@ class CALayer_ShapeTests: XCTestCase {
   }
 
   func test_shapeAnimation_hasShape_noMaskLayer() throws {
+    // given: a layer with a shape, whose mask is removed externally
     let layer = CALayer()
     layer.bounds = CGRect(x: 0, y: 0, width: 100, height: 100)
     layer.shape = Rectangle()
     layer.mask = nil
 
+    var assertionMessages: [String] = []
     Assert.setTestAssertionFailureHandler { message, metadata, file, line, column in
-      expect(message) == "no mask layer"
+      assertionMessages.append(message)
     }
 
+    // when: animating the shape
     layer.animateShape(to: Circle(), timing: .easeInEaseOut(duration: 0.25))
 
     Assert.resetTestAssertionFailureHandler()
+
+    // then: the animation is skipped, the new shape is applied directly with a reinstalled mask layer
+    expect(assertionMessages) == ["no mask layer", "should have mask layer"]
+    expect(layer.shape?.isEqual(to: Circle())) == true
+    let maskLayer = try (layer.mask as? CAShapeLayer).unwrap()
+    expect(maskLayer.animation(forKey: "path")) == nil
+    expect(maskLayer.path?.pathElements()) == Circle().path(in: layer.bounds).pathElements()
+  }
+
+  func test_shapeAnimation_hasShape_maskReplacedExternally() throws {
+    // given: a layer with a shape, whose mask is replaced externally with another shape layer
+    let layer = CALayer()
+    layer.bounds = CGRect(x: 0, y: 0, width: 100, height: 100)
+    layer.shape = Rectangle()
+
+    let externalMask = CAShapeLayer()
+    layer.mask = externalMask
+
+    var assertionMessages: [String] = []
+    Assert.setTestAssertionFailureHandler { message, metadata, file, line, column in
+      assertionMessages.append(message)
+    }
+
+    // when: animating the shape
+    layer.animateShape(to: Circle(), timing: .easeInEaseOut(duration: 0.25))
+
+    Assert.resetTestAssertionFailureHandler()
+
+    // then: the animation is skipped (not applied to the external mask), the new shape is applied directly with a
+    // reinstalled mask layer
+    expect(assertionMessages) == ["no mask layer", "mask layer should be the shape-installed mask layer"]
+    expect(externalMask.animation(forKey: "path")) == nil
+    expect(layer.shape?.isEqual(to: Circle())) == true
+    let maskLayer = try (layer.mask as? CAShapeLayer).unwrap()
+    expect(maskLayer) !== externalMask
+    expect(maskLayer.path?.pathElements()) == Circle().path(in: layer.bounds).pathElements()
   }
 
   func test_shapeAnimation_hasShape_fromShapeIsNil() throws {
