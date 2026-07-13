@@ -115,40 +115,40 @@ public extension CALayer {
       backgroundGradientLayer = nil
 
     case (.some(let oldBackgroundColor), .some(let newBackgroundColor)):
-      switch (oldBackgroundColor.gradientColor, newBackgroundColor.gradientColor) {
-      case (.some, .some(let newGradient)):
+      switch (oldBackgroundColor, newBackgroundColor) {
+      case (.gradient, .gradient(let newGradient)):
         // gradient -> gradient
         backgroundColor = nil
         isOpaque = false
 
         // reuse gradient
         ChouTi.assert(backgroundGradientLayer != nil)
-        backgroundGradientLayer?.setBackgroundGradientColor(newGradient)
+        backgroundGradientLayer?.setBackgroundGradientColor(newGradient.gradientColor)
 
-      case (nil, .some(let newGradient)):
+      case (.color, .gradient(let newGradient)):
         // solid -> gradient
         backgroundColor = nil
         isOpaque = false
 
         let gradientLayer = BaseCAGradientLayer()
-        gradientLayer.setBackgroundGradientColor(newGradient)
+        gradientLayer.setBackgroundGradientColor(newGradient.gradientColor)
         addFullSizeSublayer(gradientLayer, at: 0)
         backgroundGradientLayer = gradientLayer
 
-      case (.some, nil):
+      case (.gradient, .color(let newColor)):
         // gradient -> solid
-        backgroundColor = newBackgroundColor.solidColor!.cgColor // swiftlint:disable:this force_unwrapping
-        isOpaque = newBackgroundColor.solidColor!.isOpaque // swiftlint:disable:this force_unwrapping
+        backgroundColor = newColor.cgColor
+        isOpaque = newColor.isOpaque
 
         // remove gradient
         ChouTi.assert(backgroundGradientLayer != nil)
         backgroundGradientLayer.map { self.removeFullSizeSublayer($0) }
         backgroundGradientLayer = nil
 
-      case (nil, nil):
+      case (.color, .color(let newColor)):
         // solid -> solid
-        backgroundColor = newBackgroundColor.solidColor!.cgColor // swiftlint:disable:this force_unwrapping
-        isOpaque = newBackgroundColor.solidColor!.isOpaque // swiftlint:disable:this force_unwrapping
+        backgroundColor = newColor.cgColor
+        isOpaque = newColor.isOpaque
 
         ChouTi.assert(backgroundGradientLayer == nil)
       }
