@@ -296,14 +296,8 @@ public extension CALayer {
       )
     case (.color(let fromSolidColor), .gradient(let toGradientColor)):
       // solid -> gradient
-      let gradientLayer = CATransaction.disableAnimations {
-        let gradientLayer = prepareAnimationGradientLayer()
-        gradientLayer.setBackgroundGradientColor(toGradientColor)
-        return gradientLayer
-      }
-
-      let animationId = MachTimeId.id()
-      gradientLayer.animationId = animationId
+      let (gradientLayer, animationId) = prepareAnimationGradientLayer(with: toGradientColor)
+      let teardownDelegate = makeTearDownAnimationDelegate(animationId: animationId)
 
       gradientLayer.animate(
         keyPath: "colors",
@@ -316,26 +310,12 @@ public extension CALayer {
           return Array(repeating: fromSolidColor.cgColor, count: colors.count)
         },
         to: { layer in layer.colors },
-        updateAnimation: { animation in
-          animation.delegate = AnimationDelegate(
-            animationDidStop: { [weak self] animation, finished in
-              if self?.animationGradientLayer?.animationId == animationId {
-                self?.tearDownAnimationGradientLayer()
-              }
-            }
-          )
-        }
+        updateAnimation: { $0.delegate = teardownDelegate }
       )
     case (.gradient(let fromGradientColor), .color(let toSolidColor)):
       // gradient -> solid
-      let gradientLayer = CATransaction.disableAnimations {
-        let gradientLayer = prepareAnimationGradientLayer()
-        gradientLayer.setBackgroundGradientColor(fromGradientColor)
-        return gradientLayer
-      }
-
-      let animationId = MachTimeId.id()
-      gradientLayer.animationId = animationId
+      let (gradientLayer, animationId) = prepareAnimationGradientLayer(with: fromGradientColor)
+      let teardownDelegate = makeTearDownAnimationDelegate(animationId: animationId)
 
       gradientLayer.animate(
         keyPath: "colors",
@@ -348,43 +328,21 @@ public extension CALayer {
           }
           return Array(repeating: toSolidColor.cgColor, count: colors.count)
         },
-        updateAnimation: { animation in
-          animation.delegate = AnimationDelegate(
-            animationDidStop: { [weak self] animation, finished in
-              if self?.animationGradientLayer?.animationId == animationId {
-                self?.tearDownAnimationGradientLayer()
-              }
-            }
-          )
-        }
+        updateAnimation: { $0.delegate = teardownDelegate }
       )
     case (.gradient(let fromGradientColor), .gradient(let toGradientColor)):
       // gradient -> gradient
       ChouTi.assert(fromGradientColor.gradientLayerType == toGradientColor.gradientLayerType, "mismatch gradient layer type")
 
-      let gradientLayer = CATransaction.disableAnimations {
-        let gradientLayer = prepareAnimationGradientLayer()
-        gradientLayer.setBackgroundGradientColor(toGradientColor)
-        return gradientLayer
-      }
-
-      let animationId = MachTimeId.id()
-      gradientLayer.animationId = animationId
+      let (gradientLayer, animationId) = prepareAnimationGradientLayer(with: toGradientColor)
+      let teardownDelegate = makeTearDownAnimationDelegate(animationId: animationId)
 
       gradientLayer.animate(
         keyPath: "colors",
         timing: timing,
         from: { _ in fromGradientColor.colors.map(\.cgColor) },
         to: { _ in toGradientColor.colors.map(\.cgColor) },
-        updateAnimation: { animation in
-          animation.delegate = AnimationDelegate(
-            animationDidStop: { [weak self] animation, finished in
-              if self?.animationGradientLayer?.animationId == animationId {
-                self?.tearDownAnimationGradientLayer()
-              }
-            }
-          )
-        }
+        updateAnimation: { $0.delegate = teardownDelegate }
       )
       gradientLayer.animate(
         keyPath: "locations",
@@ -409,6 +367,38 @@ public extension CALayer {
     CATransaction.disableAnimations { // disable the implicit animation
       background = toColor
     }
+  }
+
+  /// Prepare the animation gradient layer for a background animation.
+  ///
+  /// - Parameter gradientColor: The gradient color to set on the animation gradient layer, without an implicit animation.
+  /// - Returns: The animation gradient layer, tagged with a new animation id.
+  private func prepareAnimationGradientLayer(with gradientColor: GradientColorType) -> (gradientLayer: AnimatedGradientLayer, animationId: MachTimeId) {
+    let gradientLayer = CATransaction.disableAnimations {
+      let gradientLayer = prepareAnimationGradientLayer()
+      gradientLayer.setBackgroundGradientColor(gradientColor)
+      return gradientLayer
+    }
+
+    let animationId = MachTimeId.id()
+    gradientLayer.animationId = animationId
+    return (gradientLayer, animationId)
+  }
+
+  /// Make an animation delegate that tears down the animation gradient layer when the animation stops.
+  ///
+  /// - Parameter animationId: The id of the animation that the delegate is attached to. The teardown only happens if the
+  ///   animation gradient layer's current animation id still matches this id, so that a stale animation's completion
+  ///   doesn't tear down the animation gradient layer reused by a newer animation.
+  /// - Returns: The animation delegate.
+  private func makeTearDownAnimationDelegate(animationId: MachTimeId) -> AnimationDelegate {
+    AnimationDelegate(
+      animationDidStop: { [weak self] _, _ in
+        if self?.animationGradientLayer?.animationId == animationId {
+          self?.tearDownAnimationGradientLayer()
+        }
+      }
+    )
   }
 
   private func prepareAnimationGradientLayer() -> AnimatedGradientLayer {
