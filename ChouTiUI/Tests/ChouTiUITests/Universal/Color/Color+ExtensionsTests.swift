@@ -50,6 +50,14 @@ class Color_ExtensionsTests: XCTestCase {
     expect(color.red(colorSpace: .displayP3)) == 1
   }
 
+  func test_fromCGColor_fallback() throws {
+    // when the conversion succeeds, the converted color is returned, not the fallback
+    let cgColor = try CGColor.rgba(red: 1, green: 0, blue: 0, alpha: 1, colorSpace: .sRGB()).unwrap()
+    let color = Color.from(cgColor: cgColor, fallback: .blue)
+    expect(color.red()) == 1
+    expect(color.blue()) == 0
+  }
+
   func test_opacityAdjustment() {
     let color = Color(white: 1)
 
