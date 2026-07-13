@@ -338,7 +338,9 @@ public extension CALayer {
       ChouTi.assert(fromGradientColor.gradientLayerType == toGradientColor.gradientLayerType, "mismatch gradient layer type")
       guard fromGradientColor.gradientLayerType == toGradientColor.gradientLayerType else {
         // can't animate between different gradient layer types, skip the animation and let the background update below
-        // apply the new background directly.
+        // apply the new background directly. tear down any in-progress animation gradient layer so that it doesn't
+        // cover the new background.
+        tearDownAnimationGradientLayer()
         break
       }
 

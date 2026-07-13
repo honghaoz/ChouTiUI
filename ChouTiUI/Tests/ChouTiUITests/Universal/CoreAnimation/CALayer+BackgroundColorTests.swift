@@ -801,6 +801,35 @@ class CALayer_BackgroundColorTests: XCTestCase {
     expect(layer.backgroundGradientLayer?.type) == CAGradientLayerType.radial
   }
 
+  func test_animation_mismatchedGradient_inProgressAnimation() throws {
+    // given: a layer with an in-progress gradient animation
+    let window = TestWindow()
+    let layer = CALayer()
+    layer.background = .linearGradient(LinearGradientColor([.red, .blue]))
+    window.layer.addSublayer(layer)
+
+    layer.animateBackground(to: .linearGradient(LinearGradientColor([.green, .yellow])), timing: .easeInEaseOut(duration: 0.05))
+    let animationGradientLayer = try layer.test.animationGradientLayer.unwrap()
+    expect(animationGradientLayer.superlayer) === layer
+
+    Assert.setTestAssertionFailureHandler { message, _, _, _, _ in
+      expect(message) == "mismatch gradient layer type"
+    }
+
+    // when: retargeting to a different gradient type while the animation is in progress
+    let radialGradient = RadialGradientColor(colors: [.purple, .orange], centerPoint: .center, endPoint: .bottom)
+    layer.animateBackground(to: UnifiedColor.radialGradient(radialGradient), timing: .easeInEaseOut(duration: 0.05))
+
+    Assert.resetTestAssertionFailureHandler()
+
+    // then: the in-progress animation gradient layer is torn down immediately so that it doesn't cover the new
+    // background, and the new background is applied directly
+    expect(layer.test.animationGradientLayer) == nil
+    expect(animationGradientLayer.superlayer) == nil
+    expect(layer.background) == .radialGradient(radialGradient)
+    expect(layer.backgroundGradientLayer?.type) == CAGradientLayerType.radial
+  }
+
   func test_animation_gradientToGradient_differentColorCounts() throws {
     // given: a layer with a 2-color gradient background
     let window = TestWindow()
