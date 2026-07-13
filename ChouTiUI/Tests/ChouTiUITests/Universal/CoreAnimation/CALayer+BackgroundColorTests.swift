@@ -774,6 +774,7 @@ class CALayer_BackgroundColorTests: XCTestCase {
   }
 
   func test_animation_mismatchedGradient() throws {
+    // given: a layer in a window
     let window = TestWindow()
     let layer = CALayer()
     window.layer.addSublayer(layer)
@@ -785,6 +786,7 @@ class CALayer_BackgroundColorTests: XCTestCase {
       expect(message) == "mismatch gradient layer type"
     }
 
+    // when: animating between mismatched gradient types
     layer.animateBackground(
       from: UnifiedColor.linearGradient(linearGradient),
       to: UnifiedColor.radialGradient(radialGradient),
@@ -792,5 +794,53 @@ class CALayer_BackgroundColorTests: XCTestCase {
     )
 
     Assert.resetTestAssertionFailureHandler()
+
+    // then: the animation is skipped, the new background is applied directly
+    expect(layer.test.animationGradientLayer) == nil
+    expect(layer.background) == .radialGradient(radialGradient)
+    expect(layer.backgroundGradientLayer?.type) == CAGradientLayerType.radial
+  }
+
+  func test_animation_gradientToGradient_differentColorCounts() throws {
+    // given: a layer with a 2-color gradient background
+    let window = TestWindow()
+    let layer = CALayer()
+    layer.background = .linearGradient(LinearGradientColor([.red, .blue]))
+    window.layer.addSublayer(layer)
+
+    // when: animating to a 3-color gradient
+    let toGradient = LinearGradientColor([.green, .yellow, .purple], [0, 0.4, 1])
+    layer.animateBackground(to: UnifiedColor.linearGradient(toGradient), timing: .easeInEaseOut(duration: 0.05))
+
+    // then: the from colors/locations are padded to 3 stops (repeating the last one) so that Core Animation
+    // interpolates instead of jumping discretely
+    let animationLayer = try layer.test.animationGradientLayer.unwrap()
+
+    let colorsAnimation = try (animationLayer.animation(forKey: "colors").unwrap() as? CABasicAnimation).unwrap()
+    expect(colorsAnimation.fromValue as! [CGColor]) == [Color.red.cgColor, Color.blue.cgColor, Color.blue.cgColor] // swiftlint:disable:this force_cast
+    expect(colorsAnimation.toValue as! [CGColor]) == [Color.green.cgColor, Color.yellow.cgColor, Color.purple.cgColor] // swiftlint:disable:this force_cast
+
+    let locationsAnimation = try (animationLayer.animation(forKey: "locations").unwrap() as? CABasicAnimation).unwrap()
+    expect(locationsAnimation.fromValue as! [NSNumber]) == [0, 1, 1] // swiftlint:disable:this force_cast
+    expect(locationsAnimation.toValue as! [NSNumber]) == [0, 0.4, 1] // swiftlint:disable:this force_cast
+
+    expect(layer.test.animationGradientLayer).toEventually(beEqual(to: nil))
+
+    // given: the layer now has the 3-color gradient background
+    // when: animating back to a 2-color gradient
+    layer.animateBackground(to: .linearGradient(LinearGradientColor([.red, .blue])), timing: .easeInEaseOut(duration: 0.05))
+
+    // then: the to colors/locations are padded to 3 stops
+    let animationLayer2 = try layer.test.animationGradientLayer.unwrap()
+
+    let colorsAnimation2 = try (animationLayer2.animation(forKey: "colors").unwrap() as? CABasicAnimation).unwrap()
+    expect(colorsAnimation2.fromValue as! [CGColor]) == [Color.green.cgColor, Color.yellow.cgColor, Color.purple.cgColor] // swiftlint:disable:this force_cast
+    expect(colorsAnimation2.toValue as! [CGColor]) == [Color.red.cgColor, Color.blue.cgColor, Color.blue.cgColor] // swiftlint:disable:this force_cast
+
+    let locationsAnimation2 = try (animationLayer2.animation(forKey: "locations").unwrap() as? CABasicAnimation).unwrap()
+    expect(locationsAnimation2.fromValue as! [NSNumber]) == [0, 0.4, 1] // swiftlint:disable:this force_cast
+    expect(locationsAnimation2.toValue as! [NSNumber]) == [0, 1, 1] // swiftlint:disable:this force_cast
+
+    expect(layer.test.animationGradientLayer).toEventually(beEqual(to: nil))
   }
 }

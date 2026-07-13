@@ -224,6 +224,9 @@ public extension CALayer {
   ///
   /// The layer's `background` property will be updated to the new color.
   ///
+  /// - Note: Animating from one gradient to another requires both gradients to have the same type (e.g. linear -> linear).
+  ///   For mismatched types (e.g. linear -> radial), the background is updated to the new value without animation.
+  ///
   /// - Parameters:
   ///   - fromColor: The from color. If `nil`, the current background color will be used. Default is `nil`.
   ///   - toColor: The to color. If `nil`, the background color will be cleared.
@@ -333,22 +336,36 @@ public extension CALayer {
     case (.gradient(let fromGradientColor), .gradient(let toGradientColor)):
       // gradient -> gradient
       ChouTi.assert(fromGradientColor.gradientLayerType == toGradientColor.gradientLayerType, "mismatch gradient layer type")
+      guard fromGradientColor.gradientLayerType == toGradientColor.gradientLayerType else {
+        // can't animate between different gradient layer types, skip the animation and let the background update below
+        // apply the new background directly.
+        break
+      }
 
       let (gradientLayer, animationId) = prepareAnimationGradientLayer(with: toGradientColor)
       let teardownDelegate = makeTearDownAnimationDelegate(animationId: animationId)
 
+      // Core Animation can't interpolate arrays of different lengths (the animation jumps discretely), so pad the
+      // shorter colors/locations to the same length. Repeating the last color/location adds zero-width gradient stops,
+      // which render identically to the original gradient.
+      let colorCount = max(fromGradientColor.colors.count, toGradientColor.colors.count)
+      let fromColors = fromGradientColor.colors.map(\.cgColor).padded(to: colorCount)
+      let toColors = toGradientColor.colors.map(\.cgColor).padded(to: colorCount)
+      let fromLocations = fromGradientColor.locationNSNumbers.padded(to: colorCount)
+      let toLocations = toGradientColor.locationNSNumbers.padded(to: colorCount)
+
       gradientLayer.animate(
         keyPath: "colors",
         timing: timing,
-        from: { _ in fromGradientColor.colors.map(\.cgColor) },
-        to: { _ in toGradientColor.colors.map(\.cgColor) },
+        from: { _ in fromColors },
+        to: { _ in toColors },
         updateAnimation: { $0.delegate = teardownDelegate }
       )
       gradientLayer.animate(
         keyPath: "locations",
         timing: timing,
-        from: { _ in fromGradientColor.locationNSNumbers },
-        to: { _ in toGradientColor.locationNSNumbers }
+        from: { _ in fromLocations },
+        to: { _ in toLocations }
       )
       gradientLayer.animate(
         keyPath: "startPoint",
@@ -469,6 +486,20 @@ private extension CAGradientLayer {
 private extension CGColor {
 
   static let clear = Color.clear.cgColor
+}
+
+private extension Array {
+
+  /// Pad the array to the given count by repeating the last element.
+  ///
+  /// - Parameter count: The target element count.
+  /// - Returns: The padded array, or the original array if it's empty or already has at least `count` elements.
+  func padded(to count: Int) -> [Element] {
+    guard self.count < count, let last else {
+      return self
+    }
+    return self + Array(repeating: last, count: count - self.count)
+  }
 }
 
 // MARK: - Testing
