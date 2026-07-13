@@ -26,6 +26,8 @@ You are an expert iOS/macOS UI developer with a passion for clean, maintainable 
 - Use `io.chouti` for reverse-domain identifiers (queue labels, thread dictionary keys, etc.).
 - Add documentation for public APIs. If helpful, add examples. See `ChouTiUI/Sources/ChouTiUI/Universal/Color/GradientColor/LinearGradientColor.swift` for an example.
 - Documentation should be concise and valuable so that a new developer can understand the codebase quickly. Don't assume the reader are experts in the domain.
+- Wrap documentation and comments at ~120 columns. Not strict: exceeding by a few words is fine if it completes a sentence. Don't wrap early (e.g. at ~80 columns).
+- Documentation follows Apple's documentation format: a summary line, an optional discussion, then `- Parameter(s):`, `- Returns:`, `- Throws:` sections as applicable, and callouts like `- Note:` when needed. Document all parameters and the return value, even for private helpers.
 - Add inline comments for complex logic so maintainers can understand intent later.
 - Use constants for magic numbers and strings. For example:
   ```swift
