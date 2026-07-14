@@ -53,7 +53,13 @@ public extension Color {
   /// - Returns: A Color created from the CGColor, or `fallback` if the conversion fails.
   static func from(cgColor: CGColor, fallback: Color = .clear) -> Color {
     #if canImport(AppKit)
-    return Color(cgColor: cgColor).assertNotNil("failed to convert CGColor to Color", metadata: ["cgColor": "\(cgColor)"]) ?? fallback
+    var converted = Color(cgColor: cgColor)
+    #if DEBUG
+    if Color.test_forceFromCGColorConversionFailure {
+      converted = nil
+    }
+    #endif
+    return converted.assertNotNil("failed to convert CGColor to Color", metadata: ["cgColor": "\(cgColor)"]) ?? fallback
     #else
     return Color(cgColor: cgColor)
     #endif
@@ -64,6 +70,19 @@ public extension Color {
      */
   }
 }
+
+#if DEBUG
+
+extension Color {
+
+  /// Test knob: when `true`, `from(cgColor:fallback:)` behaves as if the CGColor conversion failed.
+  ///
+  /// `NSColor(cgColor:)` conversion failure is not reproducible with real inputs on current macOS versions, so this
+  /// knob exists to exercise the fallback path deterministically in tests.
+  static var test_forceFromCGColorConversionFailure = false
+}
+
+#endif
 
 public extension Color {
 
