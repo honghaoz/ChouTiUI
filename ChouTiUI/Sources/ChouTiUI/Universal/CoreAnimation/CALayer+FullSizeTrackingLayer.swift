@@ -166,17 +166,14 @@ public extension CALayer {
           guard let self else {
             return
           }
-          // skip if the layer is no longer tracked, i.e. the layer is removed after the bounds change but before
-          // this scheduled retry runs. otherwise, the removed layer would incorrectly get a size synchronization
-          // animation and the `onAddSizeChangeAnimation` callback.
-          guard self.fullSizeTrackingLayers[ObjectIdentifier(layer)] != nil else {
+          guard let trackingInfo = self.fullSizeTrackingLayers[ObjectIdentifier(layer)] else {
             return
           }
           self.addSizeSynchronizationAnimation(
             to: layer,
             oldBounds: oldBounds,
             newBounds: newBounds,
-            onAddSizeChangeAnimation: onAddSizeChangeAnimation,
+            onAddSizeChangeAnimation: trackingInfo.onAddSizeChangeAnimation,
             shouldSchedule: false
           )
         }
