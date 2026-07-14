@@ -69,20 +69,13 @@ public extension Color {
      https://www.cocoawithlove.com/2010/11/back-to-mac-12-features-from-ios-i-like.html
      */
   }
+
+  #if DEBUG
+
+  /// Test knob. When `true`, `from(cgColor:fallback:)` behaves as if the CGColor conversion failed.
+  internal static var test_forceFromCGColorConversionFailure = false // swiftformat:disable:this redundantInternal
+  #endif
 }
-
-#if DEBUG
-
-extension Color {
-
-  /// Test knob: when `true`, `from(cgColor:fallback:)` behaves as if the CGColor conversion failed.
-  ///
-  /// `NSColor(cgColor:)` conversion failure is not reproducible with real inputs on current macOS versions, so this
-  /// knob exists to exercise the fallback path deterministically in tests.
-  static var test_forceFromCGColorConversionFailure = false
-}
-
-#endif
 
 public extension Color {
 
