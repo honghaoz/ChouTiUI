@@ -304,6 +304,113 @@ class CALayer_FullSizeTrackingLayerTests: XCTestCase {
     expect(layer2.frame) == CGRect(x: 0, y: 0, width: 150, height: 200)
   }
 
+  func test_removeFullSizeTrackingLayer_beforeScheduledSizeSynchronization() throws {
+    // given: a host layer with a tracking layer, in a window
+    let window = TestWindow()
+
+    let layer1 = CALayer()
+    layer1.frame = CGRect(x: 0, y: 0, width: 100, height: 100)
+    window.layer.addSublayer(layer1)
+
+    // wait for the layer to have a presentation layer
+    expect(layer1.presentation()).toEventuallyNot(beNil())
+
+    var onAddSizeChangeAnimationCallCount = 0
+
+    let layer2 = CALayer()
+    layer1.addFullSizeTrackingLayer(
+      layer2,
+      onAddSizeChangeAnimation: { _, _ in
+        onAddSizeChangeAnimationCallCount += 1
+      }
+    )
+
+    // when: the host layer's bounds changes (no size animation yet, so a size synchronization check is scheduled to
+    // the next runloop), and the tracking layer is removed before the scheduled check runs
+    layer1.bounds = CGRect(x: 0, y: 0, width: 200, height: 200)
+    layer1.removeFullSizeTrackingLayer(layer2)
+
+    // when: a size animation is added, so the scheduled check can find one
+    let animation = CABasicAnimation(keyPath: "bounds.size")
+    animation.fromValue = CGSize(width: 100, height: 100)
+    animation.toValue = CGSize(width: 200, height: 200)
+    animation.duration = 0.1
+    layer1.add(animation, forKey: "bounds.size")
+
+    // wait for the scheduled check to run.
+    // the barrier block is enqueued after the scheduled check, so when the barrier block runs, the scheduled check has run.
+    let waitExpectation = expectation(description: "scheduled size synchronization check has run")
+    RunLoop.main.perform {
+      waitExpectation.fulfill()
+    }
+    wait(for: [waitExpectation])
+
+    // then: the removed tracking layer should not get the size synchronization animation or the callback
+    expect(onAddSizeChangeAnimationCallCount) == 0
+    expect(layer2.animationKeys()) == nil
+  }
+
+  func test_removeThenReAddFullSizeTrackingLayer_beforeScheduledSizeSynchronization() throws {
+    // given: a host layer with a tracking layer, in a window
+    let window = TestWindow()
+
+    let layer1 = CALayer()
+    layer1.frame = CGRect(x: 0, y: 0, width: 100, height: 100)
+    window.layer.addSublayer(layer1)
+
+    // wait for the layer to have a presentation layer
+    expect(layer1.presentation()).toEventuallyNot(beNil())
+
+    var oldCallbackCallCount = 0
+    var newCallbackCallCount = 0
+
+    let layer2 = CALayer()
+    layer1.addFullSizeTrackingLayer(
+      layer2,
+      onAddSizeChangeAnimation: { _, _ in
+        oldCallbackCallCount += 1
+      }
+    )
+
+    // when: the host layer's bounds changes (no size animation yet, so a size synchronization check is scheduled to
+    // the next runloop), and the tracking layer is removed, then re-added with a new callback, before the scheduled
+    // check runs
+    layer1.bounds = CGRect(x: 0, y: 0, width: 200, height: 200)
+    layer1.removeFullSizeTrackingLayer(layer2)
+    layer1.addFullSizeTrackingLayer(
+      layer2,
+      onAddSizeChangeAnimation: { _, _ in
+        newCallbackCallCount += 1
+      }
+    )
+
+    // when: a size animation is added, so the scheduled check can find one
+    let animation = CABasicAnimation(keyPath: "bounds.size")
+    animation.fromValue = CGSize(width: 100, height: 100)
+    animation.toValue = CGSize(width: 200, height: 200)
+    animation.duration = 0.1
+    layer1.add(animation, forKey: "bounds.size")
+
+    // wait for the scheduled check to run.
+    // the barrier block is enqueued after the scheduled check, so when the barrier block runs, the scheduled check has run.
+    //
+    // capture the animation keys in the barrier block.
+    // the tracking layer is not in a layer tree, so its animations don't survive the transaction commit at the end of the runloop turn.
+    var animationKeysAfterScheduledCheck: [String]?
+    let waitExpectation = expectation(description: "scheduled size synchronization check has run")
+    RunLoop.main.perform {
+      animationKeysAfterScheduledCheck = layer2.animationKeys()
+      waitExpectation.fulfill()
+    }
+    wait(for: [waitExpectation])
+
+    // then: the re-added tracking layer should get the size synchronization animation with the new registration's
+    // callback, and the removed registration's callback should not be invoked
+    expect(oldCallbackCallCount) == 0
+    expect(newCallbackCallCount) == 1
+    try expect(animationKeysAfterScheduledCheck.unwrap().sorted()) == ["bounds.size", "position"]
+  }
+
   /// Test the case when the host layer's size change animation is non-additive.
   func test_nonAdditiveAnimation() throws {
     let window = TestWindow()
