@@ -44,15 +44,24 @@ public extension Color {
 
   /// Create a Color from CGColor.
   ///
-  /// - Warning: ⚠️ Can crash on mac if the CGColor can't convert to `NSColor`.
+  /// On Mac, `NSColor(cgColor:)` can fail for unsupported color spaces (e.g. pattern colors). The failure is asserted
+  /// in debug builds and the `fallback` color is returned.
   ///
-  /// - Parameter cgColor: The CGColor to convert to Color.
-  /// - Returns: A Color created from the CGColor.
-  static func from(cgColor: CGColor) -> Color {
+  /// - Parameters:
+  ///   - cgColor: The CGColor to convert to Color.
+  ///   - fallback: The color to return if the conversion fails. Defaults to `.clear`.
+  /// - Returns: A Color created from the CGColor, or `fallback` if the conversion fails.
+  static func from(cgColor: CGColor, fallback: Color = .clear) -> Color {
     #if canImport(AppKit)
-    Color(cgColor: cgColor)! // swiftlint:disable:this force_unwrapping
+    var converted = Color(cgColor: cgColor)
+    #if DEBUG
+    if Color.test_forceFromCGColorConversionFailure {
+      converted = nil
+    }
+    #endif
+    return converted.assertNotNil("failed to convert CGColor to Color", metadata: ["cgColor": "\(cgColor)"]) ?? fallback
     #else
-    Color(cgColor: cgColor)
+    return Color(cgColor: cgColor)
     #endif
 
     /**
@@ -60,6 +69,12 @@ public extension Color {
      https://www.cocoawithlove.com/2010/11/back-to-mac-12-features-from-ios-i-like.html
      */
   }
+
+  #if DEBUG
+
+  /// Test knob. When `true`, `from(cgColor:fallback:)` behaves as if the CGColor conversion failed.
+  internal static var test_forceFromCGColorConversionFailure = false // swiftformat:disable:this redundantInternal
+  #endif
 }
 
 public extension Color {

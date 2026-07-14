@@ -56,6 +56,12 @@ private enum AssociateKey {
 public extension CALayer {
 
   /// The unified background color of this layer.
+  ///
+  /// Setting a solid color updates the layer's `backgroundColor`. Setting a gradient color installs a gradient layer
+  /// at the bottom of the layer that tracks the layer's bounds.
+  ///
+  /// - Note: Don't set the layer's `backgroundColor` directly when using this property: doing so leaves the stored
+  ///   `background` value out of sync with the layer's actual background.
   var background: UnifiedColor? {
     get {
       getAssociatedObject(for: &AssociateKey.background) as? UnifiedColor
@@ -226,6 +232,10 @@ public extension CALayer {
   ///
   /// - Note: Animating from one gradient to another requires both gradients to have the same type (e.g. linear -> linear).
   ///   For mismatched types (e.g. linear -> radial), the background is updated to the new value without animation.
+  /// - Note: Animations involving a gradient run on a temporary gradient layer, inserted above the background gradient
+  ///   layer (if any) and below the layer's content sublayers. The temporary layer is removed when the animation ends.
+  /// - Note: Timings with a `delay` are not fully supported: the layer's background is updated to the target value
+  ///   immediately, so the layer shows the target value during the delay, before the animation starts.
   ///
   /// - Parameters:
   ///   - fromColor: The from color. If `nil`, the current background color will be used. Default is `nil`.
@@ -257,20 +267,10 @@ public extension CALayer {
         }
       } else if solidColorAnimation != nil {
         // has solid color animation, there's a in-progress animation, use the current background color
-        #if canImport(AppKit)
-        return UnifiedColor.color(Color(cgColor: presentation().assertNotNil("missing presentation layer")?.backgroundColor ?? backgroundColor ?? CGColor.clear) ?? .clear)
-        #endif
-        #if canImport(UIKit)
-        return UnifiedColor.color(Color(cgColor: presentation().assertNotNil("missing presentation layer")?.backgroundColor ?? backgroundColor ?? .clear))
-        #endif
+        return UnifiedColor.color(Color.from(cgColor: presentation().assertNotNil("missing presentation layer")?.backgroundColor ?? backgroundColor ?? .clear))
       } else {
         // no animation, just use the model value
-        #if canImport(AppKit)
-        return background ?? UnifiedColor.color(Color(cgColor: backgroundColor ?? .clear).assertNotNil("failed to convert CGColor to Color") ?? .clear)
-        #endif
-        #if canImport(UIKit)
-        return background ?? UnifiedColor.color(Color(cgColor: backgroundColor ?? .clear))
-        #endif
+        return background ?? UnifiedColor.color(Color.from(cgColor: backgroundColor ?? .clear))
       }
     }()
 
@@ -463,12 +463,7 @@ private extension CAGradientLayer {
   /// Get the colors of the gradient layer.
   func getColors() -> [Color] {
     (colors ?? []).map { value -> Color in
-      #if canImport(AppKit)
-      return Color(cgColor: value as! CGColor) ?? .clear // swiftlint:disable:this force_cast
-      #endif
-      #if canImport(UIKit)
-      return Color(cgColor: value as! CGColor) // swiftlint:disable:this force_cast
-      #endif
+      Color.from(cgColor: value as! CGColor) // swiftlint:disable:this force_cast
     }
   }
 

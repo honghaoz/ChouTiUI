@@ -39,16 +39,60 @@ import UIKit
 import ChouTiTest
 
 import ChouTi
-import ChouTiUI
+@testable import ChouTiUI
 
 class Color_ExtensionsTests: XCTestCase {
 
   func test_fromCGColor() throws {
+    // given: a valid CGColor
     let cgColor = try CGColor.rgba(red: 1, green: 0, blue: 0, alpha: 1, colorSpace: .displayP3()).unwrap()
+
+    // when: converting to Color
     let color = Color.from(cgColor: cgColor)
 
+    // then: the converted color should match the CGColor
     expect(color.red(colorSpace: .displayP3)) == 1
   }
+
+  func test_fromCGColor_fallback() throws {
+    // given: a valid CGColor
+    let cgColor = try CGColor.rgba(red: 1, green: 0, blue: 0, alpha: 1, colorSpace: .sRGB()).unwrap()
+
+    // when: converting to Color with a fallback
+    let color = Color.from(cgColor: cgColor, fallback: .blue)
+
+    // then: the converted color is returned, not the fallback
+    expect(color.red()) == 1
+    expect(color.blue()) == 0
+  }
+
+  #if canImport(AppKit)
+  func test_fromCGColor_conversionFailure() throws {
+    // given: the CGColor -> Color conversion fails
+    // (the failure is not reproducible with real inputs on current macOS versions, use the test knob to force it)
+    Color.test_forceFromCGColorConversionFailure = true
+    defer {
+      Color.test_forceFromCGColorConversionFailure = false
+    }
+
+    var assertionMessages: [String] = []
+    Assert.setTestAssertionFailureHandler { message, _, _, _, _ in
+      assertionMessages.append(message)
+    }
+
+    // when: converting to Color
+    let cgColor = try CGColor.rgba(red: 1, green: 0, blue: 0, alpha: 1, colorSpace: .sRGB()).unwrap()
+    let defaultFallbackColor = Color.from(cgColor: cgColor)
+    let explicitFallbackColor = Color.from(cgColor: cgColor, fallback: .blue)
+
+    Assert.resetTestAssertionFailureHandler()
+
+    // then: the conversion failure is asserted and the fallback color is returned
+    expect(assertionMessages) == ["failed to convert CGColor to Color", "failed to convert CGColor to Color"]
+    expect(defaultFallbackColor) == Color.clear
+    expect(explicitFallbackColor) == Color.blue
+  }
+  #endif
 
   func test_opacityAdjustment() {
     let color = Color(white: 1)
