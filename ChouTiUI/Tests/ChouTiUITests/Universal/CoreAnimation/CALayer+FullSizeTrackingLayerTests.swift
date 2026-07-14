@@ -304,6 +304,46 @@ class CALayer_FullSizeTrackingLayerTests: XCTestCase {
     expect(layer2.frame) == CGRect(x: 0, y: 0, width: 150, height: 200)
   }
 
+  func test_removeFullSizeTrackingLayer_beforeScheduledSizeSynchronization() throws {
+    // given: a host layer with a tracking layer, in a window
+    let window = TestWindow()
+
+    let layer1 = CALayer()
+    layer1.frame = CGRect(x: 0, y: 0, width: 100, height: 100)
+    window.layer.addSublayer(layer1)
+
+    // wait for the layer to have a presentation layer
+    expect(layer1.presentation()).toEventuallyNot(beNil())
+
+    var onAddSizeChangeAnimationCallCount = 0
+
+    let layer2 = CALayer()
+    layer1.addFullSizeTrackingLayer(
+      layer2,
+      onAddSizeChangeAnimation: { _, _ in
+        onAddSizeChangeAnimationCallCount += 1
+      }
+    )
+
+    // when: the host layer's bounds changes (no size animation yet, so a size synchronization check is scheduled to
+    // the next runloop), and the tracking layer is removed before the scheduled check runs
+    layer1.bounds = CGRect(x: 0, y: 0, width: 200, height: 200)
+    layer1.removeFullSizeTrackingLayer(layer2)
+
+    // when: a size animation is added, so the scheduled check can find one
+    let animation = CABasicAnimation(keyPath: "bounds.size")
+    animation.fromValue = CGSize(width: 100, height: 100)
+    animation.toValue = CGSize(width: 200, height: 200)
+    animation.duration = 0.1
+    layer1.add(animation, forKey: "bounds.size")
+
+    wait(timeout: 0.05) // wait for the scheduled check to run
+
+    // then: the removed tracking layer should not get the size synchronization animation or the callback
+    expect(onAddSizeChangeAnimationCallCount) == 0
+    expect(layer2.animationKeys()) == nil
+  }
+
   /// Test the case when the host layer's size change animation is non-additive.
   func test_nonAdditiveAnimation() throws {
     let window = TestWindow()

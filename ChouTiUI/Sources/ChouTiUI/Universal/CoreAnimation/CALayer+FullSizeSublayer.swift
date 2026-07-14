@@ -69,8 +69,10 @@ public extension CALayer {
   ///
   /// - Parameter sublayer: The sublayer to remove.
   func removeFullSizeSublayer(_ sublayer: CALayer) {
-    CATransaction.disableAnimations { // disable the implicit animation to avoid animation artifact
-      sublayer.removeFromSuperlayer()
+    if sublayer.superlayer === self {
+      CATransaction.disableAnimations { // disable the implicit animation to avoid animation artifact
+        sublayer.removeFromSuperlayer()
+      }
     }
 
     fullSizeSublayers.removeValue(forKey: ObjectIdentifier(sublayer))

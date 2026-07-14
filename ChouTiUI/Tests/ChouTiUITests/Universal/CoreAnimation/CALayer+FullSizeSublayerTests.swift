@@ -92,6 +92,25 @@ class CALayer_FullSizeSublayerTests: XCTestCase {
     expect(layer.test.fullSizeSublayerBoundsToken) == nil
   }
 
+  func test_removeFullSizeSublayer_sublayerMovedToAnotherLayer() throws {
+    // given: a full size sublayer that is moved to another layer
+    let layer = CALayer()
+    layer.bounds = CGRect(x: 0, y: 0, width: 100, height: 100)
+    let sublayer = CALayer()
+    layer.addFullSizeSublayer(sublayer)
+
+    let anotherLayer = CALayer()
+    anotherLayer.addSublayer(sublayer)
+    expect(sublayer.superlayer) === anotherLayer
+
+    // when: removing the full size sublayer from the original layer
+    layer.removeFullSizeSublayer(sublayer)
+
+    // then: the sublayer should be untracked, but should stay in its new parent layer
+    expect(layer.test.fullSizeSublayers) == [:]
+    expect(sublayer.superlayer) === anotherLayer
+  }
+
   func test_moveFullSizeSublayerAutomatically() throws {
     let layer = CALayer()
     let sublayer1 = CALayer()

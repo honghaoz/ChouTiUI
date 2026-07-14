@@ -162,7 +162,16 @@ public extension CALayer {
       // no size animation found
       if shouldSchedule {
         // schedule to the next run loop to make sure the animation added after the bounds change can be found
-        RunLoop.main.perform {
+        RunLoop.main.perform { [weak self] in
+          guard let self else {
+            return
+          }
+          // skip if the layer is no longer tracked, i.e. the layer is removed after the bounds change but before
+          // this scheduled retry runs. otherwise, the removed layer would incorrectly get a size synchronization
+          // animation and the `onAddSizeChangeAnimation` callback.
+          guard self.fullSizeTrackingLayers[ObjectIdentifier(layer)] != nil else {
+            return
+          }
           self.addSizeSynchronizationAnimation(
             to: layer,
             oldBounds: oldBounds,
