@@ -446,10 +446,6 @@ extension CALayer.Test {
   var liveFrameTickCount: Int {
     host.tickCount
   }
-
-  var liveFrameDisplayRunIsActive: Bool {
-    host.displayLayer?.isRunning ?? false
-  }
 }
 
 #endif
