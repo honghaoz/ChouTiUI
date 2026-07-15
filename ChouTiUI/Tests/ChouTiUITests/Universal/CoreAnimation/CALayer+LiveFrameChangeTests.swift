@@ -1323,16 +1323,15 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
     animation.toValue = CGPoint(x: 150, y: 120)
     layer.add(animation, forKey: "position")
 
-    // wait until the animation is committed, i.e. its begin time is resolved to an absolute time
-    expect((self.layer.animation(forKey: "position")?.beginTime ?? 0) > 0).toEventually(beTrue())
-
-    // stop real render-driven ticks. this also resets the tick statistics, so manual ticks below start fresh.
+    // stop real render-driven ticks once the animation is committed. removing the display layer also resets the
+    // tick statistics, so manual ticks below start fresh.
+    let committedAnimation = try waitForCommittedAnimation(forKey: "position")
     layer.test.removeLiveFrameDisplayLayer()
     capturedFrames.removeAll() // drop frames captured by any real tick that fired before the removal
     expect(layer.test.liveFrameTickCount) == 0 // tick statistics are fresh, manual ticks are deterministic
 
-    let beginTime = try layer.animation(forKey: "position").unwrap().beginTime
-    let duration: TimeInterval = 2
+    let beginTime = committedAnimation.beginTime
+    let duration = committedAnimation.duration
 
     // when: driving ticks manually at exact times
     // - tick 1 at 25% time: lookahead is 16ms (first tick) -> time progress = (0.5 + 0.016) / 2 = 0.258
