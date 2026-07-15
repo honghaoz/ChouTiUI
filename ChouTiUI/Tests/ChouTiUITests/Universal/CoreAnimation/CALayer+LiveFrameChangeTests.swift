@@ -194,6 +194,28 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
     expect(capturedFrames2.count) == 2
   }
 
+  func test_onLiveFrameChange_cancel_cleansUpBookkeeping() throws {
+    // given: two live frame observers
+    let token1 = layer.onLiveFrameChange { _, _ in }
+    let token2 = layer.onLiveFrameChange { _, _ in }
+    expect(layer.test.liveFrameChangeBlocksCount) == 2
+    expect(layer.test.liveFrameLastNotifiedFramesCount) == 2
+
+    // when: cancelling the first observer
+    token1.cancel()
+
+    // then: the first observer's bookkeeping is removed
+    expect(layer.test.liveFrameChangeBlocksCount) == 1
+    expect(layer.test.liveFrameLastNotifiedFramesCount) == 1
+
+    // when: cancelling the second observer
+    token2.cancel()
+
+    // then: all bookkeeping is removed
+    expect(layer.test.liveFrameChangeBlocksCount) == 0
+    expect(layer.test.liveFrameLastNotifiedFramesCount) == 0
+  }
+
   // MARK: - Explicit Animation
 
   func test_onLiveFrameChange_explicitAnimation_positionChanged() throws {
@@ -1055,6 +1077,72 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
       try expect(capturedFrames.last.unwrap().0) === layer
       try expect(capturedFrames.last.unwrap().1) == CGRect(x: 10, y: 20, width: 110, height: 220)
       expect(layer.sublayers?.count ?? 0) == 0 // should have no display layer
+    }
+  }
+
+  func test_onLiveFrameChange_explicitAnimation_secondSessionAfterIdleGap() throws {
+    // given: a live frame observer that has completed an animation session, followed by an idle gap.
+    // the idle gap must not poison the average tick duration used as the lookahead in the progress calculation:
+    // otherwise the second session's frames would jump toward (or beyond) the animation's end value.
+    let waiter = TickWaiter()
+    var capturedFrames: [CGRect] = []
+
+    let expectation = XCTestExpectation(description: "tick")
+    layer.onLiveFrameChange { _, frame in
+      capturedFrames.append(frame)
+      waiter.tick()
+      if isGitHubActions {
+        expectation.fulfill()
+      }
+    }
+
+    // session 1: animate position, let it finish
+    layer.position = CGPoint(x: 150, y: 120)
+    let animation1 = CABasicAnimation(keyPath: "position")
+    animation1.timingFunction = CAMediaTimingFunction(name: .linear)
+    animation1.duration = Constants.explicitAnimationDuration
+    animation1.fromValue = CGPoint(x: 60, y: 120)
+    animation1.toValue = CGPoint(x: 150, y: 120)
+    layer.add(animation1, forKey: "position")
+
+    if isGitHubActions {
+      wait(for: [expectation], timeout: 1)
+    } else {
+      waiter.wait() // wait until the animation is finished
+    }
+
+    // idle gap between the two animation sessions
+    wait(timeout: 0.5)
+    capturedFrames.removeAll()
+
+    // when: session 2 animates position back
+    layer.position = CGPoint(x: 60, y: 120)
+    let animation2 = CABasicAnimation(keyPath: "position")
+    animation2.timingFunction = CAMediaTimingFunction(name: .linear)
+    animation2.duration = Constants.explicitAnimationDuration
+    animation2.fromValue = CGPoint(x: 150, y: 120)
+    animation2.toValue = CGPoint(x: 60, y: 120)
+    layer.add(animation2, forKey: "position")
+
+    if isGitHubActions {
+      wait(timeout: Constants.explicitAnimationDuration + 0.1) // wait until the animation is finished
+    } else {
+      waiter.wait() // wait until the animation is finished
+    }
+
+    // then: all frames are within the animation's range (frame.x within [10, 100]), i.e. no frames
+    // jumped beyond the end value due to a poisoned lookahead. this check is stall-proof, so it runs on CI too.
+    for frame in capturedFrames {
+      expect(frame.origin.x) >= 10
+      expect(frame.origin.x) <= 100
+    }
+
+    if !isGitHubActions {
+      // then: the second session interpolates, i.e. it has intermediate frames, not just the end value
+      expect(capturedFrames.count) > 2
+      let intermediateFrames = capturedFrames.filter { $0.origin.x > 12 && $0.origin.x < 98 }
+      expect(intermediateFrames.count) > 0
+      try expect(capturedFrames.last.unwrap()) == CGRect(x: 10, y: 20, width: 100, height: 200)
     }
   }
 

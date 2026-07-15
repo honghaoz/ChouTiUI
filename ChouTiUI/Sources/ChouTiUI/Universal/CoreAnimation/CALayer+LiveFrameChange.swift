@@ -128,6 +128,7 @@ public extension CALayer {
         return
       }
       token.remove(from: &self.frameChangeBlocks)
+      self.lastNotifiedFrames.removeValue(forKey: ObjectIdentifier(token))
 
       // stop frame observation if there's no callbacks
       if frameChangeBlocks.isEmpty {
@@ -187,6 +188,9 @@ public extension CALayer {
   private func tearDownDisplayLayer() {
     displayLayer?.removeFromSuperlayer()
     displayLayer = nil
+
+    firstTickTime = 0
+    tickCount = 0
   }
 
   private func onPositionChange(oldPosition: CGPoint, newPosition: CGPoint) {
@@ -197,10 +201,7 @@ public extension CALayer {
       return
     }
 
-    setUpDisplayLayer()
-    displayLayer?.run(for: maxDuration * 1.5) { [weak self] in
-      self?.tick()
-    }
+    startDisplayRun(for: maxDuration)
   }
 
   private func onBoundsChange(oldBounds: CGRect, newBounds: CGRect) {
@@ -211,8 +212,30 @@ public extension CALayer {
       return
     }
 
+    startDisplayRun(for: maxDuration)
+  }
+
+  /// Start (or extend) a display run so that `tick()` is called while the animation is in flight.
+  ///
+  /// - Parameter maxAnimationDuration: The max duration of the in-flight animations.
+  private func startDisplayRun(for maxAnimationDuration: TimeInterval) {
     setUpDisplayLayer()
-    displayLayer?.run(for: maxDuration * 1.5) { [weak self] in
+    guard let displayLayer else {
+      ChouTi.assertFailure("missing display layer") // impossible, `setUpDisplayLayer()` ensures it
+      return
+    }
+
+    if !displayLayer.isRunning {
+      // reset the tick statistics so that the average tick duration reflects only this session's ticks.
+      //
+      // the reset in `tearDownDisplayLayer()` is not enough, an unrelated long-lived animation (e.g. opacity) can keep
+      // the layer's animations non-empty so that the tick-based teardown never runs, leaving stale statistics that
+      // would poison the next session's lookahead.
+      firstTickTime = 0
+      tickCount = 0
+    }
+
+    displayLayer.run(for: maxAnimationDuration * 1.5) { [weak self] in
       self?.tick()
     }
   }
@@ -280,7 +303,7 @@ public extension CALayer {
       }
 
       let beginTime = animation.beginTime
-      let timeProgress = (tickTime - beginTime + averageTickDuration) / animation.duration
+      let timeProgress = ((tickTime - beginTime + averageTickDuration) / animation.duration).clamped(to: 0 ... 1)
       let progress: Double = Double(animation.progress(for: Float(timeProgress)) ?? 1)
 
       switch animation.keyPath {
@@ -386,6 +409,23 @@ public extension CALayer {
     lastFrame = frame
   }
 }
+
+// MARK: - Testing
+
+#if DEBUG
+
+extension CALayer.Test {
+
+  var liveFrameChangeBlocksCount: Int {
+    host.frameChangeBlocks.count
+  }
+
+  var liveFrameLastNotifiedFramesCount: Int {
+    host.lastNotifiedFrames.count
+  }
+}
+
+#endif
 
 private extension CAAnimation {
 
