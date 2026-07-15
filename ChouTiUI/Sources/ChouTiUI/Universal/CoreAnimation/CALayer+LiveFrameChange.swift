@@ -340,12 +340,15 @@ public extension CALayer {
         let fromValue = (animation.fromValue as? CGRect) ?? self.bounds
         let toValue = (animation.toValue as? CGRect) ?? self.bounds
 
+        // use `size.width`/`size.height` instead of `width`/`height`: additive animations use negative values for
+        // the from/to deltas, and `CGRect.width`/`CGRect.height` return normalized (absolute) values, which would
+        // flip the delta's sign.
         if animation.isAdditive {
-          widthDelta += (fromValue.width - toValue.width) * (1 - progress)
-          heightDelta += (fromValue.height - toValue.height) * (1 - progress)
+          widthDelta += (fromValue.size.width - toValue.size.width) * (1 - progress)
+          heightDelta += (fromValue.size.height - toValue.size.height) * (1 - progress)
         } else {
-          widthBase = fromValue.width + (toValue.width - fromValue.width) * progress
-          heightBase = fromValue.height + (toValue.height - fromValue.height) * progress
+          widthBase = fromValue.size.width + (toValue.size.width - fromValue.size.width) * progress
+          heightBase = fromValue.size.height + (toValue.size.height - fromValue.size.height) * progress
         }
       case "bounds.size":
         let fromValue = (animation.fromValue as? CGSize) ?? self.bounds.size
