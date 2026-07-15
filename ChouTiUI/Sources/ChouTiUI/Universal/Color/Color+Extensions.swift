@@ -71,7 +71,6 @@ public extension Color {
   }
 
   #if DEBUG
-
   /// Test knob. When `true`, `from(cgColor:fallback:)` behaves as if the CGColor conversion failed.
   internal static var test_forceFromCGColorConversionFailure = false // swiftformat:disable:this redundantInternal
   #endif

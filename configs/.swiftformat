@@ -1,10 +1,16 @@
 # rules
 --enable blankLineAfterImports
 --enable noForceTryInTests
+--enable preferContains
+--enable preferFirstWhere
+--enable preferFlatMap
+--enable preferMinOverSorted
 --enable redundantNilInit
 --enable wrapCaseBodies
---enable wrapConditionalBodies
 --enable wrapEnumCases
+--enable wrapGuardStatementBodies
+--enable wrapIfExpressionBodies
+--enable wrapIfStatementBodies
 --enable wrapSwitchCases
 
 --disable blankLinesAtStartOfScope
