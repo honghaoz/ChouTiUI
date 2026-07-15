@@ -112,6 +112,14 @@ open class DisplayLayer: CALayer {
 
   private var endTime: TimeInterval?
 
+  /// Whether the layer is currently running display calls, i.e. a `run(for:onDisplay:)` session is in progress.
+  var isRunning: Bool {
+    guard let endTime, onDisplay != nil else {
+      return false
+    }
+    return CACurrentMediaTime() <= endTime
+  }
+
   /// Run the display layer for a duration.
   ///
   /// If multiple calls are made, the longest duration will be used.

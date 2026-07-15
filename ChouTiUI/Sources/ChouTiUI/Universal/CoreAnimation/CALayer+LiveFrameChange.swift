@@ -201,10 +201,7 @@ public extension CALayer {
       return
     }
 
-    setUpDisplayLayer()
-    displayLayer?.run(for: maxDuration * 1.5) { [weak self] in
-      self?.tick()
-    }
+    startDisplayRun(for: maxDuration)
   }
 
   private func onBoundsChange(oldBounds: CGRect, newBounds: CGRect) {
@@ -215,8 +212,30 @@ public extension CALayer {
       return
     }
 
+    startDisplayRun(for: maxDuration)
+  }
+
+  /// Start (or extend) a display run so that `tick()` is called while the animation is in flight.
+  ///
+  /// - Parameter maxAnimationDuration: The max duration of the in-flight animations.
+  private func startDisplayRun(for maxAnimationDuration: TimeInterval) {
     setUpDisplayLayer()
-    displayLayer?.run(for: maxDuration * 1.5) { [weak self] in
+    guard let displayLayer else {
+      ChouTi.assertFailure("missing display layer") // impossible, `setUpDisplayLayer()` ensures it
+      return
+    }
+
+    if !displayLayer.isRunning {
+      // reset the tick statistics so that the average tick duration reflects only this session's ticks.
+      //
+      // the reset in `tearDownDisplayLayer()` is not enough, an unrelated long-lived animation (e.g. opacity) can keep
+      // the layer's animations non-empty so that the tick-based teardown never runs, leaving stale statistics that
+      // would poison the next session's lookahead.
+      firstTickTime = 0
+      tickCount = 0
+    }
+
+    displayLayer.run(for: maxAnimationDuration * 1.5) { [weak self] in
       self?.tick()
     }
   }
