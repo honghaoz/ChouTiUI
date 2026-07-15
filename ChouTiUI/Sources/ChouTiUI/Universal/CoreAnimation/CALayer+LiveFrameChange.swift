@@ -128,6 +128,7 @@ public extension CALayer {
         return
       }
       token.remove(from: &self.frameChangeBlocks)
+      self.lastNotifiedFrames.removeValue(forKey: ObjectIdentifier(token))
 
       // stop frame observation if there's no callbacks
       if frameChangeBlocks.isEmpty {
@@ -187,6 +188,9 @@ public extension CALayer {
   private func tearDownDisplayLayer() {
     displayLayer?.removeFromSuperlayer()
     displayLayer = nil
+
+    firstTickTime = 0
+    tickCount = 0
   }
 
   private func onPositionChange(oldPosition: CGPoint, newPosition: CGPoint) {
@@ -280,7 +284,7 @@ public extension CALayer {
       }
 
       let beginTime = animation.beginTime
-      let timeProgress = (tickTime - beginTime + averageTickDuration) / animation.duration
+      let timeProgress = ((tickTime - beginTime + averageTickDuration) / animation.duration).clamped(to: 0 ... 1)
       let progress: Double = Double(animation.progress(for: Float(timeProgress)) ?? 1)
 
       switch animation.keyPath {
@@ -386,6 +390,23 @@ public extension CALayer {
     lastFrame = frame
   }
 }
+
+// MARK: - Testing
+
+#if DEBUG
+
+extension CALayer.Test {
+
+  var liveFrameChangeBlocksCount: Int {
+    host.frameChangeBlocks.count
+  }
+
+  var liveFrameLastNotifiedFramesCount: Int {
+    host.lastNotifiedFrames.count
+  }
+}
+
+#endif
 
 private extension CAAnimation {
 
