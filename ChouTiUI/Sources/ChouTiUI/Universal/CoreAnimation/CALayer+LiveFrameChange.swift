@@ -250,7 +250,7 @@ public extension CALayer {
     return maxDuration
   }
 
-  private func tick() {
+  private func tick(now: TimeInterval = CACurrentMediaTime()) {
     if self.animationKeys() == nil {
       // no animation, meaning the animations are finished, notify with the model value to finalize the frame
       notifyFrameChangeBlocks(with: self.frame)
@@ -259,7 +259,7 @@ public extension CALayer {
     }
 
     // Tick Average Duration Calculation
-    let tickTime = CACurrentMediaTime()
+    let tickTime = now
 
     if firstTickTime == 0 {
       firstTickTime = tickTime
@@ -340,9 +340,9 @@ public extension CALayer {
         let fromValue = (animation.fromValue as? CGRect) ?? self.bounds
         let toValue = (animation.toValue as? CGRect) ?? self.bounds
 
-        // use `size.width`/`size.height` instead of `width`/`height`: additive animations use negative values for
-        // the from/to deltas, and `CGRect.width`/`CGRect.height` return normalized (absolute) values, which would
-        // flip the delta's sign.
+        // must use `size.width`/`size.height` instead of `width`/`height`
+        // additive animations use negative values for the from/to deltas, and `CGRect.width`/`CGRect.height` return
+        // normalized (absolute) values, which would flip the delta's sign.
         if animation.isAdditive {
           widthDelta += (fromValue.size.width - toValue.size.width) * (1 - progress)
           heightDelta += (fromValue.size.height - toValue.size.height) * (1 - progress)
@@ -425,6 +425,30 @@ extension CALayer.Test {
 
   var liveFrameLastNotifiedFramesCount: Int {
     host.lastNotifiedFrames.count
+  }
+
+  /// Drives a live frame tick manually, as if the display layer ticked at the given time.
+  ///
+  /// - Parameter now: The tick time, in the same time space as the animation's resolved `beginTime`.
+  func tick(now: TimeInterval) {
+    host.tick(now: now)
+  }
+
+  /// Removes the display layer so that real render-driven ticks stop.
+  func removeLiveFrameDisplayLayer() {
+    host.tearDownDisplayLayer()
+  }
+
+  var liveFrameFirstTickTime: TimeInterval {
+    host.firstTickTime
+  }
+
+  var liveFrameTickCount: Int {
+    host.tickCount
+  }
+
+  var liveFrameDisplayRunIsActive: Bool {
+    host.displayLayer?.isRunning ?? false
   }
 }
 
