@@ -37,6 +37,47 @@ import ChouTi
 
 class BorderLayerTests: XCTestCase {
 
+  // MARK: - Border Content Invalidation
+
+  /// Verifies changing `borderContent` marks the layer dirty so the next layout cycle picks up the new content.
+  func test_borderContent_change_triggersLayout() {
+    // given: a laid-out solid-color border
+    let layer = makeBorderLayer(usesNativeBorderOffset: true)
+    layer.frame = CGRect(x: 0, y: 0, width: 100, height: 60)
+    layer.borderWidth = 4
+    layer.borderContent = .color(.red)
+    layer.borderMask = .cornerRadius(12)
+    layer.layoutIfNeeded()
+    expect(layer.needsLayout()) == false
+    expect(layer.borderColor) == Color.red.cgColor
+
+    // when: border content changes to a different color
+    layer.borderContent = .color(.blue)
+
+    // then: layout is invalidated and the new color is applied after layout
+    expect(layer.needsLayout()) == true
+    layer.layoutIfNeeded()
+    expect(layer.borderColor) == Color.blue.cgColor
+  }
+
+  /// Verifies assigning the same `borderContent` value does not invalidate layout.
+  func test_borderContent_sameValue_doesNotTriggerLayout() {
+    // given: a laid-out solid-color border
+    let layer = makeBorderLayer(usesNativeBorderOffset: true)
+    layer.frame = CGRect(x: 0, y: 0, width: 100, height: 60)
+    layer.borderWidth = 4
+    layer.borderContent = .color(.red)
+    layer.borderMask = .cornerRadius(12)
+    layer.layoutIfNeeded()
+    expect(layer.needsLayout()) == false
+
+    // when: the same border content is assigned again
+    layer.borderContent = .color(.red)
+
+    // then: layout is not invalidated
+    expect(layer.needsLayout()) == false
+  }
+
   // MARK: - Solid Color + Corner Radius
 
   func test_solidColor_cornerRadius_zeroOffset_useNativeBorderOffset() {

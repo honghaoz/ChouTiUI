@@ -74,7 +74,7 @@ public final class BorderLayer: CALayer {
   // MARK: - Border Content
 
   /// The content of the border.
-  public enum BorderContent {
+  public enum BorderContent: Equatable {
 
     /// A solid color border.
     case color(_ color: Color)
@@ -89,10 +89,31 @@ public final class BorderLayer: CALayer {
     ///
     /// The layer's delegate should be nil. If you want to use a view as the border content, you should wrap the view's layer in a CALayer and use the wrapper layer as the border content.
     case layer(_ layer: CALayer)
+
+    public static func == (lhs: BorderContent, rhs: BorderContent) -> Bool {
+      switch (lhs, rhs) {
+      case (.color(let lhsColor), .color(let rhsColor)):
+        return lhsColor == rhsColor
+      case (.gradient(let lhsGradient), .gradient(let rhsGradient)):
+        return lhsGradient == rhsGradient
+      case (.layer(let lhsLayer), .layer(let rhsLayer)):
+        return lhsLayer === rhsLayer
+      case (.color, _),
+           (.gradient, _),
+           (.layer, _):
+        return false
+      }
+    }
   }
 
   /// The content of the border. The default value is a solid black color border.
-  public var borderContent: BorderContent = .color(.black)
+  public var borderContent: BorderContent = .color(.black) {
+    didSet {
+      if borderContent != oldValue {
+        setNeedsLayout()
+      }
+    }
+  }
 
   /// The layer for `BorderContent.color` when the border mask uses shape.
   private var borderContentColorLayer: CALayer?
