@@ -78,6 +78,34 @@ class BorderLayerTests: XCTestCase {
     expect(layer.needsLayout()) == false
   }
 
+  /// Verifies switching `.layer(A)` to `.layer(B)` removes A so it does not leak as a permanent sublayer.
+  func test_externalLayer_switch_removesPreviousLayer() {
+    // given: a border using an external content layer A
+    let layer = makeBorderLayer(usesNativeBorderOffset: false)
+    layer.frame = CGRect(x: 0, y: 0, width: 100, height: 60)
+    layer.borderWidth = 4
+    layer.borderMask = .cornerRadius(12)
+
+    let layerA = CALayer()
+    let layerB = CALayer()
+    layer.borderContent = .layer(layerA)
+    layer.layoutIfNeeded()
+
+    expect(layerA.superlayer) === layer
+    expect(DynamicLookup(layer).keyPath("borderContentExternalLayer") as CALayer?) === layerA
+
+    // when: border content switches to a different external layer B
+    layer.borderContent = .layer(layerB)
+    layer.layoutIfNeeded()
+
+    // then: A is detached and B is the only tracked external content layer
+    expect(layerA.superlayer) == nil
+    expect(layerB.superlayer) === layer
+    expect(DynamicLookup(layer).keyPath("borderContentExternalLayer") as CALayer?) === layerB
+    expect(layer.sublayers?.contains(layerA) ?? false) == false
+    expect(layer.sublayers?.contains(layerB) ?? false) == true
+  }
+
   // MARK: - Solid Color + Corner Radius
 
   func test_solidColor_cornerRadius_zeroOffset_useNativeBorderOffset() {

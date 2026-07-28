@@ -382,6 +382,12 @@ public final class BorderLayer: CALayer {
     self.borderContentGradientLayer?.removeFromSuperlayer()
     self.borderContentGradientLayer = nil
 
+    // replace the previous external content layer when switching to a different one
+    if let existingExternalLayer = self.borderContentExternalLayer, existingExternalLayer !== contentLayer {
+      existingExternalLayer.removeFromSuperlayer()
+      self.borderContentExternalLayer = nil
+    }
+
     // set up border content external layer
     if contentLayer.superlayer !== self {
       contentLayer.removeFromSuperlayer()
