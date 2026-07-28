@@ -190,6 +190,22 @@ class ViewController: NSViewController {
         .fixedSize()
 
         ViewNode(make: { _ in
+          let button = NSButton(title: "Layer Border Shape", target: nil, action: nil)
+          let windowBox = WeakBox<LayerBorderShapeChangeWindow>(nil)
+          button.addAction {
+            windowBox.object?.close()
+
+            let newWindow = LayerBorderShapeChangeWindow()
+            newWindow.show()
+            windowBox.object = newWindow
+          }
+          button.wantsLayer = true
+          button.sizeToFit()
+          return button
+        })
+        .fixedSize()
+
+        ViewNode(make: { _ in
           let button = NSButton(title: "Window Radius", target: nil, action: nil)
           var demo: WindowCornerRadiusDemo?
           button.addAction {

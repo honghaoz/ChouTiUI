@@ -377,6 +377,46 @@ class BorderLayerTests: XCTestCase {
     expect(updatedMaskPathBounds) != initialMaskPathBounds
   }
 
+  /// Verifies changing only the shape (same bounds and offset) refreshes the mask path immediately.
+  ///
+  /// Regression context:
+  /// Replacing the path provider without calling `updateMaskPath()` left the previous geometry on screen until the next
+  /// bounds change, because `onLiveFrameChange` only fires when the frame changes.
+  func test_solidColor_shape_change_updatesMaskPath_whenBoundsAndOffsetUnchanged() {
+    // given: a shape border with a fixed offset
+    let layer = makeBorderLayer()
+    layer.frame = CGRect(x: 0, y: 0, width: 120, height: 80)
+    layer.borderWidth = 4
+    layer.borderContent = .color(.red)
+    layer.borderMask = .shape(Rectangle(cornerRadius: 12), offset: -8)
+    layer.layoutIfNeeded()
+
+    guard let initialBorderMaskLayer = layer.mask as? CAShapeLayer,
+          let initialStrokePath = initialBorderMaskLayer.path
+    else {
+      fail("expected shape border mask layer with a stroke path.")
+      return
+    }
+
+    // when: only the shape identity changes while bounds and offset stay the same
+    layer.borderMask = .shape(Ellipse(), offset: -8)
+    layer.layoutIfNeeded()
+
+    guard let updatedBorderMaskLayer = layer.mask as? CAShapeLayer,
+          let updatedStrokePath = updatedBorderMaskLayer.path
+    else {
+      fail("expected shape border mask layer after shape update.")
+      return
+    }
+
+    let updatedMaskPath = (updatedBorderMaskLayer.mask as? CAShapeLayer)?.path
+
+    // then: stroke path reflects the new shape, and nested mask path stays aligned
+    expect(updatedStrokePath.pathElements()) != initialStrokePath.pathElements()
+    expect(updatedMaskPath) != nil
+    expect(updatedMaskPath?.pathElements()) == updatedStrokePath.pathElements()
+  }
+
   // MARK: - Helper Methods
 
   private func makeBorderLayer(usesNativeBorderOffset: Bool = false) -> BorderLayer {

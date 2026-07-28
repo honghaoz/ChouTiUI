@@ -202,12 +202,6 @@ public final class BorderLayer: CALayer {
 
   // MARK: - Layout
 
-  /// The last bounds.
-  private var lastBounds: CGRect?
-
-  /// The last border mask offset.
-  private var lastBorderMaskOffset: CGFloat?
-
   override public func layoutSublayers() {
     super.layoutSublayers()
 
@@ -236,9 +230,6 @@ public final class BorderLayer: CALayer {
       if #available(macOS 15.0, iOS 18.0, tvOS 18.0, visionOS 2.0, *) {
         self.borderOffset = offset
       }
-
-      lastBounds = nil
-      lastBorderMaskOffset = nil
 
       return
     }
@@ -275,9 +266,6 @@ public final class BorderLayer: CALayer {
         borderContentFrame: borderContentFrame
       )
     }
-
-    lastBounds = bounds
-    lastBorderMaskOffset = borderMask.offset
   }
 
   // MARK: - Helpers
@@ -500,7 +488,8 @@ public final class BorderLayer: CALayer {
     borderMaskLayer.contentsScale = contentsScale
 
     // add size sync animation so that the border mask layer can follow the bounds change
-    if let sizeAnimation = self.sizeAnimation() {
+    let sizeAnimation = self.sizeAnimation()
+    if let sizeAnimation {
       borderMaskLayer.addFrameAnimation(
         from: borderMaskLayer.frame, // old frame
         to: borderContentFrame,
@@ -542,17 +531,15 @@ public final class BorderLayer: CALayer {
     }
     borderMaskLayer.maskPath = maskPath
 
-    // We only refresh the mask path when the bounds isn't changed AND the offset is changed.
+    // refresh the mask path immediately when there is no in-flight size animation.
     //
-    // When the bounds is changed, we don't call `updateMaskPath()` because the mask path will be updated automatically
-    // by the `onLiveFrameChange` observer in the `MaskShapeLayer`, and the `onLiveFrameChange` is called on the next display refresh cycle.
-    // Refreshing the mask path here will render the final border immediately, which is not desirable.
+    // when the host is animating its size, skip the immediate refresh so the live-frame observer in `MaskShapeLayer`
+    // can drive path updates in sync with the animated frame.
+    // refreshing here would snap the path to the final geometry and look wrong mid-animation.
     //
-    // However, when the bounds is not changed, while the offset is changed, we need to refresh the mask path here to
-    // ensure the border is updated immediately.
-    if let lastBounds = lastBounds, lastBounds == bounds,
-       let lastBorderMaskOffset = lastBorderMaskOffset, lastBorderMaskOffset != offset
-    {
+    // when there is no size animation (including first layout, offset-only changes, and shape-only changes), refresh
+    // immediately so the border does not stay stale until the next bounds change.
+    if sizeAnimation == nil {
       borderMaskLayer.updateMaskPath()
     }
 
