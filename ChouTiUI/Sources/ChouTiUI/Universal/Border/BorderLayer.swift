@@ -35,10 +35,12 @@ import ChouTi
 /// A layer that can render a border.
 public final class BorderLayer: CALayer {
 
-  /// Border width for the border.
+  /// Border width for the border. The default value is 1.
   override public var borderWidth: CGFloat {
     get {
-      return super.borderWidth
+      // return the managed border width value instead of `super.borderWidth`, since `super.borderWidth` is an implementation
+      // detail: it's only set in the native border rendering mode and is reset to 0 in themask-based rendering mode.
+      return borderWidthValue
     }
     set {
       // forward the border width to the underlying "borderWidthValue" property without changing the super.borderWidth

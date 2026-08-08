@@ -78,6 +78,37 @@ class BorderLayerTests: XCTestCase {
     expect(layer.needsLayout()) == false
   }
 
+  // MARK: - Border Width
+
+  /// Verifies `borderWidth` reads back the value set, regardless of the rendering mode.
+  ///
+  /// Regression context:
+  /// The getter used to return `super.borderWidth`, which is 0 before the first layout and is reset to 0 by the mask-based
+  /// rendering mode, so `borderWidth` didn't round-trip the value set.
+  func test_borderWidth_getter_returnsSetValue() {
+    // given: a border layer using the mask-based rendering mode
+    let layer = makeBorderLayer(usesNativeBorderOffset: false)
+    layer.frame = CGRect(x: 0, y: 0, width: 100, height: 60)
+    layer.borderContent = .color(.red)
+    layer.borderMask = .cornerRadius(12)
+
+    // then: the default border width is 1
+    expect(layer.borderWidth) == 1
+
+    // when: setting the border width
+    layer.borderWidth = 4
+
+    // then: the getter returns the set value before any layout
+    expect(layer.borderWidth) == 4
+
+    // when: layout runs in the mask-based rendering mode, which resets `super.borderWidth` to 0
+    layer.layoutIfNeeded()
+
+    // then: the mask-based mode is in effect and the getter still returns the set value
+    expect(layer.mask) != nil
+    expect(layer.borderWidth) == 4
+  }
+
   /// Verifies switching `.layer(A)` to `.layer(B)` removes A so it does not leak as a permanent sublayer.
   func test_externalLayer_switch_removesPreviousLayer() {
     // given: a border using an external content layer A
