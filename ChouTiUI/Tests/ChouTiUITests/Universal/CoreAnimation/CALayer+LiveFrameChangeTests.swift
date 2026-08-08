@@ -182,6 +182,36 @@ class CALayer_LiveFrameChangeTests: XCTestCase {
     try expect(capturedFrames.first.unwrap().1) == CGRect(x: 11, y: 22, width: 110, height: 220) // then bounds changed
   }
 
+  /// Verifies live frame observers are notified while the run loop spins only in a tracking-like mode.
+  ///
+  /// Regression context:
+  /// The deferred frame-change handlers were scheduled in the default run loop mode only, so during event tracking run
+  /// loop modes (e.g. macOS window live resizing, iOS scrolling) live frame updates stalled until tracking ended.
+  func test_onLiveFrameChange_noAnimations_notifiesDuringEventTrackingLikeRunLoopMode() {
+    // given: a common run loop mode other than the default mode, simulating an event tracking mode
+    let trackingLikeMode = RunLoop.Mode(rawValue: "io.chouti.test.event-tracking")
+    CFRunLoopAddCommonMode(CFRunLoopGetMain(), CFRunLoopMode(rawValue: trackingLikeMode.rawValue as CFString))
+
+    var capturedFrames: [CGRect] = []
+    layer.onLiveFrameChange { (_: CALayer, frame) in
+      capturedFrames.append(frame)
+    }
+
+    // when: the layer's frame changes and the run loop spins only in the tracking-like mode
+    layer.frame = CGRect(x: 11, y: 22, width: 110, height: 220)
+
+    let deadline = Date(timeIntervalSinceNow: 1)
+    while capturedFrames.isEmpty, Date() < deadline {
+      _ = RunLoop.main.run(mode: trackingLikeMode, before: Date(timeIntervalSinceNow: 0.01))
+    }
+    // drain any remaining scheduled handlers (position + bounds) to verify deduplication
+    _ = RunLoop.main.run(mode: trackingLikeMode, before: Date(timeIntervalSinceNow: 0.01))
+
+    // then: the observer is notified without the default run loop mode ever running
+    expect(capturedFrames.count) == 1
+    expect(capturedFrames.first) == CGRect(x: 11, y: 22, width: 110, height: 220)
+  }
+
   func test_onLiveFrameChange_noAnimations_cancel() throws {
     // old position is (60, 120)
 

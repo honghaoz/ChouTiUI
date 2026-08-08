@@ -151,7 +151,10 @@ public extension CALayer {
       positionToken = onPositionChange { [weak self] layer, old, new in
         // schedule to the next run loop to make sure the animation added after the position change can be found
         // layer's implicit animation will be added to the next run loop
-        RunLoop.main.perform {
+        //
+        // schedule in the common run loop modes, otherwise the block won't run during event tracking run loop modes
+        // (e.g. macOS window live resizing, iOS scrolling) and live frame updates would stall until tracking ends.
+        RunLoop.main.perform(inModes: [.common]) {
           self?.onPositionChange(oldPosition: old, newPosition: new)
         }
       }
@@ -161,7 +164,10 @@ public extension CALayer {
       boundsToken = onBoundsChange { [weak self] layer, old, new in
         // schedule to the next run loop to make sure the animation added after the bounds change can be found
         // layer's implicit animation will be added to the next run loop
-        RunLoop.main.perform {
+        //
+        // schedule in the common run loop modes, otherwise the block won't run during event tracking run loop modes
+        // (e.g. macOS window live resizing, iOS scrolling) and live frame updates would stall until tracking ends.
+        RunLoop.main.perform(inModes: [.common]) {
           self?.onBoundsChange(oldBounds: old, newBounds: new)
         }
       }
