@@ -1,0 +1,31 @@
+name: cache
+description: "Cache bins, SPM, and SwiftPM build products across GitHub-hosted runs."
+
+inputs:
+  kind:
+    description: "test, lint, or build"
+    required: true
+  xcode-version:
+    description: "Xcode version used in the cache key"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Cache CI artifacts
+      uses: actions/cache@v6
+      with:
+        # DerivedData caching was measured and did not improve iOS wall time on
+        # public runners (simulator boot dominates and stale DerivedData can
+        # hurt), so only cache reusable tool/SPM/.build artifacts here.
+        path: |
+          bin/jq
+          bin/swiftformat
+          bin/swiftlint
+          bin/xcbeautify
+          ~/Library/Caches/org.swift.swiftpm
+          ChouTiUI/.build
+        key: ci-${{ inputs.kind }}-${{ runner.os }}-${{ runner.arch }}-xcode-${{ inputs.xcode-version }}-${{ hashFiles('ChouTiUI/Package.resolved', 'bin/.versions') }}-${{ github.sha }}
+        restore-keys: |
+          ci-${{ inputs.kind }}-${{ runner.os }}-${{ runner.arch }}-xcode-${{ inputs.xcode-version }}-${{ hashFiles('ChouTiUI/Package.resolved', 'bin/.versions') }}-
+          ci-${{ inputs.kind }}-${{ runner.os }}-${{ runner.arch }}-xcode-${{ inputs.xcode-version }}-

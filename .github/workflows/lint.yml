@@ -11,6 +11,12 @@ on:
   pull_request: # any pull request against any branch
   workflow_dispatch: # manual trigger
 
+concurrency:
+  # newer commits cancel older in-flight CI on the same ref.
+  # scoping the group by event keeps push runs from cancelling scheduled runs (and vice versa).
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' }}
+
 env:
   TERM: xterm-256color
   DEVELOPER_DIR: /Applications/Xcode_${{ vars.XCODE_VERSION }}.app/Contents/Developer
@@ -25,6 +31,11 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v5
+      - name: Cache CI artifacts
+        uses: ./.github/actions/cache
+        with:
+          kind: lint
+          xcode-version: ${{ vars.XCODE_VERSION }}
       - name: Bootstrap
         uses: ./.github/actions/bootstrap
       - name: Lint

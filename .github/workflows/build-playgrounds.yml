@@ -1,3 +1,5 @@
+# This workflow is used to build the playgrounds on all platforms.
+
 name: build playgrounds
 on:
   release:
@@ -9,6 +11,12 @@ on:
       # v1.2, v1.1.1, v1.1.12
       - '?(v)+([0-9]).+([0-9])?(.+([0-9]))'
   workflow_dispatch: # manual trigger
+
+concurrency:
+  # newer commits cancel older in-flight CI on the same ref.
+  # scoping the group by event keeps push runs from cancelling scheduled runs (and vice versa).
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' }}
 
 env:
   TERM: xterm-256color
@@ -28,9 +36,6 @@ jobs:
         uses: actions/checkout@v5
       - name: Bootstrap
         uses: ./.github/actions/bootstrap
-      # - name: Download visionOS simulator
-      #   if: matrix.platform == 'visionOS'
-      #   run: xcodebuild -downloadPlatform visionOS
       - name: Build ChouTiUIPlayground-${{ matrix.platform }}
         if: success() || failure()
         run: make build-playground-${{ matrix.platform }}

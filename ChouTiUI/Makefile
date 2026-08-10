@@ -5,47 +5,51 @@ MAKEFILE_DIR = $(shell cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd
 
 .PHONY: build
 build: # Build with debug configuration.
-	@$(REPO_ROOT)/scripts/swift-package/build-workspace.sh --workspace-path "Project.xcworkspace" --scheme "ChouTiUI" --configuration "Debug" --os "macOS iOS tvOS visionOS"
+	@$(REPO_ROOT)/scripts/swift-package/build-package-xcodebuild.sh --package "$(MAKEFILE_DIR)" --configuration "Debug" --os "macOS iOS tvOS visionOS"
 
 .PHONY: build-release
 build-release: # Build with release configuration on all platforms.
-	@$(REPO_ROOT)/scripts/swift-package/build-workspace.sh --workspace-path "Project.xcworkspace" --scheme "ChouTiUI" --configuration "Release" --os "macOS iOS tvOS visionOS"
+	@$(REPO_ROOT)/scripts/swift-package/build-package-xcodebuild.sh --package "$(MAKEFILE_DIR)" --configuration "Release" --os "macOS iOS tvOS visionOS"
 
 .PHONY: build-release-macOS
 build-release-macOS: # Build with release configuration on macOS.
-	@$(REPO_ROOT)/scripts/swift-package/build-workspace.sh --workspace-path "Project.xcworkspace" --scheme "ChouTiUI" --configuration "Release" --os "macOS"
+	@$(REPO_ROOT)/scripts/swift-package/build-package-xcodebuild.sh --package "$(MAKEFILE_DIR)" --configuration "Release" --os "macOS"
 
 .PHONY: build-release-iOS
 build-release-iOS: # Build with release configuration on iOS.
-	@$(REPO_ROOT)/scripts/swift-package/build-workspace.sh --workspace-path "Project.xcworkspace" --scheme "ChouTiUI" --configuration "Release" --os "iOS"
+	@$(REPO_ROOT)/scripts/swift-package/build-package-xcodebuild.sh --package "$(MAKEFILE_DIR)" --configuration "Release" --os "iOS"
 
 .PHONY: build-release-tvOS
 build-release-tvOS: # Build with release configuration on tvOS.
-	@$(REPO_ROOT)/scripts/swift-package/build-workspace.sh --workspace-path "Project.xcworkspace" --scheme "ChouTiUI" --configuration "Release" --os "tvOS"
+	@$(REPO_ROOT)/scripts/swift-package/build-package-xcodebuild.sh --package "$(MAKEFILE_DIR)" --configuration "Release" --os "tvOS"
 
 .PHONY: build-release-visionOS
 build-release-visionOS: # Build with release configuration on visionOS.
-	@$(REPO_ROOT)/scripts/swift-package/build-workspace.sh --workspace-path "Project.xcworkspace" --scheme "ChouTiUI" --configuration "Release" --os "visionOS"
+	@$(REPO_ROOT)/scripts/swift-package/build-package-xcodebuild.sh --package "$(MAKEFILE_DIR)" --configuration "Release" --os "visionOS"
 
 .PHONY: test
 test: # Run tests on all platforms.
-	@$(REPO_ROOT)/scripts/swift-package/test-workspace.sh --workspace-path "Project.xcworkspace" --scheme "ChouTiUI" --os "macOS iOS tvOS visionOS"
+	@$(REPO_ROOT)/scripts/swift-package/test-package-xcodebuild.sh --package "$(MAKEFILE_DIR)" --os "macOS iOS tvOS visionOS"
 
 .PHONY: test-macOS
 test-macOS: # Run tests on macOS.
-	@$(REPO_ROOT)/scripts/swift-package/test-workspace.sh --workspace-path "Project.xcworkspace" --scheme "ChouTiUI" --os "macOS"
+	@$(REPO_ROOT)/scripts/swift-package/test-package-xcodebuild.sh --package "$(MAKEFILE_DIR)" --os "macOS"
 
 .PHONY: test-iOS
 test-iOS: # Run tests on iOS.
-	@$(REPO_ROOT)/scripts/swift-package/test-workspace.sh --workspace-path "Project.xcworkspace" --scheme "ChouTiUI" --os "iOS" --beautify false
+	@$(REPO_ROOT)/scripts/swift-package/test-package-xcodebuild.sh --package "$(MAKEFILE_DIR)" --os "iOS" --beautify false
 
 .PHONY: test-tvOS
 test-tvOS: # Run tests on tvOS.
-	@$(REPO_ROOT)/scripts/swift-package/test-workspace.sh --workspace-path "Project.xcworkspace" --scheme "ChouTiUI" --os "tvOS" --beautify false
+	@$(REPO_ROOT)/scripts/swift-package/test-package-xcodebuild.sh --package "$(MAKEFILE_DIR)" --os "tvOS" --beautify false
 
 .PHONY: test-visionOS
 test-visionOS: # Run tests on visionOS.
-	@$(REPO_ROOT)/scripts/swift-package/test-workspace.sh --workspace-path "Project.xcworkspace" --scheme "ChouTiUI" --os "visionOS" --beautify false
+	@$(REPO_ROOT)/scripts/swift-package/test-package-xcodebuild.sh --package "$(MAKEFILE_DIR)" --os "visionOS" --beautify false
+
+.PHONY: test-ci
+test-ci: # Run tests with CI-optimized caching path. Usage: make test-ci OS=iOS [PHASE=pick|boot|build|test].
+	@$(REPO_ROOT)/scripts/swift-package/test-package-xcodebuild.sh --package "$(MAKEFILE_DIR)" --os "$(OS)" --beautify false --derived-data-path "$(CURDIR)/.derived-data" $(if $(PHASE),--phase $(PHASE),)
 
 .PHONY: test-codecov
 test-codecov: # Run tests with code coverage.

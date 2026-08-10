@@ -44,6 +44,9 @@ DerivedData/
 timeline.xctimeline
 playground.xcworkspace
 
+## Custom derived data
+**/.derived-data/
+
 # ===== Swift Package Manager =====
 #
 # Add this line if you want to avoid checking in source code from Swift Package Manager dependencies.
@@ -52,10 +55,10 @@ playground.xcworkspace
 # Package.resolved
 # *.xcodeproj
 
-# swiftpm
-# .swiftpm/**/*
-**/.swiftpm/**/*.xcworkspacedata
-# !**/.swiftpm/**/xcshareddata/**/*.xcscheme
+# Everything under .swiftpm is Xcode-generated (wrapper workspace, schemes,
+# user state), so nothing needs tracking. If a customized shared scheme ever
+# needs tracking, add a negation rule for it.
+.swiftpm/
 .build/
 
 # ===== LLVM =====

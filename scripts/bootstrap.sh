@@ -18,11 +18,14 @@ case "$OS" in
   CPU=$(uname -m)
   case "$CPU" in
   'arm64') # on Apple Silicon Mac
-    # download jq
     echo ""
-    echo "📦 Download jq..."
-    curl -sL https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-macos-arm64 -o "$REPO_ROOT/bin/jq"
-    chmod +x "$REPO_ROOT/bin/jq"
+    if [ -x "$REPO_ROOT/bin/jq" ]; then
+      echo "📦 jq already present, skipping download"
+    else
+      echo "📦 Download jq..."
+      curl -sL https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-macos-arm64 -o "$REPO_ROOT/bin/jq"
+      chmod +x "$REPO_ROOT/bin/jq"
+    fi
 
     # download scripts
     echo ""
@@ -34,10 +37,15 @@ case "$OS" in
     echo "📦 Download bins..."
     "$REPO_ROOT/scripts/download-bin/download-bins.sh"
 
-    # git hooks
-    echo ""
-    echo "🪝 Install git hooks..."
-    "$REPO_ROOT/scripts/git/install-git-hooks.sh"
+    # git hooks are only useful for local development, so skip them in CI
+    if [ "${CI:-}" = "true" ]; then
+      echo ""
+      echo "🪝 Skipping git hooks install in CI"
+    else
+      echo ""
+      echo "🪝 Install git hooks..."
+      "$REPO_ROOT/scripts/git/install-git-hooks.sh"
+    fi
 
     # update packages if needed
     echo ""

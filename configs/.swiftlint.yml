@@ -10,6 +10,7 @@ excluded:
   - "${PWD}/**/*/*.playground"
   - "${PWD}/**/*/.swiftpm"
   - "${PWD}/**/*/.build"
+  - "${PWD}/**/*/.derived-data"
   - "**/_Deprecated"
   - "**/_ChouTiDeprecated"
   - ChouTi
