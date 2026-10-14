@@ -1,24 +1,18 @@
 # rules
---enable blankLineAfterImports
---enable noForceTryInTests
+--enable noGuardInTests
 --enable preferContains
 --enable preferFirstWhere
 --enable preferFlatMap
 --enable preferMinOverSorted
---enable redundantNilInit
 --enable wrapCaseBodies
 --enable wrapEnumCases
 --enable wrapGuardStatementBodies
---enable wrapIfExpressionBodies
---enable wrapIfStatementBodies
 --enable wrapSwitchCases
 
---disable blankLinesAtStartOfScope
+--disable blankLinesAtStartOfScope # TODO: enable with `--type-blank-lines start-only` once function bodies can keep their leading blank lines: https://github.com/nicklockwood/SwiftFormat/issues/583
 --disable blankLinesBetweenImports
 --disable conditionalAssignment
 --disable docComments
---disable emptyExtensions
---disable isEmpty
 --disable preferForLoop
 --disable redundantAsync
 --disable redundantEquatable
@@ -32,10 +26,7 @@
 --disable redundantViewBuilder
 --disable sortImports
 --disable strongifiedSelf
---disable testSuiteAccessControl
 --disable unusedArguments
---disable unusedPrivateDeclarations
---disable validateTestCases
 --disable wrapPropertyBodies
 
 # format options
