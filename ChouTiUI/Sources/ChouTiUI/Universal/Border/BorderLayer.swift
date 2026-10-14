@@ -418,7 +418,11 @@ public final class BorderLayer: CALayer {
   }
 
   private func resetBorderStyle() {
-    super.borderColor = Color.black.cgColor
+    // clear, not black: Core Animation can draw this layer's own border with the width from the `borderWidth` getter,
+    // which returns the configured width rather than the 0 set below
+    // TODO: this is a stopgap. Store the configured width in `super.borderWidth` and remove the `borderWidth` getter
+    // override, so the getter and the stored value can't disagree.
+    super.borderColor = Color.clear.cgColor
     super.borderWidth = 0
     super.cornerRadius = 0
     self.cornerCurve = .continuous

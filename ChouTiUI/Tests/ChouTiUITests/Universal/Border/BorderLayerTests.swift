@@ -364,6 +364,25 @@ class BorderLayerTests: XCTestCase {
     expect(layer.mask?.cornerRadius) == 16
   }
 
+  /// Core Animation can draw the layer's own border with the width from the `borderWidth` getter, which returns the
+  /// configured width even though the mask-based rendering mode sets `super.borderWidth` to 0. The layer's own border
+  /// color must be clear so that border doesn't cover the masked border content.
+  func test_gradient_cornerRadius_ownBorderIsClear() {
+    // given: a gradient border, which renders with the mask-based mode
+    let layer = makeBorderLayer(usesNativeBorderOffset: true)
+    layer.frame = CGRect(x: 0, y: 0, width: 120, height: 80)
+    layer.borderWidth = 10
+    layer.borderContent = .gradient(.linearGradient(LinearGradientColor(colors: [.yellow, .cyan], locations: [0, 1])))
+    layer.borderMask = .cornerRadius(30)
+
+    // when: layout the layer
+    layer.layoutSublayers()
+
+    // then: the layer's own border is invisible
+    expect(layer.borderWidth) == 10
+    expect(layer.borderColor?.alpha) == 0
+  }
+
   // MARK: - Solid Color + Shape
 
   /// Verifies `.shape(Rectangle, offset:)` updates the internal mask path even when bounds stay the same.
