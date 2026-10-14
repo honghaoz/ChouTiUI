@@ -603,8 +603,8 @@ class LayerBorderWindow: NSWindow {
           UnifiedColorNode(light: .whiteRGB, dark: .whiteRGB(0.5))
             .frame(width: .flexible, height: .halfPoint)
         })
-        .dropShadow(color: .black, opacity: 0.3, radius: 1, offset: CGSize(width: 0, height: -1), path: { renderable in
-          CGPath(rect: renderable.bounds.insetBy(dx: -4, dy: 0), transform: nil)
+        .dropShadow(color: .black, opacity: 0.3, radius: 1, offset: CGSize(width: 0, height: -1), path: { size in
+          CGPath(rect: CGRect(origin: .zero, size: size).insetBy(dx: -4, dy: 0), transform: nil)
         })
         .animation(.easeInEaseOut(duration: 5))
       }
@@ -613,8 +613,6 @@ class LayerBorderWindow: NSWindow {
           switch renderType {
           case .refresh(isAnimated: let isAnimated):
             return isAnimated
-          case .scroll:
-            return false
           case .boundsChange:
             return false
           }
@@ -843,7 +841,9 @@ private class ComposeViewContentLayer: CALayer {
 
     super.init()
 
-    addSublayer(view.contentView().unsafeLayer)
+    if let contentLayer = view.documentView?.unsafeLayer {
+      addSublayer(contentLayer)
+    }
   }
 
   @available(*, unavailable)
@@ -861,7 +861,7 @@ private class ComposeViewContentLayer: CALayer {
     view.layoutIfNeeded()
 
     if let sizeAnimation = self.sizeAnimation() {
-      view.contentView().unsafeLayer.addFrameAnimation(
+      view.documentView?.unsafeLayer.addFrameAnimation(
         from: oldBounds,
         to: bounds,
         presentationBounds: self.presentation()?.bounds,

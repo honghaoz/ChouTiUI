@@ -124,8 +124,8 @@ class LayerShapeWindow: NSWindow {
           UnifiedColorNode(light: .whiteRGB, dark: .whiteRGB(0.5))
             .frame(width: .flexible, height: .halfPoint)
         })
-        .dropShadow(color: .black, opacity: 0.3, radius: 1, offset: CGSize(width: 0, height: -1), path: { renderable in
-          CGPath(rect: renderable.bounds.insetBy(dx: -4, dy: 0), transform: nil)
+        .dropShadow(color: .black, opacity: 0.3, radius: 1, offset: CGSize(width: 0, height: -1), path: { size in
+          CGPath(rect: CGRect(origin: .zero, size: size).insetBy(dx: -4, dy: 0), transform: nil)
         })
         .animation(.easeInEaseOut(duration: 5))
       }
@@ -134,8 +134,6 @@ class LayerShapeWindow: NSWindow {
           switch renderType {
           case .refresh(isAnimated: let isAnimated):
             return isAnimated
-          case .scroll:
-            return false
           case .boundsChange:
             return false
           }

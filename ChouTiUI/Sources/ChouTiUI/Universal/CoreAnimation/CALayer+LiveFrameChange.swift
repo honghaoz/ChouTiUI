@@ -301,7 +301,7 @@ public extension CALayer {
         return
       }
 
-      guard animation.isAbsoluteBeginTimeMode(), animation.beginTime > 0 else {
+      guard animation.hasResolvedBeginTime() else {
         // skip the animation if it's not added in the render tree (begin time is negative)
         // use the last frame for the frame change blocks
         notifyFrameChangeBlocks(with: lastFrame)
@@ -460,9 +460,10 @@ private extension CAAnimation {
 
   private static let beginTimeModeKey = String("emiTnigeb".reversed() + "Mode") // beginTimeMode
 
-  func isAbsoluteBeginTimeMode() -> Bool {
-    // non-zero: when the begin time is zero. when just added to the layer
-    // absolute: when the begin time is positive
+  func hasResolvedBeginTime() -> Bool {
+    // non-zero: the begin time is used as set. it's zero when just added to the layer, until it's resolved at commit,
+    //           or positive when set when added, as ComposeUI's animations do
+    // absolute: the begin time is resolved to a positive time at commit
 
     guard let beginTimeMode = value(forKey: Self.beginTimeModeKey) as? String else {
       ChouTi.assertFailure("beginTimeMode is not set")
@@ -470,10 +471,9 @@ private extension CAAnimation {
     }
 
     switch beginTimeMode {
-    case "absolute":
-      return true
-    case "non-zero":
-      return false
+    case "absolute",
+         "non-zero":
+      return beginTime > 0
     default:
       ChouTi.assertFailure("unknown beginTimeMode: \(beginTimeMode)")
       return false

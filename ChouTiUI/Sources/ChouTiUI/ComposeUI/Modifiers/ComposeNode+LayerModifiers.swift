@@ -53,7 +53,11 @@ public extension ComposeNode {
   @available(macOS 15.0, iOS 18.0, tvOS 18.0, visionOS 2.0, *)
   func borderOffset(_ offset: Themed<CGFloat>) -> some ComposeNode {
     onUpdate { item, context in
-      guard context.updateType.requiresFullUpdate else {
+      switch context.updateType {
+      case .insert,
+           .refresh:
+        break
+      case .boundsChange:
         return
       }
 

@@ -125,7 +125,7 @@ class ComposeNode_LayerModifiersTests: XCTestCase {
       expect(layer?.animationKeys()?.contains("borderOffset")) == true
     }
 
-    // early return when requiresFullUpdate is false
+    // early return on bounds change
     do {
       var layer: CALayer?
       var borderOffset: CGFloat = 2
