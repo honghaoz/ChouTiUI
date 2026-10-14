@@ -49,24 +49,32 @@ public extension CALayer {
   /// Get layer's size change animation.
   ///
   /// This method returns the most granular animation that affects the layer's size.
-  /// It looks for the first animation with key paths: "bounds.size.width", "bounds.size.height", "bounds.size", "bounds" in order.
+  /// It looks for animations with key paths: "bounds.size.width", "bounds.size.height", "bounds.size", "bounds" in order.
+  /// When several animations share the most granular key path, such as stacked additive animations, it returns the one
+  /// that began last.
   ///
   /// This is useful for adding a size synchronization animation to sublayers when the parent layer's size changes with an animation.
   ///
   /// - Returns: The most granular size change animation.
   func sizeAnimation() -> CABasicAnimation? {
-    animations()
-      .compactMap { animation -> (animation: CABasicAnimation, order: Int)? in
-        guard let animation = animation as? CABasicAnimation,
-              let keyPath = animation.keyPath,
-              let order = Self.boundsSizeAnimationKeyPathOrder[keyPath]
-        else {
-          return nil
-        }
-        return (animation, order)
+    var result: (animation: CABasicAnimation, order: Int, beginTime: TimeInterval)?
+    for animation in animations() {
+      guard let animation = animation as? CABasicAnimation,
+            let keyPath = animation.keyPath,
+            let order = Self.boundsSizeAnimationKeyPathOrder[keyPath]
+      else {
+        continue
       }
-      .min { $0.order < $1.order }?
-      .animation
+
+      // compare begin times rather than the animation keys' order, which depends on how the begin times are set.
+      // a zero begin time is resolved when the animation is committed, after the animations already in flight began.
+      let beginTime = animation.beginTime > 0 ? animation.beginTime : .infinity
+      if let current = result, order > current.order || (order == current.order && beginTime < current.beginTime) {
+        continue
+      }
+      result = (animation, order, beginTime)
+    }
+    return result?.animation
   }
 
   private static let boundsSizeAnimationKeyPathOrder: [String: Int] = [

@@ -246,6 +246,46 @@ class CALayer_AnimationExtensionsTests: XCTestCase {
     expect(sizeAnimation.keyPath) == "bounds.size.width"
   }
 
+  func test_sizeAnimation_stackedAnimations_returnsLatestBegun() throws {
+    // given: stacked additive animations with begin times, which Core Animation keys in the order they were added
+    let layer = CALayer()
+    layer.bounds = CGRect(x: 0, y: 0, width: 100, height: 100)
+    let beginTime = CACurrentMediaTime()
+    layer.add(makeAdditiveSizeAnimation(from: CGSize(width: 10, height: 10), beginTime: beginTime), forKey: "bounds.size")
+    layer.add(makeAdditiveSizeAnimation(from: CGSize(width: 20, height: 20), beginTime: beginTime + 0.3), forKey: "bounds.size-1")
+
+    // when: get the size animation
+    let sizeAnimation = try layer.sizeAnimation().unwrap()
+
+    // then: it's the animation that began last
+    expect(sizeAnimation.fromValue as? CGSize) == CGSize(width: 20, height: 20)
+    expect(sizeAnimation.beginTime) == beginTime + 0.3
+  }
+
+  func test_sizeAnimation_stackedAnimations_prefersUncommitted() throws {
+    // given: an animation with a begin time, then an animation whose begin time is resolved when it's committed
+    let layer = CALayer()
+    layer.bounds = CGRect(x: 0, y: 0, width: 100, height: 100)
+    layer.add(makeAdditiveSizeAnimation(from: CGSize(width: 10, height: 10), beginTime: CACurrentMediaTime()), forKey: "bounds.size")
+    layer.add(makeAdditiveSizeAnimation(from: CGSize(width: 20, height: 20), beginTime: 0), forKey: "bounds.size-1")
+
+    // when: get the size animation
+    let sizeAnimation = try layer.sizeAnimation().unwrap()
+
+    // then: it's the uncommitted animation, which begins after the one already in flight
+    expect(sizeAnimation.fromValue as? CGSize) == CGSize(width: 20, height: 20)
+  }
+
+  private func makeAdditiveSizeAnimation(from offset: CGSize, beginTime: TimeInterval) -> CABasicAnimation {
+    let animation = CABasicAnimation(keyPath: "bounds.size")
+    animation.fromValue = offset
+    animation.toValue = CGSize.zero
+    animation.isAdditive = true
+    animation.duration = 1
+    animation.beginTime = beginTime
+    return animation
+  }
+
   func test_sizeAnimation_withNonPropertyAnimation() throws {
     let layer = CALayer()
     layer.bounds = CGRect(x: 0, y: 0, width: 100, height: 100)
