@@ -120,10 +120,10 @@ public struct UnifiedColorNode: ComposeNode {
     return ComposeNodeSizing(width: .flexible, height: .flexible)
   }
 
-  public func renderableItems(in visibleBounds: CGRect) -> [RenderableItem] {
+  public func render(visibleBounds: CGRect, into items: inout [RenderableItem]) {
     let frame = CGRect(origin: .zero, size: size)
     guard visibleBounds.intersects(frame) else {
-      return []
+      return
     }
 
     let layerItem = LayerItem<CALayer>(
@@ -148,6 +148,6 @@ public struct UnifiedColorNode: ComposeNode {
       }
     )
 
-    return [layerItem.eraseToRenderableItem()]
+    items.append(layerItem.eraseToRenderableItem())
   }
 }
