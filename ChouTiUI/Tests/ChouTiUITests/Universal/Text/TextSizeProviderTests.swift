@@ -31,17 +31,16 @@
 #if canImport(AppKit)
 import AppKit
 #endif
-
 #if canImport(UIKit)
 import UIKit
 #endif
-
 import CoreGraphics
 import CoreText
 
+import ChouTi
+
 import ChouTiTest
 
-import ChouTi
 import ChouTiUI
 
 class TextSizeProviderTests: XCTestCase {

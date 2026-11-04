@@ -30,11 +30,12 @@
 
 import QuartzCore
 
+import ChouTi
+@_spi(Private) import ComposeUI
+
 import ChouTiTest
 
-import ChouTi
 @testable import ChouTiUI
-@_spi(Private) import ComposeUI
 
 class CALayer_LiveFrameChangeTests: XCTestCase {
 

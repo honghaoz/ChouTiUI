@@ -31,14 +31,14 @@
 #if canImport(AppKit)
 import AppKit
 #endif
-
 #if canImport(UIKit)
 import UIKit
 #endif
 
+import ChouTi
+
 import ChouTiTest
 
-import ChouTi
 import ChouTiUI
 
 class View_LayerTests: XCTestCase {

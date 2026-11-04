@@ -31,15 +31,15 @@
 #if canImport(AppKit)
 import AppKit
 #endif
-
 #if canImport(UIKit)
 import UIKit
 #endif
 
+import ComposeUI
+
 import ChouTiTest
 
 import ChouTiUI
-import ComposeUI
 
 class UnifiedColorNodeTests: XCTestCase {
 

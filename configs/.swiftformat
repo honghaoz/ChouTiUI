@@ -24,7 +24,6 @@
 --disable redundanttype
 --disable redundantVariable
 --disable redundantViewBuilder
---disable sortImports
 --disable strongifiedSelf
 --disable unusedArguments
 --disable wrapPropertyBodies

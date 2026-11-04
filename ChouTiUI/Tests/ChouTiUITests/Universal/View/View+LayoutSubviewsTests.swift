@@ -28,9 +28,10 @@
 //  IN THE SOFTWARE.
 //
 
+import ChouTi
+
 import ChouTiTest
 
-import ChouTi
 @testable import ChouTiUI
 
 private let viewClassName: String = {

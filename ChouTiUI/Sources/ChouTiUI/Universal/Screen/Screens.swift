@@ -33,7 +33,6 @@
 #if canImport(AppKit)
 import AppKit
 #endif
-
 #if canImport(UIKit)
 import UIKit
 #endif
@@ -75,4 +74,5 @@ public enum Screens {
 
   private static var _mainScreen: Screen?
 }
+
 #endif

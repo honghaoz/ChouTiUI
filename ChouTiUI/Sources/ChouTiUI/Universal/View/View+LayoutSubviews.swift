@@ -28,13 +28,12 @@
 //  IN THE SOFTWARE.
 //
 
-import ObjectiveC
-
 #if canImport(AppKit)
 import AppKit
 #elseif canImport(UIKit)
 import UIKit
 #endif
+import ObjectiveC
 
 import ChouTi
 

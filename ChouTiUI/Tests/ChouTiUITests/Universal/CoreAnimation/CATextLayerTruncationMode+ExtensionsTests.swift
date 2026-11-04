@@ -31,16 +31,15 @@
 #if canImport(AppKit)
 import AppKit
 #endif
-
 #if canImport(UIKit)
 import UIKit
 #endif
-
 import QuartzCore
+
+import ChouTi
 
 import ChouTiTest
 
-import ChouTi
 import ChouTiUI
 
 class CATextLayerTruncationMode_ExtensionsTests: XCTestCase {

@@ -28,8 +28,9 @@
 //  IN THE SOFTWARE.
 //
 
-@_spi(Private) import ComposeUI
 import CoreGraphics
+
+@_spi(Private) import ComposeUI
 
 public extension ComposeNode {
 

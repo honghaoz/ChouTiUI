@@ -1,0 +1,19 @@
+# The groups of the imports at the top of the Swift files in `paths`, which `make format` groups and `make lint` checks
+# with `scripts/imports/group-imports.sh`, which `make bootstrap` downloads from ChouTi.
+#
+# The imports go in the groups in this order, with a blank line between groups. `*` is the group of the modules that no
+# group lists, the system frameworks.
+
+paths: ChouTiUI/Sources ChouTiUI/Tests playgrounds
+
+# system frameworks
+group: *
+
+# external frameworks
+group: ChouTi ComposeUI
+
+# test frameworks
+group: ChouTiTest XCTest
+
+# local modules
+group: ChouTiUI

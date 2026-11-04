@@ -28,9 +28,9 @@
 //  IN THE SOFTWARE.
 //
 
-import Foundation
 import CoreImage
 import CoreImage.CIFilterBuiltins
+import Foundation
 
 import ChouTi
 

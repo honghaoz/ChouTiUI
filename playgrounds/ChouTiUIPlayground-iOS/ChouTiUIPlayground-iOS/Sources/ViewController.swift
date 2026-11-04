@@ -31,8 +31,9 @@
 import UIKit
 
 import ChouTi
-import ChouTiUI
 @_spi(Private) import ComposeUI
+
+import ChouTiUI
 
 class ViewController: UIViewController {
 

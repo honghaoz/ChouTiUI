@@ -32,9 +32,10 @@
 
 import AppKit
 
+import ChouTi
+
 import ChouTiTest
 
-import ChouTi
 import ChouTiUI
 
 class NSApplication_ThemeUpdatingTests: XCTestCase {

@@ -31,9 +31,10 @@
 import CoreGraphics
 import CoreImage
 
+import ChouTi
+
 import ChouTiTest
 
-import ChouTi
 import ChouTiUI
 
 class CIImage_BorderTests: XCTestCase {

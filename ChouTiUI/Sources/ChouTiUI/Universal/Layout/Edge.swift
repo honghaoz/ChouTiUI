@@ -28,11 +28,10 @@
 //  IN THE SOFTWARE.
 //
 
-import Foundation
-
 #if canImport(AppKit)
 import AppKit
 #endif
+import Foundation
 
 /// A type indicates one edge of a rectangle.
 public enum Edge: Sendable {
