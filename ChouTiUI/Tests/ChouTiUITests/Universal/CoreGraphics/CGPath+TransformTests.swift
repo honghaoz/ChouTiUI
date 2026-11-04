@@ -30,9 +30,9 @@
 
 import CoreGraphics
 
-import ChouTiTest
-
 import ChouTi
+
+import ChouTiTest
 
 class CGPath_TransformTests: XCTestCase {
 

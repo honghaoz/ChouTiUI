@@ -29,9 +29,11 @@
 //
 
 import AppKit
+
 import ChouTi
-@_spi(Private) import ChouTiUI
 @_spi(Private) import ComposeUI
+
+@_spi(Private) import ChouTiUI
 
 class LayerBorderOffsetWindow: NSWindow {
 

@@ -28,8 +28,9 @@
 //  IN THE SOFTWARE.
 //
 
-import ChouTi
 import QuartzCore
+
+import ChouTi
 
 /// A protocol for base CoreAnimation layer types.
 public protocol BaseCALayerType: CALayer {

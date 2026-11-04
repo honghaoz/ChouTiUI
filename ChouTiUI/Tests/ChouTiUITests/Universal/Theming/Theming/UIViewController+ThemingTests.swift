@@ -98,4 +98,5 @@ class UIViewController_ThemingTests: XCTestCase {
     expect(viewController.overrideUserInterfaceStyle) == .unspecified
   }
 }
+
 #endif

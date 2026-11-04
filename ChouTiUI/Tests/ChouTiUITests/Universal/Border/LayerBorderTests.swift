@@ -31,9 +31,10 @@
 import CoreGraphics
 import QuartzCore
 
+import ChouTi
+
 import ChouTiTest
 
-import ChouTi
 import ChouTiUI
 
 class LayerBorderTests: XCTestCase {

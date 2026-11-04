@@ -29,6 +29,7 @@
 //
 
 import QuartzCore
+
 import ChouTi
 
 /// A protocol that supports `solveForInput(_:)`.

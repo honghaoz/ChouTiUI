@@ -30,9 +30,10 @@
 
 import QuartzCore
 
+import ChouTi
+
 import ChouTiTest
 
-import ChouTi
 import ChouTiUI
 
 class CALayer_ShapeTests: XCTestCase {

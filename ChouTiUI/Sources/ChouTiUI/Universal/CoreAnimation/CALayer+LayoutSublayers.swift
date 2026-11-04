@@ -28,11 +28,10 @@
 //  IN THE SOFTWARE.
 //
 
-import QuartzCore
-
 #if canImport(AppKit)
 import AppKit
 #endif
+import QuartzCore
 
 import ChouTi
 

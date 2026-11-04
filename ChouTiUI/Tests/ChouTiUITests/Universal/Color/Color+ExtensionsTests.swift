@@ -31,14 +31,14 @@
 #if canImport(AppKit)
 import AppKit
 #endif
-
 #if canImport(UIKit)
 import UIKit
 #endif
 
+import ChouTi
+
 import ChouTiTest
 
-import ChouTi
 @testable import ChouTiUI
 
 class Color_ExtensionsTests: XCTestCase {

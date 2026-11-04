@@ -28,9 +28,10 @@
 //  IN THE SOFTWARE.
 //
 
-import QuartzCore
-import Metal
 import CoreImage
+import Metal
+import QuartzCore
+
 import ChouTi
 
 public extension CAMetalLayer {

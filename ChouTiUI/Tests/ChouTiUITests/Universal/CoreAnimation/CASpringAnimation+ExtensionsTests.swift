@@ -30,10 +30,11 @@
 
 import QuartzCore
 
+@_spi(Private) import ComposeUI
+
 import ChouTiTest
 
 import ChouTiUI
-@_spi(Private) import ComposeUI
 
 class CASpringAnimation_ExtensionsTests: XCTestCase {
 

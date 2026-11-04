@@ -28,13 +28,14 @@
 //  IN THE SOFTWARE.
 //
 
-import QuartzCore
-import Metal
 import CoreImage
+import Metal
+import QuartzCore
+
+import ChouTi
 
 import ChouTiTest
 
-import ChouTi
 import ChouTiUI
 
 class CAMetalLayerCIImageTests: XCTestCase {

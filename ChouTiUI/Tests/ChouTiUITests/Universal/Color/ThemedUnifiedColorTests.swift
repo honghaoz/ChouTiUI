@@ -28,9 +28,10 @@
 //  IN THE SOFTWARE.
 //
 
+import ChouTi
+
 import ChouTiTest
 
-import ChouTi
 import ChouTiUI
 
 class ThemedUnifiedColorTests: XCTestCase {

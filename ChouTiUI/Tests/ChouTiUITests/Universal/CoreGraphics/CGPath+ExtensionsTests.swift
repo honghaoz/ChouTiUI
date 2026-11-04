@@ -30,9 +30,10 @@
 
 import CoreGraphics
 
+import ChouTi
+
 import ChouTiTest
 
-import ChouTi
 import ChouTiUI
 
 class CGPath_ExtensionsTests: XCTestCase {

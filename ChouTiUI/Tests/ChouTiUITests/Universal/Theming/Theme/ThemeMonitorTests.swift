@@ -30,9 +30,10 @@
 
 import Combine
 
+import ChouTi
+
 import ChouTiTest
 
-import ChouTi
 @testable import ChouTiUI
 
 class ThemeMonitorTests: XCTestCase {

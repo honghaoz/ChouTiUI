@@ -31,18 +31,17 @@
 #if canImport(AppKit)
 import AppKit
 #endif
-
+#if canImport(QuartzCore)
+import QuartzCore
+#endif
 #if canImport(UIKit)
 import UIKit
 #endif
 
-#if canImport(QuartzCore)
-import QuartzCore
-#endif
+import ChouTi
 
 import ChouTiTest
 
-import ChouTi
 import ChouTiUI
 
 class GradientColorTypeTests: XCTestCase {
