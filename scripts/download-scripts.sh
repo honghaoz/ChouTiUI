@@ -3,7 +3,7 @@
 set -e
 
 # OVERVIEW:
-# Download scripts from https://github.com/honghaoz/ChouTi
+# Downloads scripts from https://github.com/honghaoz/ChouTi.
 
 REPO_ROOT=$(git rev-parse --show-toplevel)
 
@@ -40,7 +40,23 @@ declare -a scripts=(
   "scripts/swiftlint-beautify"
 )
 
-# Get the contents of a directory on GitHub
+# --retry covers timeouts and HTTP 408/429/5xx. --retry-all-errors is required
+# for a dropped connection (curl 56), and with -f it also retries 4xx.
+# --connect-timeout and --max-time turn a stall into a retryable failure.
+# --retry-max-time only limits when a new retry may start.
+#
+# keep this array in sync with the same flags in scripts/bootstrap.sh
+CURL_RETRY=(
+  -fsSL
+  --retry 5
+  --retry-all-errors
+  --retry-delay 2
+  --retry-max-time 90
+  --connect-timeout 10
+  --max-time 30
+)
+
+# Gets the file and directory listing of a path on GitHub.
 function get_contents() {
   if [ -z "$1" ]; then
     echo "Error: No path provided to get_contents" >&2
@@ -51,17 +67,35 @@ function get_contents() {
   # remove trailing slash if it exists
   path="${path%/}"
 
-  local contents=$(curl -s "https://api.github.com/repos/honghaoz/ChouTi/contents/$path?ref=$BRANCH")
-  
+  # curl only discards a failed attempt's body when writing to a file, not when
+  # stdout is captured, so a retried drop would otherwise concatenate JSON
+  local tmp files_list dirs_list ok
+  tmp=$(mktemp)
+  trap 'rm -f "$tmp"' EXIT
+
+  # this function only runs inside $(...), where set -e is off, so a failed
+  # curl or jq must be checked explicitly or the empty listing looks successful
+  ok=0
+  if curl "${CURL_RETRY[@]}" \
+      "https://api.github.com/repos/honghaoz/ChouTi/contents/$path?ref=$BRANCH" \
+      -o "$tmp" \
+    && files_list=$(jq -r '.[] | select(.type == "file") | .path' "$tmp") \
+    && dirs_list=$(jq -r '.[] | select(.type == "dir") | .path' "$tmp"); then
+    ok=1
+  fi
+  trap - EXIT
+  rm -f "$tmp"
+  [ "$ok" -eq 1 ] || return 1
+
   echo "FILESSTART"
-  echo "$contents" | jq -r '.[] | select(.type == "file") | .path'
+  echo "$files_list"
   echo "FILESEND"
   echo "DIRSSTART"
-  echo "$contents" | jq -r '.[] | select(.type == "dir") | .path'
+  echo "$dirs_list"
   echo "DIRSEND"
 }
 
-# Download an executable file from GitHub
+# Downloads an executable file from GitHub.
 function download_file() {
   if [ -z "$1" ]; then
     echo "Error: No path provided to download_file" >&2
@@ -70,11 +104,29 @@ function download_file() {
   local path="$1"
   echo "Downloading $path"
   mkdir -p "$(dirname "$path")"
-  curl -fsSL https://raw.githubusercontent.com/honghaoz/ChouTi/$BRANCH/$path -o "$path"
-  chmod +x "$path"
+
+  # write to a temp file so a failed or truncated response can't replace a
+  # previously downloaded script
+  local tmp
+  tmp=$(mktemp "$path.XXXXXX")
+  trap 'rm -f "$tmp"' EXIT
+  if ! curl "${CURL_RETRY[@]}" \
+    "https://raw.githubusercontent.com/honghaoz/ChouTi/$BRANCH/$path" \
+    -o "$tmp"; then
+    trap - EXIT
+    rm -f "$tmp"
+    return 1
+  fi
+
+  # mktemp creates 0600, so chmod +x would leave 0711, and a script can't run
+  # without the read bit if another user executes it
+  chmod 755 "$tmp"
+
+  mv "$tmp" "$path"
+  trap - EXIT
 }
 
-# Download a list of executable files from GitHub
+# Downloads a list of executable files from GitHub.
 function download_files() {
   if [ -z "$1" ]; then
     echo "Error: No files provided to download_files" >&2
@@ -86,7 +138,7 @@ function download_files() {
   done
 }
 
-# Download a list of directories from GitHub
+# Downloads a list of directories from GitHub.
 function download_dirs() {
   if [ -z "$1" ]; then
     echo "Error: No dirs provided to download_dirs" >&2
@@ -95,7 +147,8 @@ function download_dirs() {
 
   local dirs="$1"
   for dir in $dirs; do
-    output=$(get_contents "$dir")
+    # set -e is off inside $(...), so a failed listing must be checked here
+    output=$(get_contents "$dir") || return 1
     files_list=$(echo "$output" | sed -n '/FILESSTART/,/FILESEND/p' | grep -av "FILESSTART" | grep -av "FILESEND" || true)
     dirs_list=$(echo "$output" | sed -n '/DIRSSTART/,/DIRSEND/p' | grep -av "DIRSSTART" | grep -av "DIRSEND" || true)
 
