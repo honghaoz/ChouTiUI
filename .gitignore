@@ -114,6 +114,8 @@ bin/jq
 bin/swiftformat
 bin/swiftlint
 bin/xcbeautify
+bin/.tmp.*
+bin/.*.backup.*
 
 # ===== Temp =====
 .temp
