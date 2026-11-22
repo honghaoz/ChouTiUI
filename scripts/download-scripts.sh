@@ -5,8 +5,21 @@ set -e
 # OVERVIEW:
 # Downloads scripts from https://github.com/honghaoz/ChouTi.
 
-REPO_ROOT=$(git rev-parse --show-toplevel)
-
+# resolve the repo from this script's location so download-scripts works from
+# any directory.
+#
+# CDPATH= and >/dev/null keep an exported CDPATH from printing the
+# directory into REPO_ROOT. unset GIT_DIR so a linked worktree hook cannot
+# make --show-toplevel return the current directory
+if [ -z "${BASH_SOURCE[0]:-}" ]; then
+  echo "Error: download-scripts must be run as a file, not piped to bash." >&2
+  exit 1
+fi
+REPO_ROOT=$(CDPATH= cd -- "$(dirname "${BASH_SOURCE[0]}")/.." >/dev/null && unset GIT_DIR && git rev-parse --show-toplevel) || exit 1
+if [ ! -f "$REPO_ROOT/scripts/download-scripts.sh" ]; then
+  echo "Error: resolved $REPO_ROOT does not look like the repository root." >&2
+  exit 1
+fi
 cd "$REPO_ROOT" || exit 1
 
 # branch of ChouTi
@@ -42,7 +55,10 @@ declare -a scripts=(
 
 # --retry covers timeouts and HTTP 408/429/5xx. --retry-all-errors is required
 # for a dropped connection (curl 56), and with -f it also retries 4xx.
-# --connect-timeout and --max-time turn a stall into a retryable failure.
+# --connect-timeout bounds a hung connect. --speed-limit 1024 and
+# --speed-time 30 abort a transfer slower than 1024 bytes/s for 30 seconds,
+# so a stall is retryable without capping a slow but progressing download.
+#
 # --retry-max-time only limits when a new retry may start.
 #
 # keep this array in sync with the same flags in scripts/bootstrap.sh
@@ -53,7 +69,8 @@ CURL_RETRY=(
   --retry-delay 2
   --retry-max-time 90
   --connect-timeout 10
-  --max-time 30
+  --speed-limit 1024
+  --speed-time 30
 )
 
 # Gets the file and directory listing of a path on GitHub.
@@ -62,10 +79,10 @@ function get_contents() {
     echo "Error: No path provided to get_contents" >&2
     return 1
   fi
-  local path="$1"
+  local script_path="$1"
 
   # remove trailing slash if it exists
-  path="${path%/}"
+  script_path="${script_path%/}"
 
   # curl only discards a failed attempt's body when writing to a file, not when
   # stdout is captured, so a retried drop would otherwise concatenate JSON
@@ -77,7 +94,7 @@ function get_contents() {
   # curl or jq must be checked explicitly or the empty listing looks successful
   ok=0
   if curl "${CURL_RETRY[@]}" \
-      "https://api.github.com/repos/honghaoz/ChouTi/contents/$path?ref=$BRANCH" \
+      "https://api.github.com/repos/honghaoz/ChouTi/contents/$script_path?ref=$BRANCH" \
       -o "$tmp" \
     && files_list=$(jq -r '.[] | select(.type == "file") | .path' "$tmp") \
     && dirs_list=$(jq -r '.[] | select(.type == "dir") | .path' "$tmp"); then
@@ -101,17 +118,17 @@ function download_file() {
     echo "Error: No path provided to download_file" >&2
     return 1
   fi
-  local path="$1"
-  echo "Downloading $path"
-  mkdir -p "$(dirname "$path")"
+  local script_path="$1"
+  echo "Downloading $script_path"
+  mkdir -p "$(dirname "$script_path")"
 
   # write to a temp file so a failed or truncated response can't replace a
   # previously downloaded script
   local tmp
-  tmp=$(mktemp "$path.XXXXXX")
+  tmp=$(mktemp "$script_path.XXXXXX")
   trap 'rm -f "$tmp"' EXIT
   if ! curl "${CURL_RETRY[@]}" \
-    "https://raw.githubusercontent.com/honghaoz/ChouTi/$BRANCH/$path" \
+    "https://raw.githubusercontent.com/honghaoz/ChouTi/$BRANCH/$script_path" \
     -o "$tmp"; then
     trap - EXIT
     rm -f "$tmp"
@@ -122,7 +139,7 @@ function download_file() {
   # without the read bit if another user executes it
   chmod 755 "$tmp"
 
-  mv "$tmp" "$path"
+  mv "$tmp" "$script_path"
   trap - EXIT
 }
 
@@ -168,11 +185,11 @@ function download_dirs() {
 }
 
 # download each script
-for path in "${scripts[@]}"; do
-  if [[ "$path" == */ ]]; then
-    download_dirs "$path"
+for script_path in "${scripts[@]}"; do
+  if [[ "$script_path" == */ ]]; then
+    download_dirs "$script_path"
   else
     # path is a file
-    download_file "$path"
+    download_file "$script_path"
   fi
 done
