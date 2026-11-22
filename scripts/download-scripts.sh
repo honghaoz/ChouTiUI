@@ -173,14 +173,14 @@ function download_dirs() {
     folder=$(basename "$dir")
     mkdir -p "$folder"
 
-    cd "$folder"
+    CDPATH= cd -- "$folder" >/dev/null
     if [ -n "$files_list" ]; then
       download_files "$files_list"
     fi
     if [ -n "$dirs_list" ]; then
       download_dirs "$dirs_list"
     fi
-    cd ..
+    CDPATH= cd -- ".." >/dev/null
   done
 }
 
