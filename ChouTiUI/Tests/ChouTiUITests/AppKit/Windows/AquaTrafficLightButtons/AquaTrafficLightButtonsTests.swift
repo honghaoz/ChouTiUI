@@ -346,6 +346,77 @@ class AquaTrafficLightButtonsTests: XCTestCase {
     window.close()
   }
 
+  func test_fullScreen_transition() {
+    // given installed buttons with the mouse over the cluster
+    let window = makeWindow()
+    let trafficLights = AquaTrafficLightButtons(window: window)
+    trafficLights.install()
+    sendMouseEvent(window, inside: true)
+    expect(buttonView(window, .zoom)?.state) == .hovered(.enterFullScreen)
+
+    // when the window enters full screen, then the zoom button shows the exit glyph
+    NotificationCenter.default.post(name: NSWindow.willEnterFullScreenNotification, object: window)
+    NotificationCenter.default.post(name: NSWindow.didEnterFullScreenNotification, object: window)
+    sendMouseEvent(window, inside: true)
+    expect(buttonView(window, .zoom)?.state) == .hovered(.exitFullScreen)
+
+    // when the window starts exiting full screen, then the glyphs are hidden during the transition
+    NotificationCenter.default.post(name: NSWindow.willExitFullScreenNotification, object: window)
+    expect(buttonView(window, .close)?.state) == .inactive(nil)
+    expect(buttonView(window, .zoom)?.state) == .inactive(nil)
+
+    // when the transition ends, then the mouse is checked again (it's not over the window in tests)
+    NotificationCenter.default.post(name: NSWindow.didExitFullScreenNotification, object: window)
+    sendMouseEvent(window, inside: true)
+    expect(buttonView(window, .zoom)?.state) == .hovered(.enterFullScreen)
+  }
+
+  func test_frameChange_rechecksCursor() {
+    // given installed buttons with the mouse over the cluster
+    let window = makeWindow()
+    let trafficLights = AquaTrafficLightButtons(window: window)
+    trafficLights.install()
+    sendMouseEvent(window, inside: true)
+    expect(buttonView(window, .close)?.state) == .hovered(.close)
+
+    // when the window moves under a still cursor (the real cursor isn't over the test window)
+    NotificationCenter.default.post(name: NSWindow.didMoveNotification, object: window)
+
+    // then the glyphs are hidden, without a mouse event from the tracking area
+    expect(buttonView(window, .close)?.state) == .inactive(nil)
+  }
+
+  func test_accentColorChange() {
+    // given installed buttons
+    let window = makeWindow()
+    let trafficLights = AquaTrafficLightButtons(window: window)
+    trafficLights.install()
+
+    // when the control tint changes
+    NotificationCenter.default.post(name: NSColor.currentControlTintDidChangeNotification, object: nil)
+
+    // then the buttons follow the system's graphite setting
+    for view in buttonViews(window) {
+      expect(view.isGraphite) == AquaTrafficLightButtons.isGraphiteAccentColor()
+    }
+  }
+
+  func test_install_titlebarInAnotherWindow() throws {
+    // given a window whose titlebar is hosted by another window, as AppKit does in full screen
+    let window = makeWindow()
+    let titlebarContainerView = try window.standardWindowButton(.closeButton)?.superview?.superview.unwrap()
+    let hostWindow = makeWindow(styleMask: [.borderless])
+    try titlebarContainerView.unwrap().removeFromSuperview()
+    try hostWindow.contentView?.addSubview(titlebarContainerView.unwrap())
+
+    // when installing
+    let trafficLights = AquaTrafficLightButtons(window: window)
+    trafficLights.install()
+
+    // then the buttons are installed in the titlebar
+    expect(buttonViews(window).count) == 3
+  }
+
   // MARK: - Hidden
 
   func test_setButtonHidden() {
@@ -387,7 +458,7 @@ class AquaTrafficLightButtonsTests: XCTestCase {
     expect(buttonView(window, .zoom)?.isHidden) == true
   }
 
-  func test_hiddenButton_isNotHovered() throws {
+  func test_hiddenButton_staysInHoverRegion() throws {
     // given installed buttons with the zoom button hidden
     let window = makeWindow()
     let trafficLights = AquaTrafficLightButtons(window: window)
@@ -411,14 +482,10 @@ class AquaTrafficLightButtonsTests: XCTestCase {
     ).unwrap()
     owner.mouseMoved(with: event)
 
-    // then the visible buttons don't show their glyphs
-    expect(buttonView(window, .close)?.state) == .inactive(nil)
-    expect(buttonView(window, .miniaturize)?.state) == .inactive(nil)
-
-    // when all buttons are hidden, then the cluster isn't tracked
-    trafficLights.setCloseButtonHidden(true)
-    trafficLights.setMiniaturizeButtonHidden(true)
-    expect(titlebarView.trackingAreas.filter { !($0.owner is NSView) }.count) == 0
+    // then the visible buttons show their glyphs, like the system buttons, whose hover region keeps the hidden
+    // button's spot
+    expect(buttonView(window, .close)?.state) == .hovered(.close)
+    expect(buttonView(window, .miniaturize)?.state) == .hovered(.miniaturize)
   }
 
   // MARK: - Full Screen

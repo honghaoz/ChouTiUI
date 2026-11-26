@@ -72,11 +72,9 @@ public final class AquaTrafficLightButtons {
   private weak var window: NSWindow?
 
   /// The views, observations and monitors of the installation, which `uninstall()` removes.
-  ///
-  /// It's a separate object so that `deinit` can hand it to the main thread for the teardown.
   private let installation = Installation()
 
-  /// The frame of the traffic light cluster in the container view, the union of the visible system buttons' frames.
+  /// The frame of the traffic light cluster in the container view, the union of the system buttons' frames.
   private var clusterFrame: CGRect?
 
   /// Whether the mouse is over the traffic light cluster.
@@ -105,19 +103,10 @@ public final class AquaTrafficLightButtons {
   }
 
   deinit {
-    // the deinit can run off the main thread, e.g. when a task releases the last reference, and the teardown changes
-    // views, so it runs on the main thread
-    let installation = installation
-    if Thread.isMainThread {
-      MainActor.assumeIsolated {
-        installation.tearDown()
-      }
-    } else {
-      DispatchQueue.main.async {
-        MainActor.assumeIsolated {
-          installation.tearDown()
-        }
-      }
+    // the runtime runs the deinit of a main actor class on the main thread, even when the last reference is released
+    // on another thread
+    MainActor.assumeIsolated {
+      installation.tearDown()
     }
   }
 
@@ -187,9 +176,6 @@ public final class AquaTrafficLightButtons {
 
     syncLayout()
     startObserving(window: window)
-
-    // the window can already be visible with the cursor over the buttons
-    isMouseInside = isCursorInsideCluster()
     update()
   }
 
@@ -220,12 +206,7 @@ public final class AquaTrafficLightButtons {
       return
     }
 
-    let oldClusterFrame = clusterFrame
     syncLayout()
-    if clusterFrame != oldClusterFrame {
-      // the cluster moved or resized under the cursor (e.g. a button is hidden), which the tracking area doesn't report
-      isMouseInside = isCursorInsideCluster()
-    }
     update()
   }
 
@@ -268,9 +249,6 @@ public final class AquaTrafficLightButtons {
       systemButton.isHidden = isHidden
     }
     installation.buttonViews[kind]?.isHidden = isHidden
-
-    // the hover region covers the visible buttons
-    refresh()
   }
 
   /// Returns the system button of a kind.
@@ -303,10 +281,9 @@ public final class AquaTrafficLightButtons {
         buttonView.isHidden = systemButton.isHidden
       }
 
-      // a hidden button doesn't show its glyph, so it isn't part of the hover region
-      if !systemButton.isHidden {
-        clusterFrame = clusterFrame.map { $0.union(systemButton.frame) } ?? systemButton.frame
-      }
+      // a hidden button stays in the hover region, like the system's button group (`NSThemeFrame`'s
+      // `leftButtonGroupInteractionFrame` keeps a hidden zoom button's spot)
+      clusterFrame = clusterFrame.map { $0.union(systemButton.frame) } ?? systemButton.frame
     }
 
     self.clusterFrame = clusterFrame
@@ -421,12 +398,13 @@ public final class AquaTrafficLightButtons {
     }
 
     let screenLocation = NSEvent.mouseLocation
-    guard NSWindow.windowNumber(at: screenLocation, belowWindowWithWindowNumber: 0) == containerWindow.windowNumber else {
+    let locationInWindow = containerWindow.convertPoint(fromScreen: screenLocation)
+    guard clusterFrame.contains(containerView.convert(locationInWindow, from: nil)) else {
       return false
     }
 
-    let locationInWindow = containerWindow.convertPoint(fromScreen: screenLocation)
-    return clusterFrame.contains(containerView.convert(locationInWindow, from: nil))
+    // the window server query is checked last, it's the expensive one
+    return NSWindow.windowNumber(at: screenLocation, belowWindowWithWindowNumber: 0) == containerWindow.windowNumber
   }
 
   // MARK: - Observation
@@ -479,8 +457,10 @@ public final class AquaTrafficLightButtons {
 
     let accentColorToken = DistributedNotificationCenter.default().addObserver(forName: .accentColorDidChange, object: nil, queue: .main) { [weak self] _ in
       // AppKit updates the control tint after the notification, so it's read on the next run loop
-      onMainAsync { [weak self] in
-        self?.accentColorDidChange()
+      DispatchQueue.main.async { [weak self] in
+        MainActor.assumeIsolated {
+          self?.accentColorDidChange()
+        }
       }
     }
     installation.notificationObservers.append((DistributedNotificationCenter.default(), accentColorToken))
@@ -574,9 +554,9 @@ public final class AquaTrafficLightButtons {
 
   /// Schedules a refresh on the next run loop after the window becomes key for the first time since it's shown.
   ///
-  /// When an app launches, the window can become key before AppKit finishes activating the app, and the system
-  /// buttons report their states for the inactive window. Refreshing again on the next run loop picks up the final
-  /// states, so the buttons don't stay gray.
+  /// When an app launches, the window can become key before AppKit finishes activating the app, and the system buttons
+  /// report their states for the inactive window. Refreshing again on the next run loop picks up the final states, so
+  /// the buttons don't stay gray.
   private func scheduleKeyWindowRefresh() {
     guard !hasBecomeKey else {
       return
@@ -599,7 +579,7 @@ public final class AquaTrafficLightButtons {
     // the window is shown (e.g. ordered front or reopened): the tracking area doesn't report a cursor that is already
     // there, so the cursor location is checked
     startEventMonitors()
-    if !isExitingFullScreen, installation.fullScreenTransitionTimer == nil {
+    if !isExitingFullScreen {
       isFullScreen = window.styleMask.contains(.fullScreen)
     }
     syncLayout()
@@ -616,8 +596,6 @@ public final class AquaTrafficLightButtons {
     isExitingFullScreen = false
     hasBecomeKey = false
     installation.cancelCloseButtonRefreshes()
-    installation.fullScreenTransitionTimer?.invalidate()
-    installation.fullScreenTransitionTimer = nil
 
     // the monitors are process-wide, they shouldn't run for a closed window. they start again when the window shows.
     installation.stopEventMonitors()
@@ -642,32 +620,15 @@ public final class AquaTrafficLightButtons {
     // the glyphs are hidden while the window exits full screen
     isExitingFullScreen = !isEntering && isFullScreen
     refresh()
-
-    // a failed transition is only reported to the window's delegate, without a "did" notification, so the state is
-    // checked after the transition would have ended
-    installation.fullScreenTransitionTimer?.invalidate()
-    let timer = Timer(timeInterval: Constants.fullScreenTransitionTimeout, repeats: false) { [weak self] _ in
-      MainActor.assumeIsolated {
-        guard let self, let window = self.window else {
-          return
-        }
-        self.windowFullScreenDidChange(isFullScreen: window.styleMask.contains(.fullScreen))
-      }
-    }
-    RunLoop.main.add(timer, forMode: .common)
-    installation.fullScreenTransitionTimer = timer
   }
 
-  /// Handles the end of a full screen transition, or the check after a failed one.
+  /// Handles the end of a full screen transition.
   ///
   /// - Parameter isFullScreen: Whether the window is in full screen.
   private func windowFullScreenDidChange(isFullScreen: Bool) {
     guard installation.isInstalled else {
       return
     }
-
-    installation.fullScreenTransitionTimer?.invalidate()
-    installation.fullScreenTransitionTimer = nil
 
     self.isFullScreen = isFullScreen
     isExitingFullScreen = false
@@ -692,10 +653,10 @@ public final class AquaTrafficLightButtons {
 
   /// Schedules refreshes for a short period after the close button changes.
   ///
-  /// The close button can show its pressed state briefly without a layout to restore it, e.g. when a close is
-  /// cancelled by the window's delegate (`windowShouldClose(_:)`), or when the button is disabled for a sheet. Refreshing
-  /// a few times after each layout picks up the restored state. The refreshes are cheap: the buttons only redraw when
-  /// their states change.
+  /// The close button can show its pressed state briefly without a layout to restore it, e.g. when a close is cancelled
+  /// by the window's delegate (`windowShouldClose(_:)`), or when the button is disabled for a sheet. Refreshing a few
+  /// times after each layout picks up the restored state. The refreshes are cheap: the buttons only redraw when their
+  /// states change.
   private func scheduleCloseButtonRefreshes() {
     installation.cancelCloseButtonRefreshes()
 
@@ -743,10 +704,6 @@ public final class AquaTrafficLightButtons {
 
     /// The duration of the refreshes after the close button changes.
     static let closeButtonRefreshDuration: TimeInterval = 0.2
-
-    /// The time after a full screen transition starts to check the window's mode, in case the transition fails. It's
-    /// longer than the transition animation.
-    static let fullScreenTransitionTimeout: TimeInterval = 3
   }
 }
 
@@ -771,8 +728,8 @@ private final class Installation {
   /// The titlebar background views that are removed, with where to add them back.
   private var removedBackgroundViews: [RemovedView] = []
 
-  /// The owner of the tracking area, which forwards the mouse events. It's kept here because the tracking area
-  /// doesn't retain its owner.
+  /// The owner of the tracking area, which forwards the mouse events. It's kept here because the tracking area doesn't
+  /// retain its owner.
   var mouseEventReceiver: MouseEventReceiver?
 
   /// The tracking area over the traffic light cluster.
@@ -795,9 +752,6 @@ private final class Installation {
 
   /// The timers that refresh the buttons after the close button changes.
   var closeButtonRefreshTimers: [Timer] = []
-
-  /// The timer that checks the window's mode after a full screen transition starts.
-  var fullScreenTransitionTimer: Timer?
 
   /// Removes titlebar background views, remembering where to add them back.
   ///
@@ -880,8 +834,6 @@ private final class Installation {
     layoutObservationTokens.removeAll()
 
     cancelCloseButtonRefreshes()
-    fullScreenTransitionTimer?.invalidate()
-    fullScreenTransitionTimer = nil
     stopEventMonitors()
     removeTrackingArea()
     mouseEventReceiver = nil
@@ -1031,13 +983,16 @@ private struct TitlebarHierarchy {
       return nil
     }
 
-    guard let titlebarContainerView = themeFrame.subviews.first(where: { $0.className == "NSTitlebarContainerView" }) else {
-      ChouTi.assertFailure("NSTitlebarContainerView isn't found")
+    // the titlebar is found from a system button: in full screen, AppKit moves NSTitlebarContainerView out of
+    // NSThemeFrame into a separate window (NSToolbarFullScreenWindow)
+    let systemButton = [NSWindow.ButtonType.closeButton, .miniaturizeButton, .zoomButton].lazy.compactMap { window.standardWindowButton($0) }.first
+    guard let titlebarView = systemButton?.superview, titlebarView.className == "NSTitlebarView" else {
+      ChouTi.assertFailure("NSTitlebarView isn't found")
       return nil
     }
 
-    guard let titlebarView = titlebarContainerView.subviews.first(where: { $0.className == "NSTitlebarView" }) else {
-      ChouTi.assertFailure("NSTitlebarView isn't found")
+    guard let titlebarContainerView = titlebarView.superview, titlebarContainerView.className == "NSTitlebarContainerView" else {
+      ChouTi.assertFailure("NSTitlebarContainerView isn't found")
       return nil
     }
 
