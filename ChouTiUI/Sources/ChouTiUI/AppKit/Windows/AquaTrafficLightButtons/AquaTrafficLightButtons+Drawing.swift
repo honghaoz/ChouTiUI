@@ -67,16 +67,16 @@ enum AquaTrafficLightButtonKind: CaseIterable {
 
   private enum Constants {
 
-    // iTunes 11.4 -> #fc564c, Big Sur -> #fe5f57
+    /// iTunes 11.4 -> #fc564c, Big Sur -> #fe5f57
     static let closeColor = ThemedColor(Color.hex("#fe5f57"))
 
-    // iTunes 11.4 -> #f8c35f, Big Sur -> #febc2e
+    /// iTunes 11.4 -> #f8c35f, Big Sur -> #febc2e
     static let miniaturizeColor = ThemedColor(Color.hex("#febc2e"))
 
-    // iTunes 11.4 -> #99d372, Big Sur -> #28c840
+    /// iTunes 11.4 -> #99d372, Big Sur -> #28c840
     static let zoomColor = ThemedColor(Color.hex("#28c840"))
 
-    // the graphite accent color turns the system buttons gray.
+    /// The graphite accent color turns the system buttons gray.
     static let graphiteColor = ThemedColor(Color.hex("#8E8E8E"))
   }
 }
@@ -305,7 +305,7 @@ final class AquaTrafficLightButtonView: ComposeView {
     /// How much darker the pressed button is than the active button.
     static let pressedDarkening: CGFloat = 0.25
 
-    // iTunes 11.4 -> #ebeceb, Big Sur -> #d3d4d3
+    /// iTunes 11.4 -> #ebeceb, Big Sur -> #d3d4d3
     static let inactiveColor = ThemedColor(light: Color.hex("#E6E6E6"), dark: Color.hex("#3D3D3D"))
   }
 }
