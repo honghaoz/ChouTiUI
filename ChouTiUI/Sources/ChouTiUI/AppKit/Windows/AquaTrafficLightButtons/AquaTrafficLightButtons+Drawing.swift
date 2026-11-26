@@ -137,6 +137,7 @@ final class AquaTrafficLightButtonView: ComposeView {
       state: state,
       size: size,
       theme: effectiveAppearance.theme, // `theme` is ambiguous between ComposeUI and ChouTiUI
+      pixelSize: pixelSize,
       isTahoe: System.macOS_tahoe
     )
     // the circle is at the top left of the frame: the system button images leave their extra space at the trailing and
@@ -144,11 +145,45 @@ final class AquaTrafficLightButtonView: ComposeView {
     .frame(size, alignment: .topLeft)
   }
 
+  override func setFrameSize(_ newSize: NSSize) {
+    let oldSize = frame.size
+    super.setFrameSize(newSize)
+
+    // the content is made for the view's size, and a resize only lays out the content that is already made
+    if newSize != oldSize {
+      setNeedsRefresh(animated: false)
+    }
+  }
+
   override func hitTest(_ point: NSPoint) -> NSView? {
     nil // clicks go to the system button below
   }
 
   override var acceptsFirstResponder: Bool { false }
+
+  // the system buttons below are the accessible controls, the drawing isn't
+  override func isAccessibilityElement() -> Bool {
+    false
+  }
+
+  override func accessibilityChildren() -> [Any]? {
+    []
+  }
+
+  /// The size of a device pixel on the window's screen, for the hairlines.
+  var pixelSize: CGFloat {
+    #if DEBUG
+    if let backingScaleFactorOverride {
+      return 1 / backingScaleFactorOverride
+    }
+    #endif
+    return 1 / (window?.backingScaleFactor ?? Screen.mainScreenScale)
+  }
+
+  #if DEBUG
+  /// The screen scale to draw for instead of the window's, for tests.
+  var backingScaleFactorOverride: CGFloat?
+  #endif
 
   // MARK: - Drawing
 
@@ -162,12 +197,14 @@ final class AquaTrafficLightButtonView: ComposeView {
   ///   - state: The appearance state of the button.
   ///   - size: The size of the system button. The button circle is inset by 1pt to match the system button's size.
   ///   - theme: The theme to draw for.
+  ///   - pixelSize: The size of a device pixel on the screen, for the hairlines.
   ///   - isTahoe: Whether to use the macOS 26 (Tahoe) glyph geometry.
   /// - Returns: The button node.
   static func makeButton(primaryColor: ThemedColor,
                          state: AquaTrafficLightButtonState,
                          size: CGSize,
                          theme: Theme,
+                         pixelSize: CGFloat,
                          isTahoe: Bool) -> some ComposeNode
   {
     // screenshots: https://forums.macrumors.com/threads/snow-leopard-theme-for-el-capitan-ongoing-project.1956681/page-2
@@ -246,11 +283,11 @@ final class AquaTrafficLightButtonView: ComposeView {
           layer.path = glyph.path(in: layer.bounds, isTahoe: isTahoe)
         })
         // inner radius shadow
-        .innerShadow(color: .black, opacity: 0.6, radius: .pixel, offset: CGSize(width: 0, height: .pixel)) {
+        .innerShadow(color: .black, opacity: 0.6, radius: pixelSize, offset: CGSize(width: 0, height: pixelSize)) {
           glyph.path(in: CGRect(origin: .zero, size: $0), isTahoe: isTahoe)
         }
         // inner top dark shadow
-        .innerShadow(color: .black, opacity: 0.3, radius: 0, offset: CGSize(width: 0, height: .pixel)) {
+        .innerShadow(color: .black, opacity: 0.3, radius: 0, offset: CGSize(width: 0, height: pixelSize)) {
           glyph.path(in: CGRect(origin: .zero, size: $0), isTahoe: isTahoe)
         }
       }
@@ -261,11 +298,11 @@ final class AquaTrafficLightButtonView: ComposeView {
           // the path strokes on both sides of the circle, the mask clips the outer half
           layer.fillColor = nil
           layer.strokeColor = Color.black(alpha: isInactive ? 0.4 : 0.3).cgColor
-          layer.lineWidth = .pixel * 2
+          layer.lineWidth = pixelSize * 2
           layer.path = circlePath(in: layer.bounds.size)
         })
         .shape(Circle())
-        .padding(-.pixel)
+        .padding(-pixelSize)
       }
     }
   }

@@ -98,8 +98,9 @@ struct AquaTrafficLightInputs: Equatable {
   /// Whether the window is in full screen.
   var isFullScreen: Bool
 
-  /// Whether the window is at the normal window level. Only normal windows can enter full screen.
-  var isNormalWindow: Bool
+  /// Whether the zoom button enters full screen. Otherwise, it zooms the window, e.g. for a panel, a window with a
+  /// sheet, or a window that opts out of full screen.
+  var canEnterFullScreen: Bool
 
   /// Whether the window has unsaved changes.
   var isDocumentEdited: Bool
@@ -154,13 +155,13 @@ struct AquaTrafficLightOutputs: Equatable {
 
 /// Resolves the Aqua traffic light button states from the window state.
 ///
-/// | Window state                | Close                   | Miniaturize   | Zoom                                         |
-/// |-----------------------------|-------------------------|---------------|----------------------------------------------|
-/// | key, mouse inside, Option   | × (or dot)              | −             | + (exit full screen glyph in full screen)    |
-/// | key, mouse inside           | × (or dot)              | −             | full screen glyphs, + for non-normal windows |
-/// | key, mouse outside          | colored (dot if edited) | colored       | colored                                      |
-/// | not key, mouse inside       | × (or dot)              | −             | full screen glyphs (Option is ignored)       |
-/// | not key, mouse outside      | gray (dot if edited)    | gray          | gray                                         |
+/// | Window state              | Close                   | Miniaturize | Zoom                                                |
+/// |---------------------------|-------------------------|-------------|-----------------------------------------------------|
+/// | key, mouse inside, Option | × (or dot)              | −           | + (exit full screen glyph in full screen)           |
+/// | key, mouse inside         | × (or dot)              | −           | full screen glyphs, + if it can't enter full screen |
+/// | key, mouse outside        | colored (dot if edited) | colored     | colored                                             |
+/// | not key, mouse inside     | × (or dot)              | −           | full screen glyphs (Option is ignored)              |
+/// | not key, mouse outside    | gray (dot if edited)    | gray        | gray                                                |
 ///
 /// A highlighted (pressed) system button shows the pressed state, and a disabled system button shows the inactive state.
 ///
@@ -191,7 +192,7 @@ func resolveAquaTrafficLightStates(_ inputs: AquaTrafficLightInputs) -> AquaTraf
     let zoomGlyph: AquaTrafficLightGlyph
     if inputs.isKey, inputs.isOptionPressed {
       zoomGlyph = inputs.isFullScreen ? .exitFullScreen : .zoom
-    } else if inputs.isNormalWindow {
+    } else if inputs.canEnterFullScreen {
       zoomGlyph = inputs.isFullScreen ? .exitFullScreen : .enterFullScreen
     } else {
       zoomGlyph = .zoom

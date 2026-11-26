@@ -47,7 +47,7 @@ class AquaTrafficLightButtons_StateTests: XCTestCase {
                           isMouseInside: Bool,
                           isOptionPressed: Bool = false,
                           isFullScreen: Bool = false,
-                          isNormalWindow: Bool = true,
+                          canEnterFullScreen: Bool = true,
                           isDocumentEdited: Bool = false) -> AquaTrafficLightInputs
   {
     AquaTrafficLightInputs(
@@ -55,7 +55,7 @@ class AquaTrafficLightButtons_StateTests: XCTestCase {
       isMouseInside: isMouseInside,
       isOptionPressed: isOptionPressed,
       isFullScreen: isFullScreen,
-      isNormalWindow: isNormalWindow,
+      canEnterFullScreen: canEnterFullScreen,
       isDocumentEdited: isDocumentEdited,
       close: enabled,
       miniaturize: enabled,
@@ -124,9 +124,9 @@ class AquaTrafficLightButtons_StateTests: XCTestCase {
     expect(outputs.zoom) == .hovered(.exitFullScreen)
   }
 
-  func test_key_mouseInside_nonNormalWindow_showsZoomGlyph() {
-    // given a key window above the normal level (e.g. a floating panel), which can't enter full screen
-    let inputs = makeInputs(isKey: true, isMouseInside: true, isNormalWindow: false)
+  func test_key_mouseInside_cannotEnterFullScreen_showsZoomGlyph() {
+    // given a key window that can't enter full screen (e.g. a panel, a window with a sheet)
+    let inputs = makeInputs(isKey: true, isMouseInside: true, canEnterFullScreen: false)
 
     // when resolving
     let outputs = resolveAquaTrafficLightStates(inputs)
@@ -215,9 +215,9 @@ class AquaTrafficLightButtons_StateTests: XCTestCase {
     expect(outputs) == AquaTrafficLightOutputs(close: .hovered(.close), miniaturize: .hovered(.miniaturize), zoom: .hovered(.enterFullScreen))
   }
 
-  func test_nonKey_mouseInside_nonNormalWindow_showsZoomGlyph() {
-    // given a non-key window above the normal level with the mouse over the cluster
-    let inputs = makeInputs(isKey: false, isMouseInside: true, isNormalWindow: false)
+  func test_nonKey_mouseInside_cannotEnterFullScreen_showsZoomGlyph() {
+    // given a non-key window that can't enter full screen, with the mouse over the cluster
+    let inputs = makeInputs(isKey: false, isMouseInside: true, canEnterFullScreen: false)
 
     // when resolving
     let outputs = resolveAquaTrafficLightStates(inputs)

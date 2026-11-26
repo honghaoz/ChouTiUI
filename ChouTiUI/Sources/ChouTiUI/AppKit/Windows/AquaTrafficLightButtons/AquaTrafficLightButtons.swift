@@ -58,41 +58,26 @@ import ChouTi
 /// resizing, full screen and the system button layout. Call `refresh()` after a change that the window doesn't
 /// announce.
 ///
-/// - Important: `install()` changes the window's titlebar view hierarchy permanently: it removes the titlebar
-///   background views (`NSVisualEffectView`, `_NSTitlebarDecorationView`, `NSTitlebarBackgroundView`) so that the
-///   window draws its own titlebar background, and makes the system buttons almost transparent. The hierarchy is
-///   private to AppKit, so the installation checks it first and leaves the window untouched if it isn't recognized.
+/// - Important: `install()` changes the window's titlebar view hierarchy: it removes the titlebar background views
+///   (`NSVisualEffectView`, `_NSTitlebarDecorationView`, `NSTitlebarBackgroundView`) so that the window draws its own
+///   titlebar background, and makes the system buttons almost transparent. The hierarchy is private to AppKit, so the
+///   installation checks it first and leaves the window untouched if it isn't recognized. `uninstall()` restores it.
 ///
-/// - Note: The buttons stop working when the instance is deallocated, keep a strong reference to it for the window's
-///   lifetime.
+/// - Note: The buttons are uninstalled when the instance is deallocated, keep a strong reference to it for as long as
+///   the window shows the buttons.
 @MainActor
 public final class AquaTrafficLightButtons {
 
   /// The window that the buttons are installed on.
   private weak var window: NSWindow?
 
-  /// Whether the buttons are installed.
-  private var isInstalled = false
+  /// The views, observations and monitors of the installation, which `uninstall()` removes.
+  ///
+  /// It's a separate object so that `deinit` can hand it to the main thread for the teardown.
+  private let installation = Installation()
 
-  /// The view that holds the system buttons and the custom buttons, `NSTitlebarView`.
-  private weak var containerView: NSView?
-
-  /// The system buttons, by kind.
-  private var systemButtons: [AquaTrafficLightButtonKind: WeakBox<NSButton>] = [:]
-
-  /// The custom buttons, by kind.
-  private var buttonViews: [AquaTrafficLightButtonKind: AquaTrafficLightButtonView] = [:]
-
-  /// The frame of the traffic light cluster in the container view, the union of the system buttons' frames.
+  /// The frame of the traffic light cluster in the container view, the union of the visible system buttons' frames.
   private var clusterFrame: CGRect?
-
-  /// The tracking area over the traffic light cluster.
-  private var trackingArea: NSTrackingArea?
-
-  /// The owner of the tracking area, which forwards the mouse events.
-  private lazy var mouseEventReceiver = MouseEventReceiver { [weak self] event in
-    self?.handleMouseEvent(event)
-  }
 
   /// Whether the mouse is over the traffic light cluster.
   private var isMouseInside = false
@@ -108,25 +93,7 @@ public final class AquaTrafficLightButtons {
   private var hasBecomeKey = false
 
   /// Whether the system uses the graphite accent color.
-  private var isGraphite = AquaTrafficLightButtons.isGraphiteAccentColor()
-
-  /// The notification observers of the window and the system.
-  private var notificationObservers: [(center: NotificationCenter, token: NSObjectProtocol)] = []
-
-  /// The key-value observations of the window and the system buttons.
-  private var keyValueObservations: [NSKeyValueObservation] = []
-
-  /// The tokens of the system buttons' layout observations.
-  private var layoutObservationTokens: [CancellableToken] = []
-
-  /// The local monitor of the modifier flag changes, for the Option key.
-  private var flagsChangedMonitor: Any?
-
-  /// The global monitor of the mouse events in other apps, which means the mouse is outside of the window.
-  private var globalMouseMonitor: Any?
-
-  /// The timers that refresh the buttons after the close button changes, see `scheduleCloseButtonRefreshes()`.
-  private var closeButtonRefreshTimers: [Timer] = []
+  private var isGraphite = false
 
   /// Creates traffic light buttons for a window.
   ///
@@ -138,9 +105,19 @@ public final class AquaTrafficLightButtons {
   }
 
   deinit {
-    // the deinit isn't isolated to the main actor, but the instance is only used on the main thread
-    MainActor.assumeIsolated {
-      stopObserving()
+    // the deinit can run off the main thread, e.g. when a task releases the last reference, and the teardown changes
+    // views, so it runs on the main thread
+    let installation = installation
+    if Thread.isMainThread {
+      MainActor.assumeIsolated {
+        installation.tearDown()
+      }
+    } else {
+      DispatchQueue.main.async {
+        MainActor.assumeIsolated {
+          installation.tearDown()
+        }
+      }
     }
   }
 
@@ -151,7 +128,7 @@ public final class AquaTrafficLightButtons {
   /// The installation removes the titlebar background views and makes the system buttons almost transparent, see the
   /// type's documentation. Calling it again does nothing.
   public func install() {
-    guard !isInstalled else {
+    guard !installation.isInstalled else {
       return
     }
 
@@ -185,25 +162,53 @@ public final class AquaTrafficLightButtons {
       ChouTi.assertFailure("the window already has traffic light buttons installed by another instance")
       return
     }
+    guard let backgroundViews = hierarchy.backgroundViews(window: window) else {
+      return
+    }
 
-    hierarchy.removeBackgroundViews(window: window)
-    containerView = hierarchy.titlebarView
+    installation.removeBackgroundViews(backgroundViews)
+    installation.containerView = hierarchy.titlebarView
+    installation.mouseEventReceiver = MouseEventReceiver { [weak self] event in
+      self?.handleMouseEvent(event)
+    }
 
+    isGraphite = Self.isGraphiteAccentColor()
     for (kind, systemButton) in systemButtons {
       let buttonView = AquaTrafficLightButtonView(kind: kind)
       buttonView.isGraphite = isGraphite
       hierarchy.titlebarView.addSubview(buttonView, positioned: .above, relativeTo: systemButton)
 
-      self.systemButtons[kind] = WeakBox(systemButton)
-      buttonViews[kind] = buttonView
+      installation.systemButtons[kind] = WeakBox(systemButton)
+      installation.buttonViews[kind] = buttonView
     }
 
-    isInstalled = true
+    installation.isInstalled = true
     isFullScreen = window.styleMask.contains(.fullScreen)
 
     syncLayout()
     startObserving(window: window)
+
+    // the window can already be visible with the cursor over the buttons
+    isMouseInside = isCursorInsideCluster()
     update()
+  }
+
+  /// Uninstalls the buttons from the window.
+  ///
+  /// The custom buttons are removed, the system buttons are visible again, and the titlebar background views that
+  /// `install()` removed are added back. The buttons can be installed again after this.
+  ///
+  /// The buttons are also uninstalled when the instance is deallocated.
+  public func uninstall() {
+    guard installation.isInstalled else {
+      return
+    }
+
+    installation.tearDown()
+    clusterFrame = nil
+    isMouseInside = false
+    isExitingFullScreen = false
+    hasBecomeKey = false
   }
 
   /// Refreshes the buttons with the current window state.
@@ -211,10 +216,16 @@ public final class AquaTrafficLightButtons {
   /// The buttons observe the window to stay in sync. Call this method after a change that the window doesn't
   /// announce, for example, a change of the system buttons' enabled state.
   public func refresh() {
-    guard isInstalled else {
+    guard installation.isInstalled else {
       return
     }
+
+    let oldClusterFrame = clusterFrame
     syncLayout()
+    if clusterFrame != oldClusterFrame {
+      // the cluster moved or resized under the cursor (e.g. a button is hidden), which the tracking area doesn't report
+      isMouseInside = isCursorInsideCluster()
+    }
     update()
   }
 
@@ -256,7 +267,10 @@ public final class AquaTrafficLightButtons {
     if let systemButton = systemButton(kind) ?? window?.standardWindowButton(kind.systemButtonType) {
       systemButton.isHidden = isHidden
     }
-    buttonViews[kind]?.isHidden = isHidden
+    installation.buttonViews[kind]?.isHidden = isHidden
+
+    // the hover region covers the visible buttons
+    refresh()
   }
 
   /// Returns the system button of a kind.
@@ -264,13 +278,13 @@ public final class AquaTrafficLightButtons {
   /// - Parameter kind: The button kind.
   /// - Returns: The system button, or `nil` if the window has no such button.
   private func systemButton(_ kind: AquaTrafficLightButtonKind) -> NSButton? {
-    systemButtons[kind]?.object
+    installation.systemButtons[kind]?.object
   }
 
   /// Makes the custom buttons follow the system buttons' frames, and updates the tracking area.
   private func syncLayout() {
     var clusterFrame: CGRect?
-    for (kind, buttonView) in buttonViews {
+    for (kind, buttonView) in installation.buttonViews {
       guard let systemButton = systemButton(kind) else {
         continue
       }
@@ -289,11 +303,14 @@ public final class AquaTrafficLightButtons {
         buttonView.isHidden = systemButton.isHidden
       }
 
-      clusterFrame = clusterFrame.map { $0.union(systemButton.frame) } ?? systemButton.frame
+      // a hidden button doesn't show its glyph, so it isn't part of the hover region
+      if !systemButton.isHidden {
+        clusterFrame = clusterFrame.map { $0.union(systemButton.frame) } ?? systemButton.frame
+      }
     }
 
     self.clusterFrame = clusterFrame
-    updateTrackingArea()
+    installation.updateTrackingArea(rect: clusterFrame)
   }
 
   /// Returns the frame of a custom button for a system button frame.
@@ -307,34 +324,11 @@ public final class AquaTrafficLightButtons {
     isTahoe ? systemButtonFrame.insetBy(dx: -1, dy: -1) : systemButtonFrame
   }
 
-  /// Updates the tracking area to cover the traffic light cluster.
-  private func updateTrackingArea() {
-    guard let containerView, let clusterFrame else {
-      return
-    }
-
-    if let trackingArea {
-      guard trackingArea.rect != clusterFrame else {
-        return
-      }
-      containerView.removeTrackingArea(trackingArea)
-    }
-
-    let trackingArea = NSTrackingArea(
-      rect: clusterFrame,
-      options: [.mouseEnteredAndExited, .mouseMoved, .activeAlways, .enabledDuringMouseDrag],
-      owner: mouseEventReceiver,
-      userInfo: nil
-    )
-    containerView.addTrackingArea(trackingArea)
-    self.trackingArea = trackingArea
-  }
-
   // MARK: - Update
 
   /// Resolves the button states from the window state and updates the buttons.
   private func update() {
-    guard isInstalled, let window else {
+    guard installation.isInstalled, let window else {
       return
     }
 
@@ -343,7 +337,7 @@ public final class AquaTrafficLightButtons {
       isMouseInside: isMouseInside && !isExitingFullScreen,
       isOptionPressed: NSEvent.modifierFlags.contains(.option),
       isFullScreen: isFullScreen,
-      isNormalWindow: window.level == .normal,
+      canEnterFullScreen: Self.canEnterFullScreen(window),
       isDocumentEdited: window.isDocumentEdited,
       close: systemButtonState(.close),
       miniaturize: systemButtonState(.miniaturize),
@@ -351,9 +345,30 @@ public final class AquaTrafficLightButtons {
     )
     let outputs = resolveAquaTrafficLightStates(inputs)
 
-    buttonViews[.close]?.state = outputs.close
-    buttonViews[.miniaturize]?.state = outputs.miniaturize
-    buttonViews[.zoom]?.state = outputs.zoom
+    installation.buttonViews[.close]?.state = outputs.close
+    installation.buttonViews[.miniaturize]?.state = outputs.miniaturize
+    installation.buttonViews[.zoom]?.state = outputs.zoom
+  }
+
+  /// Returns whether the zoom button of a window enters full screen, instead of zooming the window.
+  ///
+  /// - Parameter window: The window.
+  /// - Returns: `true` if the zoom button enters full screen.
+  static func canEnterFullScreen(_ window: NSWindow) -> Bool {
+    // only normal windows can enter full screen, and not while a sheet is shown
+    guard window.level == .normal, window.attachedSheet == nil else {
+      return false
+    }
+
+    let behavior = window.collectionBehavior
+    if behavior.contains(.fullScreenPrimary) {
+      return true
+    }
+    if behavior.contains(.fullScreenNone) || behavior.contains(.fullScreenAuxiliary) {
+      return false
+    }
+    // a resizable window can enter full screen by default
+    return window.styleMask.contains(.resizable)
   }
 
   /// Returns the state of a system button.
@@ -373,7 +388,7 @@ public final class AquaTrafficLightButtons {
   private func handleMouseEvent(_ event: NSEvent) {
     // the titlebar is in its own window in full screen, so the events are checked against the container view's window
     let isMouseInside: Bool
-    if let containerView, let containerWindow = containerView.window, event.window === containerWindow, let clusterFrame {
+    if let containerView = installation.containerView, let containerWindow = containerView.window, event.window === containerWindow, let clusterFrame {
       isMouseInside = clusterFrame.contains(containerView.convert(event.locationInWindow, from: nil))
     } else {
       // an event of another window or app, the mouse is outside of the cluster
@@ -401,7 +416,7 @@ public final class AquaTrafficLightButtons {
   /// - Returns: Whether the cursor is over the cluster and the window is the frontmost window at the cursor.
   private func isCursorInsideCluster() -> Bool {
     // the titlebar is in its own window in full screen, so the location is checked in the container view's window
-    guard let containerView, let containerWindow = containerView.window, containerWindow.isVisible, let clusterFrame else {
+    guard let containerView = installation.containerView, let containerWindow = containerView.window, containerWindow.isVisible, let clusterFrame else {
       return false
     }
 
@@ -431,7 +446,7 @@ public final class AquaTrafficLightButtons {
           handler(self)
         }
       }
-      notificationObservers.append((center, token))
+      installation.notificationObservers.append((center, token))
     }
 
     // the frame changes can move the cluster away from a still cursor (e.g. zooming), which the tracking area doesn't
@@ -445,6 +460,10 @@ public final class AquaTrafficLightButtons {
     observe(NSWindow.willCloseNotification) { $0.windowWillClose() }
     observe(NSWindow.didChangeBackingPropertiesNotification) { $0.windowBackingPropertiesDidChange() }
 
+    // a sheet turns the full screen glyph into "+"
+    observe(NSWindow.willBeginSheetNotification) { $0.refresh() }
+    observe(NSWindow.didEndSheetNotification) { $0.refresh() }
+
     observe(NSWindow.willEnterFullScreenNotification) { $0.windowFullScreenWillChange(isEntering: true) }
     observe(NSWindow.didEnterFullScreenNotification) { $0.windowFullScreenDidChange(isFullScreen: true) }
     observe(NSWindow.willExitFullScreenNotification) { $0.windowFullScreenWillChange(isEntering: false) }
@@ -456,7 +475,7 @@ public final class AquaTrafficLightButtons {
         self?.accentColorDidChange()
       }
     }
-    notificationObservers.append((center, controlTintToken))
+    installation.notificationObservers.append((center, controlTintToken))
 
     let accentColorToken = DistributedNotificationCenter.default().addObserver(forName: .accentColorDidChange, object: nil, queue: .main) { [weak self] _ in
       // AppKit updates the control tint after the notification, so it's read on the next run loop
@@ -464,9 +483,9 @@ public final class AquaTrafficLightButtons {
         self?.accentColorDidChange()
       }
     }
-    notificationObservers.append((DistributedNotificationCenter.default(), accentColorToken))
+    installation.notificationObservers.append((DistributedNotificationCenter.default(), accentColorToken))
 
-    keyValueObservations.append(
+    installation.keyValueObservations.append(
       window.observe(\.isDocumentEdited, options: [.new]) { [weak self] _, _ in
         onMainAsync { [weak self] in
           self?.refresh()
@@ -481,7 +500,7 @@ public final class AquaTrafficLightButtons {
 
       // the system buttons lay out when their states change (highlighted, enabled, the document edited dot), which
       // drives the custom buttons' states
-      layoutObservationTokens.append(
+      installation.layoutObservationTokens.append(
         systemButton.onLayoutSubviews { [weak self] _ in
           guard let self else {
             return
@@ -493,7 +512,7 @@ public final class AquaTrafficLightButtons {
         }
       )
 
-      keyValueObservations.append(
+      installation.keyValueObservations.append(
         systemButton.observe(\.isEnabled, options: [.new]) { [weak self] _, _ in
           onMainAsync { [weak self] in
             self?.refresh()
@@ -505,36 +524,16 @@ public final class AquaTrafficLightButtons {
     startEventMonitors()
   }
 
-  /// Stops observing the window, the system buttons and the system.
-  private func stopObserving() {
-    for (center, token) in notificationObservers {
-      center.removeObserver(token)
-    }
-    notificationObservers.removeAll()
-
-    keyValueObservations.forEach { $0.invalidate() }
-    keyValueObservations.removeAll()
-
-    layoutObservationTokens.forEach { $0.cancel() }
-    layoutObservationTokens.removeAll()
-
-    closeButtonRefreshTimers.forEach { $0.invalidate() }
-    closeButtonRefreshTimers.removeAll()
-
-    stopEventMonitors()
-
-    if let trackingArea {
-      containerView?.removeTrackingArea(trackingArea)
-      self.trackingArea = nil
-    }
-  }
-
   /// Starts the event monitors if they're not started.
   ///
   /// The monitors are process-wide, so they're only kept while the window is open, see `windowWillClose()`.
   private func startEventMonitors() {
-    if flagsChangedMonitor == nil {
-      flagsChangedMonitor = NSEvent.addLocalMonitorForEvents(matching: .flagsChanged) { [weak self] event in
+    guard installation.isInstalled else {
+      return
+    }
+
+    if installation.flagsChangedMonitor == nil {
+      installation.flagsChangedMonitor = NSEvent.addLocalMonitorForEvents(matching: .flagsChanged) { [weak self] event in
         MainActor.assumeIsolated {
           self?.update()
         }
@@ -542,9 +541,9 @@ public final class AquaTrafficLightButtons {
       }
     }
 
-    if globalMouseMonitor == nil {
+    if installation.globalMouseMonitor == nil {
       // the events of other apps, so that the cluster is left when the mouse moves to another app's window above it
-      globalMouseMonitor = NSEvent.addGlobalMonitorForEvents(
+      installation.globalMouseMonitor = NSEvent.addGlobalMonitorForEvents(
         matching: [.leftMouseDown, .leftMouseUp, .rightMouseDown, .otherMouseDown, .mouseMoved]
       ) { [weak self] event in
         MainActor.assumeIsolated {
@@ -554,22 +553,13 @@ public final class AquaTrafficLightButtons {
     }
   }
 
-  /// Stops the event monitors.
-  private func stopEventMonitors() {
-    if let flagsChangedMonitor {
-      NSEvent.removeMonitor(flagsChangedMonitor)
-      self.flagsChangedMonitor = nil
-    }
-    if let globalMouseMonitor {
-      NSEvent.removeMonitor(globalMouseMonitor)
-      self.globalMouseMonitor = nil
-    }
-  }
-
   // MARK: - Window Events
 
   /// Handles a change of the window's frame.
   private func windowFrameDidChange() {
+    guard installation.isInstalled else {
+      return
+    }
     syncLayout()
     isMouseInside = isCursorInsideCluster()
     update()
@@ -602,13 +592,16 @@ public final class AquaTrafficLightButtons {
 
   /// Handles a change of the window's visibility, e.g. when it's ordered front.
   private func windowOcclusionStateDidChange() {
-    guard let window, window.occlusionState.contains(.visible) else {
+    guard installation.isInstalled, let window, window.occlusionState.contains(.visible) else {
       return
     }
 
     // the window is shown (e.g. ordered front or reopened): the tracking area doesn't report a cursor that is already
     // there, so the cursor location is checked
     startEventMonitors()
+    if !isExitingFullScreen, installation.fullScreenTransitionTimer == nil {
+      isFullScreen = window.styleMask.contains(.fullScreen)
+    }
     syncLayout()
     isMouseInside = isCursorInsideCluster()
     update()
@@ -619,23 +612,25 @@ public final class AquaTrafficLightButtons {
     // the window can be reopened (e.g. from a menu), so it should start from a clean state instead of showing the
     // hovered or pressed state from when it closed
     isMouseInside = false
+    isFullScreen = false // a closed window leaves full screen
     isExitingFullScreen = false
     hasBecomeKey = false
-    closeButtonRefreshTimers.forEach { $0.invalidate() }
-    closeButtonRefreshTimers.removeAll()
+    installation.cancelCloseButtonRefreshes()
+    installation.fullScreenTransitionTimer?.invalidate()
+    installation.fullScreenTransitionTimer = nil
 
     // the monitors are process-wide, they shouldn't run for a closed window. they start again when the window shows.
-    stopEventMonitors()
+    installation.stopEventMonitors()
 
-    for buttonView in buttonViews.values {
+    for buttonView in installation.buttonViews.values {
       buttonView.state = .normal(nil)
     }
   }
 
   /// Handles a change of the window's screen scale.
   private func windowBackingPropertiesDidChange() {
-    // the hairlines are drawn for the screen's scale
-    for buttonView in buttonViews.values {
+    // the hairlines are drawn for the window's screen scale
+    for buttonView in installation.buttonViews.values {
       buttonView.setNeedsRefresh(animated: false)
     }
   }
@@ -647,12 +642,33 @@ public final class AquaTrafficLightButtons {
     // the glyphs are hidden while the window exits full screen
     isExitingFullScreen = !isEntering && isFullScreen
     refresh()
+
+    // a failed transition is only reported to the window's delegate, without a "did" notification, so the state is
+    // checked after the transition would have ended
+    installation.fullScreenTransitionTimer?.invalidate()
+    let timer = Timer(timeInterval: Constants.fullScreenTransitionTimeout, repeats: false) { [weak self] _ in
+      MainActor.assumeIsolated {
+        guard let self, let window = self.window else {
+          return
+        }
+        self.windowFullScreenDidChange(isFullScreen: window.styleMask.contains(.fullScreen))
+      }
+    }
+    RunLoop.main.add(timer, forMode: .common)
+    installation.fullScreenTransitionTimer = timer
   }
 
-  /// Handles the end of a full screen transition.
+  /// Handles the end of a full screen transition, or the check after a failed one.
   ///
   /// - Parameter isFullScreen: Whether the window is in full screen.
   private func windowFullScreenDidChange(isFullScreen: Bool) {
+    guard installation.isInstalled else {
+      return
+    }
+
+    installation.fullScreenTransitionTimer?.invalidate()
+    installation.fullScreenTransitionTimer = nil
+
     self.isFullScreen = isFullScreen
     isExitingFullScreen = false
 
@@ -669,7 +685,7 @@ public final class AquaTrafficLightButtons {
       return
     }
     self.isGraphite = isGraphite
-    for buttonView in buttonViews.values {
+    for buttonView in installation.buttonViews.values {
       buttonView.isGraphite = isGraphite
     }
   }
@@ -681,8 +697,7 @@ public final class AquaTrafficLightButtons {
   /// a few times after each layout picks up the restored state. The refreshes are cheap: the buttons only redraw when
   /// their states change.
   private func scheduleCloseButtonRefreshes() {
-    closeButtonRefreshTimers.forEach { $0.invalidate() }
-    closeButtonRefreshTimers.removeAll()
+    installation.cancelCloseButtonRefreshes()
 
     let startTime = Date()
     let repeatingTimer = Timer(timeInterval: Constants.closeButtonRefreshInterval, repeats: true) { [weak self] timer in
@@ -704,7 +719,7 @@ public final class AquaTrafficLightButtons {
     }
     RunLoop.main.add(finalTimer, forMode: .default)
 
-    closeButtonRefreshTimers = [repeatingTimer, finalTimer]
+    installation.closeButtonRefreshTimers = [repeatingTimer, finalTimer]
   }
 
   // MARK: - Graphite
@@ -728,6 +743,185 @@ public final class AquaTrafficLightButtons {
 
     /// The duration of the refreshes after the close button changes.
     static let closeButtonRefreshDuration: TimeInterval = 0.2
+
+    /// The time after a full screen transition starts to check the window's mode, in case the transition fails. It's
+    /// longer than the transition animation.
+    static let fullScreenTransitionTimeout: TimeInterval = 3
+  }
+}
+
+// MARK: - Installation
+
+/// The views, observations and monitors of an installation of `AquaTrafficLightButtons`.
+@MainActor
+private final class Installation {
+
+  /// Whether the buttons are installed.
+  var isInstalled = false
+
+  /// The view that holds the system buttons and the custom buttons, `NSTitlebarView`.
+  weak var containerView: NSView?
+
+  /// The system buttons, by kind.
+  var systemButtons: [AquaTrafficLightButtonKind: WeakBox<NSButton>] = [:]
+
+  /// The custom buttons, by kind.
+  var buttonViews: [AquaTrafficLightButtonKind: AquaTrafficLightButtonView] = [:]
+
+  /// The titlebar background views that are removed, with where to add them back.
+  private var removedBackgroundViews: [RemovedView] = []
+
+  /// The owner of the tracking area, which forwards the mouse events. It's kept here because the tracking area
+  /// doesn't retain its owner.
+  var mouseEventReceiver: MouseEventReceiver?
+
+  /// The tracking area over the traffic light cluster.
+  private var trackingArea: NSTrackingArea?
+
+  /// The notification observers of the window and the system.
+  var notificationObservers: [(center: NotificationCenter, token: NSObjectProtocol)] = []
+
+  /// The key-value observations of the window and the system buttons.
+  var keyValueObservations: [NSKeyValueObservation] = []
+
+  /// The tokens of the system buttons' layout observations.
+  var layoutObservationTokens: [CancellableToken] = []
+
+  /// The local monitor of the modifier flag changes, for the Option key.
+  var flagsChangedMonitor: Any?
+
+  /// The global monitor of the mouse events in other apps, which means the mouse is outside of the window.
+  var globalMouseMonitor: Any?
+
+  /// The timers that refresh the buttons after the close button changes.
+  var closeButtonRefreshTimers: [Timer] = []
+
+  /// The timer that checks the window's mode after a full screen transition starts.
+  var fullScreenTransitionTimer: Timer?
+
+  /// Removes titlebar background views, remembering where to add them back.
+  ///
+  /// - Parameter views: The views to remove.
+  func removeBackgroundViews(_ views: [NSView]) {
+    for view in views {
+      guard let superview = view.superview else {
+        continue
+      }
+      let siblings = superview.subviews
+      let nextSibling = siblings.firstIndex(of: view).flatMap { siblings.indices.contains($0 + 1) ? siblings[$0 + 1] : nil }
+      removedBackgroundViews.append(RemovedView(view: view, superview: superview, nextSibling: nextSibling))
+      view.removeFromSuperview()
+    }
+  }
+
+  /// Updates the tracking area to cover a rect.
+  ///
+  /// - Parameter rect: The rect to track, `nil` to remove the tracking area.
+  func updateTrackingArea(rect: CGRect?) {
+    guard let containerView, let mouseEventReceiver, let rect else {
+      removeTrackingArea()
+      return
+    }
+
+    if let trackingArea {
+      guard trackingArea.rect != rect else {
+        return
+      }
+      containerView.removeTrackingArea(trackingArea)
+    }
+
+    let trackingArea = NSTrackingArea(
+      rect: rect,
+      options: [.mouseEnteredAndExited, .mouseMoved, .activeAlways, .enabledDuringMouseDrag],
+      owner: mouseEventReceiver,
+      userInfo: nil
+    )
+    containerView.addTrackingArea(trackingArea)
+    self.trackingArea = trackingArea
+  }
+
+  /// Removes the tracking area.
+  private func removeTrackingArea() {
+    if let trackingArea {
+      containerView?.removeTrackingArea(trackingArea)
+      self.trackingArea = nil
+    }
+  }
+
+  /// Stops the event monitors.
+  func stopEventMonitors() {
+    if let flagsChangedMonitor {
+      NSEvent.removeMonitor(flagsChangedMonitor)
+      self.flagsChangedMonitor = nil
+    }
+    if let globalMouseMonitor {
+      NSEvent.removeMonitor(globalMouseMonitor)
+      self.globalMouseMonitor = nil
+    }
+  }
+
+  /// Cancels the refreshes after the close button changes.
+  func cancelCloseButtonRefreshes() {
+    closeButtonRefreshTimers.forEach { $0.invalidate() }
+    closeButtonRefreshTimers.removeAll()
+  }
+
+  /// Removes everything the installation added and restores the window.
+  func tearDown() {
+    for (center, token) in notificationObservers {
+      center.removeObserver(token)
+    }
+    notificationObservers.removeAll()
+
+    keyValueObservations.forEach { $0.invalidate() }
+    keyValueObservations.removeAll()
+
+    layoutObservationTokens.forEach { $0.cancel() }
+    layoutObservationTokens.removeAll()
+
+    cancelCloseButtonRefreshes()
+    fullScreenTransitionTimer?.invalidate()
+    fullScreenTransitionTimer = nil
+    stopEventMonitors()
+    removeTrackingArea()
+    mouseEventReceiver = nil
+
+    buttonViews.values.forEach { $0.removeFromSuperview() }
+    buttonViews.removeAll()
+
+    for systemButton in systemButtons.values.compactMap(\.object) {
+      systemButton.alphaValue = 1
+    }
+    systemButtons.removeAll()
+
+    // add the background views back where they were, in the reverse order of the removal
+    for removedView in removedBackgroundViews.reversed() {
+      guard let superview = removedView.superview else {
+        continue
+      }
+      if let nextSibling = removedView.nextSibling, nextSibling.superview === superview {
+        superview.addSubview(removedView.view, positioned: .below, relativeTo: nextSibling)
+      } else {
+        superview.addSubview(removedView.view)
+      }
+    }
+    removedBackgroundViews.removeAll()
+
+    containerView = nil
+    isInstalled = false
+  }
+
+  /// A removed view and where it was.
+  private struct RemovedView {
+
+    /// The removed view.
+    let view: NSView
+
+    /// The view's superview.
+    weak var superview: NSView?
+
+    /// The view above the removed view in the superview.
+    weak var nextSibling: NSView?
   }
 }
 
@@ -852,35 +1046,40 @@ private struct TitlebarHierarchy {
     self.titlebarView = titlebarView
   }
 
-  /// Removes the titlebar background views, so that the window draws its own titlebar background.
+  /// Returns the titlebar background views to remove, so that the window draws its own titlebar background.
   ///
   /// - Parameter window: The window.
-  func removeBackgroundViews(window: NSWindow) {
-    let windowBackgroundCount = themeFrame.removeSubviews(ofClassNames: ["NSVisualEffectView"])
-    ChouTi.assert(windowBackgroundCount > 0 || window.backgroundColor == .clear, "a window with a background should have NSVisualEffectView")
+  /// - Returns: The background views, or `nil` if the titlebar background isn't found, which means the hierarchy isn't
+  ///   recognized.
+  func backgroundViews(window: NSWindow) -> [NSView]? {
+    // the window's background, the content view can also be an NSVisualEffectView
+    let windowBackgroundViews = themeFrame.subviews(ofClassNames: ["NSVisualEffectView"]).filter { $0 !== window.contentView }
+    ChouTi.assert(!windowBackgroundViews.isEmpty || window.backgroundColor == .clear, "a window with a background should have NSVisualEffectView")
 
     // the titlebar background moves between OS versions, see the hierarchy above
-    var titlebarBackgroundCount = titlebarContainerView.removeSubviews(ofClassNames: ["_NSTitlebarDecorationView", "NSTitlebarBackgroundView"])
+    var titlebarBackgroundViews = titlebarContainerView.subviews(ofClassNames: ["_NSTitlebarDecorationView", "NSTitlebarBackgroundView"])
     if #available(macOS 26, *) {
-      titlebarBackgroundCount += titlebarView.removeSubviews(ofClassNames: ["NSTitlebarBackgroundView"])
+      titlebarBackgroundViews += titlebarView.subviews(ofClassNames: ["NSTitlebarBackgroundView"])
     } else {
-      titlebarBackgroundCount += titlebarView.removeSubviews(ofClassNames: ["NSVisualEffectView", "NSView"])
+      titlebarBackgroundViews += titlebarView.subviews(ofClassNames: ["NSVisualEffectView", "NSView"])
     }
-    ChouTi.assert(titlebarBackgroundCount > 0, "the titlebar background views aren't found")
+    guard !titlebarBackgroundViews.isEmpty else {
+      ChouTi.assertFailure("the titlebar background views aren't found")
+      return nil
+    }
+
+    return windowBackgroundViews + titlebarBackgroundViews
   }
 }
 
 private extension NSView {
 
-  /// Removes the direct subviews of the class names.
+  /// Returns the direct subviews of the class names.
   ///
-  /// - Parameter classNames: The class names of the subviews to remove.
-  /// - Returns: The number of the removed subviews.
-  @discardableResult
-  func removeSubviews(ofClassNames classNames: Set<String>) -> Int {
-    let subviewsToRemove = subviews.filter { classNames.contains($0.className) }
-    subviewsToRemove.forEach { $0.removeFromSuperview() }
-    return subviewsToRemove.count
+  /// - Parameter classNames: The class names of the subviews.
+  /// - Returns: The subviews, in the subview order.
+  func subviews(ofClassNames classNames: Set<String>) -> [NSView] {
+    subviews.filter { classNames.contains($0.className) }
   }
 }
 

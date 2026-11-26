@@ -34,8 +34,9 @@ import CoreGraphics
 
 /// The glyph drawn on top of an Aqua traffic light button.
 ///
-/// The paths reproduce the Big Sur era system glyphs. They are drawn in the button circle's square and are point
-/// symmetric about its center, so the same path works in flipped and non-flipped coordinates.
+/// The paths reproduce the Big Sur era system glyphs. They are drawn in the button circle's square, in flipped
+/// coordinates (y down): the full screen triangles point to the top left and bottom right corners. Each glyph is
+/// unchanged by a half turn about the square's center.
 enum AquaTrafficLightGlyph: Equatable {
 
   /// "×", the close glyph.
