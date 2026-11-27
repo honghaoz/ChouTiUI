@@ -55,8 +55,14 @@ class AquaTrafficLightButtonsTests: XCTestCase {
     buttonViews(window).first { $0.kind == kind }
   }
 
-  /// Sends a mouse event to the traffic light tracking area.
-  private func sendMouseEvent(_ window: NSWindow, inside: Bool) {
+  /// Sends a mouse entered or exited event to the traffic light tracking area.
+  ///
+  /// - Parameters:
+  ///   - window: The window.
+  ///   - inside: Whether the event is a mouse entered event, instead of a mouse exited event.
+  ///   - location: The event location in the titlebar view. Defaults to the middle of the cluster for an entered
+  ///     event, and to the right of the cluster for an exited event.
+  private func sendMouseEvent(_ window: NSWindow, inside: Bool, location: CGPoint? = nil) {
     guard let titlebarView = window.standardWindowButton(.closeButton)?.superview,
           let trackingArea = titlebarView.trackingAreas.first(where: { $0.owner is NSResponder && !($0.owner is NSView) }),
           let owner = trackingArea.owner as? NSResponder
@@ -65,7 +71,7 @@ class AquaTrafficLightButtonsTests: XCTestCase {
       return
     }
 
-    let pointInTitlebar = inside ? CGPoint(x: trackingArea.rect.midX, y: trackingArea.rect.midY) : CGPoint(x: trackingArea.rect.maxX + 50, y: trackingArea.rect.midY)
+    let pointInTitlebar = location ?? (inside ? CGPoint(x: trackingArea.rect.midX, y: trackingArea.rect.midY) : CGPoint(x: trackingArea.rect.maxX + 50, y: trackingArea.rect.midY))
     guard let event = NSEvent.enterExitEvent(
       with: inside ? .mouseEntered : .mouseExited,
       location: titlebarView.convert(pointInTitlebar, to: nil),
@@ -259,6 +265,38 @@ class AquaTrafficLightButtonsTests: XCTestCase {
     expect(buttonView(window, .close)?.state) == .inactive(nil)
     expect(buttonView(window, .miniaturize)?.state) == .inactive(nil)
     expect(buttonView(window, .zoom)?.state) == .inactive(nil)
+  }
+
+  func test_hover_exitOnClusterEdge() throws {
+    // given installed buttons with the mouse over the cluster
+    let window = makeWindow()
+    let trafficLights = AquaTrafficLightButtons(window: window)
+    trafficLights.install()
+    sendMouseEvent(window, inside: true)
+    expect(buttonView(window, .close)?.state) == .hovered(.close)
+
+    // when the mouse exits at the cluster's bottom edge, where the window server reports the exit when the cursor
+    // moves down by whole points (e.g. with Screen Sharing)
+    let clusterFrame = try (window.standardWindowButton(.closeButton)?.superview?.trackingAreas.first { !($0.owner is NSView) }?.rect).unwrap()
+    sendMouseEvent(window, inside: false, location: CGPoint(x: clusterFrame.minX + 6, y: clusterFrame.minY))
+
+    // then the glyphs are hidden
+    expect(buttonView(window, .close)?.state) == .inactive(nil)
+    expect(buttonView(window, .miniaturize)?.state) == .inactive(nil)
+    expect(buttonView(window, .zoom)?.state) == .inactive(nil)
+  }
+
+  func test_isLocationInsideCluster() {
+    let clusterFrame = CGRect(x: 9, y: 9, width: 60, height: 14)
+    expect(AquaTrafficLightButtons.isLocation(CGPoint(x: 15, y: 15), insideCluster: clusterFrame)) == true
+    expect(AquaTrafficLightButtons.isLocation(CGPoint(x: 9.5, y: 9.5), insideCluster: clusterFrame)) == true
+
+    // the edges are outside
+    expect(AquaTrafficLightButtons.isLocation(CGPoint(x: 15, y: 9), insideCluster: clusterFrame)) == false
+    expect(AquaTrafficLightButtons.isLocation(CGPoint(x: 15, y: 23), insideCluster: clusterFrame)) == false
+    expect(AquaTrafficLightButtons.isLocation(CGPoint(x: 9, y: 15), insideCluster: clusterFrame)) == false
+    expect(AquaTrafficLightButtons.isLocation(CGPoint(x: 69, y: 15), insideCluster: clusterFrame)) == false
+    expect(AquaTrafficLightButtons.isLocation(CGPoint(x: 100, y: 15), insideCluster: clusterFrame)) == false
   }
 
   func test_documentEdited() {
