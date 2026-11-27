@@ -208,7 +208,7 @@ final class AquaTrafficLightButtonView: ComposeView {
   /// Makes the node of a button.
   ///
   /// The button is a gradient filled circle with a glow at the bottom, a white reflection below it, inner shadows, a
-  /// specular highlight at the top, an optional glyph, and a hairline border in dark mode.
+  /// specular highlight at the top, an optional glyph, and a hairline border.
   ///
   /// - Parameters:
   ///   - primaryColor: The fill color of the button when it's active.
@@ -240,6 +240,15 @@ final class AquaTrafficLightButtonView: ComposeView {
       case .inactive:
         return Constants.inactiveColor.resolve(for: theme)
       }
+    }()
+
+    let innerShadowColor = isDark ? .black : (buttonColor.darker(by: Constants.lightRimDarkening) ?? buttonColor)
+    let borderColor: Color = {
+      if isDark {
+        return .black(alpha: isInactive ? Constants.darkInactiveBorderOpacity : Constants.darkBorderOpacity)
+      }
+      let darkening = isInactive ? Constants.lightInactiveBorderDarkening : Constants.lightBorderDarkening
+      return buttonColor.darker(by: darkening) ?? buttonColor
     }()
 
     // the fill is lighter at the top and bottom edges
@@ -276,9 +285,9 @@ final class AquaTrafficLightButtonView: ComposeView {
       offset: CGSize(width: 0, height: 1),
       path: circlePath(in:)
     )
-    .innerShadow(color: .black, opacity: isInactive ? 0.1 : 0.2, radius: 1, offset: .zero, paths: circleInnerShadowPaths(spread: 0.5))
-    .innerShadow(color: .black, opacity: isInactive ? 0.3 : 0.35, radius: 0.5, offset: CGSize(width: 0, height: 0.5), paths: circleInnerShadowPaths(spread: 0.5))
-    .innerShadow(color: .black, opacity: isInactive ? 0.3 : 0.45, radius: 0, offset: .zero, paths: circleInnerShadowPaths(spread: 0.25))
+    .innerShadow(color: innerShadowColor, opacity: isInactive ? 0.1 : 0.2, radius: 1, offset: .zero, paths: circleInnerShadowPaths(spread: 0.5))
+    .innerShadow(color: innerShadowColor, opacity: isInactive ? 0.3 : 0.35, radius: 0.5, offset: CGSize(width: 0, height: 0.5), paths: circleInnerShadowPaths(spread: 0.5))
+    .innerShadow(color: innerShadowColor, opacity: isInactive ? 0.3 : 0.45, radius: 0, offset: .zero, paths: circleInnerShadowPaths(spread: 0.25))
     .overlay {
       // top highlight
       UnifiedColorNode(
@@ -310,18 +319,17 @@ final class AquaTrafficLightButtonView: ComposeView {
         }
       }
 
-      // dark mode hairline border
-      if isDark {
-        LayerNode<CAShapeLayer>(update: { layer, _ in
-          // the path strokes on both sides of the circle, the mask clips the outer half
-          layer.fillColor = nil
-          layer.strokeColor = Color.black(alpha: isInactive ? 0.4 : 0.3).cgColor
-          layer.lineWidth = pixelSize * 2
-          layer.path = circlePath(in: layer.bounds.size)
-        })
-        .shape(Circle())
-        .padding(-pixelSize)
-      }
+      // hairline border: in dark mode, it's a pixel outside the button's edge. in light mode, it's half a pixel inside
+      // the edge, over the rim
+      LayerNode<CAShapeLayer>(update: { layer, _ in
+        // the path strokes on both sides of the circle, the mask clips the outer half
+        layer.fillColor = nil
+        layer.strokeColor = borderColor.cgColor
+        layer.lineWidth = isDark ? pixelSize * 2 : pixelSize
+        layer.path = circlePath(in: layer.bounds.size)
+      })
+      .shape(Circle())
+      .padding(isDark ? -pixelSize : 0)
     }
   }
 
@@ -359,6 +367,21 @@ final class AquaTrafficLightButtonView: ComposeView {
 
     /// How much darker the pressed button is than the active button.
     static let pressedDarkening: CGFloat = 0.25
+
+    /// How much darker the rim inner shadows are than the button in light mode.
+    static let lightRimDarkening: CGFloat = 0.85
+
+    /// The opacity of the black hairline border of the active button in dark mode.
+    static let darkBorderOpacity: CGFloat = 0.3
+
+    /// The opacity of the black hairline border of the inactive button in dark mode.
+    static let darkInactiveBorderOpacity: CGFloat = 0.4
+
+    /// How much darker the hairline border is than the active button in light mode.
+    static let lightBorderDarkening: CGFloat = 0.3
+
+    /// How much darker the hairline border is than the inactive button in light mode.
+    static let lightInactiveBorderDarkening: CGFloat = 0.4
 
     /// iTunes 11.4 -> #ebeceb, Big Sur -> #d3d4d3
     static let inactiveColor = ThemedColor(light: Color.hex("#E6E6E6"), dark: Color.hex("#3D3D3D"))

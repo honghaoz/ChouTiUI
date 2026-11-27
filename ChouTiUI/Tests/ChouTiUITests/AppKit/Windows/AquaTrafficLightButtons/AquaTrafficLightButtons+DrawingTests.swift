@@ -129,24 +129,47 @@ class AquaTrafficLightButtons_DrawingTests: XCTestCase {
   }
 
   #if DEBUG
-  func test_buttonView_hairlinesFollowScreenScale() {
-    for scale in [CGFloat(1), 2] {
-      // given a dark button view drawn for a screen scale
-      let window = NSWindow(contentRect: CGRect(x: 0, y: 0, width: 100, height: 100), styleMask: [.titled], backing: .buffered, defer: false)
-      window.appearance = NSAppearance(named: .darkAqua)
-      let view = AquaTrafficLightButtonView(kind: .close)
-      view.backingScaleFactorOverride = scale
-      view.frame = CGRect(x: 0, y: 0, width: 16, height: 18)
-      window.contentView?.addSubview(view)
+  func test_buttonView_hairlinesFollowScreenScale() throws {
+    // the light mode border is tinted with the button color, which is gray with the graphite accent color
+    AquaTrafficLightButtonView.isGraphiteAccentColorOverride = false
+    defer {
+      AquaTrafficLightButtonView.isGraphiteAccentColorOverride = nil
+    }
 
-      // when rendering
-      view.refresh(animated: false)
+    for isDark in [false, true] {
+      for scale in [CGFloat(1), 2] {
+        // given a close button view drawn for a theme and a screen scale
+        let window = NSWindow(contentRect: CGRect(x: 0, y: 0, width: 100, height: 100), styleMask: [.titled], backing: .buffered, defer: false)
+        window.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
+        let view = AquaTrafficLightButtonView(kind: .close)
+        view.backingScaleFactorOverride = scale
+        view.frame = CGRect(x: 0, y: 0, width: 16, height: 18)
+        window.contentView?.addSubview(view)
 
-      // then the dark mode border is a one-pixel hairline (stroked twice as wide, half clipped)
-      expect(view.pixelSize) == 1 / scale
-      let borderLayers = shapeLayers(view).filter { $0.fillColor == nil && $0.lineWidth > 0 }
-      expect(borderLayers.count) == 1
-      expect(borderLayers.first?.lineWidth) == 2 / scale
+        // when rendering
+        view.refresh(animated: false)
+
+        // then the border strokes the button circle with a hairline, clipped to the inner half of the stroke
+        expect(view.pixelSize) == 1 / scale
+        let borderLayers = shapeLayers(view).filter { $0.fillColor == nil && $0.lineWidth > 0 }
+        expect(borderLayers.count) == 1
+        let borderLayer = try borderLayers.first.unwrap()
+        let color = try borderLayer.strokeColor.flatMap { NSColor(cgColor: $0)?.usingColorSpace(.sRGB) }.unwrap()
+        let buttonSize = CGSize(width: 14, height: 16)
+        if isDark {
+          // dark mode: a translucent black, one pixel outside the button
+          expect(borderLayer.lineWidth) == 2 / scale
+          expect(borderLayer.bounds.size) == CGSize(width: buttonSize.width + 2 / scale, height: buttonSize.height + 2 / scale)
+          expect(color.redComponent) == 0
+          expect(color.alphaComponent < 1) == true
+        } else {
+          // light mode: an opaque, darker red, half a pixel inside the button
+          expect(borderLayer.lineWidth) == 1 / scale
+          expect(borderLayer.bounds.size) == buttonSize
+          expect(color.redComponent > color.greenComponent) == true
+          expect(color.alphaComponent) == 1
+        }
+      }
     }
   }
   #endif
