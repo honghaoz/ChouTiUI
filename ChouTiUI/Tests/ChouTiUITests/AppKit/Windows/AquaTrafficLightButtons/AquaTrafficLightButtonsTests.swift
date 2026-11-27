@@ -549,27 +549,28 @@ class AquaTrafficLightButtonsTests: XCTestCase {
 
   // MARK: - Frames
 
-  func test_systemButtonMoved_isFollowed() throws {
-    // given installed buttons, and a custom traffic light layout that moves the system close button on resize, after
-    // the buttons handled the resize (it observes the window later)
+  func test_systemButtonsMoved_areFollowed() throws {
+    // given installed buttons
     let window = makeWindow()
     let trafficLights = AquaTrafficLightButtons(window: window)
     trafficLights.install()
-    let closeButton = try window.standardWindowButton(.closeButton).unwrap()
-    let movedOrigin = CGPoint(x: closeButton.frame.minX + 2, y: closeButton.frame.minY)
-    let layoutToken = NotificationCenter.default.addObserver(forName: NSWindow.didResizeNotification, object: window, queue: nil) { _ in
-      closeButton.setFrameOrigin(movedOrigin)
-    }
-    defer {
-      NotificationCenter.default.removeObserver(layoutToken)
+    let titlebarView = try window.standardWindowButton(.closeButton)?.superview.unwrap()
+
+    // when a custom traffic light layout moves the system buttons without resizing them, and nothing refreshes the
+    // buttons
+    var systemFrames: [CGRect] = []
+    for kind in AquaTrafficLightButtonKind.allCases {
+      let systemButton = try window.standardWindowButton(kind.buttonType).unwrap()
+      systemButton.setFrameOrigin(CGPoint(x: systemButton.frame.minX + 2, y: systemButton.frame.minY + 1))
+      systemFrames.append(systemButton.frame)
     }
 
-    // when the window resizes, which moves the system close button without resizing it
-    NotificationCenter.default.post(name: NSWindow.didResizeNotification, object: window)
-
-    // then the custom close button follows it
-    expect(closeButton.frame.origin) == movedOrigin
-    expect(self.buttonView(window, .close)?.frame) == AquaTrafficLightButtons.buttonFrame(systemButtonFrame: closeButton.frame, isTahoe: System.macOS_tahoe)
+    // then the custom buttons and the hover region follow them
+    for (kind, systemFrame) in zip(AquaTrafficLightButtonKind.allCases, systemFrames) {
+      expect(buttonView(window, kind)?.frame) == AquaTrafficLightButtons.buttonFrame(systemButtonFrame: systemFrame, isTahoe: System.macOS_tahoe)
+    }
+    let clusterFrame = systemFrames.dropFirst().reduce(systemFrames[0]) { $0.union($1) }
+    expect(titlebarView?.trackingAreas.first { !($0.owner is NSView) }?.rect) == clusterFrame
   }
 
   func test_buttonFrame() {
