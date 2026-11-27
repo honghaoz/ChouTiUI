@@ -130,6 +130,12 @@ class AquaTrafficLightButtons_DrawingTests: XCTestCase {
 
   #if DEBUG
   func test_buttonView_hairlinesFollowScreenScale() throws {
+    // the light mode border is tinted with the button color, which is gray with the graphite accent color
+    AquaTrafficLightButtonView.isGraphiteAccentColorOverride = false
+    defer {
+      AquaTrafficLightButtonView.isGraphiteAccentColorOverride = nil
+    }
+
     for isDark in [false, true] {
       for scale in [CGFloat(1), 2] {
         // given a close button view drawn for a theme and a screen scale
