@@ -549,6 +549,30 @@ class AquaTrafficLightButtonsTests: XCTestCase {
 
   // MARK: - Frames
 
+  func test_systemButtonsMoved_areFollowed() throws {
+    // given installed buttons
+    let window = makeWindow()
+    let trafficLights = AquaTrafficLightButtons(window: window)
+    trafficLights.install()
+    let titlebarView = try window.standardWindowButton(.closeButton)?.superview.unwrap()
+
+    // when a custom traffic light layout moves the system buttons without resizing them, and nothing refreshes the
+    // buttons
+    var systemFrames: [CGRect] = []
+    for kind in AquaTrafficLightButtonKind.allCases {
+      let systemButton = try window.standardWindowButton(kind.buttonType).unwrap()
+      systemButton.setFrameOrigin(CGPoint(x: systemButton.frame.minX + 2, y: systemButton.frame.minY + 1))
+      systemFrames.append(systemButton.frame)
+    }
+
+    // then the custom buttons and the hover region follow them
+    for (kind, systemFrame) in zip(AquaTrafficLightButtonKind.allCases, systemFrames) {
+      expect(buttonView(window, kind)?.frame) == AquaTrafficLightButtons.buttonFrame(systemButtonFrame: systemFrame, isTahoe: System.macOS_tahoe)
+    }
+    let clusterFrame = systemFrames.dropFirst().reduce(systemFrames[0]) { $0.union($1) }
+    expect(titlebarView?.trackingAreas.first { !($0.owner is NSView) }?.rect) == clusterFrame
+  }
+
   func test_buttonFrame() {
     let systemFrame = CGRect(x: 9, y: 6, width: 14, height: 16)
     expect(AquaTrafficLightButtons.buttonFrame(systemButtonFrame: systemFrame, isTahoe: true)) == CGRect(x: 8, y: 5, width: 16, height: 18)
