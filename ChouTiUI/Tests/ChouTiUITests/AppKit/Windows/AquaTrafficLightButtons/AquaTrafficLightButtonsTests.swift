@@ -599,6 +599,29 @@ class AquaTrafficLightButtonsTests: XCTestCase {
     expect(weakTrafficLights).toEventually(beNil())
   }
 
+  func test_keptInstance_doesNotKeepClosedWindowViews() {
+    // given a caller that keeps the buttons of a window that is closed and released without uninstalling
+    var trafficLights: AquaTrafficLightButtons?
+    weak var weakWindow: NSWindow?
+    weak var weakThemeFrame: NSView?
+    weak var weakContentView: NSView?
+    autoreleasepool {
+      let window = makeWindow()
+      trafficLights = AquaTrafficLightButtons(window: window)
+      trafficLights?.install()
+      weakWindow = window
+      weakThemeFrame = window.contentView?.superview
+      weakContentView = window.contentView
+      window.close()
+    }
+
+    // then the window and its views are deallocated, even though the buttons are still referenced
+    expect(weakWindow).toEventually(beNil())
+    expect(weakThemeFrame).toEventually(beNil())
+    expect(weakContentView).toEventually(beNil())
+    expect(trafficLights) != nil
+  }
+
   // MARK: - Appearance
 
   func test_appearanceChange_keepsTitlebarBackgroundRemoved() throws {

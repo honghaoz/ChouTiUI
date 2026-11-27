@@ -50,8 +50,8 @@ import ChouTi
 ///   defer: false
 /// )
 ///
-/// let trafficLights = AquaTrafficLightButtons(window: window) // keep a strong reference
-/// trafficLights.install()
+/// let trafficLights = AquaTrafficLightButtons(window: window)
+/// trafficLights.install() // the window keeps the installed buttons
 /// ```
 ///
 /// The buttons observe the window to stay in sync: key state, mouse hover, the Option key, document edited state,
@@ -64,8 +64,8 @@ import ChouTi
 ///   installation checks it first and leaves the window untouched if it isn't recognized. The background views stay
 ///   removed after `uninstall()`.
 ///
-/// - Note: The buttons are uninstalled when the instance is deallocated, keep a strong reference to it for as long as
-///   the window shows the buttons.
+/// - Note: The window keeps the installed buttons until `uninstall()`, so no other reference is needed. Releasing a
+///   reference doesn't remove the buttons: call `uninstall()` to remove them, e.g. before installing a new instance.
 @MainActor
 public final class AquaTrafficLightButtons {
 
@@ -101,8 +101,8 @@ public final class AquaTrafficLightButtons {
   }
 
   deinit {
-    // the window keeps installed buttons, so the deinit runs when the window deallocates (or the buttons were never
-    // installed): the views go with the window, and only the observations and the process-wide monitors are stopped.
+    // the window keeps installed buttons, so the deinit runs once the window is deallocated, after `uninstall()`, or
+    // without an installation: there are no views to remove, only the observations and the process-wide monitors.
     // a deinit is nonisolated (SE-0371) and can run off the main thread with some toolchains, so the observations stop
     // on the main thread.
     let installation = installation
@@ -155,9 +155,10 @@ public final class AquaTrafficLightButtons {
       return
     }
 
-    installation.hierarchy = hierarchy
-    installation.removeBackgroundViews(window: window)
+    installation.themeFrame = hierarchy.themeFrame
+    installation.titlebarContainerView = hierarchy.titlebarContainerView
     installation.containerView = hierarchy.titlebarView
+    installation.removeBackgroundViews(window: window)
     installation.mouseEventReceiver = MouseEventReceiver { [weak self] event in
       self?.handleMouseEvent(event)
     }
@@ -187,7 +188,7 @@ public final class AquaTrafficLightButtons {
   /// background views that `install()` removed stay removed: AppKit manages their order among its own views, so they
   /// can't be put back reliably. The buttons can be installed again after this.
   ///
-  /// The buttons are also uninstalled when the instance is deallocated.
+  /// This is the way to remove the buttons: releasing a reference doesn't, because the window keeps installed buttons.
   public func uninstall() {
     guard installation.isInstalled else {
       return
@@ -712,8 +713,12 @@ private final class Installation {
   /// The system buttons' alpha before the installation, by kind.
   var systemButtonAlphas: [AquaTrafficLightButtonKind: CGFloat] = [:]
 
-  /// The titlebar views of the window.
-  var hierarchy: TitlebarHierarchy?
+  /// The window's frame view, `NSThemeFrame`. It's weak like the other views, so a kept instance doesn't keep a closed
+  /// window's views.
+  weak var themeFrame: NSView?
+
+  /// The titlebar container view, `NSTitlebarContainerView`.
+  weak var titlebarContainerView: NSView?
 
   /// The owner of the tracking area, which forwards the mouse events. It's kept here because the tracking area doesn't
   /// retain its owner.
@@ -796,7 +801,16 @@ private final class Installation {
   ///
   /// - Parameter window: The window.
   func removeBackgroundViews(window: NSWindow) {
-    hierarchy?.backgroundViews(window: window).forEach { $0.removeFromSuperview() }
+    guard let themeFrame, let titlebarContainerView, let titlebarView = containerView else {
+      return
+    }
+    let backgroundViews = TitlebarHierarchy.backgroundViews(
+      themeFrame: themeFrame,
+      titlebarContainerView: titlebarContainerView,
+      titlebarView: titlebarView,
+      contentView: window.contentView
+    )
+    backgroundViews.forEach { $0.removeFromSuperview() }
   }
 
   /// Stops the observations, the monitors and the timers.
@@ -835,7 +849,8 @@ private final class Installation {
     systemButtons.removeAll()
     systemButtonAlphas.removeAll()
 
-    hierarchy = nil
+    themeFrame = nil
+    titlebarContainerView = nil
     containerView = nil
     isInstalled = false
   }
@@ -970,11 +985,14 @@ private struct TitlebarHierarchy {
   /// The background views move between OS versions (see the hierarchy above), and a window can have none of them
   /// (e.g. a clear window, or after an earlier installation), so the ones that are found are returned.
   ///
-  /// - Parameter window: The window.
+  /// - Parameters:
+  ///   - themeFrame: The window's frame view, `NSThemeFrame`.
+  ///   - titlebarContainerView: The titlebar container view, `NSTitlebarContainerView`.
+  ///   - titlebarView: The titlebar view, `NSTitlebarView`.
+  ///   - contentView: The window's content view, which is kept even if it's an `NSVisualEffectView`.
   /// - Returns: The background views.
-  func backgroundViews(window: NSWindow) -> [NSView] {
-    // the window's background. the content view can also be an NSVisualEffectView, which is kept.
-    let windowBackgroundViews = themeFrame.subviews(ofClassNames: ["NSVisualEffectView"]).filter { $0 !== window.contentView }
+  static func backgroundViews(themeFrame: NSView, titlebarContainerView: NSView, titlebarView: NSView, contentView: NSView?) -> [NSView] {
+    let windowBackgroundViews = themeFrame.subviews(ofClassNames: ["NSVisualEffectView"]).filter { $0 !== contentView }
 
     var titlebarBackgroundViews = titlebarContainerView.subviews(ofClassNames: ["_NSTitlebarDecorationView", "NSTitlebarBackgroundView"])
     if #available(macOS 26, *) {
