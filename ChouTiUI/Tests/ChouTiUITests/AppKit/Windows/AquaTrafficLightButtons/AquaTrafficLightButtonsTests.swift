@@ -286,6 +286,37 @@ class AquaTrafficLightButtonsTests: XCTestCase {
     expect(buttonView(window, .zoom)?.state) == .inactive(nil)
   }
 
+  func test_hover_mouseMoved_showsGlyphs() throws {
+    // given installed buttons with the glyphs hidden
+    let window = makeWindow()
+    let trafficLights = AquaTrafficLightButtons(window: window)
+    trafficLights.install()
+    expect(buttonView(window, .close)?.state) == .inactive(nil)
+
+    // when the tracking area sends a moved event without an entered event, e.g. after the hover was cleared while the
+    // cursor stayed inside
+    let titlebarView = try window.standardWindowButton(.closeButton)?.superview.unwrap()
+    let trackingArea = try titlebarView.unwrap().trackingAreas.first { !($0.owner is NSView) }.unwrap()
+    let owner = try (trackingArea.owner as? NSResponder).unwrap()
+    let event = try NSEvent.mouseEvent(
+      with: .mouseMoved,
+      location: titlebarView.unwrap().convert(CGPoint(x: trackingArea.rect.midX, y: trackingArea.rect.midY), to: nil),
+      modifierFlags: [],
+      timestamp: ProcessInfo.processInfo.systemUptime,
+      windowNumber: window.windowNumber,
+      context: nil,
+      eventNumber: 0,
+      clickCount: 0,
+      pressure: 0
+    ).unwrap()
+    owner.mouseMoved(with: event)
+
+    // then the buttons show their glyphs
+    expect(buttonView(window, .close)?.state) == .hovered(.close)
+    expect(buttonView(window, .miniaturize)?.state) == .hovered(.miniaturize)
+    expect(buttonView(window, .zoom)?.state) == .hovered(.enterFullScreen)
+  }
+
   func test_isLocationInCluster_followsTrackingAreaEdges() {
     // given a cluster frame in an unflipped view, like the titlebar view
     let containerView = NSView(frame: CGRect(x: 0, y: 0, width: 320, height: 32))
