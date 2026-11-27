@@ -425,27 +425,15 @@ public final class AquaTrafficLightButtons {
 
     let screenLocation = NSEvent.mouseLocation
     let locationInWindow = containerWindow.convertPoint(fromScreen: screenLocation)
-    guard Self.isLocation(containerView.convert(locationInWindow, from: nil), insideCluster: clusterFrame) else {
+    // `isMousePoint(_:in:)` follows the tracking area's edge rule: in the titlebar view, which isn't flipped, the left
+    // and top edges are inside, the right and bottom edges are outside. `CGRect.contains(_:)` counts the bottom edge as
+    // inside, where the tracking area has already exited, so the glyphs would stay shown.
+    guard containerView.isMousePoint(containerView.convert(locationInWindow, from: nil), in: clusterFrame) else {
       return false
     }
 
     // the window server query is checked last, it's the expensive one
     return NSWindow.windowNumber(at: screenLocation, belowWindowWithWindowNumber: 0) == containerWindow.windowNumber
-  }
-
-  /// Returns whether a location is inside the traffic light cluster, for a location that isn't from a tracking area
-  /// event.
-  ///
-  /// The edges count as outside. The window server can count an edge location as outside of the tracking area, e.g.
-  /// the bottom edge of the titlebar view, and then sends no exit event when the cursor leaves, so the glyphs would
-  /// stay shown. A cursor on an edge that the tracking area counts as inside shows the glyphs on its next move.
-  ///
-  /// - Parameters:
-  ///   - location: The location, in the cluster frame's coordinate space.
-  ///   - clusterFrame: The cluster frame.
-  /// - Returns: `true` if the location is strictly inside the cluster frame.
-  static func isLocation(_ location: CGPoint, insideCluster clusterFrame: CGRect) -> Bool {
-    location.x > clusterFrame.minX && location.x < clusterFrame.maxX && location.y > clusterFrame.minY && location.y < clusterFrame.maxY
   }
 
   // MARK: - Observation

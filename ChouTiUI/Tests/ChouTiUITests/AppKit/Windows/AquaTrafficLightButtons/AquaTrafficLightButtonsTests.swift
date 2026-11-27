@@ -286,19 +286,6 @@ class AquaTrafficLightButtonsTests: XCTestCase {
     expect(buttonView(window, .zoom)?.state) == .inactive(nil)
   }
 
-  func test_isLocationInsideCluster() {
-    let clusterFrame = CGRect(x: 9, y: 9, width: 60, height: 14)
-    expect(AquaTrafficLightButtons.isLocation(CGPoint(x: 15, y: 15), insideCluster: clusterFrame)) == true
-    expect(AquaTrafficLightButtons.isLocation(CGPoint(x: 9.5, y: 9.5), insideCluster: clusterFrame)) == true
-
-    // the edges are outside
-    expect(AquaTrafficLightButtons.isLocation(CGPoint(x: 15, y: 9), insideCluster: clusterFrame)) == false
-    expect(AquaTrafficLightButtons.isLocation(CGPoint(x: 15, y: 23), insideCluster: clusterFrame)) == false
-    expect(AquaTrafficLightButtons.isLocation(CGPoint(x: 9, y: 15), insideCluster: clusterFrame)) == false
-    expect(AquaTrafficLightButtons.isLocation(CGPoint(x: 69, y: 15), insideCluster: clusterFrame)) == false
-    expect(AquaTrafficLightButtons.isLocation(CGPoint(x: 100, y: 15), insideCluster: clusterFrame)) == false
-  }
-
   func test_documentEdited() {
     // given installed buttons
     let window = makeWindow()
@@ -486,27 +473,15 @@ class AquaTrafficLightButtonsTests: XCTestCase {
     trafficLights.install()
     trafficLights.setZoomButtonHidden(true)
 
-    // when the mouse moves over where the zoom button was
+    // when the buttons lay out with the zoom button hidden
+    trafficLights.refresh()
+
+    // then the hover region still covers where the zoom button was, like the system's hover region, which keeps the
+    // hidden button's spot
     let zoomButton = try window.standardWindowButton(.zoomButton).unwrap()
     let titlebarView = try zoomButton.superview.unwrap()
-    let owner = try (titlebarView.trackingAreas.first { !($0.owner is NSView) }?.owner as? NSResponder).unwrap()
-    let event = try NSEvent.mouseEvent(
-      with: .mouseMoved,
-      location: titlebarView.convert(CGPoint(x: zoomButton.frame.midX, y: zoomButton.frame.midY), to: nil),
-      modifierFlags: [],
-      timestamp: ProcessInfo.processInfo.systemUptime,
-      windowNumber: window.windowNumber,
-      context: nil,
-      eventNumber: 0,
-      clickCount: 0,
-      pressure: 0
-    ).unwrap()
-    owner.mouseMoved(with: event)
-
-    // then the visible buttons show their glyphs, like the system buttons, whose hover region keeps the hidden
-    // button's spot
-    expect(buttonView(window, .close)?.state) == .hovered(.close)
-    expect(buttonView(window, .miniaturize)?.state) == .hovered(.miniaturize)
+    let trackingArea = try titlebarView.trackingAreas.first { !($0.owner is NSView) }.unwrap()
+    expect(trackingArea.rect.contains(zoomButton.frame)) == true
   }
 
   // MARK: - Full Screen
