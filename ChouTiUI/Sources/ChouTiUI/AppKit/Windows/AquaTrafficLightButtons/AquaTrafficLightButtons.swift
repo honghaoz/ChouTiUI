@@ -160,7 +160,7 @@ public final class AquaTrafficLightButtons {
     installation.containerView = hierarchy.titlebarView
     installation.removeBackgroundViews(window: window)
     installation.mouseEventReceiver = MouseEventReceiver { [weak self] event in
-      self?.handleMouseEvent(event)
+      self?.handleTrackingAreaEvent(event)
     }
 
     for (kind, systemButton) in systemButtons {
@@ -372,19 +372,32 @@ public final class AquaTrafficLightButtons {
 
   // MARK: - Mouse
 
-  /// Handles a mouse event from the tracking area or the global monitor.
+  /// Handles a mouse event of the tracking area over the traffic light cluster.
   ///
-  /// - Parameter event: The mouse event.
-  private func handleMouseEvent(_ event: NSEvent) {
-    // the titlebar is in its own window in full screen, so the events are checked against the container view's window
-    let isMouseInside: Bool
-    if let containerView = installation.containerView, let containerWindow = containerView.window, event.window === containerWindow, let clusterFrame {
-      isMouseInside = clusterFrame.contains(containerView.convert(event.locationInWindow, from: nil))
-    } else {
-      // an event of another window or app, the mouse is outside of the cluster
-      isMouseInside = false
+  /// The event type tells whether the mouse is inside, not the event location: the window server decides whether a
+  /// location on the tracking area's edge is inside. For example, it reports an exit at the bottom edge of the
+  /// titlebar view (which isn't flipped), a location that `CGRect.contains(_:)` counts as inside. Checking the location
+  /// would keep the glyphs shown after such an exit, with no later event to hide them.
+  ///
+  /// - Parameter event: The mouse entered, moved or exited event.
+  private func handleTrackingAreaEvent(_ event: NSEvent) {
+    switch event.type {
+    case .mouseEntered,
+         .mouseMoved:
+      // the tracking area only sends the moved events while the mouse is inside
+      setMouseInside(true)
+    case .mouseExited:
+      setMouseInside(false)
+    default:
+      break
     }
-    setMouseInside(isMouseInside)
+  }
+
+  /// Handles a mouse event of another app, from the global monitor.
+  ///
+  /// The mouse is over another app's window, so it's outside of the cluster.
+  private func handleGlobalMouseEvent() {
+    setMouseInside(false)
   }
 
   /// Sets whether the mouse is over the traffic light cluster, and updates the buttons if it changes.
@@ -412,12 +425,27 @@ public final class AquaTrafficLightButtons {
 
     let screenLocation = NSEvent.mouseLocation
     let locationInWindow = containerWindow.convertPoint(fromScreen: screenLocation)
-    guard clusterFrame.contains(containerView.convert(locationInWindow, from: nil)) else {
+    guard Self.isLocation(containerView.convert(locationInWindow, from: nil), inCluster: clusterFrame, of: containerView) else {
       return false
     }
 
     // the window server query is checked last, it's the expensive one
     return NSWindow.windowNumber(at: screenLocation, belowWindowWithWindowNumber: 0) == containerWindow.windowNumber
+  }
+
+  /// Returns whether a location is over the traffic light cluster, with the tracking area's edge rule.
+  ///
+  /// The tracking area counts the left and top edges of the titlebar view (which isn't flipped) as inside, and the
+  /// right and bottom edges as outside, like `isMousePoint(_:in:)`. `CGRect.contains(_:)` counts the bottom edge as
+  /// inside, where the tracking area has already exited, so the glyphs would stay shown with no exit event to come.
+  ///
+  /// - Parameters:
+  ///   - location: The location in the container view.
+  ///   - clusterFrame: The cluster frame in the container view.
+  ///   - containerView: The view that holds the cluster.
+  /// - Returns: `true` if the location is over the cluster.
+  static func isLocation(_ location: CGPoint, inCluster clusterFrame: CGRect, of containerView: NSView) -> Bool {
+    containerView.isMousePoint(location, in: clusterFrame)
   }
 
   // MARK: - Observation
@@ -536,9 +564,9 @@ public final class AquaTrafficLightButtons {
       // the events of other apps, so that the cluster is left when the mouse moves to another app's window above it
       installation.globalMouseMonitor = NSEvent.addGlobalMonitorForEvents(
         matching: [.leftMouseDown, .leftMouseUp, .rightMouseDown, .otherMouseDown, .mouseMoved]
-      ) { [weak self] event in
+      ) { [weak self] _ in
         MainActor.assumeIsolated {
-          self?.handleMouseEvent(event)
+          self?.handleGlobalMouseEvent()
         }
       }
     }

@@ -55,8 +55,14 @@ class AquaTrafficLightButtonsTests: XCTestCase {
     buttonViews(window).first { $0.kind == kind }
   }
 
-  /// Sends a mouse event to the traffic light tracking area.
-  private func sendMouseEvent(_ window: NSWindow, inside: Bool) {
+  /// Sends a mouse entered or exited event to the traffic light tracking area.
+  ///
+  /// - Parameters:
+  ///   - window: The window.
+  ///   - inside: Whether the event is a mouse entered event, instead of a mouse exited event.
+  ///   - location: The event location in the titlebar view. Defaults to the middle of the cluster for an entered
+  ///     event, and to the right of the cluster for an exited event.
+  private func sendMouseEvent(_ window: NSWindow, inside: Bool, location: CGPoint? = nil) {
     guard let titlebarView = window.standardWindowButton(.closeButton)?.superview,
           let trackingArea = titlebarView.trackingAreas.first(where: { $0.owner is NSResponder && !($0.owner is NSView) }),
           let owner = trackingArea.owner as? NSResponder
@@ -65,7 +71,7 @@ class AquaTrafficLightButtonsTests: XCTestCase {
       return
     }
 
-    let pointInTitlebar = inside ? CGPoint(x: trackingArea.rect.midX, y: trackingArea.rect.midY) : CGPoint(x: trackingArea.rect.maxX + 50, y: trackingArea.rect.midY)
+    let pointInTitlebar = location ?? (inside ? CGPoint(x: trackingArea.rect.midX, y: trackingArea.rect.midY) : CGPoint(x: trackingArea.rect.maxX + 50, y: trackingArea.rect.midY))
     guard let event = NSEvent.enterExitEvent(
       with: inside ? .mouseEntered : .mouseExited,
       location: titlebarView.convert(pointInTitlebar, to: nil),
@@ -261,6 +267,70 @@ class AquaTrafficLightButtonsTests: XCTestCase {
     expect(buttonView(window, .zoom)?.state) == .inactive(nil)
   }
 
+  func test_hover_exitOnClusterEdge() throws {
+    // given installed buttons with the mouse over the cluster
+    let window = makeWindow()
+    let trafficLights = AquaTrafficLightButtons(window: window)
+    trafficLights.install()
+    sendMouseEvent(window, inside: true)
+    expect(buttonView(window, .close)?.state) == .hovered(.close)
+
+    // when the mouse exits at the cluster's bottom edge, where the window server reports the exit when the cursor
+    // moves down by whole points (e.g. with Screen Sharing)
+    let clusterFrame = try (window.standardWindowButton(.closeButton)?.superview?.trackingAreas.first { !($0.owner is NSView) }?.rect).unwrap()
+    sendMouseEvent(window, inside: false, location: CGPoint(x: clusterFrame.minX + 6, y: clusterFrame.minY))
+
+    // then the glyphs are hidden
+    expect(buttonView(window, .close)?.state) == .inactive(nil)
+    expect(buttonView(window, .miniaturize)?.state) == .inactive(nil)
+    expect(buttonView(window, .zoom)?.state) == .inactive(nil)
+  }
+
+  func test_hover_mouseMoved_showsGlyphs() throws {
+    // given installed buttons with the glyphs hidden
+    let window = makeWindow()
+    let trafficLights = AquaTrafficLightButtons(window: window)
+    trafficLights.install()
+    expect(buttonView(window, .close)?.state) == .inactive(nil)
+
+    // when the tracking area sends a moved event without an entered event, e.g. after the hover was cleared while the
+    // cursor stayed inside
+    let titlebarView = try window.standardWindowButton(.closeButton)?.superview.unwrap()
+    let trackingArea = try titlebarView.unwrap().trackingAreas.first { !($0.owner is NSView) }.unwrap()
+    let owner = try (trackingArea.owner as? NSResponder).unwrap()
+    let event = try NSEvent.mouseEvent(
+      with: .mouseMoved,
+      location: titlebarView.unwrap().convert(CGPoint(x: trackingArea.rect.midX, y: trackingArea.rect.midY), to: nil),
+      modifierFlags: [],
+      timestamp: ProcessInfo.processInfo.systemUptime,
+      windowNumber: window.windowNumber,
+      context: nil,
+      eventNumber: 0,
+      clickCount: 0,
+      pressure: 0
+    ).unwrap()
+    owner.mouseMoved(with: event)
+
+    // then the buttons show their glyphs
+    expect(buttonView(window, .close)?.state) == .hovered(.close)
+    expect(buttonView(window, .miniaturize)?.state) == .hovered(.miniaturize)
+    expect(buttonView(window, .zoom)?.state) == .hovered(.enterFullScreen)
+  }
+
+  func test_isLocationInCluster_followsTrackingAreaEdges() {
+    // given a cluster frame in an unflipped view, like the titlebar view
+    let containerView = NSView(frame: CGRect(x: 0, y: 0, width: 320, height: 32))
+    let clusterFrame = CGRect(x: 9, y: 9, width: 60, height: 14)
+
+    // when checking the edges, then the left and top edges are inside and the right and bottom edges are outside, as
+    // the tracking area reports them
+    expect(AquaTrafficLightButtons.isLocation(CGPoint(x: 15, y: 15), inCluster: clusterFrame, of: containerView)) == true
+    expect(AquaTrafficLightButtons.isLocation(CGPoint(x: 9, y: 15), inCluster: clusterFrame, of: containerView)) == true
+    expect(AquaTrafficLightButtons.isLocation(CGPoint(x: 15, y: 23), inCluster: clusterFrame, of: containerView)) == true
+    expect(AquaTrafficLightButtons.isLocation(CGPoint(x: 69, y: 15), inCluster: clusterFrame, of: containerView)) == false
+    expect(AquaTrafficLightButtons.isLocation(CGPoint(x: 15, y: 9), inCluster: clusterFrame, of: containerView)) == false
+  }
+
   func test_documentEdited() {
     // given installed buttons
     let window = makeWindow()
@@ -448,27 +518,15 @@ class AquaTrafficLightButtonsTests: XCTestCase {
     trafficLights.install()
     trafficLights.setZoomButtonHidden(true)
 
-    // when the mouse moves over where the zoom button was
+    // when the buttons lay out with the zoom button hidden
+    trafficLights.refresh()
+
+    // then the hover region still covers where the zoom button was, like the system's hover region, which keeps the
+    // hidden button's spot
     let zoomButton = try window.standardWindowButton(.zoomButton).unwrap()
     let titlebarView = try zoomButton.superview.unwrap()
-    let owner = try (titlebarView.trackingAreas.first { !($0.owner is NSView) }?.owner as? NSResponder).unwrap()
-    let event = try NSEvent.mouseEvent(
-      with: .mouseMoved,
-      location: titlebarView.convert(CGPoint(x: zoomButton.frame.midX, y: zoomButton.frame.midY), to: nil),
-      modifierFlags: [],
-      timestamp: ProcessInfo.processInfo.systemUptime,
-      windowNumber: window.windowNumber,
-      context: nil,
-      eventNumber: 0,
-      clickCount: 0,
-      pressure: 0
-    ).unwrap()
-    owner.mouseMoved(with: event)
-
-    // then the visible buttons show their glyphs, like the system buttons, whose hover region keeps the hidden
-    // button's spot
-    expect(buttonView(window, .close)?.state) == .hovered(.close)
-    expect(buttonView(window, .miniaturize)?.state) == .hovered(.miniaturize)
+    let trackingArea = try titlebarView.trackingAreas.first { !($0.owner is NSView) }.unwrap()
+    expect(trackingArea.rect.contains(zoomButton.frame)) == true
   }
 
   // MARK: - Full Screen
