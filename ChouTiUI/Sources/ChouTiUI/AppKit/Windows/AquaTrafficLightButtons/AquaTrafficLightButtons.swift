@@ -485,6 +485,15 @@ public final class AquaTrafficLightButtons {
         }
       )
 
+      // a system button can move without a layout (e.g. a custom traffic light layout moves its origin), so the custom
+      // buttons follow its frame changes
+      let frameToken = center.addObserver(forName: NSView.frameDidChangeNotification, object: systemButton, queue: .main) { [weak self] _ in
+        MainActor.assumeIsolated {
+          self?.refresh()
+        }
+      }
+      installation.notificationObservers.append((center, frameToken))
+
       installation.keyValueObservations.append(
         systemButton.observe(\.isEnabled, options: [.new]) { [weak self] _, _ in
           self?.scheduleRefresh()
