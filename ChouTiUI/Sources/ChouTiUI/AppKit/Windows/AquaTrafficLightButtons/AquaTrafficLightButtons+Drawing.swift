@@ -98,15 +98,6 @@ final class AquaTrafficLightButtonView: ComposeView {
     }
   }
 
-  /// Whether the system uses the graphite accent color.
-  var isGraphite: Bool = false {
-    didSet {
-      if isGraphite != oldValue {
-        setNeedsRefresh(animated: false)
-      }
-    }
-  }
-
   /// Creates a button view.
   ///
   /// - Parameter kind: The kind of the button.
@@ -133,7 +124,7 @@ final class AquaTrafficLightButtonView: ComposeView {
       return Empty()
     }
     return Self.makeButton(
-      primaryColor: kind.primaryColor(isGraphite: isGraphite),
+      primaryColor: kind.primaryColor(isGraphite: Self.isGraphiteAccentColor()),
       state: state,
       size: size,
       theme: effectiveAppearance.theme, // `theme` is ambiguous between ComposeUI and ChouTiUI
@@ -153,6 +144,14 @@ final class AquaTrafficLightButtonView: ComposeView {
     if newSize != oldSize {
       setNeedsRefresh(animated: false)
     }
+  }
+
+  override func viewDidChangeEffectiveAppearance() {
+    super.viewDidChangeEffectiveAppearance()
+
+    // an accent color change (e.g. to graphite) changes the effective appearance without changing the theme, which is
+    // what ComposeView refreshes for
+    setNeedsRefresh(animated: false)
   }
 
   override func hitTest(_ point: NSPoint) -> NSView? {
@@ -183,6 +182,25 @@ final class AquaTrafficLightButtonView: ComposeView {
   #if DEBUG
   /// The screen scale to draw for instead of the window's, for tests.
   var backingScaleFactorOverride: CGFloat?
+  #endif
+
+  // MARK: - Graphite
+
+  /// Returns whether the system uses the graphite accent color, which turns the system traffic light buttons gray.
+  ///
+  /// - Returns: `true` if the accent color is graphite.
+  static func isGraphiteAccentColor() -> Bool {
+    #if DEBUG
+    if let isGraphiteAccentColorOverride {
+      return isGraphiteAccentColorOverride
+    }
+    #endif
+    return NSColor.currentControlTint == .graphiteControlTint
+  }
+
+  #if DEBUG
+  /// The accent color to use instead of the system's, for tests: AppKit reads the control tint once per process.
+  static var isGraphiteAccentColorOverride: Bool?
   #endif
 
   // MARK: - Drawing

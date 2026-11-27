@@ -61,7 +61,8 @@ import ChouTi
 /// - Important: `install()` changes the window's titlebar view hierarchy: it removes the titlebar background views
 ///   (`NSVisualEffectView`, `_NSTitlebarDecorationView`, `NSTitlebarBackgroundView`) so that the window draws its own
 ///   titlebar background, and makes the system buttons almost transparent. The hierarchy is private to AppKit, so the
-///   installation checks it first and leaves the window untouched if it isn't recognized. `uninstall()` restores it.
+///   installation checks it first and leaves the window untouched if it isn't recognized. The background views stay
+///   removed after `uninstall()`.
 ///
 /// - Note: The buttons are uninstalled when the instance is deallocated, keep a strong reference to it for as long as
 ///   the window shows the buttons.
@@ -90,9 +91,6 @@ public final class AquaTrafficLightButtons {
   /// Whether the window became key since it was shown, see `scheduleKeyWindowRefresh()`.
   private var hasBecomeKey = false
 
-  /// Whether the system uses the graphite accent color.
-  private var isGraphite = false
-
   /// Creates traffic light buttons for a window.
   ///
   /// Call `install()` to show the buttons.
@@ -103,10 +101,15 @@ public final class AquaTrafficLightButtons {
   }
 
   deinit {
-    // the runtime runs the deinit of a main actor class on the main thread, even when the last reference is released
-    // on another thread
-    MainActor.assumeIsolated {
-      installation.tearDown()
+    // the window keeps installed buttons, so the deinit runs when the window deallocates (or the buttons were never
+    // installed): the views go with the window, and only the observations and the process-wide monitors are stopped.
+    // a deinit is nonisolated (SE-0371) and can run off the main thread with some toolchains, so the observations stop
+    // on the main thread.
+    let installation = installation
+    onMainAsync {
+      MainActor.assumeIsolated {
+        installation.stopObserving()
+      }
     }
   }
 
@@ -147,30 +150,29 @@ public final class AquaTrafficLightButtons {
       ChouTi.assertFailure("the system buttons aren't in NSTitlebarView")
       return
     }
-    guard !hierarchy.titlebarView.subviews.contains(where: { $0 is AquaTrafficLightButtonView }) else {
+    guard window.getAssociatedObject(for: &AssociateKey.installedButtons) == nil else {
       ChouTi.assertFailure("the window already has traffic light buttons installed by another instance")
       return
     }
-    guard let backgroundViews = hierarchy.backgroundViews(window: window) else {
-      return
-    }
 
-    installation.removeBackgroundViews(backgroundViews)
+    installation.hierarchy = hierarchy
+    installation.removeBackgroundViews(window: window)
     installation.containerView = hierarchy.titlebarView
     installation.mouseEventReceiver = MouseEventReceiver { [weak self] event in
       self?.handleMouseEvent(event)
     }
 
-    isGraphite = Self.isGraphiteAccentColor()
     for (kind, systemButton) in systemButtons {
       let buttonView = AquaTrafficLightButtonView(kind: kind)
-      buttonView.isGraphite = isGraphite
       hierarchy.titlebarView.addSubview(buttonView, positioned: .above, relativeTo: systemButton)
 
       installation.systemButtons[kind] = WeakBox(systemButton)
+      installation.systemButtonAlphas[kind] = systemButton.alphaValue
       installation.buttonViews[kind] = buttonView
     }
 
+    // the window keeps the buttons while they're installed, so they work for as long as the window does
+    window.setAssociatedObject(self, for: &AssociateKey.installedButtons)
     installation.isInstalled = true
     isFullScreen = window.styleMask.contains(.fullScreen)
 
@@ -181,8 +183,9 @@ public final class AquaTrafficLightButtons {
 
   /// Uninstalls the buttons from the window.
   ///
-  /// The custom buttons are removed, the system buttons are visible again, and the titlebar background views that
-  /// `install()` removed are added back. The buttons can be installed again after this.
+  /// The custom buttons and the observations are removed, and the system buttons are visible again. The titlebar
+  /// background views that `install()` removed stay removed: AppKit manages their order among its own views, so they
+  /// can't be put back reliably. The buttons can be installed again after this.
   ///
   /// The buttons are also uninstalled when the instance is deallocated.
   public func uninstall() {
@@ -190,11 +193,15 @@ public final class AquaTrafficLightButtons {
       return
     }
 
-    installation.tearDown()
+    installation.stopObserving()
+    installation.removeViews()
     clusterFrame = nil
     isMouseInside = false
     isExitingFullScreen = false
     hasBecomeKey = false
+
+    // last, the window may hold the last reference
+    window?.setAssociatedObject(nil, for: &AssociateKey.installedButtons)
   }
 
   /// Refreshes the buttons with the current window state.
@@ -261,6 +268,11 @@ public final class AquaTrafficLightButtons {
 
   /// Makes the custom buttons follow the system buttons' frames, and updates the tracking area.
   private func syncLayout() {
+    // AppKit adds the titlebar background back when it rebuilds the titlebar, e.g. on an appearance change
+    if let window {
+      installation.removeBackgroundViews(window: window)
+    }
+
     var clusterFrame: CGRect?
     for (kind, buttonView) in installation.buttonViews {
       guard let systemButton = systemButton(kind) else {
@@ -447,29 +459,9 @@ public final class AquaTrafficLightButtons {
     observe(NSWindow.willExitFullScreenNotification) { $0.windowFullScreenWillChange(isEntering: false) }
     observe(NSWindow.didExitFullScreenNotification) { $0.windowFullScreenDidChange(isFullScreen: false) }
 
-    // the graphite accent color turns the buttons gray
-    let controlTintToken = center.addObserver(forName: NSColor.currentControlTintDidChangeNotification, object: nil, queue: .main) { [weak self] _ in
-      MainActor.assumeIsolated {
-        self?.accentColorDidChange()
-      }
-    }
-    installation.notificationObservers.append((center, controlTintToken))
-
-    let accentColorToken = DistributedNotificationCenter.default().addObserver(forName: .accentColorDidChange, object: nil, queue: .main) { [weak self] _ in
-      // AppKit updates the control tint after the notification, so it's read on the next run loop
-      DispatchQueue.main.async { [weak self] in
-        MainActor.assumeIsolated {
-          self?.accentColorDidChange()
-        }
-      }
-    }
-    installation.notificationObservers.append((DistributedNotificationCenter.default(), accentColorToken))
-
     installation.keyValueObservations.append(
       window.observe(\.isDocumentEdited, options: [.new]) { [weak self] _, _ in
-        onMainAsync { [weak self] in
-          self?.refresh()
-        }
+        self?.scheduleRefresh()
       }
     )
 
@@ -494,14 +486,23 @@ public final class AquaTrafficLightButtons {
 
       installation.keyValueObservations.append(
         systemButton.observe(\.isEnabled, options: [.new]) { [weak self] _, _ in
-          onMainAsync { [weak self] in
-            self?.refresh()
-          }
+          self?.scheduleRefresh()
         }
       )
     }
 
     startEventMonitors()
+  }
+
+  /// Refreshes the buttons on the next run loop of the main thread.
+  ///
+  /// A key-value observation can call back on any thread, so it refreshes through this method.
+  private nonisolated func scheduleRefresh() {
+    DispatchQueue.main.async { [weak self] in
+      MainActor.assumeIsolated {
+        self?.refresh()
+      }
+    }
   }
 
   /// Starts the event monitors if they're not started.
@@ -600,9 +601,7 @@ public final class AquaTrafficLightButtons {
     // the monitors are process-wide, they shouldn't run for a closed window. they start again when the window shows.
     installation.stopEventMonitors()
 
-    for buttonView in installation.buttonViews.values {
-      buttonView.state = .normal(nil)
-    }
+    update()
   }
 
   /// Handles a change of the window's screen scale.
@@ -639,18 +638,6 @@ public final class AquaTrafficLightButtons {
     update()
   }
 
-  /// Handles a change of the system accent color.
-  private func accentColorDidChange() {
-    let isGraphite = Self.isGraphiteAccentColor()
-    guard self.isGraphite != isGraphite else {
-      return
-    }
-    self.isGraphite = isGraphite
-    for buttonView in installation.buttonViews.values {
-      buttonView.isGraphite = isGraphite
-    }
-  }
-
   /// Schedules refreshes for a short period after the close button changes.
   ///
   /// The close button can show its pressed state briefly without a layout to restore it, e.g. when a close is cancelled
@@ -683,16 +670,13 @@ public final class AquaTrafficLightButtons {
     installation.closeButtonRefreshTimers = [repeatingTimer, finalTimer]
   }
 
-  // MARK: - Graphite
-
-  /// Returns whether the system uses the graphite accent color, which turns the system traffic light buttons gray.
-  ///
-  /// - Returns: `true` if the accent color is graphite.
-  static func isGraphiteAccentColor() -> Bool {
-    NSColor.currentControlTint == .graphiteControlTint
-  }
-
   // MARK: - Constants
+
+  private enum AssociateKey {
+
+    /// The key of the installed buttons on a window.
+    static var installedButtons: UInt8 = 0
+  }
 
   private enum Constants {
 
@@ -725,8 +709,11 @@ private final class Installation {
   /// The custom buttons, by kind.
   var buttonViews: [AquaTrafficLightButtonKind: AquaTrafficLightButtonView] = [:]
 
-  /// The titlebar background views that are removed, with where to add them back.
-  private var removedBackgroundViews: [RemovedView] = []
+  /// The system buttons' alpha before the installation, by kind.
+  var systemButtonAlphas: [AquaTrafficLightButtonKind: CGFloat] = [:]
+
+  /// The titlebar views of the window.
+  var hierarchy: TitlebarHierarchy?
 
   /// The owner of the tracking area, which forwards the mouse events. It's kept here because the tracking area doesn't
   /// retain its owner.
@@ -752,21 +739,6 @@ private final class Installation {
 
   /// The timers that refresh the buttons after the close button changes.
   var closeButtonRefreshTimers: [Timer] = []
-
-  /// Removes titlebar background views, remembering where to add them back.
-  ///
-  /// - Parameter views: The views to remove.
-  func removeBackgroundViews(_ views: [NSView]) {
-    for view in views {
-      guard let superview = view.superview else {
-        continue
-      }
-      let siblings = superview.subviews
-      let nextSibling = siblings.firstIndex(of: view).flatMap { siblings.indices.contains($0 + 1) ? siblings[$0 + 1] : nil }
-      removedBackgroundViews.append(RemovedView(view: view, superview: superview, nextSibling: nextSibling))
-      view.removeFromSuperview()
-    }
-  }
 
   /// Updates the tracking area to cover a rect.
   ///
@@ -820,8 +792,17 @@ private final class Installation {
     closeButtonRefreshTimers.removeAll()
   }
 
-  /// Removes everything the installation added and restores the window.
-  func tearDown() {
+  /// Removes the titlebar background views that are in the window.
+  ///
+  /// - Parameter window: The window.
+  func removeBackgroundViews(window: NSWindow) {
+    hierarchy?.backgroundViews(window: window).forEach { $0.removeFromSuperview() }
+  }
+
+  /// Stops the observations, the monitors and the timers.
+  ///
+  /// It changes no views, so it's safe while the window deallocates.
+  func stopObserving() {
     for (center, token) in notificationObservers {
       center.removeObserver(token)
     }
@@ -835,45 +816,28 @@ private final class Installation {
 
     cancelCloseButtonRefreshes()
     stopEventMonitors()
+  }
+
+  /// Removes the custom buttons and the tracking area, and restores the system buttons' alpha.
+  ///
+  /// The titlebar background views stay removed: AppKit manages their order among its own views, so they can't be put
+  /// back reliably.
+  func removeViews() {
     removeTrackingArea()
     mouseEventReceiver = nil
 
     buttonViews.values.forEach { $0.removeFromSuperview() }
     buttonViews.removeAll()
 
-    for systemButton in systemButtons.values.compactMap(\.object) {
-      systemButton.alphaValue = 1
+    for (kind, systemButton) in systemButtons {
+      systemButton.object?.alphaValue = systemButtonAlphas[kind] ?? 1
     }
     systemButtons.removeAll()
+    systemButtonAlphas.removeAll()
 
-    // add the background views back where they were, in the reverse order of the removal
-    for removedView in removedBackgroundViews.reversed() {
-      guard let superview = removedView.superview else {
-        continue
-      }
-      if let nextSibling = removedView.nextSibling, nextSibling.superview === superview {
-        superview.addSubview(removedView.view, positioned: .below, relativeTo: nextSibling)
-      } else {
-        superview.addSubview(removedView.view)
-      }
-    }
-    removedBackgroundViews.removeAll()
-
+    hierarchy = nil
     containerView = nil
     isInstalled = false
-  }
-
-  /// A removed view and where it was.
-  private struct RemovedView {
-
-    /// The removed view.
-    let view: NSView
-
-    /// The view's superview.
-    weak var superview: NSView?
-
-    /// The view above the removed view in the superview.
-    weak var nextSibling: NSView?
   }
 }
 
@@ -1003,24 +967,20 @@ private struct TitlebarHierarchy {
 
   /// Returns the titlebar background views to remove, so that the window draws its own titlebar background.
   ///
+  /// The background views move between OS versions (see the hierarchy above), and a window can have none of them
+  /// (e.g. a clear window, or after an earlier installation), so the ones that are found are returned.
+  ///
   /// - Parameter window: The window.
-  /// - Returns: The background views, or `nil` if the titlebar background isn't found, which means the hierarchy isn't
-  ///   recognized.
-  func backgroundViews(window: NSWindow) -> [NSView]? {
-    // the window's background, the content view can also be an NSVisualEffectView
+  /// - Returns: The background views.
+  func backgroundViews(window: NSWindow) -> [NSView] {
+    // the window's background. the content view can also be an NSVisualEffectView, which is kept.
     let windowBackgroundViews = themeFrame.subviews(ofClassNames: ["NSVisualEffectView"]).filter { $0 !== window.contentView }
-    ChouTi.assert(!windowBackgroundViews.isEmpty || window.backgroundColor == .clear, "a window with a background should have NSVisualEffectView")
 
-    // the titlebar background moves between OS versions, see the hierarchy above
     var titlebarBackgroundViews = titlebarContainerView.subviews(ofClassNames: ["_NSTitlebarDecorationView", "NSTitlebarBackgroundView"])
     if #available(macOS 26, *) {
       titlebarBackgroundViews += titlebarView.subviews(ofClassNames: ["NSTitlebarBackgroundView"])
     } else {
       titlebarBackgroundViews += titlebarView.subviews(ofClassNames: ["NSVisualEffectView", "NSView"])
-    }
-    guard !titlebarBackgroundViews.isEmpty else {
-      ChouTi.assertFailure("the titlebar background views aren't found")
-      return nil
     }
 
     return windowBackgroundViews + titlebarBackgroundViews

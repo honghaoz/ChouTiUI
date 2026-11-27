@@ -195,15 +195,14 @@ class AquaTrafficLightButtonsTests: XCTestCase {
     expect(window.contentView?.superview?.subviews.map(\.className)) == subviewsBefore
   }
 
-  func test_install_unrecognizedTitlebar_leavesWindowUntouched() throws {
-    // given a window whose titlebar backgrounds are already gone, which isn't a recognized hierarchy
+  func test_install_withoutTitlebarBackgrounds() throws {
+    // given a window whose titlebar backgrounds are already gone (e.g. removed by an earlier installation)
     let window = makeWindow()
     let titlebarView = try window.standardWindowButton(.closeButton)?.superview.unwrap()
     let titlebarContainerView = try titlebarView?.superview.unwrap()
     for view in (titlebarContainerView?.subviews ?? []) + (titlebarView?.subviews ?? []) where ["_NSTitlebarDecorationView", "NSTitlebarBackgroundView", "NSVisualEffectView", "NSView"].contains(view.className) {
       view.removeFromSuperview()
     }
-    let frameSubviewsBefore = window.contentView?.superview?.subviews.map(\.className)
 
     // when installing
     var assertionMessage: String?
@@ -214,11 +213,10 @@ class AquaTrafficLightButtonsTests: XCTestCase {
     trafficLights.install()
     Assert.resetTestAssertionFailureHandler()
 
-    // then nothing is changed, including the window background that would be removed with the titlebar background
-    expect(assertionMessage) == "the titlebar background views aren't found"
-    expect(window.contentView?.superview?.subviews.map(\.className)) == frameSubviewsBefore
-    expect(buttonViews(window).isEmpty) == true
-    expect(window.standardWindowButton(.closeButton)?.alphaValue) == 1
+    // then the buttons are installed without an assertion, and the content view stays
+    expect(assertionMessage) == nil
+    expect(buttonViews(window).count) == 3
+    expect(window.contentView?.superview) != nil
   }
 
   func test_install_visualEffectContentView_isKept() {
@@ -309,9 +307,9 @@ class AquaTrafficLightButtonsTests: XCTestCase {
     // when the window closes
     window.close()
 
-    // then the buttons don't keep the hovered state
+    // then the buttons don't keep the hovered state, and show the (non-key) window's state
     for view in buttonViews(window) {
-      expect(view.state) == .normal(nil)
+      expect(view.state) == .inactive(nil)
     }
 
     // when the window shows again
@@ -384,21 +382,6 @@ class AquaTrafficLightButtonsTests: XCTestCase {
 
     // then the glyphs are hidden, without a mouse event from the tracking area
     expect(buttonView(window, .close)?.state) == .inactive(nil)
-  }
-
-  func test_accentColorChange() {
-    // given installed buttons
-    let window = makeWindow()
-    let trafficLights = AquaTrafficLightButtons(window: window)
-    trafficLights.install()
-
-    // when the control tint changes
-    NotificationCenter.default.post(name: NSColor.currentControlTintDidChangeNotification, object: nil)
-
-    // then the buttons follow the system's graphite setting
-    for view in buttonViews(window) {
-      expect(view.isGraphite) == AquaTrafficLightButtons.isGraphiteAccentColor()
-    }
   }
 
   func test_install_titlebarInAnotherWindow() throws {
@@ -519,25 +502,18 @@ class AquaTrafficLightButtonsTests: XCTestCase {
 
   // MARK: - Uninstall
 
-  func test_uninstall_restoresWindow() throws {
-    // given a window and its hierarchy before the installation
+  func test_uninstall_restoresSystemButtons() throws {
+    // given installed buttons
     let window = makeWindow()
     let titlebarView = try window.standardWindowButton(.closeButton)?.superview.unwrap()
-    let frameSubviewsBefore = window.contentView?.superview?.subviews.map(\.className)
-    let containerSubviewsBefore = titlebarView?.superview?.subviews.map(\.className)
-    let titlebarSubviewsBefore = titlebarView?.subviews.map(\.className)
-
     let trafficLights = AquaTrafficLightButtons(window: window)
     trafficLights.install()
 
     // when uninstalling
     trafficLights.uninstall()
 
-    // then the window is restored
+    // then the custom buttons and the tracking area are removed, and the system buttons are visible again
     expect(buttonViews(window).isEmpty) == true
-    expect(window.contentView?.superview?.subviews.map(\.className)) == frameSubviewsBefore
-    expect(titlebarView?.superview?.subviews.map(\.className)) == containerSubviewsBefore
-    expect(titlebarView?.subviews.map(\.className)) == titlebarSubviewsBefore
     expect(titlebarView?.trackingAreas.filter { !($0.owner is NSView) }.count) == 0
     for kind in AquaTrafficLightButtonKind.allCases {
       expect(window.standardWindowButton(kind.buttonType)?.alphaValue) == 1
@@ -581,26 +557,101 @@ class AquaTrafficLightButtonsTests: XCTestCase {
 
   // MARK: - Deallocation
 
-  func test_deinit_uninstalls() throws {
+  func test_window_keepsInstalledButtons() throws {
+    // given buttons installed on a window, without another reference to them
+    let window = makeWindow()
+    weak var weakTrafficLights: AquaTrafficLightButtons?
+    autoreleasepool {
+      let trafficLights = AquaTrafficLightButtons(window: window)
+      trafficLights.install()
+      weakTrafficLights = trafficLights
+    }
+
+    // then the window keeps them working
+    expect(weakTrafficLights) != nil
+    sendMouseEvent(window, inside: true)
+    expect(buttonView(window, .close)?.state) == .hovered(.close)
+
+    // when uninstalling, then they're released
+    weakTrafficLights?.uninstall()
+    expect(weakTrafficLights) == nil
+    expect(buttonViews(window).isEmpty) == true
+  }
+
+  func test_windowOwnedButtons_deallocateWithWindow() {
+    // given a window that owns its installed buttons
+    weak var weakWindow: OwnerWindow?
+    weak var weakTrafficLights: AquaTrafficLightButtons?
+    autoreleasepool {
+      let window = OwnerWindow(contentRect: CGRect(x: 0, y: 0, width: 320, height: 200), styleMask: [.titled, .closable, .miniaturizable, .resizable], backing: .buffered, defer: false)
+      window.isReleasedWhenClosed = false
+      window.trafficLights = AquaTrafficLightButtons(window: window)
+      window.trafficLights?.install()
+      weakWindow = window
+      weakTrafficLights = window.trafficLights
+
+      // when the window closes and is released
+      window.close()
+    }
+
+    // then both are deallocated, without touching the views of the deallocating window
+    expect(weakWindow).toEventually(beNil())
+    expect(weakTrafficLights).toEventually(beNil())
+  }
+
+  // MARK: - Appearance
+
+  func test_appearanceChange_keepsTitlebarBackgroundRemoved() throws {
     // given installed buttons
     let window = makeWindow()
+    let trafficLights = AquaTrafficLightButtons(window: window)
+    trafficLights.install()
     let titlebarView = try window.standardWindowButton(.closeButton)?.superview.unwrap()
-    var trafficLights: AquaTrafficLightButtons? = AquaTrafficLightButtons(window: window)
-    trafficLights?.install()
-    expect(titlebarView?.trackingAreas.filter { !($0.owner is NSView) }.count) == 1
+    func backgroundClassNames() -> [String] {
+      ((titlebarView?.superview?.subviews ?? []) + (titlebarView?.subviews ?? [])).map(\.className).filter { $0 == "NSTitlebarBackgroundView" || $0 == "_NSTitlebarDecorationView" }
+    }
+    expect(backgroundClassNames()) == []
 
-    // when the instance is deallocated
-    trafficLights = nil
+    // when the appearance changes, AppKit rebuilds the titlebar and adds its background back
+    window.appearance = NSAppearance(named: .darkAqua)
+    window.contentView?.superview?.layoutSubtreeIfNeeded()
 
-    // then the buttons are uninstalled, and another instance can install
-    expect(titlebarView?.trackingAreas.filter { !($0.owner is NSView) }.count) == 0
-    expect(buttonViews(window).isEmpty) == true
-    expect(window.standardWindowButton(.closeButton)?.alphaValue) == 1
-
-    let anotherTrafficLights = AquaTrafficLightButtons(window: window)
-    anotherTrafficLights.install()
-    expect(buttonViews(window).count) == 3
+    // then the buttons remove it again when the system buttons lay out
+    expect(backgroundClassNames()).toEventually(beEqual(to: []))
   }
+
+  // MARK: - Close
+
+  func test_willClose_nonKeyWindow_staysInactive() {
+    // given installed buttons on a non-key window
+    let window = makeWindow()
+    let trafficLights = AquaTrafficLightButtons(window: window)
+    trafficLights.install()
+    expect(buttonViews(window).map(\.state)) == [.inactive(nil), .inactive(nil), .inactive(nil)]
+
+    // when the window closes, then the buttons don't flash the active colors
+    window.close()
+    expect(buttonViews(window).map(\.state)) == [.inactive(nil), .inactive(nil), .inactive(nil)]
+  }
+
+  func test_uninstall_restoresSystemButtonAlpha() throws {
+    // given a dimmed system button
+    let window = makeWindow()
+    let closeButton = try window.standardWindowButton(.closeButton).unwrap()
+    closeButton.alphaValue = 0.25
+    let trafficLights = AquaTrafficLightButtons(window: window)
+    trafficLights.install()
+    expect(closeButton.alphaValue) == 0.001
+
+    // when uninstalling, then its alpha is restored
+    trafficLights.uninstall()
+    expect(closeButton.alphaValue) == 0.25
+  }
+}
+
+private final class OwnerWindow: NSWindow {
+
+  var trafficLights: AquaTrafficLightButtons?
 }
 
 private extension AquaTrafficLightButtonKind {

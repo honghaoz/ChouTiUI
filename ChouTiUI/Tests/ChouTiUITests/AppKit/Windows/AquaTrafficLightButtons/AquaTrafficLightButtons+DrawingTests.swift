@@ -128,6 +128,7 @@ class AquaTrafficLightButtons_DrawingTests: XCTestCase {
     expect(layerCount(view)) == emptyLayerCount
   }
 
+  #if DEBUG
   func test_buttonView_hairlinesFollowScreenScale() {
     for scale in [CGFloat(1), 2] {
       // given a dark button view drawn for a screen scale
@@ -147,6 +148,45 @@ class AquaTrafficLightButtons_DrawingTests: XCTestCase {
       expect(borderLayers.count) == 1
       expect(borderLayers.first?.lineWidth) == 2 / scale
     }
+  }
+  #endif
+
+  #if DEBUG
+  func test_buttonView_followsAccentColor() throws {
+    // given a close button drawn with the default accent color
+    AquaTrafficLightButtonView.isGraphiteAccentColorOverride = false
+    defer {
+      AquaTrafficLightButtonView.isGraphiteAccentColorOverride = nil
+    }
+    let window = NSWindow(contentRect: CGRect(x: 0, y: 0, width: 100, height: 100), styleMask: [.titled], backing: .buffered, defer: false)
+    let view = AquaTrafficLightButtonView(kind: .close)
+    view.frame = CGRect(x: 0, y: 0, width: 16, height: 18)
+    window.contentView?.addSubview(view)
+    view.refresh(animated: false)
+    expect(try self.fillMiddleColor(view).isGray) == false
+
+    // when the accent color changes to graphite, which changes the effective appearance
+    AquaTrafficLightButtonView.isGraphiteAccentColorOverride = true
+    view.viewDidChangeEffectiveAppearance()
+
+    // then the button is redrawn gray
+    expect((try? self.fillMiddleColor(view))?.isGray).toEventually(beEqual(to: true))
+  }
+  #endif
+
+  /// Returns the middle color of the button's fill gradient.
+  private func fillMiddleColor(_ view: NSView) throws -> (red: CGFloat, green: CGFloat, blue: CGFloat, isGray: Bool) {
+    func layers(_ layer: CALayer) -> [CALayer] {
+      (layer.sublayers ?? []).flatMap { [$0] + layers($0) }
+    }
+    func allLayers(_ view: NSView) -> [CALayer] {
+      (view.layer.map(layers) ?? []) + view.subviews.flatMap { allLayers($0) }
+    }
+    let gradient = try allLayers(view).compactMap { $0 as? CAGradientLayer }.first { ($0.colors?.count ?? 0) == 3 }.unwrap()
+    let colors = try (gradient.colors as? [CGColor]).unwrap()
+    let color = try NSColor(cgColor: colors[1]).unwrap().usingColorSpace(.sRGB).unwrap()
+    let isGray = abs(color.redComponent - color.greenComponent) < 0.01 && abs(color.greenComponent - color.blueComponent) < 0.01
+    return (color.redComponent, color.greenComponent, color.blueComponent, isGray)
   }
 
   func test_buttonView_isNotAccessible() {
