@@ -286,6 +286,20 @@ class AquaTrafficLightButtonsTests: XCTestCase {
     expect(buttonView(window, .zoom)?.state) == .inactive(nil)
   }
 
+  func test_isLocationInCluster_followsTrackingAreaEdges() {
+    // given a cluster frame in an unflipped view, like the titlebar view
+    let containerView = NSView(frame: CGRect(x: 0, y: 0, width: 320, height: 32))
+    let clusterFrame = CGRect(x: 9, y: 9, width: 60, height: 14)
+
+    // when checking the edges, then the left and top edges are inside and the right and bottom edges are outside, as
+    // the tracking area reports them
+    expect(AquaTrafficLightButtons.isLocation(CGPoint(x: 15, y: 15), inCluster: clusterFrame, of: containerView)) == true
+    expect(AquaTrafficLightButtons.isLocation(CGPoint(x: 9, y: 15), inCluster: clusterFrame, of: containerView)) == true
+    expect(AquaTrafficLightButtons.isLocation(CGPoint(x: 15, y: 23), inCluster: clusterFrame, of: containerView)) == true
+    expect(AquaTrafficLightButtons.isLocation(CGPoint(x: 69, y: 15), inCluster: clusterFrame, of: containerView)) == false
+    expect(AquaTrafficLightButtons.isLocation(CGPoint(x: 15, y: 9), inCluster: clusterFrame, of: containerView)) == false
+  }
+
   func test_documentEdited() {
     // given installed buttons
     let window = makeWindow()
